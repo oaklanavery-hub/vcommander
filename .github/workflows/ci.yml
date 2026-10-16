@@ -26,13 +26,19 @@ jobs:
           include-templates: false
 
       - name: Verify Godot project loads
-        run: godot --headless --path . --editor --quit
+        run: |
+          set -o pipefail
+          godot --headless --path . --editor --quit 2>&1 | tee /tmp/godot-load.log
+          if grep -E "SCRIPT ERROR:|ERROR: Failed to load script" /tmp/godot-load.log; then
+            echo "Godot reported script load errors."
+            exit 1
+          fi
 
       - name: Run set bonus tests
-        run: godot --headless --path . --script tests/test_set_bonus_checker.gd
+        run: timeout 30s godot --headless --path . --script tests/test_set_bonus_checker.gd
 
       - name: Run Army loadout tests
-        run: godot --headless --path . --script tests/test_army_loadout.gd
+        run: timeout 30s godot --headless --path . --script tests/test_army_loadout.gd
 
       - name: Run Draft System tests
         run: timeout 30s godot --headless --path . --script tests/test_draft_system.gd
