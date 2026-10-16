@@ -1,1 +1,32 @@
-{"schema_version":1,"id":"card_earth_02","display_name":"Earth Army 2","element":"earth","set_id":"set_earth_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_earth_02",
+  "display_name": "Pitcher Plant",
+  "element": "earth",
+  "set_id": "set_earth_01",
+  "status": "playtest",
+  "role": "range",
+  "summon_amount": 2,
+  "unit_cap": 4,
+  "stats": {
+    "health": 650,
+    "attack": 110,
+    "defense": 30,
+    "attack_speed": 70,
+    "movement_speed": 60,
+    "range": 5
+  },
+  "ability": {
+    "id": "vine_pull",
+    "display_name": "Vine Pull",
+    "type": "pull_then_melee",
+    "pull_range": 5,
+    "cooldown_seconds": 5,
+    "pull_damage": 0
+  },
+  "tags": [
+    "starter",
+    "earth",
+    "range"
+  ]
+}

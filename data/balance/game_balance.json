@@ -1,6 +1,28 @@
 {
   "schema_version": 1,
-  "id": "game_balance_phase0",
-  "status": "placeholder",
-  "notes": "No final balance values are approved in Phase 0. Card stats exist only to validate the data pipeline."
+  "id": "game_balance",
+  "status": "playtest",
+  "draft": {
+    "choices_per_offer": 3,
+    "normal_selections": 3,
+    "loser_selections": 4,
+    "selection_timer_seconds": 30,
+    "max_buffs_per_offer_while_units_remain": 2
+  },
+  "match": {
+    "round_time_seconds": 120,
+    "losses_to_lose_match": 4
+  },
+  "stats": {
+    "minimum_damage": 1,
+    "attack_speed_cap": 200,
+    "movement_speed_cap": 200,
+    "attack_speed_baseline": 100
+  },
+  "battlefield": {
+    "layout": "left_vs_right",
+    "movement": "free",
+    "obstacles": false,
+    "camera": "full_field"
+  }
 }

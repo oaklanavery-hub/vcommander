@@ -1,1 +1,29 @@
-{"schema_version":1,"id":"card_earth_04","display_name":"Earth Army 4","element":"earth","set_id":"set_earth_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_earth_04",
+  "display_name": "Wood Archers",
+  "element": "earth",
+  "set_id": "set_earth_01",
+  "status": "playtest",
+  "role": "range",
+  "summon_amount": 2,
+  "unit_cap": 4,
+  "stats": {
+    "health": 390,
+    "attack": 95,
+    "defense": 10,
+    "attack_speed": 110,
+    "movement_speed": 95,
+    "range": 7
+  },
+  "ability": {
+    "id": "longbow",
+    "display_name": "Longbow",
+    "type": "basic_ranged"
+  },
+  "tags": [
+    "starter",
+    "earth",
+    "range"
+  ]
+}

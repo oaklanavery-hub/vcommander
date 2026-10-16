@@ -1,1 +1,30 @@
-{"schema_version":1,"id":"card_water_04","display_name":"Water Army 4","element":"water","set_id":"set_water_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_water_04",
+  "display_name": "Water Wizard",
+  "element": "water",
+  "set_id": "set_water_01",
+  "status": "playtest",
+  "role": "range",
+  "summon_amount": 2,
+  "unit_cap": 4,
+  "stats": {
+    "health": 440,
+    "attack": 85,
+    "defense": 15,
+    "attack_speed": 90,
+    "movement_speed": 90,
+    "range": 6
+  },
+  "ability": {
+    "id": "tidal_push",
+    "display_name": "Tidal Push",
+    "type": "ranged_pushback",
+    "pushback": "small"
+  },
+  "tags": [
+    "starter",
+    "water",
+    "range"
+  ]
+}

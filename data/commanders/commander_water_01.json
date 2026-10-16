@@ -4,5 +4,16 @@
   "display_name": "Water Commander",
   "element": "water",
   "signature_set_id": "set_water_01",
-  "status": "placeholder"
+  "status": "playtest",
+  "active_skill": {
+    "id": "frozen_field",
+    "display_name": "Frozen Field",
+    "uses_per_match": 2,
+    "uses_per_round": 1,
+    "selection_cost": 1,
+    "timing": "pre_battle",
+    "duration": "round",
+    "enemy_attack_speed_pct": -20,
+    "enemy_movement_speed_pct": -15
+  }
 }

@@ -1,0 +1,146 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource path="res://scripts/draft/draft_screen.gd" type="Script" id="1"]
+
+[node name="Draft" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 42.0
+offset_top = 28.0
+offset_right = -42.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Main" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="HBoxContainer" parent="Margin/Main"]
+layout_mode = 2
+
+[node name="Back" type="Button" parent="Margin/Main/Header"]
+custom_minimum_size = Vector2(110, 44)
+layout_mode = 2
+text = "← Army"
+
+[node name="Title" type="Label" parent="Margin/Main/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 34
+text = "Pre-Battle Draft"
+horizontal_alignment = 1
+
+[node name="Commander" type="Label" parent="Margin/Main/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Commander"
+vertical_alignment = 1
+
+[node name="StatusRow" type="HBoxContainer" parent="Margin/Main"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Round" type="Label" parent="Margin/Main/StatusRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Opening Pre-Battle"
+
+[node name="Selections" type="Label" parent="Margin/Main/StatusRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Selections left: 3"
+horizontal_alignment = 1
+
+[node name="Timer" type="Label" parent="Margin/Main/StatusRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Pick timer: 30"
+horizontal_alignment = 2
+
+[node name="OfferPanel" type="PanelContainer" parent="Margin/Main"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Margin/Main/OfferPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="OfferContent" type="VBoxContainer" parent="Margin/Main/OfferPanel/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Prompt" type="Label" parent="Margin/Main/OfferPanel/Padding/OfferContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Choose 1"
+horizontal_alignment = 1
+
+[node name="OfferRow" type="HBoxContainer" parent="Margin/Main/OfferPanel/Padding/OfferContent"]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="CommanderSkill" type="Button" parent="Margin/Main/OfferPanel/Padding/OfferContent"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "Commander Skill"
+
+[node name="SummaryRow" type="HBoxContainer" parent="Margin/Main"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 180)
+theme_override_constants/separation = 14
+
+[node name="ArmyPanel" type="PanelContainer" parent="Margin/Main/SummaryRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Margin/Main/SummaryRow/ArmyPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="ArmySummary" type="RichTextLabel" parent="Margin/Main/SummaryRow/ArmyPanel/Padding"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+text = "[b]Current Army[/b]"
+
+[node name="BuffPanel" type="PanelContainer" parent="Margin/Main/SummaryRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Margin/Main/SummaryRow/BuffPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="BuffSummary" type="RichTextLabel" parent="Margin/Main/SummaryRow/BuffPanel/Padding"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+text = "[b]Active Buffs[/b]"
+
+[node name="Footer" type="Label" parent="Margin/Main"]
+layout_mode = 2
+text = "Round 1 is Army-only."
+horizontal_alignment = 1

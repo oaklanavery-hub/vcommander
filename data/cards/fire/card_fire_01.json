@@ -1,1 +1,33 @@
-{"schema_version":1,"id":"card_fire_01","display_name":"Fire Army 1","element":"fire","set_id":"set_fire_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_fire_01",
+  "display_name": "Magma Golem",
+  "element": "fire",
+  "set_id": "set_fire_01",
+  "status": "playtest",
+  "role": "tank",
+  "summon_amount": 1,
+  "unit_cap": 3,
+  "stats": {
+    "health": 1250,
+    "attack": 85,
+    "defense": 60,
+    "attack_speed": 60,
+    "movement_speed": 55,
+    "range": 1
+  },
+  "ability": {
+    "id": "burning_aura",
+    "display_name": "Burning Aura",
+    "type": "aura_damage",
+    "radius": "small",
+    "tick_seconds": 1.0,
+    "attack_pct": 25,
+    "damage_reduced_by_def": true
+  },
+  "tags": [
+    "starter",
+    "fire",
+    "tank"
+  ]
+}

@@ -1,9 +1,15 @@
 {
   "schema_version": 1,
   "id": "set_earth_01",
-  "display_name": "Earth Starter Set",
+  "display_name": "Earth Commander Theme",
   "element": "earth",
   "required_count": 4,
-  "required_card_ids": ["card_earth_01", "card_earth_02", "card_earth_03", "card_earth_04"],
-  "bonus": {"status": "design_pending", "effects": []}
+  "activation": "all_equipped_cards_match_set",
+  "status": "playtest",
+  "bonus": {
+    "display_name": "Deep Roots",
+    "stat": "health",
+    "percentage": 10,
+    "stacking": "multiplicative"
+  }
 }

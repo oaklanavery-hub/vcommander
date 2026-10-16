@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "id": "buff_attack_speed",
+  "display_name": "Attack Speed Boost",
+  "stat": "attack_speed",
+  "percentage": 20,
+  "max_stacks": 3,
+  "stacking": "multiplicative",
+  "status": "playtest"
+}

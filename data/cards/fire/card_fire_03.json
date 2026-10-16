@@ -1,1 +1,32 @@
-{"schema_version":1,"id":"card_fire_03","display_name":"Fire Army 3","element":"fire","set_id":"set_fire_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_fire_03",
+  "display_name": "Sorcerer",
+  "element": "fire",
+  "set_id": "set_fire_01",
+  "status": "playtest",
+  "role": "range",
+  "summon_amount": 2,
+  "unit_cap": 6,
+  "stats": {
+    "health": 420,
+    "attack": 105,
+    "defense": 15,
+    "attack_speed": 90,
+    "movement_speed": 90,
+    "range": 6
+  },
+  "ability": {
+    "id": "fireball",
+    "display_name": "Fireball",
+    "type": "ranged_aoe",
+    "splash_radius": "small",
+    "splash_attack_pct": 50,
+    "damage_reduced_by_def": true
+  },
+  "tags": [
+    "starter",
+    "fire",
+    "range"
+  ]
+}
