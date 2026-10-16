@@ -13,7 +13,7 @@ const SELECTION_SECONDS := 30.0
 @onready var buff_summary: RichTextLabel = $Margin/Main/SummaryRow/BuffPanel/Padding/BuffSummary
 @onready var footer: Label = $Margin/Main/Footer
 
-var _time_left := SELECTION_SECONDS
+var _time_left: float = SELECTION_SECONDS
 
 func _ready() -> void:
     back_button.pressed.connect(_go_back)
@@ -31,7 +31,7 @@ func _process(delta: float) -> void:
     if GameState.draft.is_phase_complete():
         return
 
-    _time_left = max(0.0, _time_left - delta)
+    _time_left = maxf(0.0, _time_left - delta)
     timer_label.text = "Pick timer: %02d" % int(ceil(_time_left))
     if _time_left <= 0.0:
         if GameState.draft.auto_select():
@@ -39,7 +39,7 @@ func _process(delta: float) -> void:
             _refresh_all()
 
 func _refresh_all() -> void:
-    var commander := GameState.get_selected_commander()
+    var commander: Dictionary = GameState.get_selected_commander()
     commander_label.text = "%s • Seed %d" % [
         str(commander.get("display_name", "Commander")),
         GameState.match_seed
@@ -76,11 +76,11 @@ func _option_text(option: Dictionary) -> String:
     var option_id := str(option.get("id", ""))
 
     if option_type == "unit":
-        var card := ContentDatabase.get_card(option_id)
-        var current := GameState.draft.get_unit_count(option_id)
-        var amount := int(card.get("summon_amount", 0))
-        var cap := int(card.get("unit_cap", 0))
-        var after := min(cap, current + amount)
+        var card: Dictionary = ContentDatabase.get_card(option_id)
+        var current: int = GameState.draft.get_unit_count(option_id)
+        var amount: int = int(card.get("summon_amount", 0))
+        var cap: int = int(card.get("unit_cap", 0))
+        var after: int = mini(cap, current + amount)
         return "%s\n%s • %s\n+%d units\n%d/%d → %d/%d" % [
             str(card.get("display_name", option_id)),
             str(card.get("element", "")).capitalize(),
@@ -92,8 +92,8 @@ func _option_text(option: Dictionary) -> String:
             cap
         ]
 
-    var buff := ContentDatabase.get_buff(option_id)
-    var stack := GameState.draft.get_buff_stacks(option_id)
+    var buff: Dictionary = ContentDatabase.get_buff(option_id)
+    var stack: int = GameState.draft.get_buff_stacks(option_id)
     return "%s\n+%s%% %s\nStacks %d/%d" % [
         str(buff.get("display_name", option_id)),
         str(buff.get("percentage", 0)),
@@ -117,7 +117,7 @@ func _refresh_skill(commander: Dictionary) -> void:
 func _refresh_summaries() -> void:
     var army_lines: Array[String] = ["[b]Current Army[/b]"]
     for card_id in GameState.army.get_cards():
-        var card := ContentDatabase.get_card(card_id)
+        var card: Dictionary = ContentDatabase.get_card(card_id)
         army_lines.append("%s  %d/%d" % [
             str(card.get("display_name", card_id)),
             GameState.draft.get_unit_count(card_id),
@@ -129,7 +129,7 @@ func _refresh_summaries() -> void:
     var any_buff := false
     for buff in ContentDatabase.get_all_buffs():
         var buff_id := str(buff.get("id", ""))
-        var stacks := GameState.draft.get_buff_stacks(buff_id)
+        var stacks: int = GameState.draft.get_buff_stacks(buff_id)
         if stacks <= 0:
             continue
         any_buff = true
