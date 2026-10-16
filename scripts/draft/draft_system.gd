@@ -73,25 +73,25 @@ func refresh_offer() -> Array[Dictionary]:
     if selection_points <= 0:
         return current_offer
 
-    var eligible_units := _eligible_unit_ids()
-    var eligible_buffs := _eligible_buff_ids()
+    var eligible_units: Array[String] = _eligible_unit_ids()
+    var eligible_buffs: Array[String] = _eligible_buff_ids()
 
     if opening_phase:
         current_offer = _make_options(_take_random(eligible_units, OFFER_SIZE), "unit")
     elif eligible_units.is_empty():
         current_offer = _make_options(_take_random(eligible_buffs, OFFER_SIZE), "buff")
     else:
-        var minimum_buffs := max(0, OFFER_SIZE - eligible_units.size())
-        var maximum_buffs := min(MAX_BUFFS_WITH_UNITS, eligible_buffs.size())
-        maximum_buffs = min(maximum_buffs, OFFER_SIZE - 1)
-        minimum_buffs = min(minimum_buffs, maximum_buffs)
-        var buff_count := 0
+        var minimum_buffs: int = maxi(0, OFFER_SIZE - eligible_units.size())
+        var maximum_buffs: int = mini(MAX_BUFFS_WITH_UNITS, eligible_buffs.size())
+        maximum_buffs = mini(maximum_buffs, OFFER_SIZE - 1)
+        minimum_buffs = mini(minimum_buffs, maximum_buffs)
+        var buff_count: int = 0
         if maximum_buffs > 0:
             buff_count = _rng.randi_range(minimum_buffs, maximum_buffs)
-        var unit_count := min(OFFER_SIZE - buff_count, eligible_units.size())
+        var unit_count: int = mini(OFFER_SIZE - buff_count, eligible_units.size())
         if unit_count == 0:
-            unit_count = min(1, eligible_units.size())
-            buff_count = min(OFFER_SIZE - unit_count, eligible_buffs.size())
+            unit_count = mini(1, eligible_units.size())
+            buff_count = mini(OFFER_SIZE - unit_count, eligible_buffs.size())
 
         current_offer.append_array(_make_options(_take_random(eligible_units, unit_count), "unit"))
         current_offer.append_array(_make_options(_take_random(eligible_buffs, buff_count), "buff"))
@@ -154,7 +154,7 @@ func get_buff_stacks(buff_id: String) -> int:
     return int(buff_stacks.get(buff_id, 0))
 
 func commander_skill_uses_remaining() -> int:
-    return max(0, COMMANDER_SKILL_USES_PER_MATCH - commander_skill_uses)
+    return maxi(0, COMMANDER_SKILL_USES_PER_MATCH - commander_skill_uses)
 
 func is_phase_complete() -> bool:
     return selection_points <= 0
@@ -163,20 +163,20 @@ func _apply_unit(card_id: String) -> bool:
     if not card_definitions.has(card_id):
         return false
     var card: Dictionary = card_definitions[card_id]
-    var current := get_unit_count(card_id)
-    var cap := int(card.get("unit_cap", 0))
-    var summon_amount := int(card.get("summon_amount", 0))
+    var current: int = get_unit_count(card_id)
+    var cap: int = int(card.get("unit_cap", 0))
+    var summon_amount: int = int(card.get("summon_amount", 0))
     if current >= cap or summon_amount <= 0:
         return false
-    unit_counts[card_id] = min(cap, current + summon_amount)
+    unit_counts[card_id] = mini(cap, current + summon_amount)
     return true
 
 func _apply_buff(buff_id: String) -> bool:
     if not buff_definitions.has(buff_id):
         return false
     var buff: Dictionary = buff_definitions[buff_id]
-    var current := get_buff_stacks(buff_id)
-    var max_stacks := int(buff.get("max_stacks", 3))
+    var current: int = get_buff_stacks(buff_id)
+    var max_stacks: int = int(buff.get("max_stacks", 3))
     if current >= max_stacks:
         return false
     buff_stacks[buff_id] = current + 1
@@ -209,20 +209,20 @@ func _make_options(ids: Array[String], option_type: String) -> Array[Dictionary]
     return result
 
 func _take_random(values: Array[String], count: int) -> Array[String]:
-    var shuffled := values.duplicate()
+    var shuffled: Array[String] = values.duplicate()
     for i in range(shuffled.size() - 1, 0, -1):
-        var j := _rng.randi_range(0, i)
+        var j: int = _rng.randi_range(0, i)
         var temp: String = shuffled[i]
         shuffled[i] = shuffled[j]
         shuffled[j] = temp
     var result: Array[String] = []
-    for i in range(min(count, shuffled.size())):
+    for i in range(mini(count, shuffled.size())):
         result.append(shuffled[i])
     return result
 
 func _shuffle_options(values: Array[Dictionary]) -> void:
     for i in range(values.size() - 1, 0, -1):
-        var j := _rng.randi_range(0, i)
+        var j: int = _rng.randi_range(0, i)
         var temp: Dictionary = values[i]
         values[i] = values[j]
         values[j] = temp
