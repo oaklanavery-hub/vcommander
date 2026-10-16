@@ -1,0 +1,37 @@
+# Godot generated files
+.godot/
+.import/
+
+# Godot local export config
+export.cfg
+
+# Imported translations generated from CSV files
+*.translation
+
+# Mono / C# generated files (safe to ignore even if unused)
+.mono/
+data_*/
+mono_crash.*.json
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor / temporary files
+*.tmp
+*.temp
+*.bak
+*~
+
+# Logs
+*.log
+
+# Local environment files
+.env
+.env.*
+
+# Build output folders
+build/
+builds/
+dist/
