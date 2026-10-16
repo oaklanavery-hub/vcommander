@@ -1,1 +1,33 @@
-{"schema_version":1,"id":"card_water_03","display_name":"Water Army 3","element":"water","set_id":"set_water_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_water_03",
+  "display_name": "Penguins",
+  "element": "water",
+  "set_id": "set_water_01",
+  "status": "playtest",
+  "role": "healer",
+  "summon_amount": 1,
+  "unit_cap": 3,
+  "stats": {
+    "health": 520,
+    "attack": 40,
+    "defense": 20,
+    "attack_speed": 80,
+    "movement_speed": 105,
+    "range": 5
+  },
+  "ability": {
+    "id": "healing_puddle",
+    "display_name": "Healing Puddle",
+    "type": "area_heal",
+    "radius": "medium",
+    "duration_seconds": 4,
+    "heal_target_max_hp_pct": 5,
+    "tick_seconds": 2
+  },
+  "tags": [
+    "starter",
+    "water",
+    "healer"
+  ]
+}

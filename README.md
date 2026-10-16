@@ -4,20 +4,23 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.2 — Army Builder**
+**v0.3 — Draft Prototype**
 
-The current prototype supports:
+The current playable prototype supports:
 
-- 3 starter elements: Fire, Water, Earth
-- 1 starter Commander per element
-- 4 signature Army cards per Commander
-- Commander selection loaded from JSON
-- A four-slot Army Builder using the full starter card pool
-- Live signature-set progress from `0/4` to `4/4`
-- A generic Commander Bonus ACTIVE state when the full signature set is equipped
-- Player vs AI remains the first match target; drafting and combat are not implemented yet
+- Fire, Water and Earth starter Commanders
+- 12 approved starter Army cards with initial playtest stats/abilities
+- exactly 4 unique pre-match Army cards, freely mixed across elements
+- Commander themed-set bonuses when all four selected cards match the theme
+- seeded 3-choice pre-battle drafting
+- Army-card summon amounts and maximum unit counts
+- opening Battle 1 draft restricted to Army cards
+- 5 persistent Army-wide Buff Cards with multiplicative stacking and 3-stack caps
+- Commander skill selection cost and twice-per-match / once-per-round limits
+- 30-second pick timer and random auto-selection on timeout
+- current army/Buff progress display
 
-Gameplay values and names in `data/` are placeholders unless explicitly approved in `docs/GAME_RULES.md`.
+v0.3 stops after the opening draft. Deterministic auto-combat is the v0.4 milestone.
 
 ## Technology
 
@@ -40,8 +43,8 @@ Read these before changing gameplay:
 
 ## Development workflow
 
-`main` should remain playable. Work happens on short-lived branches, passes validation, then enters `main` through a pull request.
+`main` remains playable. Work happens on short-lived branches, passes validation/tests, then enters `main` through a pull request.
 
 ## Local start
 
-Open `project.godot` using Godot 4.7 stable and run the project. Choose a Commander, open the Army Builder, equip four cards, and observe signature-set progress and bonus activation.
+Open `project.godot` using Godot 4.7 stable and run the project. Choose a Commander, equip four unique Army cards, then choose **Begin Match Draft**.

@@ -1,1 +1,31 @@
-{"schema_version":1,"id":"card_earth_03","display_name":"Earth Army 3","element":"earth","set_id":"set_earth_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_earth_03",
+  "display_name": "Bear",
+  "element": "earth",
+  "set_id": "set_earth_01",
+  "status": "playtest",
+  "role": "melee",
+  "summon_amount": 2,
+  "unit_cap": 6,
+  "stats": {
+    "health": 700,
+    "attack": 115,
+    "defense": 30,
+    "attack_speed": 100,
+    "movement_speed": 115,
+    "range": 1
+  },
+  "ability": {
+    "id": "maul",
+    "display_name": "Maul",
+    "type": "empowered_attack",
+    "every_n_attacks": 3,
+    "attack_pct": 150
+  },
+  "tags": [
+    "starter",
+    "earth",
+    "melee"
+  ]
+}

@@ -3,6 +3,7 @@ extends Node
 var commanders: Dictionary = {}
 var cards: Dictionary = {}
 var sets: Dictionary = {}
+var buffs: Dictionary = {}
 var load_errors: Array[String] = []
 
 func _ready() -> void:
@@ -12,11 +13,13 @@ func reload() -> void:
     commanders.clear()
     cards.clear()
     sets.clear()
+    buffs.clear()
     load_errors.clear()
 
     _load_json_directory("res://data/commanders", commanders)
     _load_json_tree("res://data/cards", cards)
     _load_json_directory("res://data/sets", sets)
+    _load_json_directory("res://data/buffs", buffs)
 
 func get_summary() -> Dictionary:
     return {
@@ -24,6 +27,7 @@ func get_summary() -> Dictionary:
         "commanders": commanders.size(),
         "cards": cards.size(),
         "sets": sets.size(),
+        "buffs": buffs.size(),
         "errors": load_errors.duplicate()
     }
 
@@ -36,21 +40,17 @@ func get_signature_set(set_id: String) -> Dictionary:
 func get_card(card_id: String) -> Dictionary:
     return cards.get(card_id, {})
 
+func get_buff(buff_id: String) -> Dictionary:
+    return buffs.get(buff_id, {})
+
 func get_all_commanders() -> Array[Dictionary]:
-    var ids: Array = commanders.keys()
-    ids.sort()
-    var result: Array[Dictionary] = []
-    for commander_id in ids:
-        result.append(commanders[commander_id])
-    return result
+    return _sorted_values(commanders)
 
 func get_all_cards() -> Array[Dictionary]:
-    var ids: Array = cards.keys()
-    ids.sort()
-    var result: Array[Dictionary] = []
-    for card_id in ids:
-        result.append(cards[card_id])
-    return result
+    return _sorted_values(cards)
+
+func get_all_buffs() -> Array[Dictionary]:
+    return _sorted_values(buffs)
 
 func get_cards_by_ids(card_ids: Array) -> Array[Dictionary]:
     var result: Array[Dictionary] = []
@@ -58,6 +58,21 @@ func get_cards_by_ids(card_ids: Array) -> Array[Dictionary]:
         var card := get_card(str(card_id))
         if not card.is_empty():
             result.append(card)
+    return result
+
+func get_cards_by_set(set_id: String) -> Array[Dictionary]:
+    var result: Array[Dictionary] = []
+    for card in get_all_cards():
+        if str(card.get("set_id", "")) == set_id:
+            result.append(card)
+    return result
+
+func _sorted_values(source: Dictionary) -> Array[Dictionary]:
+    var ids: Array = source.keys()
+    ids.sort()
+    var result: Array[Dictionary] = []
+    for content_id in ids:
+        result.append(source[content_id])
     return result
 
 func _load_json_tree(root_path: String, target: Dictionary) -> void:

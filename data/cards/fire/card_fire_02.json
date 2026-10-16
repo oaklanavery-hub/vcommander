@@ -1,1 +1,36 @@
-{"schema_version":1,"id":"card_fire_02","display_name":"Fire Army 2","element":"fire","set_id":"set_fire_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_fire_02",
+  "display_name": "Fire Imp",
+  "element": "fire",
+  "set_id": "set_fire_01",
+  "status": "playtest",
+  "role": "melee",
+  "summon_amount": 3,
+  "unit_cap": 9,
+  "stats": {
+    "health": 280,
+    "attack": 70,
+    "defense": 12,
+    "attack_speed": 125,
+    "movement_speed": 140,
+    "range": 1
+  },
+  "ability": {
+    "id": "volatile_imp",
+    "display_name": "Volatile Imp",
+    "trigger": "on_death",
+    "type": "explosion",
+    "radius": "medium",
+    "attack_pct": 150,
+    "pushback": "moderate",
+    "burn_seconds": 3,
+    "burn_attack_pct_per_second": 20,
+    "damage_reduced_by_def": true
+  },
+  "tags": [
+    "starter",
+    "fire",
+    "melee"
+  ]
+}

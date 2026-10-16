@@ -1,1 +1,29 @@
-{"schema_version":1,"id":"card_water_02","display_name":"Water Army 2","element":"water","set_id":"set_water_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_water_02",
+  "display_name": "Sea Serpent",
+  "element": "water",
+  "set_id": "set_water_01",
+  "status": "playtest",
+  "role": "range",
+  "summon_amount": 2,
+  "unit_cap": 6,
+  "stats": {
+    "health": 460,
+    "attack": 95,
+    "defense": 18,
+    "attack_speed": 105,
+    "movement_speed": 100,
+    "range": 5
+  },
+  "ability": {
+    "id": "water_shot",
+    "display_name": "Water Shot",
+    "type": "basic_ranged"
+  },
+  "tags": [
+    "starter",
+    "water",
+    "range"
+  ]
+}

@@ -68,29 +68,28 @@ func _select_commander(commander_id: String) -> void:
     var set_id: String = str(commander.get("signature_set_id", ""))
     var signature_set := ContentDatabase.get_signature_set(set_id)
     if signature_set.is_empty():
-        set_name_label.text = "Signature set missing"
+        set_name_label.text = "Commander theme missing"
         _clear_cards()
         bonus_label.text = ""
         return
 
-    set_name_label.text = "Signature Set: %s" % str(signature_set.get("display_name", set_id))
-    _show_signature_cards(signature_set.get("required_card_ids", []))
+    set_name_label.text = "Commander Theme: %s" % str(signature_set.get("display_name", set_id))
+    _show_theme_cards(set_id)
 
     var bonus: Dictionary = signature_set.get("bonus", {})
-    if str(bonus.get("status", "")) == "design_pending":
-        bonus_label.text = "Full-set Commander Bonus: design pending. It activates only when all 4 signature cards are equipped."
-    else:
-        bonus_label.text = "Full-set Commander Bonus configured."
+    bonus_label.text = "4-card Theme Bonus: +%s%% %s • Any four unique cards from this theme qualify." % [
+        str(bonus.get("percentage", "—")),
+        str(bonus.get("stat", "stat")).replace("_", " ").to_upper()
+    ]
 
-func _show_signature_cards(card_ids: Array) -> void:
+func _show_theme_cards(set_id: String) -> void:
     _clear_cards()
-    var card_definitions := ContentDatabase.get_cards_by_ids(card_ids)
-    for card in card_definitions:
+    for card in ContentDatabase.get_cards_by_set(set_id):
         cards_grid.add_child(_make_card_preview(card))
 
 func _make_card_preview(card: Dictionary) -> Control:
     var panel := PanelContainer.new()
-    panel.custom_minimum_size = Vector2(245, 150)
+    panel.custom_minimum_size = Vector2(245, 165)
 
     var margin := MarginContainer.new()
     margin.add_theme_constant_override("margin_left", 14)
@@ -107,22 +106,33 @@ func _make_card_preview(card: Dictionary) -> Control:
     name_label.add_theme_font_size_override("font_size", 19)
     content.add_child(name_label)
 
-    var element := Label.new()
-    element.text = str(card.get("element", "unknown")).capitalize()
-    content.add_child(element)
+    var role_label := Label.new()
+    role_label.text = "%s • %s" % [
+        str(card.get("element", "unknown")).capitalize(),
+        str(card.get("role", "unit")).capitalize()
+    ]
+    content.add_child(role_label)
 
     var stats: Dictionary = card.get("stats", {})
     var stat_label := Label.new()
-    stat_label.text = "HP %s  •  ATK %s  •  SPD %s" % [
+    stat_label.text = "HP %s • ATK %s • DEF %s" % [
         str(stats.get("health", "—")),
         str(stats.get("attack", "—")),
-        str(stats.get("attack_speed", "—"))
+        str(stats.get("defense", "—"))
     ]
     content.add_child(stat_label)
 
-    var placeholder := Label.new()
-    placeholder.text = "Placeholder data"
-    content.add_child(placeholder)
+    var draft_label := Label.new()
+    draft_label.text = "Draft +%s • Cap %s" % [
+        str(card.get("summon_amount", "—")),
+        str(card.get("unit_cap", "—"))
+    ]
+    content.add_child(draft_label)
+
+    var ability: Dictionary = card.get("ability", {})
+    var ability_label := Label.new()
+    ability_label.text = str(ability.get("display_name", ability.get("id", "Ability")))
+    content.add_child(ability_label)
 
     return panel
 

@@ -27,36 +27,79 @@ def read_group(path: Path, recursive: bool = False) -> dict[str, dict]:
     return result
 
 
+def require_positive_number(value, label: str) -> None:
+    if not isinstance(value, (int, float)) or value <= 0:
+        raise ValueError(f"{label} must be a positive number")
+
+
 def main() -> int:
     commanders = read_group(ROOT / "data" / "commanders")
     cards = read_group(ROOT / "data" / "cards", recursive=True)
     sets = read_group(ROOT / "data" / "sets")
+    buffs = read_group(ROOT / "data" / "buffs")
 
-    if len(commanders) != 3 or len(cards) != 12 or len(sets) != 3:
+    if (len(commanders), len(cards), len(sets), len(buffs)) != (3, 12, 3, 5):
         raise ValueError(
-            f"Phase 0 expects 3 commanders, 12 cards, 3 sets; got "
-            f"{len(commanders)}, {len(cards)}, {len(sets)}"
+            "Starter slice expects 3 commanders, 12 cards, 3 sets and 5 buffs; "
+            f"got {len(commanders)}, {len(cards)}, {len(sets)}, {len(buffs)}"
         )
 
     for commander in commanders.values():
         set_id = commander.get("signature_set_id")
         if set_id not in sets:
             raise ValueError(f"Commander {commander['id']} references unknown set {set_id}")
+        skill = commander.get("active_skill", {})
+        require_positive_number(skill.get("uses_per_match"), f"{commander['id']} uses_per_match")
+        require_positive_number(skill.get("uses_per_round"), f"{commander['id']} uses_per_round")
+        require_positive_number(skill.get("selection_cost"), f"{commander['id']} selection_cost")
 
-    for signature_set in sets.values():
-        required = signature_set.get("required_card_ids", [])
-        required_count = signature_set.get("required_count")
-        if required_count != 4 or len(required) != 4 or len(set(required)) != 4:
-            raise ValueError(f"Set {signature_set['id']} must contain four unique required cards")
-        for card_id in required:
-            if card_id not in cards:
-                raise ValueError(f"Set {signature_set['id']} references unknown card {card_id}")
-            if cards[card_id].get("set_id") != signature_set["id"]:
-                raise ValueError(f"Card {card_id} points at a different set")
-            if cards[card_id].get("element") != signature_set.get("element"):
-                raise ValueError(f"Card {card_id} element differs from its set")
+    cards_by_set: dict[str, list[dict]] = {set_id: [] for set_id in sets}
+    required_stats = ("health", "attack", "defense", "attack_speed", "movement_speed", "range")
+    for army_card in cards.values():
+        set_id = army_card.get("set_id")
+        if set_id not in sets:
+            raise ValueError(f"Card {army_card['id']} references unknown set {set_id}")
+        cards_by_set[set_id].append(army_card)
 
-    print(f"Data OK: {len(commanders)} commanders, {len(cards)} cards, {len(sets)} sets")
+        summon_amount = army_card.get("summon_amount")
+        unit_cap = army_card.get("unit_cap")
+        require_positive_number(summon_amount, f"{army_card['id']} summon_amount")
+        require_positive_number(unit_cap, f"{army_card['id']} unit_cap")
+        if summon_amount > unit_cap:
+            raise ValueError(f"{army_card['id']} summon_amount cannot exceed unit_cap")
+
+        stats = army_card.get("stats", {})
+        for stat_name in required_stats:
+            require_positive_number(stats.get(stat_name), f"{army_card['id']} stats.{stat_name}")
+
+        ability = army_card.get("ability", {})
+        if not ability.get("id") or not ability.get("type"):
+            raise ValueError(f"{army_card['id']} must define an ability id and type")
+
+    for set_id, signature_set in sets.items():
+        if signature_set.get("required_count") != 4:
+            raise ValueError(f"Set {set_id} required_count must be 4")
+        if signature_set.get("activation") != "all_equipped_cards_match_set":
+            raise ValueError(f"Set {set_id} uses unsupported activation rule")
+        if len(cards_by_set[set_id]) < 4:
+            raise ValueError(f"Set {set_id} needs at least four available themed cards")
+
+        bonus = signature_set.get("bonus", {})
+        require_positive_number(bonus.get("percentage"), f"{set_id} bonus.percentage")
+        if bonus.get("stacking") != "multiplicative":
+            raise ValueError(f"Set {set_id} bonus must stack multiplicatively")
+
+    for buff in buffs.values():
+        require_positive_number(buff.get("percentage"), f"{buff['id']} percentage")
+        if buff.get("max_stacks") != 3:
+            raise ValueError(f"{buff['id']} max_stacks must be 3")
+        if buff.get("stacking") != "multiplicative":
+            raise ValueError(f"{buff['id']} must stack multiplicatively")
+
+    print(
+        f"Data OK: {len(commanders)} commanders, {len(cards)} cards, "
+        f"{len(sets)} sets, {len(buffs)} buffs"
+    )
     return 0
 
 

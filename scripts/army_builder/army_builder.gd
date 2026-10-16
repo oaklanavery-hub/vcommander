@@ -7,16 +7,19 @@ extends Control
 @onready var bonus_status_label: Label = $Margin/Main/SlotsPanel/Padding/SlotsContent/BonusStatus
 @onready var army_status_label: Label = $Margin/Main/SlotsPanel/Padding/SlotsContent/ArmyStatus
 @onready var cards_grid: GridContainer = $Margin/Main/CardScroll/CardsGrid
+@onready var begin_draft_button: Button = $Margin/Main/BeginDraft
 
-var available_card_buttons: Array[Button] = []
+var available_card_buttons: Dictionary = {}
 
 func _ready() -> void:
     back_button.pressed.connect(_go_back)
+    begin_draft_button.pressed.connect(_begin_draft)
 
     var commander := GameState.get_selected_commander()
     if commander.is_empty():
         commander_label.text = "No Commander selected"
         army_status_label.text = "Return and choose a Commander first."
+        begin_draft_button.disabled = true
         return
 
     commander_label.text = "%s • %s" % [
@@ -31,20 +34,24 @@ func _populate_available_cards() -> void:
     for card in ContentDatabase.get_all_cards():
         var card_id: String = str(card.get("id", ""))
         var button := Button.new()
-        button.custom_minimum_size = Vector2(270, 105)
+        button.custom_minimum_size = Vector2(270, 120)
         button.text = _card_button_text(card)
         button.tooltip_text = "Equip %s" % str(card.get("display_name", card_id))
         button.pressed.connect(_equip_card.bind(card_id))
-        available_card_buttons.append(button)
+        available_card_buttons[card_id] = button
         cards_grid.add_child(button)
 
 func _card_button_text(card: Dictionary) -> String:
     var stats: Dictionary = card.get("stats", {})
-    return "%s\n%s • HP %s • ATK %s" % [
+    return "%s\n%s • %s\nHP %s • ATK %s • DEF %s\nSummon +%s • Cap %s" % [
         str(card.get("display_name", card.get("id", "Card"))),
         str(card.get("element", "unknown")).capitalize(),
+        str(card.get("role", "unit")).capitalize(),
         str(stats.get("health", "—")),
-        str(stats.get("attack", "—"))
+        str(stats.get("attack", "—")),
+        str(stats.get("defense", "—")),
+        str(card.get("summon_amount", "—")),
+        str(card.get("unit_cap", "—"))
     ]
 
 func _equip_card(card_id: String) -> void:
@@ -59,6 +66,7 @@ func _refresh() -> void:
     _refresh_slots()
     _refresh_set_status()
     _refresh_available_cards()
+    begin_draft_button.disabled = not GameState.army.is_full()
 
 func _refresh_slots() -> void:
     for child in slots_row.get_children():
@@ -83,17 +91,24 @@ func _refresh_slots() -> void:
 func _refresh_set_status() -> void:
     var progress := GameState.get_signature_progress()
     var required := GameState.get_signature_required_count()
-    set_progress_label.text = "Signature Set: %d / %d" % [progress, required]
+    set_progress_label.text = "Commander Theme: %d / %d matching cards" % [progress, required]
+
+    var signature_set := GameState.get_selected_signature_set()
+    var bonus: Dictionary = signature_set.get("bonus", {})
+    var bonus_text := "+%s%% %s" % [
+        str(bonus.get("percentage", "—")),
+        str(bonus.get("stat", "stat")).replace("_", " ").to_upper()
+    ]
 
     if GameState.is_full_set_active():
-        bonus_status_label.text = "COMMANDER BONUS: ACTIVE — full signature set equipped"
+        bonus_status_label.text = "COMMANDER BONUS ACTIVE — %s" % bonus_text
     else:
-        bonus_status_label.text = "Commander Bonus: INACTIVE — equip all signature cards"
+        bonus_status_label.text = "Commander Bonus INACTIVE — all 4 cards must match this Commander theme"
 
     if GameState.army.is_full():
-        army_status_label.text = "Army Ready: 4 / 4 cards equipped."
+        army_status_label.text = "Army Ready: 4 / 4 unique cards equipped."
     else:
-        army_status_label.text = "Choose %d more card(s): %d / %d equipped." % [
+        army_status_label.text = "Choose %d more unique card(s): %d / %d equipped." % [
             GameState.army.max_slots - GameState.army.size(),
             GameState.army.size(),
             GameState.army.max_slots
@@ -101,8 +116,14 @@ func _refresh_set_status() -> void:
 
 func _refresh_available_cards() -> void:
     var full := GameState.army.is_full()
-    for button in available_card_buttons:
-        button.disabled = full
+    for card_id in available_card_buttons:
+        var button: Button = available_card_buttons[card_id]
+        button.disabled = full or GameState.army.contains(str(card_id))
+
+func _begin_draft() -> void:
+    var seed_value := int(Time.get_unix_time_from_system() * 1000.0)
+    if GameState.begin_match(seed_value):
+        get_tree().change_scene_to_file("res://scenes/draft/draft.tscn")
 
 func _go_back() -> void:
     get_tree().change_scene_to_file("res://scenes/commander_select/commander_select.tscn")

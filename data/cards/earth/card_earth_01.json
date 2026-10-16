@@ -1,1 +1,32 @@
-{"schema_version":1,"id":"card_earth_01","display_name":"Earth Army 1","element":"earth","set_id":"set_earth_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_earth_01",
+  "display_name": "Giant Tree",
+  "element": "earth",
+  "set_id": "set_earth_01",
+  "status": "playtest",
+  "role": "tank",
+  "summon_amount": 1,
+  "unit_cap": 3,
+  "stats": {
+    "health": 1400,
+    "attack": 65,
+    "defense": 65,
+    "attack_speed": 50,
+    "movement_speed": 40,
+    "range": 1
+  },
+  "ability": {
+    "id": "regenerative_canopy",
+    "display_name": "Regenerative Canopy",
+    "type": "aura_heal",
+    "radius": "large",
+    "heal_ally_max_hp_pct": 3,
+    "tick_seconds": 2
+  },
+  "tags": [
+    "starter",
+    "earth",
+    "tank"
+  ]
+}

@@ -1,1 +1,32 @@
-{"schema_version":1,"id":"card_water_01","display_name":"Water Army 1","element":"water","set_id":"set_water_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_water_01",
+  "display_name": "Ice Giant",
+  "element": "water",
+  "set_id": "set_water_01",
+  "status": "playtest",
+  "role": "tank",
+  "summon_amount": 2,
+  "unit_cap": 6,
+  "stats": {
+    "health": 760,
+    "attack": 75,
+    "defense": 45,
+    "attack_speed": 65,
+    "movement_speed": 55,
+    "range": 1
+  },
+  "ability": {
+    "id": "freezing_aura",
+    "display_name": "Freezing Aura",
+    "type": "aura_debuff",
+    "radius": "small",
+    "enemy_attack_speed_pct": -15,
+    "same_source_stacks": false
+  },
+  "tags": [
+    "starter",
+    "water",
+    "tank"
+  ]
+}

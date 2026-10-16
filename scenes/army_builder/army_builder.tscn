@@ -47,7 +47,7 @@ text = "Build Your Army"
 
 [node name="Subtitle" type="Label" parent="Margin/Main/Header/HeaderText"]
 layout_mode = 2
-text = "v0.2 • Equip four cards and complete your Commander's signature set"
+text = "v0.3 • Equip exactly four unique cards from any element"
 
 [node name="Commander" type="Label" parent="Margin/Main/Header"]
 layout_mode = 2
@@ -81,7 +81,7 @@ theme_override_constants/separation = 10
 [node name="SetProgress" type="Label" parent="Margin/Main/SlotsPanel/Padding/SlotsContent"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Signature Set: 0 / 4"
+text = "Commander Theme: 0 / 4"
 
 [node name="BonusStatus" type="Label" parent="Margin/Main/SlotsPanel/Padding/SlotsContent"]
 layout_mode = 2
@@ -89,7 +89,7 @@ text = "Commander Bonus: INACTIVE"
 
 [node name="ArmyStatus" type="Label" parent="Margin/Main/SlotsPanel/Padding/SlotsContent"]
 layout_mode = 2
-text = "Choose 4 cards."
+text = "Choose 4 unique cards."
 
 [node name="Divider" type="HSeparator" parent="Margin/Main"]
 layout_mode = 2
@@ -101,7 +101,7 @@ text = "Available Army Cards"
 
 [node name="Hint" type="Label" parent="Margin/Main"]
 layout_mode = 2
-text = "Click a card to equip it. Click an occupied Army Slot to remove that card."
+text = "Mix any elements. Click a card to equip it; click an occupied slot to remove it."
 
 [node name="CardScroll" type="ScrollContainer" parent="Margin/Main"]
 layout_mode = 2
@@ -115,6 +115,12 @@ columns = 4
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 
+[node name="BeginDraft" type="Button" parent="Margin/Main"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "Begin Match Draft"
+disabled = true
+
 [node name="Footer" type="Label" parent="Margin/Main"]
 layout_mode = 2
-text = "Drafting and battle are not implemented yet. v0.2 ends when your four-card Army is ready."
+text = "Fill all four slots to continue to the opening pre-battle draft."

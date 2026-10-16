@@ -1,55 +1,44 @@
 # Roadmap
 
 ## v0.0 — Foundation ✅
-
-- Repository structure
-- Godot 4.7 project
-- Browser export preset
-- AI development rules
-- Authoritative game rules
-- Data schemas
-- Fire/Water/Earth placeholder content
-- Generic set-completion checker
-- Automated data validation
-- CI and GitHub Pages workflow
+- Repository structure, Godot 4.7 browser export, rules/schema/architecture, starter content, validation, CI and Pages.
 
 ## v0.1 — Commander and content system ✅
-
-- Commander selection
-- Content browser/debug view
-- Commander data validation in-game
+- Commander selection and data-driven content loading.
 
 ## v0.2 — Army builder ✅
+- Exactly four Army slots, Commander-theme progress and shared game state.
 
-- Equip exactly four cards
-- Show signature-set progress
-- Activate full-set status at 4/4
-- Keep loadout/set logic outside presentation code
-
-## v0.3 — Draft prototype
-
-- Draft rules finalized first
-- Minimal interactive draft flow
+## v0.3 — Draft prototype ✅
+- Finalized match/draft/combat rules documented.
+- Four unique pre-match Army cards with mixed-element support.
+- Seeded three-choice draft offers.
+- Opening Army-only draft.
+- Summon amounts/unit caps and exhausted-card removal.
+- Persistent Buff stack model and offer limits.
+- Commander skill selection cost/use limits.
+- 30-second per-selection timeout with random auto-pick.
+- Interactive opening pre-battle draft screen.
 
 ## v0.4 — Deterministic auto-combat
-
-- Combat rules finalized first
-- Seeded simulation independent from visuals
-- Battle event log
+- Seeded simulation independent from visuals.
+- Open left-vs-right battlefield.
+- Formation, targeting, movement/collision and damage model.
+- Commander skills and starter unit abilities.
+- Battle event log and round resolution.
 
 ## v0.5 — AI
-
-- Legal army/draft choices
-- Basic decision policy
+- Legal Army/draft choices.
+- Basic decision policy.
+- Hidden-current-pick opponent drafting.
 
 ## v0.6 — Fire/Water/Earth vertical slice
-
-- Complete match loop
-- Starter content playable
+- Complete multi-round match loop.
+- Four-loss condition, loser draft bonus and Sudden Death.
+- Full starter content playable.
 
 ## v0.7+ — Presentation and balance
-
-- UI polish
-- Animation/VFX/audio
-- Simulation-based balance testing
-- Playtesting and accessibility improvements
+- Pixel-art animation/VFX/audio.
+- UI polish.
+- Simulation-based balance testing.
+- Playtesting and accessibility improvements.

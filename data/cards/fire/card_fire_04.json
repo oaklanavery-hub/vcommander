@@ -1,1 +1,34 @@
-{"schema_version":1,"id":"card_fire_04","display_name":"Fire Army 4","element":"fire","set_id":"set_fire_01","status":"placeholder","stats":{"health":100,"attack":10,"attack_speed":1.0},"tags":["starter","placeholder"]}
+{
+  "schema_version": 1,
+  "id": "card_fire_04",
+  "display_name": "Dragon",
+  "element": "fire",
+  "set_id": "set_fire_01",
+  "status": "playtest",
+  "role": "range",
+  "summon_amount": 1,
+  "unit_cap": 2,
+  "stats": {
+    "health": 1050,
+    "attack": 135,
+    "defense": 35,
+    "attack_speed": 75,
+    "movement_speed": 105,
+    "range": 6
+  },
+  "ability": {
+    "id": "dragonfire",
+    "display_name": "Dragonfire",
+    "type": "ranged_aoe_dot",
+    "radius": "large",
+    "burn_seconds": 4,
+    "burn_attack_pct_per_second": 25,
+    "refreshes_duration": true,
+    "damage_reduced_by_def": true
+  },
+  "tags": [
+    "starter",
+    "fire",
+    "range"
+  ]
+}

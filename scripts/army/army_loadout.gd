@@ -8,7 +8,7 @@ func _init(slot_count: int = 4) -> void:
     max_slots = max(1, slot_count)
 
 func equip(card_id: String) -> bool:
-    if card_id.is_empty() or is_full():
+    if card_id.is_empty() or is_full() or equipped_card_ids.has(card_id):
         return false
     equipped_card_ids.append(card_id)
     return true
@@ -34,6 +34,9 @@ func is_full() -> bool:
 
 func size() -> int:
     return equipped_card_ids.size()
+
+func contains(card_id: String) -> bool:
+    return equipped_card_ids.has(card_id)
 
 func get_cards() -> Array[String]:
     var result: Array[String] = []

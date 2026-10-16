@@ -12,24 +12,21 @@ Game systems / simulation
 Content data
 ```
 
-Presentation must never be the authoritative source of combat outcomes or game rules.
+Presentation must never be the authoritative source of draft legality, combat outcomes or game rules.
 
 ## Layers
 
-### Data
-`data/`
+### Data — `data/`
 
-Contains Commander, card, set and balance definitions. Content IDs are stable identifiers and should not depend on display names.
+Contains Commander, Army card, Buff, set/theme and balance definitions. Content IDs are stable identifiers and do not depend on display names.
 
-### Core systems
-`scripts/`
+### Core systems — `scripts/`
 
-Generic logic such as content loading, set checking, army loadout state, drafting, seeded combat simulation, match state and AI.
+Generic logic such as content loading, set checking, Army loadout state, drafting, seeded combat simulation, match state and AI.
 
-### Presentation
-`scenes/`, `ui/`, `assets/`
+### Presentation — `scenes/`, `ui/`, `assets/`
 
-Godot scenes, controls, effects, animation and audio. Presentation reacts to game state and events.
+Godot scenes, controls, effects, animation and audio. Presentation reacts to system state and events.
 
 ## Current/planned modules
 
@@ -45,24 +42,29 @@ scripts/
     set_bonus_checker.gd
     commander_system.gd    (future)
   draft/
-    draft_system.gd        (future)
+    draft_system.gd
+    draft_screen.gd
   combat/
-    combat_simulator.gd    (future)
-    battle_event.gd        (future)
+    combat_simulator.gd    (v0.4)
+    battle_event.gd        (v0.4)
   ai/
-    ai_controller.gd       (future)
+    ai_controller.gd       (v0.5)
 ```
 
-`GameState` owns the currently selected Commander and four-slot `ArmyLoadout`. The Army Builder reads and mutates that state through generic methods; it does not calculate set completion itself.
+`GameState` owns the selected Commander, four-slot unique `ArmyLoadout`, match seed and current `DraftSystem`.
+
+`DraftSystem` owns draft legality and progression: selection points, unit counts, Buff stacks, Commander skill-use limits, seeded offer generation and auto-selection. The draft UI only displays and invokes this state.
+
+Commander theme completion is calculated from equipped card definitions and their `set_id`. It is not hardcoded to four permanently named card IDs.
 
 ## Determinism requirement
 
-Randomized simulation must use a match seed. A battle should be reproducible from the same game state, content version, and seed.
+All randomized gameplay systems accept/store an explicit match seed. A match should be reproducible from the same game state, content version and seed.
 
 ## Combat/presentation boundary
 
-Future combat code should emit plain battle events such as attack, damage, defeat or ability-triggered. Visual scenes consume these events and animate them. Animations do not decide damage.
+Combat code must emit plain battle events such as attack, damage, defeat, ability trigger or skill resolution. Visual scenes consume those events and animate them. Animations never decide damage.
 
 ## Multiplayer future-proofing
 
-Phase 1 is local player vs AI. Match orchestration should avoid assuming the opponent is always local AI so a future online provider can be added without rewriting combat rules. No multiplayer backend is to be built until explicitly approved.
+The first target is local player vs AI. Match orchestration should avoid assuming the opponent is always local AI so a future online provider can be added without rewriting draft/combat rules. No multiplayer backend is built until explicitly approved.

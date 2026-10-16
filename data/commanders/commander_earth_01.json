@@ -4,5 +4,25 @@
   "display_name": "Earth Commander",
   "element": "earth",
   "signature_set_id": "set_earth_01",
-  "status": "placeholder"
+  "status": "playtest",
+  "active_skill": {
+    "id": "plant_summon",
+    "display_name": "Plant Summon",
+    "uses_per_match": 2,
+    "uses_per_round": 1,
+    "selection_cost": 1,
+    "timing": "pre_battle",
+    "duration": "round",
+    "plant_count": 6,
+    "spawn": "random_valid_enemy_field",
+    "plant": {
+      "health": 450,
+      "defense": 20,
+      "attack_interval": 1.5,
+      "range": 5,
+      "seed_target_max_hp_pct": 8,
+      "damage_reduced_by_def": true,
+      "stationary": true
+    }
+  }
 }

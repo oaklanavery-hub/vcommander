@@ -2,20 +2,37 @@ extends SceneTree
 
 const SetBonusCheckerScript = preload("res://scripts/commanders/set_bonus_checker.gd")
 
+var _failed := false
+
+func _card(card_id: String, set_id: String) -> Dictionary:
+    return {"id": card_id, "set_id": set_id}
+
 func _init() -> void:
-    var required := ["a", "b", "c", "d"]
+    var fire_four := [
+        _card("a", "fire"),
+        _card("b", "fire"),
+        _card("c", "fire"),
+        _card("d", "fire")
+    ]
+    var mixed := [
+        _card("a", "fire"),
+        _card("b", "fire"),
+        _card("c", "fire"),
+        _card("x", "water")
+    ]
 
-    _assert(SetBonusCheckerScript.progress(["a", "b"], required) == 2, "2/4 progress should equal 2")
-    _assert(not SetBonusCheckerScript.is_complete(["a", "b", "c"], required), "3/4 must not activate")
-    _assert(SetBonusCheckerScript.is_complete(["a", "b", "c", "d"], required), "4/4 must activate")
-    _assert(SetBonusCheckerScript.is_complete(["d", "b", "a", "c"], required), "order must not matter")
-    _assert(not SetBonusCheckerScript.is_complete(["a", "b", "c", "x"], required), "wrong fourth card must not activate")
+    _assert(SetBonusCheckerScript.progress(fire_four, "fire") == 4, "four themed cards should show 4/4 progress")
+    _assert(SetBonusCheckerScript.is_complete(fire_four, "fire", 4), "any four cards from the Commander theme should activate")
+    _assert(SetBonusCheckerScript.progress(mixed, "fire") == 3, "mixed Army should show only matching theme progress")
+    _assert(not SetBonusCheckerScript.is_complete(mixed, "fire", 4), "mixed fourth card must prevent activation")
+    _assert(not SetBonusCheckerScript.is_complete(fire_four.slice(0, 3), "fire", 4), "three cards must not activate")
 
-    print("SetBonusChecker tests passed.")
-    quit(0)
+    if not _failed:
+        print("SetBonusChecker tests passed.")
+    quit(1 if _failed else 0)
 
 func _assert(condition: bool, message: String) -> void:
     if condition:
         return
+    _failed = true
     push_error("TEST FAILED: %s" % message)
-    quit(1)

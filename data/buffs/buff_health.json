@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "id": "buff_health",
+  "display_name": "Health Boost",
+  "stat": "health",
+  "percentage": 25,
+  "max_stacks": 3,
+  "stacking": "multiplicative",
+  "status": "playtest"
+}
