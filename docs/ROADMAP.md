@@ -1,6 +1,6 @@
 # Roadmap
 
-## v0.0 — Foundation
+## v0.0 — Foundation ✅
 
 - Repository structure
 - Godot 4.7 project
@@ -13,7 +13,7 @@
 - Automated data validation
 - CI and GitHub Pages workflow
 
-## v0.1 — Commander and content system
+## v0.1 — Commander and content system — in progress
 
 - Commander selection
 - Content browser/debug view
