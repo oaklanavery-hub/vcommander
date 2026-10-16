@@ -4,7 +4,7 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**Phase 0 — Project Foundation**
+**v0.1 — Commander & Content System (in development)**
 
 The first playable design target is deliberately small:
 
@@ -41,4 +41,4 @@ Read these before changing gameplay:
 
 ## Local start
 
-Open `project.godot` using Godot 4.7 stable and run the project. Phase 0 displays a foundation/status screen and validates that the starter data can be loaded.
+Open `project.godot` using Godot 4.7 stable and run the project. The current build opens the placeholder Commander selection screen and loads all Commander/card/set information from `data/`.
