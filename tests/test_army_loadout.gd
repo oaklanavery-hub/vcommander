@@ -2,6 +2,8 @@ extends SceneTree
 
 const ArmyLoadoutScript = preload("res://scripts/army/army_loadout.gd")
 
+var _failed := false
+
 func _init() -> void:
     var army = ArmyLoadoutScript.new(4)
 
@@ -22,11 +24,12 @@ func _init() -> void:
     army.clear()
     _assert(army.size() == 0, "clear should empty the Army")
 
-    print("ArmyLoadout tests passed.")
-    quit(0)
+    if not _failed:
+        print("ArmyLoadout tests passed.")
+    quit(1 if _failed else 0)
 
 func _assert(condition: bool, message: String) -> void:
     if condition:
         return
+    _failed = true
     push_error("TEST FAILED: %s" % message)
-    quit(1)
