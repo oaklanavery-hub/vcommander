@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "id": "game_balance_phase0",
+  "status": "placeholder",
+  "notes": "No final balance values are approved in Phase 0. Card stats exist only to validate the data pipeline."
+}
