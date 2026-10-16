@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "id": "commander_earth_01",
+  "display_name": "Earth Commander",
+  "element": "earth",
+  "signature_set_id": "set_earth_01",
+  "status": "placeholder"
+}

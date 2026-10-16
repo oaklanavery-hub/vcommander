@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "id": "commander_water_01",
+  "display_name": "Water Commander",
+  "element": "water",
+  "signature_set_id": "set_water_01",
+  "status": "placeholder"
+}
