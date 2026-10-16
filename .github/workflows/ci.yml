@@ -35,4 +35,4 @@ jobs:
         run: godot --headless --path . --script tests/test_army_loadout.gd
 
       - name: Run Draft System tests
-        run: godot --headless --path . --script tests/test_draft_system.gd
+        run: timeout 30s godot --headless --path . --script tests/test_draft_system.gd
