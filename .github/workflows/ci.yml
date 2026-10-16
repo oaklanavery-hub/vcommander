@@ -30,3 +30,6 @@ jobs:
 
       - name: Run set bonus tests
         run: godot --headless --path . --script tests/test_set_bonus_checker.gd
+
+      - name: Run Army loadout tests
+        run: godot --headless --path . --script tests/test_army_loadout.gd

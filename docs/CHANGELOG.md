@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- v0.2 four-slot Army Builder.
+- Reusable `ArmyLoadout` state with four-card capacity enforcement.
+- Shared `GameState` for selected Commander and equipped Army.
+- Signature-set progress display and generic 4/4 Commander bonus activation state.
+- Army loadout automated tests.
 - v0.1 placeholder Commander selection screen.
 - Data-driven Commander list and signature-set previews.
 - Content database lookup helpers for Commanders, sets and cards.
