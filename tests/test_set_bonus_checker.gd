@@ -2,6 +2,8 @@ extends SceneTree
 
 const SetBonusCheckerScript = preload("res://scripts/commanders/set_bonus_checker.gd")
 
+var _failed := false
+
 func _card(card_id: String, set_id: String) -> Dictionary:
     return {"id": card_id, "set_id": set_id}
 
@@ -25,11 +27,12 @@ func _init() -> void:
     _assert(not SetBonusCheckerScript.is_complete(mixed, "fire", 4), "mixed fourth card must prevent activation")
     _assert(not SetBonusCheckerScript.is_complete(fire_four.slice(0, 3), "fire", 4), "three cards must not activate")
 
-    print("SetBonusChecker tests passed.")
-    quit(0)
+    if not _failed:
+        print("SetBonusChecker tests passed.")
+    quit(1 if _failed else 0)
 
 func _assert(condition: bool, message: String) -> void:
     if condition:
         return
+    _failed = true
     push_error("TEST FAILED: %s" % message)
-    quit(1)
