@@ -2,6 +2,8 @@ extends SceneTree
 
 const DraftSystemScript = preload("res://scripts/draft/draft_system.gd")
 
+var _failed := false
+
 func _card(card_id: String, summon_amount: int, unit_cap: int) -> Dictionary:
     return {
         "id": card_id,
@@ -35,10 +37,11 @@ func _init() -> void:
     for option in draft.current_offer:
         _assert(option.get("type") == "unit", "opening round must be Army-only")
 
-    var first_id := str(draft.current_offer[0].get("id"))
-    _assert(draft.select_offer(0), "unit choice should apply")
-    _assert(draft.get_unit_count(first_id) > 0, "unit choice should add units")
-    _assert(draft.selection_points == 2, "selection should spend one point")
+    if not draft.current_offer.is_empty():
+        var first_id := str(draft.current_offer[0].get("id"))
+        _assert(draft.select_offer(0), "unit choice should apply")
+        _assert(draft.get_unit_count(first_id) > 0, "unit choice should add units")
+        _assert(draft.selection_points == 2, "selection should spend one point")
 
     _assert(draft.use_commander_skill(), "Commander skill should be usable once in the round")
     _assert(not draft.use_commander_skill(), "Commander skill cannot be used twice in one round")
@@ -73,8 +76,9 @@ func _init() -> void:
     for option in normal.current_offer:
         _assert(str(option.get("id")) != "atk", "3/3 buff must leave the offer pool")
 
-    print("DraftSystem tests passed.")
-    quit(0)
+    if not _failed:
+        print("DraftSystem tests passed.")
+    quit(1 if _failed else 0)
 
 func _count_type(options: Array, option_type: String) -> int:
     var count := 0
@@ -86,5 +90,5 @@ func _count_type(options: Array, option_type: String) -> int:
 func _assert(condition: bool, message: String) -> void:
     if condition:
         return
+    _failed = true
     push_error("TEST FAILED: %s" % message)
-    quit(1)
