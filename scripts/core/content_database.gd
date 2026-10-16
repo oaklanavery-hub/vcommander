@@ -44,6 +44,14 @@ func get_all_commanders() -> Array[Dictionary]:
         result.append(commanders[commander_id])
     return result
 
+func get_all_cards() -> Array[Dictionary]:
+    var ids: Array = cards.keys()
+    ids.sort()
+    var result: Array[Dictionary] = []
+    for card_id in ids:
+        result.append(cards[card_id])
+    return result
+
 func get_cards_by_ids(card_ids: Array) -> Array[Dictionary]:
     var result: Array[Dictionary] = []
     for card_id in card_ids:

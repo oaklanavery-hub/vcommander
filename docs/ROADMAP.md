@@ -13,17 +13,18 @@
 - Automated data validation
 - CI and GitHub Pages workflow
 
-## v0.1 — Commander and content system — in progress
+## v0.1 — Commander and content system ✅
 
 - Commander selection
 - Content browser/debug view
 - Commander data validation in-game
 
-## v0.2 — Army builder
+## v0.2 — Army builder ✅
 
 - Equip exactly four cards
 - Show signature-set progress
 - Activate full-set status at 4/4
+- Keep loadout/set logic outside presentation code
 
 ## v0.3 — Draft prototype
 

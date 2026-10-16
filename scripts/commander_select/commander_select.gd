@@ -6,17 +6,21 @@ extends Control
 @onready var set_name_label: Label = $Margin/Main/DetailPanel/Padding/Details/SetName
 @onready var cards_grid: GridContainer = $Margin/Main/DetailPanel/Padding/Details/CardsGrid
 @onready var bonus_label: Label = $Margin/Main/DetailPanel/Padding/Details/Bonus
+@onready var build_army_button: Button = $Margin/Main/DetailPanel/Padding/Details/BuildArmy
 
 var commander_buttons: Dictionary = {}
 var selected_commander_id := ""
 
 func _ready() -> void:
+    build_army_button.pressed.connect(_open_army_builder)
+
     var summary := ContentDatabase.get_summary()
     if not summary.get("ok", false):
         commander_name.text = "Content data failed to load"
         element_label.text = "Check the Godot output log."
         set_name_label.text = ""
         bonus_label.text = "\n".join(summary.get("errors", []))
+        build_army_button.disabled = true
         return
 
     _populate_commanders()
@@ -25,6 +29,7 @@ func _populate_commanders() -> void:
     var all_commanders := ContentDatabase.get_all_commanders()
     if all_commanders.is_empty():
         commander_name.text = "No Commanders found"
+        build_army_button.disabled = true
         return
 
     for commander in all_commanders:
@@ -40,7 +45,10 @@ func _populate_commanders() -> void:
         commander_buttons[commander_id] = button
         commander_row.add_child(button)
 
-    _select_commander(str(all_commanders[0].get("id", "")))
+    var initial_id := GameState.selected_commander_id
+    if initial_id.is_empty() or ContentDatabase.get_commander(initial_id).is_empty():
+        initial_id = str(all_commanders[0].get("id", ""))
+    _select_commander(initial_id)
 
 func _select_commander(commander_id: String) -> void:
     var commander := ContentDatabase.get_commander(commander_id)
@@ -48,6 +56,9 @@ func _select_commander(commander_id: String) -> void:
         return
 
     selected_commander_id = commander_id
+    GameState.select_commander(commander_id)
+    build_army_button.disabled = false
+
     for id in commander_buttons:
         commander_buttons[id].button_pressed = str(id) == selected_commander_id
 
@@ -67,7 +78,7 @@ func _select_commander(commander_id: String) -> void:
 
     var bonus: Dictionary = signature_set.get("bonus", {})
     if str(bonus.get("status", "")) == "design_pending":
-        bonus_label.text = "Full-set Commander Bonus: design pending. It will activate only when all 4 signature cards are equipped."
+        bonus_label.text = "Full-set Commander Bonus: design pending. It activates only when all 4 signature cards are equipped."
     else:
         bonus_label.text = "Full-set Commander Bonus configured."
 
@@ -118,3 +129,9 @@ func _make_card_preview(card: Dictionary) -> Control:
 func _clear_cards() -> void:
     for child in cards_grid.get_children():
         child.queue_free()
+
+func _open_army_builder() -> void:
+    if selected_commander_id.is_empty():
+        return
+    GameState.select_commander(selected_commander_id)
+    get_tree().change_scene_to_file("res://scenes/army_builder/army_builder.tscn")

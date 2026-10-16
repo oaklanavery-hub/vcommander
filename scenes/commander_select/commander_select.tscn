@@ -35,7 +35,7 @@ text = "Choose Your Commander"
 [node name="Subtitle" type="Label" parent="Margin/Main"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "v0.1 • Commander & Content System"
+text = "v0.2 • Commander selection → Army Builder"
 
 [node name="CommanderRow" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
@@ -86,5 +86,10 @@ autowrap_mode = 2
 
 [node name="NextStep" type="Label" parent="Margin/Main/DetailPanel/Padding/Details"]
 layout_mode = 2
-text = "Army equipping and 0/4 → 4/4 set progress arrive in v0.2."
+text = "Choose a Commander, then continue to build a four-card Army."
 autowrap_mode = 2
+
+[node name="BuildArmy" type="Button" parent="Margin/Main/DetailPanel/Padding/Details"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "Build Army →"
