@@ -4,15 +4,18 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.1 — Commander & Content System (in development)**
+**v0.2 — Army Builder**
 
-The first playable design target is deliberately small:
+The current prototype supports:
 
 - 3 starter elements: Fire, Water, Earth
 - 1 starter Commander per element
 - 4 signature Army cards per Commander
-- A full 4-card signature set activates that Commander's set bonus
-- Player vs AI first; online multiplayer is not part of the initial prototype
+- Commander selection loaded from JSON
+- A four-slot Army Builder using the full starter card pool
+- Live signature-set progress from `0/4` to `4/4`
+- A generic Commander Bonus ACTIVE state when the full signature set is equipped
+- Player vs AI remains the first match target; drafting and combat are not implemented yet
 
 Gameplay values and names in `data/` are placeholders unless explicitly approved in `docs/GAME_RULES.md`.
 
@@ -41,4 +44,4 @@ Read these before changing gameplay:
 
 ## Local start
 
-Open `project.godot` using Godot 4.7 stable and run the project. The current build opens the placeholder Commander selection screen and loads all Commander/card/set information from `data/`.
+Open `project.godot` using Godot 4.7 stable and run the project. Choose a Commander, open the Army Builder, equip four cards, and observe signature-set progress and bonus activation.

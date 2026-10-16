@@ -19,7 +19,7 @@
 - Content browser/debug view
 - Commander data validation in-game
 
-## v0.2 — Army builder — in progress
+## v0.2 — Army builder ✅
 
 - Equip exactly four cards
 - Show signature-set progress
