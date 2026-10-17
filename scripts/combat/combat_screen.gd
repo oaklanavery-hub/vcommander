@@ -9,7 +9,8 @@ extends Control
 @onready var battlefield: BattlefieldView = $Margin/Main/BattlePanel/Padding/Battlefield
 @onready var player_summary: RichTextLabel = $Margin/Main/SummaryRow/PlayerPanel/Padding/PlayerSummary
 @onready var opponent_summary: RichTextLabel = $Margin/Main/SummaryRow/OpponentPanel/Padding/OpponentSummary
-@onready var event_log: RichTextLabel = $Margin/Main/EventPanel/Padding/EventLog
+@onready var event_log: RichTextLabel = $Margin/Main/SummaryRow/EventPanel/Padding/EventLog
+@onready var next_button: Button = $Margin/Main/NextRound
 @onready var result_label: Label = $Margin/Main/Result
 
 var _frames: Array = []
@@ -25,13 +26,16 @@ var _log_lines: Array[String] = []
 
 func _ready() -> void:
     back_button.pressed.connect(_go_back)
+    next_button.pressed.connect(_next_round)
+    next_button.visible = false
+    back_button.text = "Leave match"
     speed_button.pressed.connect(_cycle_speed)
     skip_button.pressed.connect(_skip_to_result)
 
     var result: Dictionary = GameState.battle_result
     if result.is_empty():
-        title_label.text = "No battle preview available"
-        result_label.text = "Return to the Draft and finish the opening selections first."
+        title_label.text = "No battle available"
+        result_label.text = "Return to the Army Builder to start a match."
         set_process(false)
         return
 
@@ -48,7 +52,7 @@ func _ready() -> void:
     if not _frames.is_empty():
         battlefield.set_frame(_frames[0])
 
-    title_label.text = "Battle 1 • The Verdant Crossing"
+    title_label.text = "Battle %d • %s" % [GameState.match_state.round_number, "SUDDEN DEATH" if GameState.match_state.sudden_death else "The Verdant Crossing"]
     _refresh_summaries()
     _update_speed_label()
     _update_timer_label()
@@ -136,6 +140,8 @@ func _side_summary(title: String, side_config: Dictionary) -> String:
         var commander: Dictionary = side_config.get("commander", {})
         var skill: Dictionary = commander.get("active_skill", {})
         lines.append("Commander Skill: %s" % str(skill.get("display_name", "Active")))
+    for buff in side_config.get("buffs", []):
+        lines.append("%s ×%d" % [str(buff.get("definition", {}).get("display_name", "Buff")), int(buff.get("stacks", 0))])
     return "\n".join(lines)
 
 func _update_timer_label() -> void:
@@ -172,6 +178,25 @@ func _finish_replay() -> void:
         result_label.text = "DRAW • %s" % reason
     speed_button.disabled = true
     skip_button.disabled = true
+    var match_info = GameState.match_state
+    result_label.text += " • Round losses: You %d | Rival %d" % [int(match_info.losses["player"]), int(match_info.losses["opponent"])]
+    if match_info.is_complete():
+        result_label.text = "MATCH WON!" if match_info.winner == "player" else "MATCH LOST • A new strategy awaits"
+        next_button.text = "Choose a new Commander"
+    else:
+        next_button.text = "Continue to %sRound %d" % ["Sudden Death • " if match_info.sudden_death else "", match_info.round_number + 1]
+    next_button.visible = true
 
 func _go_back() -> void:
-    get_tree().change_scene_to_file("res://scenes/draft/draft.tscn")
+    GameState.leave_match()
+    get_tree().change_scene_to_file("res://scenes/army_builder/army_builder.tscn")
+
+func _next_round() -> void:
+    next_button.disabled = true
+    if GameState.match_state.is_complete():
+        GameState.leave_match()
+        get_tree().change_scene_to_file("res://scenes/commander_select/commander_select.tscn")
+    elif GameState.begin_next_round():
+        get_tree().change_scene_to_file("res://scenes/draft/draft.tscn")
+    else:
+        next_button.disabled = false

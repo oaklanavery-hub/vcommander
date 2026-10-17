@@ -25,3 +25,7 @@ window/stretch/mode="canvas_items"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.055, 0.059, 0.075, 1)
+
+[gui]
+
+theme/custom="res://assets/ui/fantasy_theme.tres"

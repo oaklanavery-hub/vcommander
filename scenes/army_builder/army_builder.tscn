@@ -47,7 +47,7 @@ text = "Build Your Army"
 
 [node name="Subtitle" type="Label" parent="Margin/Main/Header/HeaderText"]
 layout_mode = 2
-text = "v0.3 • Equip exactly four unique cards from any element"
+text = "Equip exactly four unique cards from any element"
 
 [node name="Commander" type="Label" parent="Margin/Main/Header"]
 layout_mode = 2

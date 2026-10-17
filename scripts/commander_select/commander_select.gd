@@ -89,7 +89,7 @@ func _show_theme_cards(set_id: String) -> void:
 
 func _make_card_preview(card: Dictionary) -> Control:
     var panel := PanelContainer.new()
-    panel.custom_minimum_size = Vector2(245, 165)
+    panel.custom_minimum_size = Vector2(240, 140)
 
     var margin := MarginContainer.new()
     margin.add_theme_constant_override("margin_left", 14)

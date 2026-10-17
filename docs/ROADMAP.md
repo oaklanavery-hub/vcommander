@@ -38,10 +38,11 @@
 - Replace the v0.4 training opponent with strategic PvAI decisions.
 - Original pixel silhouettes, elemental palettes and a decorated meadow battlefield.
 
-## v0.6 — Fire/Water/Earth vertical slice
+## v0.6 — Fire/Water/Earth vertical slice ✅
 - Complete multi-round match loop.
 - Four-loss condition, loser draft bonus and Sudden Death.
 - Full starter content playable.
+- Fantasy UI theme and viewport-tested draft, replay and result screens.
 
 ## v0.7+ — Presentation and balance
 - Pixel-art animation/VFX/audio.

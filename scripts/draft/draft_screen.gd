@@ -29,7 +29,6 @@ func _ready() -> void:
         set_process(false)
         return
 
-    battle_button.text = "Start Battle 1"
     _refresh_all()
 
 func _process(delta: float) -> void:
@@ -49,7 +48,9 @@ func _refresh_all() -> void:
         str(commander.get("display_name", "Commander")),
         GameState.match_seed
     ]
-    round_label.text = "Opening Pre-Battle"
+    var round_number: int = GameState.match_state.round_number
+    round_label.text = "Round %d • %s" % [round_number, "SUDDEN DEATH" if GameState.match_state.sudden_death else "Command Phase"]
+    battle_button.text = "Start Battle %d" % round_number
     selections_label.text = "Selections left: %d" % GameState.draft.selection_points
     timer_label.text = "Pick timer: %02d" % int(ceil(_time_left))
 
@@ -64,7 +65,12 @@ func _refresh_all() -> void:
         footer.text = "Your army is ready. The rival reveals their new picks when battle begins."
         timer_label.text = "Draft complete"
     else:
-        footer.text = "Round 1 is Army-only. Every pick rerolls all three choices."
+        if GameState.match_state.sudden_death:
+            footer.text = "Sudden Death: three selections each. Win a battle outright to win the match."
+        elif GameState.match_state.round_number == 1:
+            footer.text = "Round 1 is Army-only. Every pick rerolls all three choices."
+        else:
+            footer.text = "Armies and buffs persist. All units respawn at full HP each battle."
 
 func _refresh_offer() -> void:
     for child in offer_row.get_children():
@@ -116,6 +122,8 @@ func _refresh_skill(commander: Dictionary) -> void:
         str(skill.get("display_name", "Commander Skill")),
         GameState.draft.commander_skill_uses_remaining()
     ]
+    if GameState.draft.commander_skill_used_this_round:
+        skill_button.text += " • Prepared for battle"
     skill_button.disabled = (
         GameState.draft.is_phase_complete()
         or GameState.draft.commander_skill_used_this_round
@@ -123,7 +131,7 @@ func _refresh_skill(commander: Dictionary) -> void:
     )
 
 func _refresh_summaries() -> void:
-    var army_lines: Array[String] = ["[b]Current Army[/b]"]
+    var army_lines: Array[String] = ["[b]Your Army • %d round losses[/b]" % int(GameState.match_state.losses["player"])]
     for card_id in GameState.army.get_cards():
         var card: Dictionary = ContentDatabase.get_card(card_id)
         army_lines.append("%s  %d/%d" % [
@@ -163,18 +171,15 @@ func _use_commander_skill() -> void:
 
 func _start_battle() -> void:
     battle_button.disabled = true
-    footer.text = "Simulating deterministic Battle 1…"
-    if GameState.run_combat_preview():
+    footer.text = "Preparing battle…"
+    if GameState.run_battle():
         get_tree().change_scene_to_file("res://scenes/combat/combat.tscn")
         return
     battle_button.disabled = false
-    footer.text = "Combat preview could not start. Finish the draft and try again."
+    footer.text = "Battle could not start. Finish the draft and try again."
 
 func _go_back() -> void:
-    GameState.match_started = false
-    GameState.battle_result.clear()
-    GameState.opponent_public_side.clear()
-    GameState.opponent_combat_side.clear()
+    GameState.leave_match()
     get_tree().change_scene_to_file("res://scenes/army_builder/army_builder.tscn")
 
 func _opponent_text() -> String:
@@ -184,7 +189,7 @@ func _opponent_text() -> String:
     var lines: Array[String] = ["[b]Rival • %s[/b]" % str(commander.get("display_name", "Commander"))]
     for card in side.get("cards", []):
         lines.append("%s ×%d" % [str(card.get("display_name", "Unit")), int(side.get("unit_counts", {}).get(card.get("id"), 0))])
-    lines.append("Skill uses: %d/2 • Losses: 0/4" % int(side.get("skill_uses_remaining", 2)))
+    lines.append("Skill uses: %d/2 • Losses: %d" % [int(side.get("skill_uses_remaining", 2)), int(GameState.match_state.losses["opponent"])])
     lines.append("Theme: +%s%% %s" % [str(bonus.get("percentage", 0)), str(bonus.get("stat", "inactive"))])
     for buff in side.get("buffs", []):
         lines.append("%s ×%d" % [str(buff.get("definition", {}).get("display_name", "Buff")), int(buff.get("stacks", 0))])

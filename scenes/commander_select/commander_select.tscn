@@ -16,16 +16,16 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 56.0
-offset_top = 42.0
-offset_right = -56.0
-offset_bottom = -42.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Main" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 18
+theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="Margin/Main"]
 layout_mode = 2
@@ -35,7 +35,7 @@ text = "Choose Your Commander"
 [node name="Subtitle" type="Label" parent="Margin/Main"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "v0.2 • Commander selection → Army Builder"
+text = "Build a warband. Draft reinforcements. Lead it to victory."
 
 [node name="CommanderRow" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
@@ -51,13 +51,13 @@ size_flags_vertical = 3
 [node name="Padding" type="MarginContainer" parent="Margin/Main/DetailPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 22
+theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 22
+theme_override_constants/margin_bottom = 14
 
 [node name="Details" type="VBoxContainer" parent="Margin/Main/DetailPanel/Padding"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="CommanderName" type="Label" parent="Margin/Main/DetailPanel/Padding/Details"]
 layout_mode = 2
