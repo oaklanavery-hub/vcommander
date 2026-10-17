@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.7.4 — Battle presentation
+
+- Each battle starts at 1×; removed result skipping.
+- Separate pre-battle Commander skill playback holds armies and the battle clock until both selected skills finish.
+- Before/after skill snapshots, pause/clock tests and normal result-completion coverage.
+- Pitcher Plant vines extend, grab, drag and retract using authoritative before/after pull positions.
+- Content-driven arrows, fireballs, dragon flames, water orbs, ice shards and seed shots with interpolated motion and distinct impact effects.
+- Attack anticipation/lunge/recovery and sprouting Commander plants; richer meteor and freezing openings.
+- Seventeen new original physical/magic SFX, per-cue throttling and twelve effect voices so different simultaneous actions remain audible.
+- Presentation/profile/audio validation and native captures covering all three openings, six projectile styles and three vine phases.
+
 ## v0.7.3 — Detailed pixel fantasy artwork
 
 - Three distinct original Commander designs: fire battlemage, tide spellcaster and forest warden, at 128×192 native pixels.

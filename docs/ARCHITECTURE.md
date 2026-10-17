@@ -89,7 +89,7 @@ The simulator also emits periodic position/HP frames for the temporary combat re
 
 `MatchState` is a headless rules/state machine: draft → battle → result → next draft, or complete. It owns round-loss counts, comeback allowances, Sudden Death and small battle-history summaries. Battle resolution is guarded so revisiting a replay cannot charge a second loss. Both fourth losses in a draw trigger repeated three-selection Sudden Death rounds until an outright winner.
 
-`GameState` assembles fresh combat inputs from the persistent player/AI drafts, uses a separate deterministic seed per round, and scores the simulator result immediately. Replay timing, skip and animation never alter outcomes. The UI advances to the next draft only after replay completion. All accumulated units are respawned by each new simulator instance; temporary combat statuses and summoned plants do not enter persistent draft counts.
+`GameState` assembles fresh combat inputs from the persistent player/AI drafts, uses a separate deterministic seed per round, and scores the simulator result immediately. Replay timing and animation never alter outcomes. The UI advances to the next draft only after replay completion. All accumulated units are respawned by each new simulator instance; temporary combat statuses and summoned plants do not enter persistent draft counts.
 
 ## AI information boundary
 
@@ -126,3 +126,13 @@ Projectiles advance through fixed simulation steps with swept collision against 
 `PixelAtlasArt` maps presentation IDs to cached `AtlasTexture` regions using `assets/pixel/art_manifest.json`. The original generated artwork is packed with nearest-neighbor sampling into 128×192 Commander and 64×64 unit cells, with transparent gutters and a common unit foot baseline. The same unit frames feed cards, roster summaries and battlefield rendering. The earlier editable palette catalogs remain safe fallbacks for unmapped content.
 
 The detailed battlefield renderer preserves directional lean, four-step movement, attack facing, hit feedback and death fade as procedural presentation. These are not separately hand-drawn animation frames and never decide hit timing or outcomes. See `assets/pixel/CREDITS.md` for provenance and prompts and `tools/pack_pixel_art.py` for the reviewed crop/packing recipe.
+
+## Pre-battle skill presentation
+
+`CombatSimulator` records the before/after snapshots and event range around its existing simultaneous pre-battle skill resolution. `BattlePrelude` schedules those read-only events on a separate presentation clock. The combat scene keeps replay time at zero until that sequence finishes, then begins the existing battle frames at 1×. Pausing also holds the opening sequence. Animation never re-runs effects or changes scored outcomes. Results appear only after normal playback completes; there is no result-skip control.
+
+## Combat cues and visual effects
+
+`CombatCues` reads role-appropriate projectile, motion and sound assignments from `data/presentation/combat_cues.json`. `BattleEffects` draws pixel arrows, flames, water/ice/seed shots, impact particles and the two-strand leafy vine. Pull animation consumes recorded before/after endpoints and temporarily overrides only displayed positions/HP; it settles at the current authoritative frame. Attack anticipation, strikes and recovery remain cosmetic.
+
+`BattleAudio` maps events to distinct cues with independent real-time cooldowns and a burst budget. Commander cues retain priority; the shared twelve-voice audio pool favors idle voices. The seventeen additional original effects are reproducible from `tools/compose_battle_sfx.py`. CI validates profiles/WAV integrity, all suites and dedicated native opening/projectile/vine captures.

@@ -7,7 +7,6 @@ const AudioScript = preload("res://scripts/presentation/battle_audio.gd")
 @onready var seed_label: Label = $Margin/Main/Header/Seed
 @onready var battle_timer: Label = $Margin/Main/StatusRow/BattleTimer
 @onready var speed_button: Button = $Margin/Main/StatusRow/Speed
-@onready var skip_button: Button = $Margin/Main/StatusRow/Skip
 @onready var battlefield: BattlefieldView = $Margin/Main/BattlePanel/Padding/Battlefield
 @onready var player_summary: RichTextLabel = $Margin/Main/SummaryRow/PlayerPanel/Padding/PlayerSummary
 @onready var opponent_summary: RichTextLabel = $Margin/Main/SummaryRow/OpponentPanel/Padding/OpponentSummary
@@ -28,10 +27,10 @@ var _duration := 0.0
 var _frame_index := 0
 var _event_index := 0
 var _speed_options: Array[float] = [1.0, 2.0, 4.0]
-var _speed_index := 1
+var _speed_index := 0
 var _finished := false
 var _paused := false
-var _skipping := false
+var _prelude := BattlePrelude.new()
 var _audio = AudioScript.new()
 var _log_lines: Array[String] = []
 
@@ -54,7 +53,6 @@ func _ready() -> void:
     next_button.visible = false
     back_button.text = "Leave match"
     speed_button.pressed.connect(_cycle_speed)
-    skip_button.pressed.connect(_skip_to_result)
 
     var result: Dictionary = GameState.battle_result
     if result.is_empty():
@@ -66,6 +64,10 @@ func _ready() -> void:
     _frames = result.get("frames", [])
     _events = result.get("events", [])
     _duration = float(result.get("duration", 0.0))
+    _prelude = BattlePrelude.new(result.get("pre_battle", {}))
+    if _prelude.active():
+        _event_index = _prelude.event_end
+        speed_button.disabled = true
     seed_label.text = "Seed %d" % int(result.get("seed", GameState.match_seed))
 
     var field: Dictionary = result.get("battlefield", {})
@@ -81,10 +83,16 @@ func _ready() -> void:
     _refresh_summaries()
     _update_speed_label()
     _update_timer_label()
-    result_label.text = "Battle in progress…"
+    result_label.text = "Commander skills • Armies hold position" if _prelude.active() else "Battle in progress…"
+    if _prelude.active():
+        _advance_prelude(0.0)
 
 func _process(delta: float) -> void:
     if _finished or _paused:
+        return
+
+    if _prelude.active():
+        _advance_prelude(delta)
         return
 
     _playback_time = minf(
@@ -97,6 +105,28 @@ func _process(delta: float) -> void:
 
     if _playback_time + 0.001 >= _duration:
         _finish_replay()
+
+func _advance_prelude(delta: float) -> void:
+    var events := _prelude.advance(delta)
+    var frame := _prelude.frame()
+    battlefield.set_playback(frame, frame, 0.0, _prelude.elapsed)
+    battlefield.prelude_skills = _prelude.skills if _prelude.active() else []
+    battlefield.prelude_time = _prelude.elapsed
+    for event in events:
+        battlefield.consume_event(event)
+        _audio.consume_event(event)
+        var line := _format_event(event)
+        if not line.is_empty():
+            _log_lines.append(line)
+    event_log.text = "\n".join(_log_lines)
+    battle_timer.text = "Pre-battle • Commander skills"
+    if not _prelude.active():
+        battlefield.finish_replay()
+        battlefield.prelude_skills = []
+        battlefield.set_frame(_frames[0] if not _frames.is_empty() else frame)
+        speed_button.disabled = false
+        result_label.text = "Battle in progress…"
+        _update_timer_label()
 
 func _advance_frames() -> void:
     while _frame_index + 1 < _frames.size():
@@ -117,7 +147,7 @@ func _advance_events() -> void:
             break
         _event_index += 1
         battlefield.consume_event(event)
-        if not _skipping and _playback_time - float(event.get("time", 0)) < 0.15:
+        if _playback_time - float(event.get("time", 0)) < 0.15:
             _audio.consume_event(event)
         var line := _format_event(event)
         if not line.is_empty():
@@ -183,19 +213,10 @@ func _update_speed_label() -> void:
     speed_button.text = "Battle speed: %dx" % int(_speed_options[_speed_index])
 
 func _cycle_speed() -> void:
+    if _prelude.active() or _finished:
+        return
     _speed_index = (_speed_index + 1) % _speed_options.size()
     _update_speed_label()
-
-func _skip_to_result() -> void:
-    _skipping = true
-    _audio.stop_all()
-    _playback_time = _duration
-    if not _frames.is_empty():
-        _frame_index = _frames.size() - 1
-        battlefield.set_playback(_frames[_frame_index], _frames[_frame_index], 0.0, _playback_time)
-    _advance_events()
-    _update_timer_label()
-    _finish_replay()
 
 func _finish_replay() -> void:
     if _finished:
@@ -213,7 +234,6 @@ func _finish_replay() -> void:
         result_label.text = "A draw. Both Commanders lose a heart."
     pause_button.disabled = true
     speed_button.disabled = true
-    skip_button.disabled = true
     var match_info = GameState.match_state
     if winner == "draw" and match_info.sudden_death:
         result_label.text = "Sudden Death! Win the next battle outright."
@@ -284,7 +304,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
         return
     if event.keycode == KEY_SPACE:
         _toggle_pause()
-    elif event.keycode in [KEY_1, KEY_2, KEY_4]:
+    elif event.keycode in [KEY_1, KEY_2, KEY_4] and not _prelude.active() and not _finished:
         _speed_index = {KEY_1: 0, KEY_2: 1, KEY_4: 2}[event.keycode]
         _update_speed_label()
     elif event.keycode == KEY_M:

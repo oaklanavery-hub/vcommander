@@ -52,6 +52,14 @@ jobs:
           test -s build/qa/battle.png
           test -s build/qa/combat_effects.png
           test -s build/qa/result.png
+          timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_battle_fx.gd -- --output-dir=build/qa 2>&1 | tee /tmp/battle-fx-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/battle-fx-qa.log; then
+            exit 1
+          fi
+          test -s build/qa/prebattle_fire.png
+          test -s build/qa/prebattle_water.png
+          test -s build/qa/prebattle_earth.png
+          test -s build/qa/vine_drag.png
 
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4

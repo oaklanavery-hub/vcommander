@@ -57,7 +57,9 @@ func run() -> void:
     current_scene._advance_events()
     current_scene._paused = true
     await save_image("combat_effects")
-    current_scene._skip_to_result()
+    current_scene._paused = false
+    current_scene._process(BattlePrelude.DURATION)
+    current_scene._process(current_scene._duration + 1.0)
     await save_image("result")
     print("Visual captures saved: ", output_dir)
     quit(0)

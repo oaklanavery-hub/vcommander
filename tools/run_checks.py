@@ -22,6 +22,7 @@ def run(command, timeout=90):
 if not args.pack:
     run([sys.executable, 'tools/validate_data.py'])
     run([sys.executable, 'tools/validate_art.py'])
+    run([sys.executable, 'tools/validate_presentation.py'])
     run([args.godot, '--headless', '--path', '.', '--editor', '--quit'])
 for test in sorted((ROOT / 'tests').glob('test_*.gd')):
     command = [args.godot, '--headless']

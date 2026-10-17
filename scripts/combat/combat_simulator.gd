@@ -17,6 +17,7 @@ var _projectile_sequence := 0
 var _area_effects: Array[Dictionary] = []
 var _pending_damage: Array[Dictionary] = []
 var _pending_heal: Array[Dictionary] = []
+var _pre_battle: Dictionary = {}
 
 var _time := 0.0
 var _step := 0.1
@@ -50,7 +51,11 @@ func simulate(
 
     _spawn_side(player_side, false)
     _spawn_side(opponent_side, true)
+    var before_skills := _snapshot()
+    var skill_event_start := _events.size()
     _resolve_pre_battle_skills(player_side, opponent_side)
+    if _events.size() > skill_event_start:
+        _pre_battle = {"before": before_skills, "after": _snapshot(), "events": _events.slice(skill_event_start).duplicate(true), "event_end": _events.size()}
     _capture_frame(true)
 
     var immediate_result: String = _elimination_result()
@@ -86,6 +91,7 @@ func _reset(battle_seed: int, balance: Dictionary) -> void:
     _area_effects.clear()
     _pending_damage.clear()
     _pending_heal.clear()
+    _pre_battle.clear()
     _time = 0.0
     _next_frame_time = 0.0
 
@@ -601,6 +607,7 @@ func _tick_pull_unit(unit: Dictionary, target: Dictionary, ability: Dictionary) 
         and distance > 1.0 + EPSILON
         and float(unit.get("ability_cooldown", 0.0)) <= EPSILON
     ):
+        var pull_from := _unit_position(target)
         var direction := (_unit_position(unit) - _unit_position(target)).normalized()
         var desired := _unit_position(unit) - direction * 0.9
         _displace_unit(target, desired)
@@ -610,7 +617,11 @@ func _tick_pull_unit(unit: Dictionary, target: Dictionary, ability: Dictionary) 
             "unit_id": str(unit.get("id", "")),
             "target_id": str(target.get("id", "")),
             "ability": str(ability.get("display_name", "Pull")),
-            "kind": "pull"
+            "kind": "pull",
+            "source_x": float(unit["x"]), "source_y": float(unit["y"]),
+            "from_hp": float(target["hp"]),
+            "from_x": pull_from.x, "from_y": pull_from.y,
+            "to_x": float(target["x"]), "to_y": float(target["y"])
         }))
         distance = _unit_position(unit).distance_to(_unit_position(target))
 
@@ -682,7 +693,10 @@ func _perform_attack(attacker: Dictionary, target: Dictionary) -> void:
         "side": side_id,
         "unit_id": attacker_id,
         "target_id": target_id,
-        "kind": "ranged" if _is_ranged(attacker) else "melee"
+        "kind": "ranged" if _is_ranged(attacker) else "melee",
+        "card_id": str(attacker.get("card_id", "")),
+        "x": float(attacker.get("x", 0)), "y": float(attacker.get("y", 0)),
+        "target_x": float(target.get("x", 0)), "target_y": float(target.get("y", 0))
     }))
 
     if _is_ranged(attacker):
@@ -690,9 +704,11 @@ func _perform_attack(attacker: Dictionary, target: Dictionary) -> void:
         _projectiles.append({
             "id": _projectile_sequence,
             "launched_at": _time,
+            "start_x": float(attacker.get("x", 0.0)), "start_y": float(attacker.get("y", 0.0)),
             "x": float(attacker.get("x", 0.0)),
             "y": float(attacker.get("y", 0.0)),
             "element": str(attacker.get("element", "earth")),
+            "card_id": str(attacker.get("card_id", "")),
             "source_id": attacker_id,
             "source_side": side_id,
             "target_id": target_id,
@@ -752,6 +768,13 @@ func _tick_projectiles() -> void:
 
         _queue_raw_damage(target_id, raw_damage, source_side, source_id, "projectile")
         var impact_position := _unit_position(target)
+        _events.append(BattleEventScript.make("projectile_impact", _time, {
+            "projectile_id": int(projectile.get("id", 0)),
+            "source_unit_id": source_id, "target_id": target_id,
+            "card_id": str(projectile.get("card_id", "")),
+            "element": str(projectile.get("element", "earth")),
+            "x": impact_position.x, "y": impact_position.y
+        }))
 
         if ability_type == "ranged_aoe":
             var radius := _radius_from_value(str(ability.get("splash_radius", "small")))
@@ -1257,7 +1280,10 @@ func _elimination_result() -> String:
 func _capture_frame(force: bool) -> void:
     if not force and _time + EPSILON < _next_frame_time:
         return
+    _frames.append(_snapshot())
+    _next_frame_time = _time + _frame_interval
 
+func _snapshot() -> Dictionary:
     var frame_units: Array[Dictionary] = []
     for unit in _units:
         if not bool(unit.get("alive", false)):
@@ -1277,13 +1303,12 @@ func _capture_frame(force: bool) -> void:
             "ability_type": str(unit.get("ability", {}).get("type", "")),
             "aura_radius": _radius_from_value(str(unit.get("ability", {}).get("radius", "small"))) if str(unit.get("ability", {}).get("type", "")).begins_with("aura_") else 0.0
         })
-    _frames.append({
+    return {
         "time": snappedf(_time, 0.001),
         "units": frame_units,
         "projectiles": _projectiles.duplicate(true),
         "areas": _area_effects.duplicate(true)
-    })
-    _next_frame_time = _time + _frame_interval
+    }
 
 
 func _finish_result(winner: String, reason: String) -> Dictionary:
@@ -1298,6 +1323,7 @@ func _finish_result(winner: String, reason: String) -> Dictionary:
         "duration": snappedf(_time, 0.001),
         "events": _events.duplicate(true),
         "frames": _frames.duplicate(true),
+        "pre_battle": _pre_battle.duplicate(true),
         "seed": int(_rng.seed),
         "battlefield": {
             "width": _field_width,

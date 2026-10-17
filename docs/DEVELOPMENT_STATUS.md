@@ -2,7 +2,27 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Detailed pixel fantasy art and interface polish
+## Current task — Battle animation, audio and pre-battle skill playback
+
+- User requests visible stretching/retracting Pitcher Plant vines, projectiles matched to unit roles, additional SFX, each battle starting at 1×, removal of result skipping, and complete Commander skill animations before combat begins.
+- Branch: `feat/battle-effects`, based on main `85acd3a4481dfdbf253ecab6a1495b7ffe0d2466` (v0.7.3 verified and live in PR #14).
+- Preserve all gameplay outcomes, deterministic timing and existing rules. Commander effects already resolve before combat in simulation; add a separate visual prelude that holds the replay clock and armies until the skill presentation finishes. Both selected skills share that prelude.
+- Checkpoint 1: pre-battle replay metadata and presentation clock, default 1×, remove Skip and its code paths; focused timing/flow tests, then save.
+- Checkpoint 2: content-driven projectile/attack visuals, source/target pull endpoints, animated vines and impact feedback, original extra SFX with sensible per-cue throttling; save.
+- Final gate: relevant headless checks, native captures of skills/vines/projectiles, PR CI, Web export and served-pack verification.
+- Checkpoint 1 implemented: simulation exposes immutable before/after skill snapshots and the pre-battle event range. `BattlePrelude` schedules simultaneous skill playback while both armies and the combat clock hold. New replay instances start at 1×; Skip and its method have been removed.
+- Checkpoint 1 passing checks: clean Godot import, `test_battle_presentation.gd` (all three skill types, simultaneous skills, clock hold/pause, exact final snapshot and unchanged outcomes), `test_scene_flow.gd`, `test_combat_simulator.gd`.
+- Checkpoint 1 saved at `1d6de84fe72941339f3d941c946b7849be7f1157`.
+- Checkpoint 2 implemented: two-strand leafy vines with extend/grab/drag/retract phases, exact pull endpoints, six projectile styles with interpolation/impact effects, attack anticipation/lunge/recovery and sprouting plants. Thirteen content-driven profiles and seventeen new original SFX use independent cue cooldowns and twelve effect voices.
+- Passing focused checks: presentation/WAV validation, clean Godot import, battle presentation (including vine endpoint animation, projectile assignments and independent sound throttling), projectile collision, scene flow and player experience/audio coverage.
+- A standalone headless test initially exposed an autoload compile dependency in `BattleAudio`; node lookup in `_ready` corrected it and focused checks now pass. The initial stalled test was bounded at 60s; do not rerun it unchanged.
+- Checkpoint 2 saved at `3edd76cd9e793642ab2d9cf802c0a88258449452` before native FX review.
+- Native review completed: ten standard screens plus twelve dedicated captures covering three skill openings, six projectile styles and vine extension/drag/retraction. Review caught overlapping pulls on one enemy; visual chains now retain the earliest grab position and latest authoritative destination, with both vines following the same displayed target. The corrected vine sequence was rendered and inspected again.
+- Additional checks passed: exact results/durations/semantic combat-event fingerprints match v0.7.3 across three seeded elemental matchups; the next battle resets a manually changed speed to 1×. Enhanced battle-presentation tests pass after the final refinements.
+- Next: publish the final visual-review checkpoint and open the branch PR; require full CI, Web export, exported-pack tests and live served-pack verification. Record run links/deployed identity in that PR before reporting the release live.
+- If interrupted: inspect this branch and its PR/checks, then resume the next unchecked checkpoint. The next major gameplay phase remains a Game Director scope decision.
+
+## Previous task — Detailed pixel fantasy art and interface polish (released v0.7.3)
 
 - User approved v0.7.2 layouts and requested richer character artwork, using a detailed fighting-game portrait as Commander quality reference and smaller fighter sprites as army quality reference. References guide pixel craft and readability; create original fantasy designs.
 - Branch: `feat/fantasy-art`, based on main `f7f9282264cee06bab6a20e46bd8c8672b3499e9` (v0.7.2 deployed and verified in PR #13).
