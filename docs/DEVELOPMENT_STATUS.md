@@ -10,8 +10,11 @@ Verify this handoff against GitHub and the working tree before resuming.
 - Acceptance: full menu → Commander → army → draft → battle → result flow; help/settings and confirmed exit; preference persistence; audio included in exports; readable 1280×720 screens; passing regression suites and deployment checks.
 - Implemented: title/help/settings/pause, safe exit, starter-warband flow, warm forest scenery, card hierarchy, two music loops and nine effects.
 - Local validation: all 13 suites passed with `python3 tools/run_checks.py --godot /workspace/scratch/5d3e19c21d4d/vcommander-tools/Godot_v4.7-stable_linux.x86_64`; final visual captures, fresh-import CI and deployed-pack checks remain pending.
-- Native screenshot setup: local Xvfb dependencies are being prepared; no web-browser visual verification has been claimed.
-- If interrupted: inspect this branch's diff/PR, complete acceptance checks, then publish after CI passes. Record exact results here and in the PR.
+- Native visual review: ten 1280×720 Compatibility-renderer captures inspected (title, help, settings, Commander, warband, draft, pause, battle, effects and result). Fixed a collapsed collection, focused-button contrast and undersized portraits. Added a collection visibility/filter regression check.
+- After those fixes, `tests/test_player_experience.gd` and `tests/test_scene_flow.gd` both passed. Audio files were verified as 40.0s / 34.29s original loops plus nine effects.
+- PR: https://github.com/oaklanavery-hub/vcommander/pull/12 — current checks and final run links are recorded there. The initial head passed CI at https://github.com/oaklanavery-hub/vcommander/actions/runs/39053920966. Final-head CI and post-merge deployment verification must pass before release.
+- No hardware/browser audio audition is claimed; the cloud verification browser lacks WebGL2. Native renders and source/export/deployed-pack tests provide the automated evidence.
+- If interrupted: inspect this branch's diff/PR, complete the current-head CI/visual acceptance checks, then merge. If already merged, verify its Deploy Web run. Do not restart completed gameplay work. Final evidence is in the PR and Actions run for its merge commit.
 
 ## Product scope
 

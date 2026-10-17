@@ -148,7 +148,7 @@ func _make_card_preview(card: Dictionary) -> Control:
     stat_label.queue_free()
 
     var draft_label := Label.new()
-    draft_label.text = "Draft +%s • Cap %s" % [
+    draft_label.text = "Recruit %s • Up to %s" % [
         str(int(card.get("summon_amount", 0))),
         str(int(card.get("unit_cap", 0)))
     ]

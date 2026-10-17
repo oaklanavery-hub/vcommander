@@ -1,6 +1,6 @@
 extends Control
 
-const Backdrop = preload("res://scripts/presentation/forest_backdrop.gd")
+const Backdrop = preload("res://scripts/presentation/pixel_backdrop.gd")
 var play_button: Button
 
 func _ready() -> void:

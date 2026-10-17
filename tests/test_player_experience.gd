@@ -66,6 +66,22 @@ func run() -> void:
     await process_frame
     check(state.army.is_full(), "first-time flow equips a valid starter warband")
     check(not current_scene.begin_draft_button.disabled, "starter warband can begin immediately")
+    await process_frame
+    await process_frame
+    var collection: Control = current_scene.get_node("Margin/Main/CardScroll")
+    check(collection.size.y >= 104, "companion collection remains visible, not collapsed")
+    var visible_cards := 0
+    for button in current_scene.available_card_buttons.values():
+        if button.visible:
+            visible_cards += 1
+    check(visible_cards == 4, "collection initially shows Commander companions")
+    current_scene._toggle_filter()
+    visible_cards = 0
+    for button in current_scene.available_card_buttons.values():
+        if button.visible:
+            visible_cards += 1
+    check(visible_cards == 12, "browse other elements reveals the full collection")
+    current_scene._toggle_filter()
     check(state.begin_match(1729), "starter match can begin")
     var draft = await open_scene("res://scenes/draft/draft.tscn")
     var points: int = state.draft.selection_points

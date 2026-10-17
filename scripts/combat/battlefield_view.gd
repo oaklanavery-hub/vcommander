@@ -67,7 +67,7 @@ func _point(x: float, y: float) -> Vector2:
     return (_arena.position + Vector2(x / _field_width * _arena.size.x, y / _field_height * _arena.size.y)).round()
 
 func _draw() -> void:
-    draw_rect(Rect2(Vector2.ZERO, size), Color("172b32"))
+    draw_rect(Rect2(Vector2.ZERO, size), Color("172d28"))
     var height := maxf(1.0, size.y - 8.0)
     var width := height * _field_width / _field_height
     if width > size.x - 8.0:
@@ -144,7 +144,8 @@ func _draw_rosters() -> void:
             var id_value := str(card.get("id", ""))
             var count := int(config.get("unit_counts", {}).get(id_value, 0))
             draw_texture_rect(UnitArt.icon(id_value, str(card.get("role", "range")), str(card.get("element", "earth"))), Rect2(Vector2(x, y - 27), Vector2(30, 30)), false)
-            draw_string(ThemeDB.fallback_font, Vector2(x + 34, y - 4), "%s ×%d" % [str(card.get("display_name", "Unit")), count], HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 60, 13, Color("eee2c3"))
+            draw_string(ThemeDB.fallback_font, Vector2(x + 34, y - 10), str(card.get("display_name", "Unit")), HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 60, 12, Color("eee2c3"))
+            draw_string(ThemeDB.fallback_font, Vector2(x + 34, y + 8), "Recruited: %d" % count, HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 60, 11, Color("a8b9a5"))
             y += 48
         var bonus: Dictionary = config.get("set_bonus", {})
         var bonus_text := "Theme inactive" if bonus.is_empty() else "+%d%% %s" % [int(bonus.get("percentage", 0)), str(bonus.get("stat", "")).replace("_", " ")]

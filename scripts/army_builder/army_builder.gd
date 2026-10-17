@@ -20,6 +20,10 @@ var _filter_button := Button.new()
 func _ready() -> void:
     ScreenStyle.apply(self)
     ScreenStyle.primary(begin_draft_button)
+    set_progress_label.hide()
+    get_node("Margin/Main/Footer").hide()
+    get_node("Margin/Main").add_theme_constant_override("separation", 8)
+    get_node("Margin/Main/CardScroll").custom_minimum_size.y = 108
     _filter_button.text = "Browse other elements"
     _filter_button.pressed.connect(_toggle_filter)
     var main := get_node("Margin/Main")
@@ -101,6 +105,7 @@ func _refresh_slots() -> void:
             slot.text = str(card.get("display_name", equipped[index])) + "\nIn your warband"
             slot.icon = UnitArt.icon(str(card["id"]), str(card["role"]), str(card["element"]))
             slot.add_theme_constant_override("icon_max_width", 40)
+            slot.expand_icon = true
             slot.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
             slot.tooltip_text = "Click to remove this companion"
             slot.pressed.connect(_unequip_slot.bind(index))
@@ -127,8 +132,10 @@ func _refresh_set_status() -> void:
         bonus_status_label.text = "Commander Bonus INACTIVE — all 4 cards must match this Commander theme"
 
     if GameState.army.is_full():
+        army_status_label.hide()
         army_status_label.text = "Army Ready: 4 / 4 unique cards equipped."
     else:
+        army_status_label.show()
         army_status_label.text = "Choose %d more unique card(s): %d / %d equipped." % [
             GameState.army.max_slots - GameState.army.size(),
             GameState.army.size(),
@@ -148,6 +155,7 @@ func _begin_draft() -> void:
     var requested_seed := seed_input.text.strip_edges()
     if not requested_seed.is_empty():
         if not requested_seed.is_valid_int():
+            army_status_label.show()
             army_status_label.text = "Enter a whole number for the match seed."
             seed_input.grab_focus()
             return

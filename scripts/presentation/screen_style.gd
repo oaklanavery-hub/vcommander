@@ -1,7 +1,7 @@
 class_name ScreenStyle
 extends RefCounted
 
-const Backdrop = preload("res://scripts/presentation/forest_backdrop.gd")
+const Backdrop = preload("res://scripts/presentation/pixel_backdrop.gd")
 
 static func apply(screen: Control) -> void:
     var background := Backdrop.new()
@@ -44,6 +44,8 @@ static func primary(button: Button) -> void:
     button.add_theme_color_override("font_color", Color("302d24"))
     button.add_theme_color_override("font_hover_color", Color("302d24"))
     button.add_theme_color_override("font_pressed_color", Color("302d24"))
+    button.add_theme_color_override("font_focus_color", Color("302d24"))
+    button.add_theme_color_override("font_hover_pressed_color", Color("302d24"))
     button.add_theme_font_size_override("font_size", 20)
 
 static func card(button: Button, element: String) -> void:
@@ -61,6 +63,8 @@ static func card(button: Button, element: String) -> void:
     button.add_theme_stylebox_override("hover", hover)
     button.add_theme_stylebox_override("pressed", hover)
     button.add_theme_constant_override("icon_max_width", 64)
+    button.expand_icon = true
+    button.add_theme_font_size_override("font_size", 18)
 
 static func label(text: String, font_size: int = 18) -> Label:
     var result := Label.new()
