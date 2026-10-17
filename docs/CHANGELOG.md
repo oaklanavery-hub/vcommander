@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.6 — Complete elemental PvAI matches
+
+- Multi-round match state, four-loss condition, comeback selections and repeated Sudden Death.
+- Persistent drafted armies, Buff stacks and skill budgets with fresh battle state each round.
+- Seeded replayable full matches for all three themes and mixed-element armies.
+- Round/result navigation, loss counters, prepared-skill status and fantasy UI theme.
+- Fixed combat event-log scene path and overflowing selection/result layouts.
+- Headless match-rule, full-match and 1280×720 scene-flow regression tests.
+
+
 ## v0.5 — Seeded AI and battlefield art
 
 - Independent legal AI Commander/loadout selection, role-aware draft policy and skill conservation.

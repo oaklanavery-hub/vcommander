@@ -71,7 +71,7 @@ layout_mode = 2
 text = "Skip to Result"
 
 [node name="BattlePanel" type="PanelContainer" parent="Margin/Main"]
-custom_minimum_size = Vector2(0, 360)
+custom_minimum_size = Vector2(0, 260)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -83,7 +83,7 @@ theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
 [node name="Battlefield" type="Control" parent="Margin/Main/BattlePanel/Padding"]
-custom_minimum_size = Vector2(0, 330)
+custom_minimum_size = Vector2(0, 224)
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("2")
@@ -107,7 +107,7 @@ theme_override_constants/margin_bottom = 8
 [node name="PlayerSummary" type="RichTextLabel" parent="Margin/Main/SummaryRow/PlayerPanel/Padding"]
 layout_mode = 2
 bbcode_enabled = true
-fit_content = true
+fit_content = false
 text = "[b]Your Army[/b]"
 
 [node name="OpponentPanel" type="PanelContainer" parent="Margin/Main/SummaryRow"]
@@ -124,7 +124,7 @@ theme_override_constants/margin_bottom = 8
 [node name="OpponentSummary" type="RichTextLabel" parent="Margin/Main/SummaryRow/OpponentPanel/Padding"]
 layout_mode = 2
 bbcode_enabled = true
-fit_content = true
+fit_content = false
 text = "[b]Rival Commander[/b]"
 
 [node name="EventPanel" type="PanelContainer" parent="Margin/Main/SummaryRow"]
@@ -140,11 +140,18 @@ theme_override_constants/margin_bottom = 8
 
 [node name="EventLog" type="RichTextLabel" parent="Margin/Main/SummaryRow/EventPanel/Padding"]
 layout_mode = 2
-fit_content = true
+fit_content = false
 text = "Battle events"
 
 [node name="Result" type="Label" parent="Margin/Main"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 2
 text = "Combat replay running…"
 horizontal_alignment = 1
+
+[node name="NextRound" type="Button" parent="Margin/Main"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Continue to next round"
+visible = false

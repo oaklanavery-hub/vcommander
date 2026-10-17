@@ -3,6 +3,7 @@ extends Node
 const ArmyLoadoutScript = preload("res://scripts/army/army_loadout.gd")
 const SetBonusCheckerScript = preload("res://scripts/commanders/set_bonus_checker.gd")
 const DraftSystemScript = preload("res://scripts/draft/draft_system.gd")
+const MatchScript = preload("res://scripts/core/match_state.gd")
 const AiScript = preload("res://scripts/ai/ai_controller.gd")
 const CombatSimulatorScript = preload("res://scripts/combat/combat_simulator.gd")
 
@@ -11,6 +12,7 @@ var army = ArmyLoadoutScript.new(4)
 var draft = DraftSystemScript.new()
 var match_seed := 0
 var match_started := false
+var match_state = MatchScript.new()
 
 var battle_result: Dictionary = {}
 var opponent = AiScript.new()
@@ -75,7 +77,9 @@ func is_full_set_active() -> bool:
 func begin_match(seed_value: int) -> bool:
     if selected_commander_id.is_empty() or not army.is_full():
         return false
+    _reset_match_runtime()
     match_seed = seed_value
+    match_state.start(int(ContentDatabase.get_game_balance().get("match", {}).get("losses_to_lose_match", 4)))
     draft.configure(
         army.get_cards(),
         ContentDatabase.get_cards_by_ids(army.get_cards()),
@@ -92,12 +96,14 @@ func begin_match(seed_value: int) -> bool:
     opponent_public_side = opponent.get_side()
     return opponent.begin_round(true, false, false, get_player_combat_side())
 
-func run_combat_preview() -> bool:
+func run_battle() -> bool:
     if not match_started or not draft.is_phase_complete():
         return false
     if not battle_result.is_empty():
         return true
 
+    if not match_state.begin_battle():
+        return false
     var player_side := _build_combat_side(
         "player",
         draft,
@@ -109,10 +115,23 @@ func run_combat_preview() -> bool:
     battle_result = simulator.simulate(
         player_side,
         opponent_combat_side,
-        match_seed + 104729,
+        match_seed + match_state.round_number * 104729,
         ContentDatabase.get_game_balance()
     )
-    return not battle_result.is_empty()
+    return match_state.resolve_round(str(battle_result.get("winner", "draw")), float(battle_result.get("duration", 0.0)))
+
+func begin_next_round() -> bool:
+    if not match_started or not match_state.advance_round():
+        return false
+    var public_player := get_player_combat_side().duplicate(true)
+    opponent_public_side = opponent.get_side()
+    battle_result.clear()
+    opponent_combat_side.clear()
+    draft.begin_round(false, bool(match_state.lost_previous["player"]), match_state.sudden_death)
+    return opponent.begin_round(false, bool(match_state.lost_previous["opponent"]), match_state.sudden_death, public_player, int(match_state.losses["opponent"]))
+
+func leave_match() -> void:
+    _reset_match_runtime()
 
 func get_player_combat_side() -> Dictionary:
     if not match_started:
@@ -151,11 +170,13 @@ func _build_combat_side(side_id: String, draft_state, skill_active: bool) -> Dic
         "cards": ContentDatabase.get_cards_by_ids(army.get_cards()),
         "unit_counts": counts,
         "buffs": buff_states,
-        "set_bonus": set_bonus
+        "set_bonus": set_bonus,
+        "skill_uses_remaining": draft_state.commander_skill_uses_remaining()
     }
 
 func _reset_match_runtime() -> void:
     match_started = false
+    match_state.start()
     battle_result.clear()
     opponent_public_side.clear()
     opponent_combat_side.clear()

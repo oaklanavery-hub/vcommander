@@ -35,6 +35,7 @@ scripts/
   core/
     content_database.gd
     game_state.gd
+    match_state.gd
     save_manager.gd        (future)
   army/
     army_loadout.gd
@@ -83,6 +84,12 @@ Combat emits plain dictionaries for events such as:
 - `battle_end`
 
 The simulator also emits periodic position/HP frames for the temporary combat replay. Visual scenes consume these outputs; animations never decide damage.
+
+## Match lifecycle
+
+`MatchState` is a headless rules/state machine: draft → battle → result → next draft, or complete. It owns round-loss counts, comeback allowances, Sudden Death and small battle-history summaries. Battle resolution is guarded so revisiting a replay cannot charge a second loss. Both fourth losses in a draw trigger repeated three-selection Sudden Death rounds until an outright winner.
+
+`GameState` assembles fresh combat inputs from the persistent player/AI drafts, uses a separate deterministic seed per round, and scores the simulator result immediately. Replay timing, skip and animation never alter outcomes. The UI advances to the next draft only after replay completion. All accumulated units are respawned by each new simulator instance; temporary combat statuses and summoned plants do not enter persistent draft counts.
 
 ## AI information boundary
 

@@ -51,3 +51,12 @@ jobs:
 
       - name: Run PvAI integration tests
         run: timeout 30s godot --headless --path . --script tests/test_pvai_preview.gd
+
+      - name: Run Match State tests
+        run: timeout 30s godot --headless --path . --script tests/test_match_state.gd
+
+      - name: Run full PvAI match integration tests
+        run: timeout 90s godot --headless --path . --script tests/test_full_match.gd
+
+      - name: Run desktop scene flow tests
+        run: timeout 30s godot --headless --path . --script tests/test_scene_flow.gd
