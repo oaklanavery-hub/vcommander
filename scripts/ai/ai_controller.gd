@@ -92,6 +92,11 @@ func score_option(option: Dictionary) -> float:
                 role_total += draft.get_unit_count(str(owned["id"]))
         if role_total == 0:
             score *= 1.7 if role == "tank" else 1.25
+        var ability: Dictionary = card.get("ability", {})
+        if ability.get("type") in ["area_heal", "aura_heal"] and draft.get_unit_count(option_id) == 0 and _unit_total() >= 4:
+            # First support unit gains value as more allies can benefit.
+            var heal_pct := float(ability.get("heal_target_max_hp_pct", ability.get("heal_ally_max_hp_pct", 0)))
+            score += float(_unit_total()) * heal_pct * 3.0
         return score
     var buff: Dictionary = draft.buff_definitions.get(option_id, {})
     var value := float(buff.get("percentage", 0)) * float(_unit_total()) * 0.65

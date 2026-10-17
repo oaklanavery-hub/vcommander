@@ -5,6 +5,7 @@ config_version=5
 [application]
 
 config/name="VCommander"
+config/version="0.7.0"
 run/main_scene="res://scenes/commander_select/commander_select.tscn"
 
 [autoload]

@@ -35,6 +35,14 @@ func _init() -> void:
                 check(ai.draft.commander_skill_uses == 0, "AI preserves opening summons")
         check(public_before["unit_counts"].values().all(func(count): return count == 0), "snapshot does not reveal future picks")
         check(public_before["skill_uses_remaining"] == 2, "snapshot does not reveal skill spending")
+    var support_ai = Ai.new()
+    support_ai.configure([db.get_commander("commander_water_01")], db.get_cards_by_set("set_water_01"), db.sets, db.get_all_buffs(), 77)
+    support_ai.draft.unit_counts["card_water_01"] = 4
+    support_ai.draft.unit_counts["card_water_02"] = 4
+    var first_healer: float = support_ai.score_option({"type": "unit", "id": "card_water_03"})
+    check(first_healer > support_ai.score_option({"type": "unit", "id": "card_water_01"}), "AI values the first healer for an established army")
+    support_ai.draft.unit_counts["card_water_03"] = 1
+    check(support_ai.score_option({"type": "unit", "id": "card_water_03"}) < first_healer, "support coverage has diminishing draft value")
     db.free()
     if not failed:
         print("AiController tests passed: 50 seeds, 700 drafting phases.")

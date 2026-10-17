@@ -115,6 +115,25 @@ columns = 4
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 
+[node name="SeedRow" type="HBoxContainer" parent="Margin/Main"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ThemeArmy" type="Button" parent="Margin/Main/SeedRow"]
+layout_mode = 2
+text = "Equip Commander theme"
+
+[node name="SeedLabel" type="Label" parent="Margin/Main/SeedRow"]
+layout_mode = 2
+text = "Match seed (optional):"
+
+[node name="Seed" type="LineEdit" parent="Margin/Main/SeedRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Leave empty for a new match"
+max_length = 18
+tooltip_text = "Use the same Commander, army and seed to replay a strategy"
+
 [node name="BeginDraft" type="Button" parent="Margin/Main"]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2

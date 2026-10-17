@@ -60,7 +60,7 @@ scripts/
 
 `CombatSimulator` is a headless fixed-timestep simulation. It receives plain side configurations plus a seed and balance definition, then returns a deterministic result containing battle events and replay frames. It does not depend on Godot scene nodes, sprite animation or combat UI.
 
-`BattlefieldView` and `combat_screen.gd` consume simulator output only. The v0.4 placeholder visualization cannot change targeting, damage or battle outcomes.
+`BattlefieldView` and `combat_screen.gd` consume simulator output only. The presentation cannot change targeting, damage or battle outcomes.
 
 Commander theme completion is calculated from equipped card definitions and their `set_id`. It is not hardcoded to four permanently named card IDs.
 
@@ -100,3 +100,13 @@ At the start of drafting, `GameState` captures a deep public opponent snapshot b
 ## Multiplayer future-proofing
 
 The first target is local player vs AI. Match orchestration should avoid assuming the opponent is always local AI so a future online provider can be added without rewriting draft/combat rules. No multiplayer backend is built until explicitly approved.
+
+## v0.7 presentation and verification
+
+`assets/pixel/roster.json` stores replaceable 16×16 silhouettes and elemental palettes. `PixelUnitArt` consumes content IDs only to choose artwork; role/element fallbacks support new content. It supplies neutral idle/death poses, eight-direction procedural movement and four-direction attack facing. Card portraits and battlefield actors use the same catalog.
+
+`BattlefieldView` interpolates simulator frames and consumes combat events. Projectiles, auras, area effects, burn indicators, HP, hit feedback and skill effects read simulation metadata. The field preserves its world aspect ratio and stays fully visible. Reduced motion, HP numbers, pause, playback speed and optional synthesized sound are presentation settings and never write simulation state. `BattleAudio` owns disposable audio players and releases playback on exit.
+
+Projectiles advance through fixed simulation steps with swept collision against enemies, passing through allies. The original locked target remains the commitment/fizzle condition; the earliest enemy along the path can intercept. Position snapshots make the projectile visible without giving presentation authority over hit resolution.
+
+`tools/run_checks.py` discovers all headless test suites and treats logged Godot errors as failures. `tools/capture_ui.gd` renders six desktop screens in CI. Deployment depends on successful validation, tests the exported PCK, and writes a public commit/version manifest. `tools/verify_deployment.py` checks the served manifest, loader, JavaScript, WebAssembly and game pack, then runs the downloaded pack's tests. Generated build and QA directories are ignored by Godot and excluded from Web exports.

@@ -167,3 +167,9 @@ The simulator returns a result with winner/reason/duration, a battle-event array
 - Every Buff Card has a positive percentage and `max_stacks` of 3.
 - Required battlefield/simulation balance values are positive.
 - JSON parses without errors.
+
+## Presentation metadata (v0.7)
+
+Combat replay units include stable `card_id`, `element`, HP, position, ability type, aura radius and burn state. Frames also include projectile positions and temporary healing areas. Commander/meteor events carry generic behavior types, elemental colors and impact coordinates. These fields are read-only presentation output; they never provide gameplay input.
+
+The separate `assets/pixel/roster.json` catalog uses its own schema version 1: common colors, elemental palettes and a `sprites` dictionary keyed by presentation/content ID. Each sprite defines a name, element, role and sixteen rows of sixteen palette characters. `.` is transparent. `tools/validate_art.py` verifies palette validity, dimensions and coverage of all starter cards independently of gameplay content validation.

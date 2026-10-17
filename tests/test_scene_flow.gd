@@ -36,16 +36,38 @@ func run() -> void:
     state.run_battle()
     var combat = await open_scene("res://scenes/combat/combat.tscn")
     check(not combat.next_button.visible, "round transition waits for replay completion")
+    var scored_losses: Dictionary = state.match_state.losses.duplicate()
+    combat._toggle_pause()
+    check(combat._paused, "replay pause available")
+    combat._toggle_motion()
+    combat._toggle_hp()
+    combat._toggle_sound()
+    combat._toggle_details()
+    check(state.match_state.losses == scored_losses, "presentation controls never change results")
     combat._skip_to_result()
     await process_frame
     check(combat.next_button.visible, "result enables next round")
     var main: Control = combat.get_node("Margin/Main")
     check(main.get_global_rect().end.y <= root.size.y + 1, "combat result fits viewport: " + str(main.get_global_rect()))
     check(state.begin_next_round(), "round two available")
+    combat._toggle_sound()
+    combat._toggle_motion()
+    combat._toggle_hp()
     var second_draft = await open_scene("res://scenes/draft/draft.tscn")
+    for buff in db.get_all_buffs():
+        state.draft.buff_stacks[str(buff["id"])] = 3
+        state.opponent.draft.buff_stacks[str(buff["id"])] = 3
+    state.opponent_public_side = state.opponent.get_side()
+    second_draft._refresh_all()
+    await process_frame
+    await process_frame
+    check(second_draft.opponent_summary.get_content_height() <= second_draft.opponent_summary.size.y + 1, "full rival state visible: content=" + str(second_draft.opponent_summary.get_content_height()) + " height=" + str(second_draft.opponent_summary.size.y) + " text=" + second_draft.opponent_summary.text)
+    check(second_draft.buff_summary.get_content_height() <= second_draft.buff_summary.size.y + 1, "all active player Buff stacks visible")
     check(second_draft.round_label.text.contains("Round 2"), "UI displays current round")
     if not failed:
         print("Scene flow tests passed: Commander, builder, draft, combat, result, next round at 1280×720.")
+    await physics_frame
+    await physics_frame
     quit(1 if failed else 0)
 
 func check(condition: bool, message: String) -> void:

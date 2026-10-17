@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.7 — Pixel presentation, accessibility and playtest baseline
+
+- Original replaceable pixel catalog for all twelve starter units and Commander plants, shared by cards and the battlefield.
+- Eight-direction movement poses, four-direction attacks, neutral idle/death, interpolation, aura/area/projectile/skill effects and burn/HP feedback.
+- Optional synthesized battle tones, pause, speed shortcuts, reduced motion and HP-number controls.
+- Quick themed loadouts, optional match seed and compact complete rival summaries.
+- Fixed projectile interception with swept enemy collision, allied pass-through and locked-target fizzle/commitment.
+- Improved generic AI valuation of first healing support; adjusted Ice Giant/Sea Serpent ATK and Giant Tree healing for the provisional baseline.
+- Automated validation over 108 final-sample matches/652 battles, max-cap roster stress and visual captures.
+- Deployment depends on validation, tests the actual exported PCK, excludes generated output and publishes source identity.
+- Reusable local/deployed validation tools and an evidence-based playtest report.
+
+
 ## v0.6 — Complete elemental PvAI matches
 
 - Multi-round match state, four-loss condition, comeback selections and repeated Sudden Death.

@@ -1,0 +1,52 @@
+extends SceneTree
+var output_dir := "user://visual_qa"
+
+func _init() -> void:
+    call_deferred("run")
+
+func save_image(filename: String) -> void:
+    for index in range(3):
+        await process_frame
+    await RenderingServer.frame_post_draw
+    var error := root.get_texture().get_image().save_png(output_dir.path_join(filename + ".png"))
+    if error != OK:
+        push_error("Visual capture failed: " + filename)
+        quit(1)
+
+func capture(scene_path: String, filename: String) -> void:
+    change_scene_to_file(scene_path)
+    await scene_changed
+    await save_image(filename)
+
+func run() -> void:
+    for argument in OS.get_cmdline_user_args():
+        if argument.begins_with("--output-dir="):
+            output_dir = argument.trim_prefix("--output-dir=")
+    if not output_dir.is_absolute_path():
+        output_dir = "res://" + output_dir
+    output_dir = ProjectSettings.globalize_path(output_dir)
+    DirAccess.make_dir_recursive_absolute(output_dir)
+    root.size = Vector2i(1280, 720)
+    var state = root.get_node("GameState")
+    var db = root.get_node("ContentDatabase")
+    await capture("res://scenes/commander_select/commander_select.tscn", "commander")
+    state.select_commander("commander_fire_01")
+    state.clear_army()
+    for card in db.get_cards_by_set("set_fire_01"):
+        state.equip_card(str(card["id"]))
+    await capture("res://scenes/army_builder/army_builder.tscn", "army")
+    state.begin_match(1729)
+    await capture("res://scenes/draft/draft.tscn", "draft")
+    while not state.draft.is_phase_complete():
+        state.draft.auto_select()
+    state.run_battle()
+    await capture("res://scenes/combat/combat.tscn", "battle")
+    current_scene._playback_time = minf(6.0, float(state.battle_result.get("duration", 0)) * 0.5)
+    current_scene._advance_frames()
+    current_scene._advance_events()
+    current_scene._paused = true
+    await save_image("combat_effects")
+    current_scene._skip_to_result()
+    await save_image("result")
+    print("Visual captures saved: ", output_dir)
+    quit(0)

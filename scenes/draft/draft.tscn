@@ -109,7 +109,7 @@ visible = false
 
 [node name="SummaryRow" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 180)
+custom_minimum_size = Vector2(0, 210)
 theme_override_constants/separation = 14
 
 [node name="ArmyPanel" type="PanelContainer" parent="Margin/Main/SummaryRow"]
@@ -163,7 +163,7 @@ theme_override_constants/margin_bottom = 12
 layout_mode = 2
 bbcode_enabled = true
 fit_content = false
-theme_override_font_sizes/normal_font_size = 16
+theme_override_font_sizes/normal_font_size = 14
 text = "[b]Rival Commander[/b]"
 
 [node name="Footer" type="Label" parent="Margin/Main"]

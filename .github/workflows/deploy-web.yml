@@ -15,7 +15,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  validate:
+    uses: ./.github/workflows/ci.yml
+
   build:
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -34,7 +38,15 @@ jobs:
       - name: Export Web build
         run: |
           mkdir -p build/web
+          touch build/.gdignore
+          set -o pipefail
+          godot --headless --path . --editor --quit 2>&1 | tee /tmp/godot-export-import.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/godot-export-import.log; then
+            exit 1
+          fi
           godot --headless --path . --export-release "Web" build/web/index.html
+          python3 tools/run_checks.py --pack build/web/index.pck
+          python3 tools/write_build_info.py build/web --commit "$GITHUB_SHA"
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

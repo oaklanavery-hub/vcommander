@@ -13,6 +13,7 @@ var _units: Array[Dictionary] = []
 var _events: Array[Dictionary] = []
 var _frames: Array[Dictionary] = []
 var _projectiles: Array[Dictionary] = []
+var _projectile_sequence := 0
 var _area_effects: Array[Dictionary] = []
 var _pending_damage: Array[Dictionary] = []
 var _pending_heal: Array[Dictionary] = []
@@ -81,6 +82,7 @@ func _reset(battle_seed: int, balance: Dictionary) -> void:
     _events.clear()
     _frames.clear()
     _projectiles.clear()
+    _projectile_sequence = 0
     _area_effects.clear()
     _pending_damage.clear()
     _pending_heal.clear()
@@ -291,7 +293,9 @@ func _emit_skill_event_if_active(side_config: Dictionary) -> void:
     _events.append(BattleEventScript.make("commander_skill", _time, {
         "side": str(side_config.get("id", PLAYER_SIDE)),
         "skill_id": str(skill.get("id", "")),
-        "name": str(skill.get("display_name", "Commander Skill"))
+        "name": str(skill.get("display_name", "Commander Skill")),
+        "skill_type": str(skill.get("type", "")),
+        "element": str(side_config.get("commander", {}).get("element", "earth"))
     }))
 
 
@@ -316,6 +320,7 @@ func _spawn_summon_skill_if_active(side_config: Dictionary) -> void:
         var unit: Dictionary = {
             "id": unit_id,
             "card_id": "commander_plant",
+            "element": str(side_config.get("commander", {}).get("element", "earth")),
             "display_name": "Commander Plant",
             "side": side_id,
             "role": "range",
@@ -419,7 +424,11 @@ func _queue_damage_skill_if_active(source_side: Dictionary, target_side_id: Stri
             "side": source_side_id,
             "ability": str(skill.get("display_name", "Meteor")),
             "target_id": direct_id,
-            "kind": "meteor"
+            "kind": "meteor",
+            "index": meteor_index,
+            "x": impact_position.x,
+            "y": impact_position.y,
+            "radius": radius
         }))
         _queue_raw_damage(
             direct_id,
@@ -677,10 +686,13 @@ func _perform_attack(attacker: Dictionary, target: Dictionary) -> void:
     }))
 
     if _is_ranged(attacker):
-        var distance := _unit_position(attacker).distance_to(_unit_position(target))
-        var travel_time := distance / _projectile_units_per_second
+        _projectile_sequence += 1
         _projectiles.append({
-            "resolve_at": _time + maxf(_step, travel_time),
+            "id": _projectile_sequence,
+            "launched_at": _time,
+            "x": float(attacker.get("x", 0.0)),
+            "y": float(attacker.get("y", 0.0)),
+            "element": str(attacker.get("element", "earth")),
             "source_id": attacker_id,
             "source_side": side_id,
             "target_id": target_id,
@@ -700,7 +712,7 @@ func _perform_attack(attacker: Dictionary, target: Dictionary) -> void:
 func _tick_projectiles() -> void:
     var kept: Array[Dictionary] = []
     for projectile in _projectiles:
-        if float(projectile.get("resolve_at", _time)) > _time + EPSILON:
+        if float(projectile.get("launched_at", -1.0)) >= _time - EPSILON:
             kept.append(projectile)
             continue
 
@@ -712,6 +724,18 @@ func _tick_projectiles() -> void:
                 "target_id": target_id
             }))
             continue
+
+        var start := Vector2(float(projectile.get("x", 0)), float(projectile.get("y", 0)))
+        var destination := _unit_position(target)
+        var end := start.move_toward(destination, _projectile_units_per_second * _step)
+        var hit := _first_projectile_hit(start, end, str(target.get("side", "")))
+        projectile["x"] = end.x
+        projectile["y"] = end.y
+        if hit.is_empty():
+            kept.append(projectile)
+            continue
+        target = hit
+        target_id = str(hit.get("id", ""))
 
         var source_id := str(projectile.get("source_id", ""))
         var source_side := str(projectile.get("source_side", ""))
@@ -761,6 +785,29 @@ func _tick_projectiles() -> void:
                 _push_from_source(target, source, _push_from_value(str(ability.get("pushback", "small"))))
 
     _projectiles = kept
+
+
+# Swept circles prevent fast projectiles tunneling through the first enemy.
+func _first_projectile_hit(start: Vector2, end: Vector2, enemy_side: String) -> Dictionary:
+    var segment := end - start
+    var length_squared := segment.length_squared()
+    var earliest := INF
+    var result: Dictionary = {}
+    for enemy in _alive_units(enemy_side):
+        var offset := start - _unit_position(enemy)
+        var c := offset.length_squared() - _collision_radius * _collision_radius
+        var hit_time := INF
+        if c <= EPSILON:
+            hit_time = 0.0
+        elif length_squared > EPSILON:
+            var b := 2.0 * offset.dot(segment)
+            var discriminant := b * b - 4.0 * length_squared * c
+            if discriminant >= 0.0:
+                hit_time = (-b - sqrt(discriminant)) / (2.0 * length_squared)
+        if hit_time >= 0.0 and hit_time <= 1.0 and hit_time < earliest:
+            earliest = hit_time
+            result = enemy
+    return result
 
 
 func _apply_burn(
@@ -1225,11 +1272,16 @@ func _capture_frame(force: bool) -> void:
             "x": float(unit.get("x", 0.0)),
             "y": float(unit.get("y", 0.0)),
             "hp": maxi(0, int(round(float(unit.get("hp", 0.0))))),
-            "max_hp": int(unit.get("max_hp", 1))
+            "max_hp": int(unit.get("max_hp", 1)),
+            "burning": not unit.get("dots", []).is_empty(),
+            "ability_type": str(unit.get("ability", {}).get("type", "")),
+            "aura_radius": _radius_from_value(str(unit.get("ability", {}).get("radius", "small"))) if str(unit.get("ability", {}).get("type", "")).begins_with("aura_") else 0.0
         })
     _frames.append({
         "time": snappedf(_time, 0.001),
-        "units": frame_units
+        "units": frame_units,
+        "projectiles": _projectiles.duplicate(true),
+        "areas": _area_effects.duplicate(true)
     })
     _next_frame_time = _time + _frame_interval
 
