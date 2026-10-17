@@ -1,5 +1,11 @@
 # Changelog
 
+## Development workflow — Resumable checkpoints
+
+- Added a repository handoff and small-checkpoint instructions so interrupted AI work can resume from saved branches and check results.
+- Removed duplicate standalone validation on main; Deploy Web still requires the reusable CI gate.
+- Cancel superseded validation runs and bound validation, build and deployment durations to avoid indefinitely stalled jobs.
+
 ## v0.7 — Pixel presentation, accessibility and playtest baseline
 
 - Original replaceable pixel catalog for all twelve starter units and Commander plants, shared by cards and the battlefield.

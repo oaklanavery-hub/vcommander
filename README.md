@@ -53,6 +53,10 @@ Read these before changing gameplay:
 
 `main` remains playable. Work happens on short-lived branches, passes validation/tests, then enters `main` through a pull request.
 
+AI development uses small, resumable checkpoints rather than bundling several milestones into one result. `docs/DEVELOPMENT_STATUS.md` records the current branch, checks and next step. After an interruption, ask: **Resume VCommander from `docs/DEVELOPMENT_STATUS.md`; verify the branch and existing checks, then complete the next focused checkpoint.** Saved commits preserve progress; they do not remove ChatGPT session limits or automatically start another turn.
+
+Pull requests run CI. On `main`, Deploy Web calls that same validation workflow once before exporting, publishing and checking the served game. Superseded validation runs are cancelled and jobs have bounded durations. The full source, visual and exported/deployed-pack checks remain enabled.
+
 ## Local start
 
 Open `project.godot` using Godot 4.7 stable and run the project. Choose a Commander, equip four unique Army cards, choose **Begin Match Draft**, spend all three opening selections, then choose **Start Battle 1**. Continue through the result screen until the match ends.
