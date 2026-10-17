@@ -68,3 +68,23 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Godot 4.7
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.0
+          use-dotnet: false
+          include-templates: false
+
+      - name: Verify served source identity, pack checksum and game tests
+        run: |
+          python3 -m py_compile tools/verify_deployment.py tools/write_build_info.py
+          python3 tools/verify_deployment.py --expected-commit "$GITHUB_SHA"
