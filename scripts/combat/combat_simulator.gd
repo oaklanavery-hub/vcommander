@@ -17,6 +17,7 @@ var _projectile_sequence := 0
 var _area_effects: Array[Dictionary] = []
 var _pending_damage: Array[Dictionary] = []
 var _pending_heal: Array[Dictionary] = []
+var _pre_battle: Dictionary = {}
 
 var _time := 0.0
 var _step := 0.1
@@ -50,7 +51,11 @@ func simulate(
 
     _spawn_side(player_side, false)
     _spawn_side(opponent_side, true)
+    var before_skills := _snapshot()
+    var skill_event_start := _events.size()
     _resolve_pre_battle_skills(player_side, opponent_side)
+    if _events.size() > skill_event_start:
+        _pre_battle = {"before": before_skills, "after": _snapshot(), "events": _events.slice(skill_event_start).duplicate(true), "event_end": _events.size()}
     _capture_frame(true)
 
     var immediate_result: String = _elimination_result()
@@ -86,6 +91,7 @@ func _reset(battle_seed: int, balance: Dictionary) -> void:
     _area_effects.clear()
     _pending_damage.clear()
     _pending_heal.clear()
+    _pre_battle.clear()
     _time = 0.0
     _next_frame_time = 0.0
 
@@ -1257,7 +1263,10 @@ func _elimination_result() -> String:
 func _capture_frame(force: bool) -> void:
     if not force and _time + EPSILON < _next_frame_time:
         return
+    _frames.append(_snapshot())
+    _next_frame_time = _time + _frame_interval
 
+func _snapshot() -> Dictionary:
     var frame_units: Array[Dictionary] = []
     for unit in _units:
         if not bool(unit.get("alive", false)):
@@ -1277,13 +1286,12 @@ func _capture_frame(force: bool) -> void:
             "ability_type": str(unit.get("ability", {}).get("type", "")),
             "aura_radius": _radius_from_value(str(unit.get("ability", {}).get("radius", "small"))) if str(unit.get("ability", {}).get("type", "")).begins_with("aura_") else 0.0
         })
-    _frames.append({
+    return {
         "time": snappedf(_time, 0.001),
         "units": frame_units,
         "projectiles": _projectiles.duplicate(true),
         "areas": _area_effects.duplicate(true)
-    })
-    _next_frame_time = _time + _frame_interval
+    }
 
 
 func _finish_result(winner: String, reason: String) -> Dictionary:
@@ -1298,6 +1306,7 @@ func _finish_result(winner: String, reason: String) -> Dictionary:
         "duration": snappedf(_time, 0.001),
         "events": _events.duplicate(true),
         "frames": _frames.duplicate(true),
+        "pre_battle": _pre_battle.duplicate(true),
         "seed": int(_rng.seed),
         "battlefield": {
             "width": _field_width,

@@ -63,12 +63,7 @@ text = "Battle 000.0 / 000.0 sec"
 [node name="Speed" type="Button" parent="Margin/Main/StatusRow"]
 custom_minimum_size = Vector2(170, 38)
 layout_mode = 2
-text = "Battle speed: 2x"
-
-[node name="Skip" type="Button" parent="Margin/Main/StatusRow"]
-custom_minimum_size = Vector2(150, 38)
-layout_mode = 2
-text = "See result"
+text = "Battle speed: 1x"
 
 [node name="Pause" type="Button" parent="Margin/Main/StatusRow"]
 layout_mode = 2

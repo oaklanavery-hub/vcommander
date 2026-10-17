@@ -156,6 +156,7 @@ These are playtest tuning values, not new conceptual gameplay rules.
 - active Commander-themed set bonus, if any
 
 The simulator returns a result with winner/reason/duration, a battle-event array and replay frames.
+When Commander skills are selected, the result also includes `pre_battle` with `before` and `after` snapshots, copied skill-resolution `events`, and `event_end` (the exclusive index in the main event array). This is playback metadata; skill damage and summons still resolve once at simulation time zero. Normal battle frames begin after resolution.
 
 ## Validation expectations
 

@@ -106,6 +106,7 @@ Commander skills may be selected during the opening pre-battle phase even though
 
 **R033 — Skill timing**  
 Selected Commander skills resolve immediately before combat begins. If both sides selected a skill, both resolve simultaneously.
+The replay holds both armies and the battle clock at zero until all selected Commander skill animations finish; normal battle movement and attacks start afterward.
 
 **R034 — Fire: Meteor Barrage**  
 Fire summons six meteors. Each meteor directly targets an enemy unit. Meteors spread across different targets before cycling back through targets when fewer than six enemies exist.

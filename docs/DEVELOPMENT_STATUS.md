@@ -2,7 +2,20 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Detailed pixel fantasy art and interface polish
+## Current task — Battle animation, audio and pre-battle skill playback
+
+- User requests visible stretching/retracting Pitcher Plant vines, projectiles matched to unit roles, additional SFX, each battle starting at 1×, removal of result skipping, and complete Commander skill animations before combat begins.
+- Branch: `feat/battle-effects`, based on main `85acd3a4481dfdbf253ecab6a1495b7ffe0d2466` (v0.7.3 verified and live in PR #14).
+- Preserve all gameplay outcomes, deterministic timing and existing rules. Commander effects already resolve before combat in simulation; add a separate visual prelude that holds the replay clock and armies until the skill presentation finishes. Both selected skills share that prelude.
+- Checkpoint 1: pre-battle replay metadata and presentation clock, default 1×, remove Skip and its code paths; focused timing/flow tests, then save.
+- Checkpoint 2: content-driven projectile/attack visuals, source/target pull endpoints, animated vines and impact feedback, original extra SFX with sensible per-cue throttling; save.
+- Final gate: relevant headless checks, native captures of skills/vines/projectiles, PR CI, Web export and served-pack verification.
+- Checkpoint 1 implemented: simulation exposes immutable before/after skill snapshots and the pre-battle event range. `BattlePrelude` schedules simultaneous skill playback while both armies and the combat clock hold. New replay instances start at 1×; Skip and its method have been removed.
+- Checkpoint 1 passing checks: clean Godot import, `test_battle_presentation.gd` (all three skill types, simultaneous skills, clock hold/pause, exact final snapshot and unchanged outcomes), `test_scene_flow.gd`, `test_combat_simulator.gd`.
+- Next: save this checkpoint, then implement vines, content-driven projectile/attack cues, additional original SFX and focused visual captures. Full CI/export/deployment remains pending.
+- If interrupted: inspect this branch and its PR/checks, then resume the next unchecked checkpoint. The next major gameplay phase remains a Game Director scope decision.
+
+## Previous task — Detailed pixel fantasy art and interface polish (released v0.7.3)
 
 - User approved v0.7.2 layouts and requested richer character artwork, using a detailed fighting-game portrait as Commander quality reference and smaller fighter sprites as army quality reference. References guide pixel craft and readability; create original fantasy designs.
 - Branch: `feat/fantasy-art`, based on main `f7f9282264cee06bab6a20e46bd8c8672b3499e9` (v0.7.2 deployed and verified in PR #13).

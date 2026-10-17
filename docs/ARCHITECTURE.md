@@ -126,3 +126,7 @@ Projectiles advance through fixed simulation steps with swept collision against 
 `PixelAtlasArt` maps presentation IDs to cached `AtlasTexture` regions using `assets/pixel/art_manifest.json`. The original generated artwork is packed with nearest-neighbor sampling into 128×192 Commander and 64×64 unit cells, with transparent gutters and a common unit foot baseline. The same unit frames feed cards, roster summaries and battlefield rendering. The earlier editable palette catalogs remain safe fallbacks for unmapped content.
 
 The detailed battlefield renderer preserves directional lean, four-step movement, attack facing, hit feedback and death fade as procedural presentation. These are not separately hand-drawn animation frames and never decide hit timing or outcomes. See `assets/pixel/CREDITS.md` for provenance and prompts and `tools/pack_pixel_art.py` for the reviewed crop/packing recipe.
+
+## Pre-battle skill presentation
+
+`CombatSimulator` records the before/after snapshots and event range around its existing simultaneous pre-battle skill resolution. `BattlePrelude` schedules those read-only events on a separate presentation clock. The combat scene keeps replay time at zero until that sequence finishes, then begins the existing battle frames at 1×. Pausing also holds the opening sequence. Animation never re-runs effects or changes scored outcomes. Results appear only after normal playback completes; there is no result-skip control.

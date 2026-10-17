@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.4 — Battle presentation
+
+- Each battle starts at 1×; removed result skipping.
+- Separate pre-battle Commander skill playback holds armies and the battle clock until both selected skills finish.
+- Before/after skill snapshots, pause/clock tests and normal result-completion coverage.
+
 ## v0.7.3 — Detailed pixel fantasy artwork
 
 - Three distinct original Commander designs: fire battlemage, tide spellcaster and forest warden, at 128×192 native pixels.

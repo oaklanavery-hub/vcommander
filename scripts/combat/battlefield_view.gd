@@ -15,6 +15,8 @@ var _known: Dictionary = {}
 var _poses: Dictionary = {}
 var _effects: Array[Dictionary] = []
 var _sides: Array[Dictionary] = []
+var prelude_skills: Array = []
+var prelude_time := 0.0
 
 func set_side_configs(player: Dictionary, opponent: Dictionary) -> void:
     _sides.assign([player, opponent])
@@ -32,6 +34,8 @@ func set_playback(frame: Dictionary, next_frame: Dictionary, blend: float, time:
     _next_frame = next_frame
     _blend = clampf(blend, 0.0, 1.0)
     _visual_time = time
+    for unit in frame.get("units", []):
+        _known[str(unit.get("id", ""))] = unit
     _effects = _effects.filter(func(effect): return time - float(effect.get("time", 0)) < 1.2)
     queue_redraw()
 
@@ -109,6 +113,28 @@ func _draw() -> void:
         _draw_unit(unit)
     _draw_projectiles()
     _draw_effects()
+    _draw_prelude()
+
+func _draw_prelude() -> void:
+    if prelude_skills.is_empty():
+        return
+    var names: Array[String] = []
+    for skill in prelude_skills:
+        names.append(("You: " if skill.get("side") == "player" else "Rival: ") + str(skill.get("name", "Commander skill")))
+        if skill.get("skill_type") == "round_debuff":
+            var right: bool = skill.get("side") == "player"
+            var region := Rect2(_arena.position + Vector2(_arena.size.x * 0.5 if right else 0.0, 0), Vector2(_arena.size.x * 0.5, _arena.size.y))
+            var progress := clampf((prelude_time - 0.3) / 1.3, 0, 1)
+            draw_rect(Rect2(region.position, Vector2(region.size.x * progress, region.size.y)), Color(0.5, 0.8, 0.95, 0.18))
+            for index in range(14):
+                var p := region.position + Vector2(18 + (index * 43) % maxi(1, int(region.size.x - 36)), 80 + (index * 71) % maxi(1, int(region.size.y - 100)))
+                var radius := 5.0 * progress
+                for axis in range(3):
+                    var ray := Vector2.from_angle(float(axis) * PI / 3.0) * radius
+                    draw_line((p - ray).round(), (p + ray).round(), Color("c5f2f5"), 2)
+    var banner := Rect2(_arena.position + Vector2(12, 12), Vector2(_arena.size.x - 24, 48))
+    draw_style_box(ScreenStyle.frame(Color(0.07, 0.15, 0.13, 0.96), Color("d9bf7f"), 8), banner)
+    draw_string(ThemeDB.fallback_font, banner.position + Vector2(10, 30), "   •   ".join(names), HORIZONTAL_ALIGNMENT_CENTER, banner.size.x - 20, 18, Color("f5dda3"))
 
 func _draw_ground() -> void:
     draw_rect(_arena.grow(4), Color("b4a272"))
