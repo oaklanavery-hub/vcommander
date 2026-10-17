@@ -175,11 +175,12 @@ func _draw_unit(unit: Dictionary) -> void:
         for effect in _effects:
             if effect["type"] == "damage" and effect["unit_id"] == id_value and _visual_time - float(effect["time"]) < 0.12:
                 pose["hit"] = true
-    draw_rect(Rect2(p + Vector2(-12, -3), Vector2(24, 6)), Color(0.12, 0.18, 0.16, 0.6))
+    var shadow := PackedVector2Array([p + Vector2(-16, -1), p + Vector2(-11, -5), p + Vector2(10, -5), p + Vector2(16, -1), p + Vector2(11, 3), p + Vector2(-11, 3)])
+    draw_colored_polygon(shadow, Color(0.08, 0.13, 0.10, 0.55))
     draw_rect(Rect2(p + Vector2(-10, 3), Vector2(20, 2)), Color("e8a087") if side == "opponent" else Color("8bd9ce"))
     UnitArt.draw_unit(self, p, str(unit.get("role", "range")), str(unit.get("element", "earth")), pixel, side == "opponent", bob, str(unit.get("card_id", "")), pose)
     var ratio := clampf(float(unit.get("hp", 0)) / maxf(1.0, float(unit.get("max_hp", 1))), 0.0, 1.0)
-    var bar := p + Vector2(-14, -17 * pixel - 4)
+    var bar := p + Vector2(-14, -22 * pixel - 4)
     draw_rect(Rect2(bar - Vector2.ONE, Vector2(30, 6)), Color("292b38"))
     draw_rect(Rect2(bar, Vector2(floorf(28 * ratio), 4)), Color("91d7a0") if side == "player" else Color("edaa8c"))
     if bool(unit.get("burning", false)):
@@ -210,7 +211,7 @@ func _draw_effects() -> void:
                     draw_rect(Rect2(p + Vector2(9, -18), Vector2(5, 2)), color)
                     draw_rect(Rect2(p + Vector2(10, -20), Vector2(2, 6)), color)
                 continue
-            draw_string(ThemeDB.fallback_font, p + Vector2(-8, -36 - (0.0 if reduced_motion else age * 24)), ("+" if type == "heal" else "") + str(int(effect.get("amount", 0))), HORIZONTAL_ALIGNMENT_CENTER, 40, 12, color)
+            draw_string(ThemeDB.fallback_font, p + Vector2(-8, -48 - (0.0 if reduced_motion else age * 24)), ("+" if type == "heal" else "") + str(int(effect.get("amount", 0))), HORIZONTAL_ALIGNMENT_CENTER, 40, 12, color)
         elif type == "defeat" and age < 0.5:
             var unit: Dictionary = effect.get("unit", {})
             var pose := {"state": "death", "alpha": 1.0 - age * 2.0}

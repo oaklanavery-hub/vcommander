@@ -12,8 +12,11 @@ Verify this handoff against GitHub and the working tree before resuming.
 - Checkpoint 2: polish shared cards/theme and adapt presentation scaling/animation; inspect all affected screens at 1280×720, run relevant checks and save.
 - Final gate: GitHub CI, Web export, exported-pack suites and verification of the served build before reporting the update live.
 - Checkpoint 1 implemented: original transparent Commander and roster atlases generated, inspected at native pixel scale and packed into cells with gutters. Shared atlas loader, detailed card portraits and replay-driven unit rendering integrated; legacy catalogs remain fallbacks. Provenance and exact generation prompts are in `assets/pixel/CREDITS.md`.
-- Checkpoint 1 passing checks: `tools/validate_art.py`, clean Godot editor import and `tests/test_export_content.gd` (all detailed frames loaded, including the Commander plant). Complete screen visual QA and UI polish are pending.
-- Next: save checkpoint 1, refine rounded card frames/panels and selection states, then inspect complete screens and run the remote release gate.
+- Checkpoint 1 saved at `a3cd8be397026342819d73f3e018025803b709f5`. Passing checks: art validation, clean Godot editor import and exported-content tests with all sixteen detailed frames.
+- Checkpoint 2 implemented: rounded pixel-edged frames and panels, gold selection/hover states, darker card nameplates, richer portrait framing, taller Commander cards, navigation/scrollbars, unit/health-bar spacing and nearest-filtered camp sprites.
+- Passing focused checks: data/art validation, clean import, `tests/test_scene_flow.gd`, `tests/test_player_experience.gd`, and enhanced exported-content checks for visible art, alpha, frame gutters and exact cached left-facing mirrors.
+- Ten final native screen captures completed at 1280×720. Commander, builder, draft, battle and menu layouts inspected. Visual review found a rival-strip mirroring issue; cached mirrored frame textures corrected it without changing the caller's draw transform, and the final battle captures passed review.
+- Next: publish checkpoint 2 and create its PR, then verify all CI/export/deployment gates. Record final run links and deployed identity in the PR; do not report live before verification passes.
 - If interrupted: inspect this branch and remote checks, preserve completed checkpoints, and resume the next unchecked item. The next major gameplay phase still requires a product direction.
 
 ## Previous task — Reference-based card interface (released v0.7.2)
@@ -29,5 +32,4 @@ Verify this handoff against GitHub and the working tree before resuming.
 - Checkpoint 2 implemented: four slots above an eight-column gallery, filters, click-to-add/remove and three validated local presets per Commander. Save requires a valid full army; Clear preserves saved slots.
 - All 14 local regression suites passed, including preset persistence and exported-content coverage. After applying the shared cards to unit draft offers, `tests/test_scene_flow.gd` and `tests/test_player_experience.gd` passed again.
 - Native captures of all ten screens completed; Commander, warband and final draft layouts were visually inspected at 1280×720. Unit draft cards retain the current → after / cap count.
-- Next: publish checkpoint 2, then verify CI/export/deployment. Remote gate results and the deployed commit belong in the PR record.
-- If interrupted: inspect this branch and its PR, resume the next unchecked acceptance item, and preserve the existing playable main.
+- Released in PR #13. CI, export and served-pack verification passed for v0.7.2 at `f7f9282264cee06bab6a20e46bd8c8672b3499e9`; see that PR for run links. This is the completed baseline for the current art refinement.

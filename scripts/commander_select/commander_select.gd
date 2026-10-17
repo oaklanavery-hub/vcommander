@@ -24,6 +24,7 @@ func _ready() -> void:
     for commander in ContentDatabase.get_all_commanders():
         var id := str(commander.get("id", ""))
         var tile := CardTile.new()
+        tile.custom_minimum_size = Vector2(132, 232)
         tile.set_content(commander, true)
         tile.toggle_mode = true
         tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL

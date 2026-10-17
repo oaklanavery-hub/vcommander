@@ -30,17 +30,18 @@ static func apply(screen: Control) -> void:
     GameAudio.set_context("battle" if screen.name == "Combat" else "menu")
 
 static func primary(button: Button) -> void:
-    var style := StyleBoxFlat.new()
-    style.bg_color = Color("dfbd78")
-    style.border_color = Color("8b633b")
-    style.set_border_width_all(2)
-    style.border_width_bottom = 5
-    style.set_content_margin_all(14)
+    var style := frame(Color("dfbd78"), Color("8b633b"), 8)
+    style.border_width_bottom = 4
     button.add_theme_stylebox_override("normal", style)
     var hover := style.duplicate() as StyleBoxFlat
     hover.bg_color = Color("f3d797")
+    hover.border_color = Color("b68a4a")
+    var pressed := style.duplicate() as StyleBoxFlat
+    pressed.bg_color = Color("c9a45f")
+    pressed.border_width_bottom = 2
     button.add_theme_stylebox_override("hover", hover)
-    button.add_theme_stylebox_override("pressed", hover)
+    button.add_theme_stylebox_override("pressed", pressed)
+    button.add_theme_stylebox_override("hover_pressed", pressed)
     button.add_theme_color_override("font_color", Color("302d24"))
     button.add_theme_color_override("font_hover_color", Color("302d24"))
     button.add_theme_color_override("font_pressed_color", Color("302d24"))
@@ -49,22 +50,41 @@ static func primary(button: Button) -> void:
     button.add_theme_font_size_override("font_size", 20)
 
 static func card(button: Button, element: String) -> void:
-    var colors := {"fire": Color("70503c"), "water": Color("345d68"), "earth": Color("496342")}
-    var style := StyleBoxFlat.new()
-    style.bg_color = colors.get(element, Color("45554a"))
-    style.border_color = Color("a09168")
-    style.set_border_width_all(2)
-    style.border_width_bottom = 4
-    style.set_content_margin_all(14)
+    var colors := {"fire": Color("594335"), "water": Color("304c56"), "earth": Color("40523c")}
+    var style := frame(colors.get(element, Color("3a4b42")), Color("938460"), 10)
+    style.shadow_color = Color(0.03, 0.06, 0.05, 0.45)
+    style.shadow_size = 3
+    style.shadow_offset = Vector2(0, 3)
     button.add_theme_stylebox_override("normal", style)
     var hover := style.duplicate() as StyleBoxFlat
-    hover.bg_color = style.bg_color.lightened(0.15)
+    hover.bg_color = style.bg_color.lightened(0.1)
     hover.border_color = Color("f2d799")
+    var pressed := style.duplicate() as StyleBoxFlat
+    pressed.bg_color = style.bg_color.lightened(0.06)
+    pressed.border_color = Color("f0cd7e")
+    pressed.set_border_width_all(3)
+    var hover_pressed := pressed.duplicate() as StyleBoxFlat
+    hover_pressed.bg_color = style.bg_color.lightened(0.15)
+    var focus := frame(Color.TRANSPARENT, Color("94d6c7"), 10)
+    focus.shadow_size = 0
     button.add_theme_stylebox_override("hover", hover)
-    button.add_theme_stylebox_override("pressed", hover)
+    button.add_theme_stylebox_override("pressed", pressed)
+    button.add_theme_stylebox_override("hover_pressed", hover_pressed)
+    button.add_theme_stylebox_override("focus", focus)
     button.add_theme_constant_override("icon_max_width", 64)
     button.expand_icon = true
     button.add_theme_font_size_override("font_size", 18)
+
+static func frame(background: Color, border: Color, radius: int = 8) -> StyleBoxFlat:
+    var style := StyleBoxFlat.new()
+    style.bg_color = background
+    style.border_color = border
+    style.set_border_width_all(2)
+    style.set_corner_radius_all(radius)
+    style.corner_detail = 4
+    style.anti_aliasing = false
+    style.set_content_margin_all(14)
+    return style
 
 static func label(text: String, font_size: int = 18) -> Label:
     var result := Label.new()

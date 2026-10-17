@@ -7,6 +7,7 @@ var portrait := CardPortrait.new()
 var caption := Label.new()
 var empty_caption := "Empty slot"
 var detail_text := ""
+var _hovered := false
 
 func _ready() -> void:
     text = ""
@@ -17,10 +18,10 @@ func _ready() -> void:
     ScreenStyle.card(self, str(definition.get("element", "earth")))
     add_child(portrait)
     portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    portrait.offset_left = 12
-    portrait.offset_top = 36
-    portrait.offset_right = -12
-    portrait.offset_bottom = -49
+    portrait.offset_left = 9
+    portrait.offset_top = 34
+    portrait.offset_right = -9
+    portrait.offset_bottom = -45
     portrait.set_content(definition, commander)
     portrait.visible = not definition.is_empty()
     add_child(caption)
@@ -28,7 +29,7 @@ func _ready() -> void:
     caption.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
     caption.offset_left = 7
     caption.offset_right = -7
-    caption.offset_top = -46
+    caption.offset_top = -43
     caption.offset_bottom = -5
     caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -45,6 +46,12 @@ func _ready() -> void:
     badges.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     badges.draw.connect(_draw_badges.bind(badges))
     toggled.connect(func(_value: bool): queue_redraw())
+    mouse_entered.connect(func():
+        _hovered = true
+        queue_redraw())
+    mouse_exited.connect(func():
+        _hovered = false
+        queue_redraw())
 
 func set_content(content: Dictionary, is_commander := false) -> void:
     definition = content
@@ -57,11 +64,19 @@ func set_content(content: Dictionary, is_commander := false) -> void:
     tooltip_text = detail
 
 func _draw() -> void:
+    caption.modulate = Color("f5dfa7") if button_pressed else Color("f1e8d3")
+    portrait.modulate = Color(1.07, 1.07, 1.04) if _hovered else Color.WHITE
+    var footer := ScreenStyle.frame(Color(0.06, 0.1, 0.08, 0.42), Color.TRANSPARENT, 7)
+    footer.set_border_width_all(0)
+    footer.corner_radius_top_left = 0
+    footer.corner_radius_top_right = 0
+    draw_style_box(footer, Rect2(Vector2(3, size.y - 43), Vector2(size.x - 6, 39)))
+    draw_line(Vector2(12, size.y - 43), Vector2(size.x - 12, size.y - 43), Color(0.88, 0.75, 0.46, 0.35))
     if definition.is_empty():
-        draw_string(ThemeDB.fallback_font, Vector2(size.x * 0.5 - 11, size.y * 0.5), "+", HORIZONTAL_ALIGNMENT_LEFT, -1, 34, Color("8c9b7a"))
+        var center := Vector2(size.x * 0.5, size.y * 0.48).floor()
+        draw_rect(Rect2(center - Vector2(2, 12), Vector2(4, 24)), Color("819478"))
+        draw_rect(Rect2(center - Vector2(12, 2), Vector2(24, 4)), Color("819478"))
         return
-    if button_pressed:
-        draw_rect(Rect2(Vector2(1, 1), size - Vector2(2, 2)), Color("f4d895"), false, 3)
 
 func _draw_badges(canvas: Control) -> void:
     if definition.is_empty():
@@ -72,12 +87,14 @@ func _draw_badges(canvas: Control) -> void:
     else:
         var count := "%d/%d" % [int(definition.get("summon_amount", 0)), int(definition.get("unit_cap", 0))]
         var center := Vector2(size.x - 20, 17)
-        canvas.draw_circle(center, 15, Color("e5d6ad"))
-        canvas.draw_string(ThemeDB.fallback_font, center + Vector2(-13, 4), count, HORIZONTAL_ALIGNMENT_CENTER, 26, 11, Color("30291f"))
+        canvas.draw_circle(center + Vector2(0, 1), 16, Color("352e25"))
+        canvas.draw_circle(center, 14, Color("ecddb4"))
+        canvas.draw_string(ThemeDB.fallback_font, center + Vector2(-13, 4), count, HORIZONTAL_ALIGNMENT_CENTER, 26, 12, Color("30291f"))
         _role_badge(Vector2(size.x - 20, 53), str(definition.get("role", "range")), canvas)
 
 func _element_badge(center: Vector2, element: String, canvas: Control) -> void:
-    canvas.draw_circle(center, 13, Color("2d382b"))
+    canvas.draw_circle(center, 14, Color("a39260"))
+    canvas.draw_circle(center, 12, Color("253c33"))
     var color := Color("9fc574")
     if element == "fire":
         color = Color("eea35c")

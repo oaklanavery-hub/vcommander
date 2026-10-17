@@ -16,16 +16,23 @@ func set_content(content: Dictionary, is_commander: bool) -> void:
 
 func _draw() -> void:
     var element := str(definition.get("element", "earth"))
-    var palettes := {"fire": Color("634330"), "water": Color("304f5a"), "earth": Color("3d5135")}
+    var palettes := {"fire": Color("563b30"), "water": Color("294952"), "earth": Color("354b36")}
     var color: Color = palettes.get(element, Color("3d5135"))
-    draw_rect(Rect2(Vector2.ZERO, size), color.darkened(0.32))
-    draw_rect(Rect2(Vector2(3, 3), size - Vector2(6, 6)), color)
-    var horizon := size.y * 0.73
-    draw_rect(Rect2(3, horizon, maxf(0, size.x - 6), maxf(0, size.y - horizon - 3)), color.darkened(0.24))
+    draw_style_box(ScreenStyle.frame(color, color.lightened(0.14), 7), Rect2(Vector2.ZERO, size))
+    var horizon := floorf(size.y * 0.74)
+    var halo_center := Vector2(size.x * 0.5, size.y * 0.4).floor()
+    var halo_radius := floorf(minf(size.x * 0.37, size.y * 0.31))
+    var halo := PackedVector2Array()
+    for index in range(9):
+        halo.append((halo_center + Vector2.from_angle(PI * 0.25 * index) * halo_radius).floor())
+    draw_colored_polygon(halo, Color(0.95, 0.81, 0.48, 0.06))
+    draw_polyline(halo, Color(0.95, 0.81, 0.48, 0.15), 1)
+    var ground := PackedVector2Array([Vector2(3, horizon), Vector2(size.x * 0.22, horizon), Vector2(size.x * 0.22, horizon - 5), Vector2(size.x * 0.61, horizon - 5), Vector2(size.x * 0.61, horizon + 3), Vector2(size.x - 3, horizon + 3), size - Vector2(3, 8), size - Vector2(8, 3), Vector2(8, size.y - 3), Vector2(3, size.y - 8)])
+    draw_colored_polygon(ground, color.darkened(0.24))
     for index in range(7):
         var x := (float(index) + 0.5) * size.x / 7.0
-        var y := size.y * (0.19 + float(index % 3) * 0.12)
-        draw_rect(Rect2(x, y, 2, 2), Color(0.94, 0.84, 0.60, 0.3))
+        var y := size.y * (0.15 + float(index % 3) * 0.15)
+        draw_rect(Rect2(Vector2(x, y).floor(), Vector2(2, 2)), Color(0.94, 0.84, 0.60, 0.25))
     if definition.is_empty():
         return
     var picture: Texture2D = CommanderArt.icon(element) if commander else UnitArt.icon(str(definition.get("id", "")), str(definition.get("role", "range")), element)
@@ -36,5 +43,6 @@ func _draw() -> void:
         scale_factor = floorf(scale_factor)
     var draw_size := (source_size * scale_factor).floor()
     var position := ((size - draw_size) * 0.5).floor()
-    draw_rect(Rect2(Vector2(size.x * 0.28, size.y - 12), Vector2(size.x * 0.44, 4)), color.darkened(0.4))
+    var foot := position.y + draw_size.y * 0.94
+    draw_rect(Rect2(Vector2(size.x * 0.3, foot), Vector2(size.x * 0.4, 4)), color.darkened(0.45))
     draw_texture_rect(picture, Rect2(position, draw_size), false)

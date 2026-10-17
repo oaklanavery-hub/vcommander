@@ -66,6 +66,12 @@
 - Four warband slots, eight-column collection, filters and three local presets per Commander.
 - Preset validation, art/export coverage and layout checks.
 
+## v0.7.3 — Requested visual refinement
+
+- Original detailed 128×192 Commander and 64×64 army atlas artwork.
+- Rounded pixel-edged cards, panel/navigation polish and richer portrait framing.
+- Shared card/battle artwork with nearest-neighbor scaling and export coverage.
+
 ## Next major phase — Game Director scope decision
 
 The approved elemental PvAI vertical slice is implemented. A new major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved roadmap. Human playtesting should inform further balance values; the current tuning remains provisional.

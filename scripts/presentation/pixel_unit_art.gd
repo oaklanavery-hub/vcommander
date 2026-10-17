@@ -94,6 +94,8 @@ static func _draw_detailed_unit(canvas: CanvasItem, texture: Texture2D, position
     var facing := int(pose.get("facing", 4 if flip else 0))
     var direction := Vector2(cos(float(facing) * PI / 4.0), sin(float(facing) * PI / 4.0)).round()
     var mirror := facing in [3, 4, 5] if state in ["move", "attack"] else flip
+    if mirror:
+        texture = PixelAtlasArt.mirrored(texture)
     var moving := state == "move"
     var stride := 1.0 if int(pose.get("step", 0)) % 4 < 2 else -1.0
     var side := roundf(pixel * 24.0)
@@ -103,7 +105,6 @@ static func _draw_detailed_unit(canvas: CanvasItem, texture: Texture2D, position
     if state == "death":
         canvas.draw_texture_rect(texture, Rect2(origin + Vector2(0, side * 0.45), Vector2(side, side * 0.55)), false, tint)
         return
-    canvas.draw_set_transform(origin + Vector2(side if mirror else 0.0, 0.0), 0.0, Vector2(-1 if mirror else 1, 1))
     var source := texture.get_size()
     # Directional body lean and alternating lower-body strips retain the existing
     # eight-direction/four-step procedural animation without driving simulation.
@@ -117,8 +118,7 @@ static func _draw_detailed_unit(canvas: CanvasItem, texture: Texture2D, position
             for leg in range(2):
                 var step := stride * (1.0 if leg == 0 else -1.0)
                 var shift := Vector2(direction.x * step, -absf(direction.y) * step)
-                var target := Rect2(Vector2(float(leg) * side * 0.5, top) + shift, Vector2(side * 0.5, bottom - top))
+                var target := Rect2(origin + Vector2(float(leg) * side * 0.5, top) + shift, Vector2(side * 0.5, bottom - top))
                 canvas.draw_texture_rect_region(texture, target, Rect2(float(leg) * source.x * 0.5, y, source.x * 0.5, 4), tint)
         else:
-            canvas.draw_texture_rect_region(texture, Rect2(Vector2(0, top) + offset, Vector2(side, bottom - top)), Rect2(0, y, source.x, minf(4, source.y - y)), tint)
-    canvas.draw_set_transform(Vector2.ZERO)
+            canvas.draw_texture_rect_region(texture, Rect2(origin + Vector2(0, top) + offset, Vector2(side, bottom - top)), Rect2(0, y, source.x, minf(4, source.y - y)), tint)

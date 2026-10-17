@@ -5,6 +5,7 @@ const MANIFEST := "res://assets/pixel/art_manifest.json"
 static var _manifest: Dictionary = {}
 static var _sheets: Dictionary = {}
 static var _frames: Dictionary = {}
+static var _mirrored: Dictionary = {}
 
 static func catalog() -> Dictionary:
     if _manifest.is_empty() and FileAccess.file_exists(MANIFEST):
@@ -33,4 +34,19 @@ static func icon(group: String, id: String) -> Texture2D:
     result.region = Rect2(int(coordinate[0]) * int(cell[0]), int(coordinate[1]) * int(cell[1]), int(cell[0]), int(cell[1]))
     result.filter_clip = true
     _frames[key] = result
+    return result
+
+static func mirrored(texture: Texture2D) -> Texture2D:
+    var key := texture.get_instance_id()
+    if _mirrored.has(key):
+        return _mirrored[key]
+    var image: Image
+    if texture is AtlasTexture:
+        var atlas := texture as AtlasTexture
+        image = atlas.atlas.get_image().get_region(Rect2i(atlas.region))
+    else:
+        image = texture.get_image()
+    image.flip_x()
+    var result := ImageTexture.create_from_image(image)
+    _mirrored[key] = result
     return result
