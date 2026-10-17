@@ -3,6 +3,7 @@ extends Node
 const ArmyLoadoutScript = preload("res://scripts/army/army_loadout.gd")
 const SetBonusCheckerScript = preload("res://scripts/commanders/set_bonus_checker.gd")
 const DraftSystemScript = preload("res://scripts/draft/draft_system.gd")
+const CombatSimulatorScript = preload("res://scripts/combat/combat_simulator.gd")
 
 var selected_commander_id := ""
 var army = ArmyLoadoutScript.new(4)
@@ -10,12 +11,15 @@ var draft = DraftSystemScript.new()
 var match_seed := 0
 var match_started := false
 
+var battle_result: Dictionary = {}
+var training_opponent: Dictionary = {}
+
 func select_commander(commander_id: String) -> bool:
     if ContentDatabase.get_commander(commander_id).is_empty():
         return false
     if selected_commander_id != commander_id:
         army.clear()
-        match_started = false
+        _reset_match_runtime()
     selected_commander_id = commander_id
     return true
 
@@ -31,15 +35,15 @@ func get_selected_signature_set() -> Dictionary:
 func equip_card(card_id: String) -> bool:
     if ContentDatabase.get_card(card_id).is_empty():
         return false
-    match_started = false
+    _reset_match_runtime()
     return army.equip(card_id)
 
 func unequip_card_at(index: int) -> bool:
-    match_started = false
+    _reset_match_runtime()
     return army.unequip_at(index)
 
 func clear_army() -> void:
-    match_started = false
+    _reset_match_runtime()
     army.clear()
 
 func get_signature_progress() -> int:
@@ -77,4 +81,86 @@ func begin_match(seed_value: int) -> bool:
     )
     draft.begin_round(true, false, false)
     match_started = true
+    battle_result.clear()
+    training_opponent.clear()
     return true
+
+func run_combat_preview() -> bool:
+    if not match_started or not draft.is_phase_complete():
+        return false
+
+    var opponent_draft = DraftSystemScript.new()
+    opponent_draft.configure(
+        army.get_cards(),
+        ContentDatabase.get_cards_by_ids(army.get_cards()),
+        ContentDatabase.get_all_buffs(),
+        match_seed + 7919
+    )
+    opponent_draft.begin_round(true, false, false)
+
+    var guard := 0
+    while not opponent_draft.is_phase_complete() and guard < 12:
+        if not opponent_draft.auto_select():
+            break
+        guard += 1
+
+    var player_side := _build_combat_side(
+        "player",
+        draft,
+        draft.commander_skill_used_this_round
+    )
+    training_opponent = _build_combat_side("opponent", opponent_draft, false)
+
+    var simulator = CombatSimulatorScript.new()
+    battle_result = simulator.simulate(
+        player_side,
+        training_opponent,
+        match_seed + 104729,
+        ContentDatabase.get_game_balance()
+    )
+    return not battle_result.is_empty()
+
+func get_player_combat_side() -> Dictionary:
+    if not match_started:
+        return {}
+    return _build_combat_side(
+        "player",
+        draft,
+        draft.commander_skill_used_this_round
+    )
+
+func _build_combat_side(side_id: String, draft_state, skill_active: bool) -> Dictionary:
+    var counts: Dictionary = {}
+    for card_id in army.get_cards():
+        counts[card_id] = draft_state.get_unit_count(card_id)
+
+    var buff_states: Array[Dictionary] = []
+    for buff in ContentDatabase.get_all_buffs():
+        var buff_id := str(buff.get("id", ""))
+        var stacks: int = int(draft_state.get_buff_stacks(buff_id))
+        if stacks <= 0:
+            continue
+        buff_states.append({
+            "definition": buff.duplicate(true),
+            "stacks": stacks
+        })
+
+    var set_bonus: Dictionary = {}
+    if is_full_set_active():
+        var signature_set := get_selected_signature_set()
+        set_bonus = signature_set.get("bonus", {}).duplicate(true)
+
+    return {
+        "id": side_id,
+        "commander": get_selected_commander().duplicate(true),
+        "commander_skill_active": skill_active,
+        "cards": ContentDatabase.get_cards_by_ids(army.get_cards()),
+        "unit_counts": counts,
+        "buffs": buff_states,
+        "set_bonus": set_bonus
+    }
+
+func _reset_match_runtime() -> void:
+    match_started = false
+    battle_result.clear()
+    training_opponent.clear()

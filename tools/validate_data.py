@@ -37,11 +37,12 @@ def main() -> int:
     cards = read_group(ROOT / "data" / "cards", recursive=True)
     sets = read_group(ROOT / "data" / "sets")
     buffs = read_group(ROOT / "data" / "buffs")
+    balances = read_group(ROOT / "data" / "balance")
 
-    if (len(commanders), len(cards), len(sets), len(buffs)) != (3, 12, 3, 5):
+    if (len(commanders), len(cards), len(sets), len(buffs), len(balances)) != (3, 12, 3, 5, 1):
         raise ValueError(
-            "Starter slice expects 3 commanders, 12 cards, 3 sets and 5 buffs; "
-            f"got {len(commanders)}, {len(cards)}, {len(sets)}, {len(buffs)}"
+            "Starter slice expects 3 commanders, 12 cards, 3 sets, 5 buffs and 1 balance file; "
+            f"got {len(commanders)}, {len(cards)}, {len(sets)}, {len(buffs)}, {len(balances)}"
         )
 
     for commander in commanders.values():
@@ -49,6 +50,8 @@ def main() -> int:
         if set_id not in sets:
             raise ValueError(f"Commander {commander['id']} references unknown set {set_id}")
         skill = commander.get("active_skill", {})
+        if not skill.get("id") or not skill.get("type"):
+            raise ValueError(f"{commander['id']} active_skill must define id and type")
         require_positive_number(skill.get("uses_per_match"), f"{commander['id']} uses_per_match")
         require_positive_number(skill.get("uses_per_round"), f"{commander['id']} uses_per_round")
         require_positive_number(skill.get("selection_cost"), f"{commander['id']} selection_cost")
@@ -96,9 +99,29 @@ def main() -> int:
         if buff.get("stacking") != "multiplicative":
             raise ValueError(f"{buff['id']} must stack multiplicatively")
 
+    balance = balances.get("game_balance")
+    if balance is None:
+        raise ValueError("data/balance must contain id=game_balance")
+    require_positive_number(
+        balance.get("match", {}).get("round_time_seconds"),
+        "game_balance match.round_time_seconds",
+    )
+    battlefield = balance.get("battlefield", {})
+    require_positive_number(battlefield.get("width"), "game_balance battlefield.width")
+    require_positive_number(battlefield.get("height"), "game_balance battlefield.height")
+    simulation = balance.get("simulation", {})
+    for key in (
+        "step_seconds",
+        "frame_interval_seconds",
+        "collision_radius",
+        "movement_units_per_second_at_100",
+        "projectile_units_per_second",
+    ):
+        require_positive_number(simulation.get(key), f"game_balance simulation.{key}")
+
     print(
         f"Data OK: {len(commanders)} commanders, {len(cards)} cards, "
-        f"{len(sets)} sets, {len(buffs)} buffs"
+        f"{len(sets)} sets, {len(buffs)} buffs, {len(balances)} balance file"
     )
     return 0
 

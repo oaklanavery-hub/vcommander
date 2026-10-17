@@ -4,6 +4,7 @@ var commanders: Dictionary = {}
 var cards: Dictionary = {}
 var sets: Dictionary = {}
 var buffs: Dictionary = {}
+var balances: Dictionary = {}
 var load_errors: Array[String] = []
 
 func _ready() -> void:
@@ -14,12 +15,14 @@ func reload() -> void:
     cards.clear()
     sets.clear()
     buffs.clear()
+    balances.clear()
     load_errors.clear()
 
     _load_json_directory("res://data/commanders", commanders)
     _load_json_tree("res://data/cards", cards)
     _load_json_directory("res://data/sets", sets)
     _load_json_directory("res://data/buffs", buffs)
+    _load_json_directory("res://data/balance", balances)
 
 func get_summary() -> Dictionary:
     return {
@@ -28,6 +31,7 @@ func get_summary() -> Dictionary:
         "cards": cards.size(),
         "sets": sets.size(),
         "buffs": buffs.size(),
+        "balances": balances.size(),
         "errors": load_errors.duplicate()
     }
 
@@ -42,6 +46,9 @@ func get_card(card_id: String) -> Dictionary:
 
 func get_buff(buff_id: String) -> Dictionary:
     return buffs.get(buff_id, {})
+
+func get_game_balance() -> Dictionary:
+    return balances.get("game_balance", {})
 
 func get_all_commanders() -> Array[Dictionary]:
     return _sorted_values(commanders)

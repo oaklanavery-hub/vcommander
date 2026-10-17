@@ -23,6 +23,26 @@
     "layout": "left_vs_right",
     "movement": "free",
     "obstacles": false,
-    "camera": "full_field"
+    "camera": "full_field",
+    "width": 24.0,
+    "height": 14.0,
+    "edge_margin": 1.0
+  },
+  "simulation": {
+    "step_seconds": 0.1,
+    "frame_interval_seconds": 0.2,
+    "collision_radius": 0.42,
+    "movement_units_per_second_at_100": 2.5,
+    "projectile_units_per_second": 12.0,
+    "radii": {
+      "small": 1.5,
+      "medium": 2.5,
+      "large": 3.5
+    },
+    "pushback": {
+      "small": 1.0,
+      "moderate": 2.0,
+      "large": 3.0
+    }
   }
 }

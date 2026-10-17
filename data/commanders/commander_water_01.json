@@ -8,6 +8,7 @@
   "active_skill": {
     "id": "frozen_field",
     "display_name": "Frozen Field",
+    "type": "round_debuff",
     "uses_per_match": 2,
     "uses_per_round": 1,
     "selection_cost": 1,
