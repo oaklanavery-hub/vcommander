@@ -21,6 +21,7 @@ jobs:
   build:
     needs: validate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -40,11 +41,11 @@ jobs:
           mkdir -p build/web
           touch build/.gdignore
           set -o pipefail
-          godot --headless --path . --editor --quit 2>&1 | tee /tmp/godot-export-import.log
+          timeout 90s godot --headless --path . --editor --quit 2>&1 | tee /tmp/godot-export-import.log
           if grep -E "SCRIPT ERROR:|ERROR:" /tmp/godot-export-import.log; then
             exit 1
           fi
-          godot --headless --path . --export-release "Web" build/web/index.html
+          timeout 120s godot --headless --path . --export-release "Web" build/web/index.html
           python3 tools/run_checks.py --pack build/web/index.pck
           python3 tools/write_build_info.py build/web --commit "$GITHUB_SHA"
 
@@ -63,6 +64,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: build
     steps:
       - name: Deploy to GitHub Pages
