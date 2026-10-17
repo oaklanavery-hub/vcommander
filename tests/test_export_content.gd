@@ -13,10 +13,14 @@ func run() -> void:
     check(Art.catalog().get("sprites", {}).size() == 13, "export retains pixel art catalog")
     for card in db.get_all_cards():
         var picture := Art.icon(str(card["id"]), str(card["role"]), str(card["element"]))
-        check(picture.get_width() == 32 and picture.get_height() == 32, "all roster portraits available")
+        check(picture.get_width() == 64 and picture.get_height() == 64, "all detailed roster portraits available")
+        check(picture is AtlasTexture, "roster uses the detailed atlas instead of a fallback")
+    var plant := Art.icon("commander_plant")
+    check(plant is AtlasTexture and plant.get_width() == 64, "summoned plant art is included")
     for commander in db.get_all_commanders():
         var portrait := CommanderArt.icon(str(commander["element"]))
-        check(portrait.get_width() == 32 and portrait.get_height() == 48, "all full-body Commander portraits available in export")
+        check(portrait.get_width() == 128 and portrait.get_height() == 192, "all detailed full-body Commander portraits available in export")
+        check(portrait is AtlasTexture, "Commanders use the detailed atlas instead of a fallback")
     if not failed:
         print("Export content tests passed: roster, buffs, balance and portraits.")
     quit(1 if failed else 0)

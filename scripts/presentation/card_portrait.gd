@@ -31,8 +31,10 @@ func _draw() -> void:
     var picture: Texture2D = CommanderArt.icon(element) if commander else UnitArt.icon(str(definition.get("id", "")), str(definition.get("role", "range")), element)
     var source_size := picture.get_size()
     var padding := 2.0 if size.y < 160 else 16.0
-    var scale_factor := maxf(1.0, floorf(minf((size.x - padding) / source_size.x, (size.y - padding) / source_size.y)))
-    var draw_size := source_size * scale_factor
+    var scale_factor := maxf(0.1, minf((size.x - padding) / source_size.x, (size.y - padding) / source_size.y))
+    if scale_factor >= 2.0:
+        scale_factor = floorf(scale_factor)
+    var draw_size := (source_size * scale_factor).floor()
     var position := ((size - draw_size) * 0.5).floor()
     draw_rect(Rect2(Vector2(size.x * 0.28, size.y - 12), Vector2(size.x * 0.44, 4)), color.darkened(0.4))
     draw_texture_rect(picture, Rect2(position, draw_size), false)

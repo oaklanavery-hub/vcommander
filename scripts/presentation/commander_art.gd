@@ -12,6 +12,9 @@ static func catalog() -> Dictionary:
     return _catalog
 
 static func icon(element: String) -> Texture2D:
+    var detailed := PixelAtlasArt.icon("commanders", element)
+    if detailed != null:
+        return detailed
     if _pictures.has(element):
         return _pictures[element]
     var data := catalog()

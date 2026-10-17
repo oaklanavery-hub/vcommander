@@ -34,6 +34,8 @@ Required core fields:
 
 The optional Commander `description` is player-facing flavor text. It does not grant abilities or modify stats.
 
+Detailed presentation atlases use `assets/pixel/art_manifest.json` schema 1. Each group provides a texture resource path, a two-number `cell_size`, and a `frames` map from stable presentation/content IDs to zero-based column/row coordinates. Frames are unique, within the RGBA texture bounds, and never define gameplay stats. The current atlases cover three Commander elements and all twelve Army cards plus the summoned Commander plant.
+
 Starter skill behavior types in v0.4 are:
 
 - `targeted_aoe_max_hp`

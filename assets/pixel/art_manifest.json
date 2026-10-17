@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "commanders": {
+    "texture": "res://assets/pixel/commanders-v2.png",
+    "cell_size": [
+      128,
+      192
+    ],
+    "frames": {
+      "fire": [
+        0,
+        0
+      ],
+      "water": [
+        1,
+        0
+      ],
+      "earth": [
+        2,
+        0
+      ]
+    }
+  },
+  "units": {
+    "texture": "res://assets/pixel/roster-v2.png",
+    "cell_size": [
+      64,
+      64
+    ],
+    "frames": {
+      "card_fire_01": [
+        0,
+        0
+      ],
+      "card_fire_02": [
+        1,
+        0
+      ],
+      "card_fire_03": [
+        2,
+        0
+      ],
+      "card_fire_04": [
+        3,
+        0
+      ],
+      "card_water_01": [
+        0,
+        1
+      ],
+      "card_water_02": [
+        1,
+        1
+      ],
+      "card_water_03": [
+        2,
+        1
+      ],
+      "card_water_04": [
+        3,
+        1
+      ],
+      "card_earth_01": [
+        0,
+        2
+      ],
+      "card_earth_02": [
+        1,
+        2
+      ],
+      "card_earth_03": [
+        2,
+        2
+      ],
+      "card_earth_04": [
+        3,
+        2
+      ],
+      "commander_plant": [
+        0,
+        3
+      ]
+    }
+  }
+}

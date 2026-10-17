@@ -120,3 +120,9 @@ Projectiles advance through fixed simulation steps with swept collision against 
 `CardTile` and `CardPortrait` render content-defined card identity, recruit/cap and class badges. `CommanderArt` loads a separate replaceable 32×48 palette catalog shared by gallery cards and the full view. Commander descriptions are presentation metadata; theme and skill effects still read the existing definitions.
 
 `WarbandPresets` receives a content source, validates complete unique loadouts with `ArmyLoadout`, and stores three ConfigFile slots under each Commander ID. Unknown/duplicate/stale entries are rejected before the UI invokes normal `GameState` equip methods. Clear affects only the current selection. Preset storage never participates in match scoring or combat.
+
+## Detailed pixel artwork
+
+`PixelAtlasArt` maps presentation IDs to cached `AtlasTexture` regions using `assets/pixel/art_manifest.json`. The original generated artwork is packed with nearest-neighbor sampling into 128×192 Commander and 64×64 unit cells, with transparent gutters and a common unit foot baseline. The same unit frames feed cards, roster summaries and battlefield rendering. The earlier editable palette catalogs remain safe fallbacks for unmapped content.
+
+The detailed battlefield renderer preserves directional lean, four-step movement, attack facing, hit feedback and death fade as procedural presentation. These are not separately hand-drawn animation frames and never decide hit timing or outcomes. See `assets/pixel/CREDITS.md` for provenance and prompts and `tools/pack_pixel_art.py` for the reviewed crop/packing recipe.
