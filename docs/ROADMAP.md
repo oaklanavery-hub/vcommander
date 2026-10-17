@@ -59,6 +59,13 @@
 - Original scenery, two music loops, nine effects and saved presentation preferences.
 - Menu/navigation/persistence tests and ten visual captures.
 
+## v0.7.2 — Reference card interface
+
+- Portrait cards with elemental, recruit/cap and class badges.
+- Commander gallery, full-body portraits and separate description/passive/active panels.
+- Four warband slots, eight-column collection, filters and three local presets per Commander.
+- Preset validation, art/export coverage and layout checks.
+
 ## Next major phase — Game Director scope decision
 
 The approved elemental PvAI vertical slice is implemented. A new major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved roadmap. Human playtesting should inform further balance values; the current tuning remains provisional.

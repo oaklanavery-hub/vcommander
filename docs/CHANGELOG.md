@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.7.2 — Portrait cards and saved warbands
+
+- Reference-based Commander gallery, full-body view and separate description, passive and active panels.
+- Shared portrait cards across selection and unit drafting, with element, recruit/cap and class badges; three original 32×48 Commander portraits.
+- Four equipped slots above an eight-column collection, element filtering and click-to-add/remove selection.
+- Three validated local warband presets per Commander, safe empty-slot loading and non-destructive Clear.
+- Commander flavor metadata, art/export coverage and preset/layout regression checks.
+
 ## v0.7.1 — Player experience
 
 - Forest-camp title menu, original pixel scenery and a warmer forest/brass interface.

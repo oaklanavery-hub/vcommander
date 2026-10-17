@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource path="res://scripts/army_builder/army_builder.gd" type="Script" id="1"]
+[ext_resource type="Script" path="res://scripts/army_builder/army_builder.gd" id="1"]
 
 [node name="ArmyBuilder" type="Control"]
 layout_mode = 3
@@ -16,130 +16,160 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 44.0
-offset_top = 32.0
-offset_right = -44.0
-offset_bottom = -32.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
 
 [node name="Main" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 14
 
 [node name="Header" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
-[node name="Back" type="Button" parent="Margin/Main/Header"]
-custom_minimum_size = Vector2(110, 44)
-layout_mode = 2
-text = "← Back"
-
-[node name="HeaderText" type="VBoxContainer" parent="Margin/Main/Header"]
+[node name="Title" type="Label" parent="Margin/Main/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "BUILD YOUR WARBAND"
 
-[node name="Title" type="Label" parent="Margin/Main/Header/HeaderText"]
+[node name="Filter" type="OptionButton" parent="Margin/Main/Header"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
-text = "Meet your warband"
+custom_minimum_size = Vector2(220, 46)
+tooltip_text = "Filter the companion collection by element"
 
-[node name="Subtitle" type="Label" parent="Margin/Main/Header/HeaderText"]
+[node name="Setup" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
-text = "2 / 3   Start with your Commander companions, or choose your own four."
+custom_minimum_size = Vector2(0, 210)
+theme_override_constants/separation = 28
 
-[node name="Commander" type="Label" parent="Margin/Main/Header"]
+[node name="SlotsRow" type="HBoxContainer" parent="Margin/Main/Setup"]
+layout_mode = 2
+custom_minimum_size = Vector2(564, 0)
+size_flags_vertical = 4
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="Actions" type="VBoxContainer" parent="Margin/Main/Setup"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 9
+
+[node name="Commander" type="Label" parent="Margin/Main/Setup/Actions"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Commander"
-vertical_alignment = 1
 
-[node name="SlotsPanel" type="PanelContainer" parent="Margin/Main"]
+[node name="Navigation" type="HBoxContainer" parent="Margin/Main/Setup/Actions"]
 layout_mode = 2
+theme_override_constants/separation = 12
 
-[node name="Padding" type="MarginContainer" parent="Margin/Main/SlotsPanel"]
+[node name="Back" type="Button" parent="Margin/Main/Setup/Actions/Navigation"]
 layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 14
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(120, 54)
+text = "Back"
 
-[node name="SlotsContent" type="VBoxContainer" parent="Margin/Main/SlotsPanel/Padding"]
+[node name="Battle" type="Button" parent="Margin/Main/Setup/Actions/Navigation"]
 layout_mode = 2
-theme_override_constants/separation = 9
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.5
+custom_minimum_size = Vector2(180, 54)
+text = "Battle →"
+tooltip_text = "Choose your opening recruits next, then enter battle"
 
-[node name="ArmyTitle" type="Label" parent="Margin/Main/SlotsPanel/Padding/SlotsContent"]
+[node name="Status" type="Label" parent="Margin/Main/Setup/Actions"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Your companions"
+custom_minimum_size = Vector2(0, 42)
+autowrap_mode = 2
+text = "Choose four companions"
 
-[node name="SlotsRow" type="HBoxContainer" parent="Margin/Main/SlotsPanel/Padding/SlotsContent"]
+[node name="Presets" type="HBoxContainer" parent="Margin/Main/Setup/Actions"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
-[node name="SetProgress" type="Label" parent="Margin/Main/SlotsPanel/Padding/SlotsContent"]
+[node name="Preset1" type="Button" parent="Margin/Main/Setup/Actions/Presets"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Commander Theme: 0 / 4"
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Preset 1"
 
-[node name="BonusStatus" type="Label" parent="Margin/Main/SlotsPanel/Padding/SlotsContent"]
+[node name="Preset2" type="Button" parent="Margin/Main/Setup/Actions/Presets"]
 layout_mode = 2
-text = "Commander Bonus: INACTIVE"
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Preset 2"
 
-[node name="ArmyStatus" type="Label" parent="Margin/Main/SlotsPanel/Padding/SlotsContent"]
+[node name="Preset3" type="Button" parent="Margin/Main/Setup/Actions/Presets"]
 layout_mode = 2
-text = "Choose 4 unique cards."
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Preset 3"
+
+[node name="Clear" type="Button" parent="Margin/Main/Setup/Actions/Presets"]
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = false
+text = "Clear"
+
+[node name="Save" type="Button" parent="Margin/Main/Setup/Actions/Presets"]
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = false
+text = "Save"
+
+[node name="Options" type="Button" parent="Margin/Main/Setup/Actions"]
+layout_mode = 2
+text = "Advanced match options"
+
+[node name="Advanced" type="HBoxContainer" parent="Margin/Main/Setup/Actions"]
+layout_mode = 2
+visible = false
+theme_override_constants/separation = 8
+
+[node name="Seed" type="LineEdit" parent="Margin/Main/Setup/Actions/Advanced"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Match seed (optional)"
+max_length = 18
+
+[node name="ThemeArmy" type="Button" parent="Margin/Main/Setup/Actions/Advanced"]
+layout_mode = 2
+text = "Use Commander theme"
 
 [node name="Divider" type="HSeparator" parent="Margin/Main"]
 layout_mode = 2
 
-[node name="AvailableTitle" type="Label" parent="Margin/Main"]
+[node name="CollectionHeading" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Companion collection"
 
-[node name="Hint" type="Label" parent="Margin/Main"]
+[node name="Title" type="Label" parent="Margin/Main/CollectionHeading"]
 layout_mode = 2
-text = "Click a companion above to remove it, then recruit a replacement below."
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+text = "COMPANION COLLECTION"
+
+[node name="Hint" type="Label" parent="Margin/Main/CollectionHeading"]
+layout_mode = 2
+text = "Select a card to add or remove it"
 
 [node name="CardScroll" type="ScrollContainer" parent="Margin/Main"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 186)
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
+follow_focus = true
 
 [node name="CardsGrid" type="GridContainer" parent="Margin/Main/CardScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-columns = 4
+columns = 8
 theme_override_constants/h_separation = 10
-theme_override_constants/v_separation = 10
+theme_override_constants/v_separation = 14
 
-[node name="SeedRow" type="HBoxContainer" parent="Margin/Main"]
+[node name="Legend" type="Label" parent="Margin/Main"]
 layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="ThemeArmy" type="Button" parent="Margin/Main/SeedRow"]
-layout_mode = 2
-text = "Equip Commander theme"
-
-[node name="SeedLabel" type="Label" parent="Margin/Main/SeedRow"]
-layout_mode = 2
-text = "Match seed (optional):"
-
-[node name="Seed" type="LineEdit" parent="Margin/Main/SeedRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Leave empty for a new match"
-max_length = 18
-tooltip_text = "Use the same Commander, army and seed to replay a strategy"
-
-[node name="BeginDraft" type="Button" parent="Margin/Main"]
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-text = "Begin adventure →"
-disabled = true
-
-[node name="Footer" type="Label" parent="Margin/Main"]
-layout_mode = 2
-text = "Your four cards form the choices you can recruit during the match."
+theme_override_font_sizes/font_size = 14
+text = "Card badges: element • recruits / maximum • class      Gold border: in your warband"

@@ -4,10 +4,13 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.7.1 — Player experience and elemental PvAI**
+**v0.7.2 — Portrait cards and saved warbands**
 
 The current playable prototype supports:
 
+- portrait Commander/army cards with element, class and recruit/cap badges
+- Commander gallery, full-body portrait and separate description, passive and active panels
+- four warband slots, an eight-column collection, element filters and three saved presets per Commander
 - a forest-camp title menu, How to Play and shared pause/settings menus
 - starter warbands, a filtered companion collection and clearer draft/result guidance
 - two original looping music tracks, nine sound effects and saved volume/accessibility settings
@@ -63,7 +66,7 @@ Pull requests run CI. On `main`, Deploy Web calls that same validation workflow 
 
 ## Local start
 
-Open `project.godot` using Godot 4.7 stable and run the project. Choose **Play**, select a Commander and meet their prefilled starter warband. Keep it or replace companions, choose **Begin adventure**, spend all opening picks, then start the battle. Continue through the results until the match ends. **How to play** is available from the title menu and **Menu / Esc** throughout the game. Local menus pause the draft clock; leaving an active match asks for confirmation.
+Open `project.godot` using Godot 4.7 stable and run the project. Choose **Play**, select a Commander card and choose **Next**. Keep their prefilled starter warband or select cards to add/remove companions, choose **Battle**, spend all opening picks, then start the battle. Continue through the results until the match ends. **How to play** is available from the title menu and **Menu / Esc** throughout the game. Local menus pause the draft clock; leaving an active match asks for confirmation.
 
 ## Controls
 
@@ -78,7 +81,13 @@ Open `project.godot` using Godot 4.7 stable and run the project. Choose **Play**
 | Battle | M | Toggle sound |
 | Result | Enter | Continue to the next round |
 
-Music and sound begin after the first player interaction. **Settings** has separate music/effects volume and accessibility controls, saved on the current device. Set a volume to zero to mute it. **Advanced** in the warband screen reveals the optional match seed; reuse it with the same setup and picks to reproduce a match. Current rival draft choices are concealed until combat. Audio credits and composition source are in `assets/audio/CREDITS.md` and `tools/compose_audio.py`.
+Music and sound begin after the first player interaction. **Settings** has separate music/effects volume and accessibility controls, saved on the current device. Set a volume to zero to mute it. **Advanced match options** in the warband screen reveals the optional match seed; reuse it with the same setup and picks to reproduce a match. Current rival draft choices are concealed until combat. Audio credits and composition source are in `assets/audio/CREDITS.md` and `tools/compose_audio.py`.
+
+## Cards and warband presets
+
+A card’s top-left badge identifies its element. Army cards show recruits per pick / unit cap at the top right, with a class symbol underneath (shield: Tank, sword: Melee, bow: Range, cross: Healer). Hover for ability and stat details. The Commander portrait, theme passive and active skill are shown separately before army building.
+
+Choose Preset 1, 2 or 3, then **Save** a complete four-card warband. Clicking a populated preset loads it. Empty slots preserve the current selection; **Clear** empties only the current warband. Presets are saved per Commander on this device and are checked against current content before loading. The top-right dropdown filters the collection; a gold card border marks equipped companions.
 
 ## Verification and playtesting
 

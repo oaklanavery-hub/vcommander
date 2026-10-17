@@ -6,10 +6,12 @@ var commander := false
 var portrait := CardPortrait.new()
 var caption := Label.new()
 var empty_caption := "Empty slot"
+var detail_text := ""
 
 func _ready() -> void:
     text = ""
-    custom_minimum_size = Vector2(132, 184)
+    if custom_minimum_size == Vector2.ZERO:
+        custom_minimum_size = Vector2(132, 184)
     mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
     texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
     ScreenStyle.card(self, str(definition.get("element", "earth")))
@@ -33,6 +35,8 @@ func _ready() -> void:
     caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     caption.add_theme_font_size_override("font_size", 14)
     caption.text = str(definition.get("display_name", empty_caption))
+    if not detail_text.is_empty():
+        caption.text += "\n" + detail_text
     if definition.is_empty():
         disabled = true
     var badges := Control.new()

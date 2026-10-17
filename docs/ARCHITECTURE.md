@@ -114,3 +114,9 @@ Projectiles advance through fixed simulation steps with swept collision against 
 ## Player menus and audio
 
 `GameMenu` is a presentation-only CanvasLayer that pauses local scene processing for help/settings/pause modals, restores the previous pause state on close, and confirms before discarding an active match. `GameAudio` owns two original looping scores, pooled effects and a local ConfigFile for volume/accessibility. Playback unlocks on player interaction. `ScreenStyle` supplies shared scenery, navigation and card hierarchy. These services never decide draft legality or battle results.
+
+## Reference card interface and warband presets
+
+`CardTile` and `CardPortrait` render content-defined card identity, recruit/cap and class badges. `CommanderArt` loads a separate replaceable 32×48 palette catalog shared by gallery cards and the full view. Commander descriptions are presentation metadata; theme and skill effects still read the existing definitions.
+
+`WarbandPresets` receives a content source, validates complete unique loadouts with `ArmyLoadout`, and stores three ConfigFile slots under each Commander ID. Unknown/duplicate/stale entries are rejected before the UI invokes normal `GameState` equip methods. Clear affects only the current selection. Preset storage never participates in match scoring or combat.

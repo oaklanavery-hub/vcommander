@@ -12,5 +12,8 @@ Verify this handoff against GitHub and the working tree before resuming.
 - Acceptance: reference layout at 1280×720, readable cards/badges/description panels, safe preset round trips and invalid-save rejection, full menu-to-match flow and existing regressions, exported/deployed verification.
 - Checkpoint 1 implemented: shared portrait cards, element/class/recruit-cap badges, three original Commander portraits and the reference gallery/full-view/description layout.
 - Checkpoint 1 validation: content/art validation and `tests/test_scene_flow.gd` passed; the new Commander screen was rendered and visually inspected at 1280×720.
-- Next: rebuild the warband screen, add validated preset persistence and exercise the complete flow. Full final CI/export/deployment checks are pending.
+- Checkpoint 2 implemented: four slots above an eight-column gallery, filters, click-to-add/remove and three validated local presets per Commander. Save requires a valid full army; Clear preserves saved slots.
+- All 14 local regression suites passed, including preset persistence and exported-content coverage. After applying the shared cards to unit draft offers, `tests/test_scene_flow.gd` and `tests/test_player_experience.gd` passed again.
+- Native captures of all ten screens completed; Commander, warband and final draft layouts were visually inspected at 1280×720. Unit draft cards retain the current → after / cap count.
+- Next: publish checkpoint 2, then verify CI/export/deployment. Remote gate results and the deployed commit belong in the PR record.
 - If interrupted: inspect this branch and its PR, resume the next unchecked acceptance item, and preserve the existing playable main.

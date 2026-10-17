@@ -177,3 +177,7 @@ Combat replay units include stable `card_id`, `element`, HP, position, ability t
 The separate `assets/pixel/roster.json` catalog uses its own schema version 1: common colors, elemental palettes and a `sprites` dictionary keyed by presentation/content ID. Each sprite defines a name, element, role and sixteen rows of sixteen palette characters. `.` is transparent. `tools/validate_art.py` verifies palette validity, dimensions and coverage of all starter cards independently of gameplay content validation.
 
 `assets/pixel/commanders.json` uses the same palette-character approach for original 32×48 full-body portraits keyed by element. Commander cards and the full portrait share this catalog. A card's recruit/cap fraction and class badge always read its content definition, independently of the artwork.
+
+## Local warband preset data
+
+`user://warband_presets.cfg` contains Commander-ID sections with `preset_0`, `preset_1` and `preset_2` arrays of four stable Army card IDs. Saved order is preserved. Loading validates the Commander, all card IDs, uniqueness and completeness against current content; invalid data yields an empty result and does not alter the active loadout. This local data is never exported as content or used to grant units.
