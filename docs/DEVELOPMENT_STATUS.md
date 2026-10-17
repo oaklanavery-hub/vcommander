@@ -12,7 +12,11 @@ Verify this handoff against GitHub and the working tree before resuming.
 - Final gate: relevant headless checks, native captures of skills/vines/projectiles, PR CI, Web export and served-pack verification.
 - Checkpoint 1 implemented: simulation exposes immutable before/after skill snapshots and the pre-battle event range. `BattlePrelude` schedules simultaneous skill playback while both armies and the combat clock hold. New replay instances start at 1×; Skip and its method have been removed.
 - Checkpoint 1 passing checks: clean Godot import, `test_battle_presentation.gd` (all three skill types, simultaneous skills, clock hold/pause, exact final snapshot and unchanged outcomes), `test_scene_flow.gd`, `test_combat_simulator.gd`.
-- Next: save this checkpoint, then implement vines, content-driven projectile/attack cues, additional original SFX and focused visual captures. Full CI/export/deployment remains pending.
+- Checkpoint 1 saved at `1d6de84fe72941339f3d941c946b7849be7f1157`.
+- Checkpoint 2 implemented: two-strand leafy vines with extend/grab/drag/retract phases, exact pull endpoints, six projectile styles with interpolation/impact effects, attack anticipation/lunge/recovery and sprouting plants. Thirteen content-driven profiles and seventeen new original SFX use independent cue cooldowns and twelve effect voices.
+- Passing focused checks: presentation/WAV validation, clean Godot import, battle presentation (including vine endpoint animation, projectile assignments and independent sound throttling), projectile collision, scene flow and player experience/audio coverage.
+- A standalone headless test initially exposed an autoload compile dependency in `BattleAudio`; node lookup in `_ready` corrected it and focused checks now pass. The initial stalled test was bounded at 60s; do not rerun it unchanged.
+- Next: save checkpoint 2 before native FX review; inspect three skill openings, six projectile styles and all three vine phases, then run the PR/export/deployment gate. Full remote checks remain pending until recorded in the PR.
 - If interrupted: inspect this branch and its PR/checks, then resume the next unchecked checkpoint. The next major gameplay phase remains a Game Director scope decision.
 
 ## Previous task — Detailed pixel fantasy art and interface polish (released v0.7.3)

@@ -13,7 +13,24 @@ const EFFECTS := {
     "heal": "res://assets/audio/heal.wav",
     "commander_skill": "res://assets/audio/skill.wav",
     "victory": "res://assets/audio/victory.wav",
-    "loss": "res://assets/audio/loss.wav"
+    "loss": "res://assets/audio/loss.wav",
+    "arrow_release": "res://assets/audio/arrow_release.wav",
+    "arrow_hit": "res://assets/audio/arrow_hit.wav",
+    "fire_cast": "res://assets/audio/fire_cast.wav",
+    "flame_breath": "res://assets/audio/flame_breath.wav",
+    "water_cast": "res://assets/audio/water_cast.wav",
+    "ice_cast": "res://assets/audio/ice_cast.wav",
+    "seed_cast": "res://assets/audio/seed_cast.wav",
+    "wood_hit": "res://assets/audio/wood_hit.wav",
+    "claw": "res://assets/audio/claw.wav",
+    "heavy_hit": "res://assets/audio/heavy_hit.wav",
+    "magic_hit": "res://assets/audio/magic_hit.wav",
+    "vine_pull": "res://assets/audio/vine_pull.wav",
+    "meteor": "res://assets/audio/meteor.wav",
+    "freeze": "res://assets/audio/freeze.wav",
+    "plant_grow": "res://assets/audio/plant_grow.wav",
+    "explosion": "res://assets/audio/explosion.wav",
+    "healing_water": "res://assets/audio/healing_water.wav"
 }
 
 var music_volume := 0.55
@@ -38,7 +55,7 @@ func _ready() -> void:
     for key in EFFECTS:
         _effect_streams[key] = load(EFFECTS[key])
     add_child(_music)
-    for index in range(5):
+    for index in range(12):
         var player := AudioStreamPlayer.new()
         add_child(player)
         _effects.append(player)
@@ -69,6 +86,10 @@ func play_effect(cue: String) -> void:
     if not _unlocked or effects_volume <= 0 or not EFFECTS.has(cue):
         return
     var player: AudioStreamPlayer = _effects[_voice % _effects.size()]
+    for candidate in _effects:
+        if not candidate.playing:
+            player = candidate
+            break
     _voice += 1
     player.stream = _effect_streams[cue]
     player.volume_db = linear_to_db(maxf(0.0001, effects_volume)) - (16.0 if cue == "hover" else 8.0)

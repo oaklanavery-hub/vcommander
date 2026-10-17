@@ -157,6 +157,9 @@ These are playtest tuning values, not new conceptual gameplay rules.
 
 The simulator returns a result with winner/reason/duration, a battle-event array and replay frames.
 When Commander skills are selected, the result also includes `pre_battle` with `before` and `after` snapshots, copied skill-resolution `events`, and `event_end` (the exclusive index in the main event array). This is playback metadata; skill damage and summons still resolve once at simulation time zero. Normal battle frames begin after resolution.
+Pull events provide `source_x/y`, `from_x/y`, `to_x/y` and original target HP for the visual grab/drag. These record the collision-resolved displacement, including a blocked pull with identical endpoints. Projectile frames include `card_id`, launch position/time and source/target IDs; `projectile_impact` events provide the projectile ID, source/card/target and impact coordinates. Attack events provide source/target coordinates. These fields do not drive combat outcomes.
+
+`data/presentation/combat_cues.json` is presentation schema 1. Its `units` map assigns each current card/plant ID a projectile style (`none`, `arrow`, `seed`, `fireball`, `dragonfire`, `water_orb`, `ice_shard`), attack motion (`slam`, `slash`, `cast`, `shoot`, `bite`) and attack/impact sound cue names. Unknown content falls back to a generic presentation profile.
 
 ## Validation expectations
 

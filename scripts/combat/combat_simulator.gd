@@ -607,6 +607,7 @@ func _tick_pull_unit(unit: Dictionary, target: Dictionary, ability: Dictionary) 
         and distance > 1.0 + EPSILON
         and float(unit.get("ability_cooldown", 0.0)) <= EPSILON
     ):
+        var pull_from := _unit_position(target)
         var direction := (_unit_position(unit) - _unit_position(target)).normalized()
         var desired := _unit_position(unit) - direction * 0.9
         _displace_unit(target, desired)
@@ -616,7 +617,11 @@ func _tick_pull_unit(unit: Dictionary, target: Dictionary, ability: Dictionary) 
             "unit_id": str(unit.get("id", "")),
             "target_id": str(target.get("id", "")),
             "ability": str(ability.get("display_name", "Pull")),
-            "kind": "pull"
+            "kind": "pull",
+            "source_x": float(unit["x"]), "source_y": float(unit["y"]),
+            "from_hp": float(target["hp"]),
+            "from_x": pull_from.x, "from_y": pull_from.y,
+            "to_x": float(target["x"]), "to_y": float(target["y"])
         }))
         distance = _unit_position(unit).distance_to(_unit_position(target))
 
@@ -688,7 +693,10 @@ func _perform_attack(attacker: Dictionary, target: Dictionary) -> void:
         "side": side_id,
         "unit_id": attacker_id,
         "target_id": target_id,
-        "kind": "ranged" if _is_ranged(attacker) else "melee"
+        "kind": "ranged" if _is_ranged(attacker) else "melee",
+        "card_id": str(attacker.get("card_id", "")),
+        "x": float(attacker.get("x", 0)), "y": float(attacker.get("y", 0)),
+        "target_x": float(target.get("x", 0)), "target_y": float(target.get("y", 0))
     }))
 
     if _is_ranged(attacker):
@@ -696,9 +704,11 @@ func _perform_attack(attacker: Dictionary, target: Dictionary) -> void:
         _projectiles.append({
             "id": _projectile_sequence,
             "launched_at": _time,
+            "start_x": float(attacker.get("x", 0.0)), "start_y": float(attacker.get("y", 0.0)),
             "x": float(attacker.get("x", 0.0)),
             "y": float(attacker.get("y", 0.0)),
             "element": str(attacker.get("element", "earth")),
+            "card_id": str(attacker.get("card_id", "")),
             "source_id": attacker_id,
             "source_side": side_id,
             "target_id": target_id,
@@ -758,6 +768,13 @@ func _tick_projectiles() -> void:
 
         _queue_raw_damage(target_id, raw_damage, source_side, source_id, "projectile")
         var impact_position := _unit_position(target)
+        _events.append(BattleEventScript.make("projectile_impact", _time, {
+            "projectile_id": int(projectile.get("id", 0)),
+            "source_unit_id": source_id, "target_id": target_id,
+            "card_id": str(projectile.get("card_id", "")),
+            "element": str(projectile.get("element", "earth")),
+            "x": impact_position.x, "y": impact_position.y
+        }))
 
         if ability_type == "ranged_aoe":
             var radius := _radius_from_value(str(ability.get("splash_radius", "small")))

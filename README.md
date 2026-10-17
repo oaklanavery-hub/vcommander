@@ -4,10 +4,13 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.7.3 — Detailed pixel fantasy artwork**
+**v0.7.4 — Battle animation and sound**
 
 The current playable prototype supports:
 
+- Commander skill openings that finish before armies move and the battle clock begins
+- stretching/retracting Pitcher Plant vines, visible enemy pulls, distinct arrows/fireballs/flames/water/ice/seeds and impact/attack motion
+- every battle starts at 1×, with results shown after the battle completes
 - three distinct detailed Commander designs and thirteen detailed army sprites, shared by cards and battles
 - rounded pixel-edged card frames, gold selection borders, darker nameplates and refined panels/navigation
 - portrait Commander/army cards with element, class and recruit/cap badges
@@ -15,7 +18,7 @@ The current playable prototype supports:
 - four warband slots, an eight-column collection, element filters and three saved presets per Commander
 - a forest-camp title menu, How to Play and shared pause/settings menus
 - starter warbands, a filtered companion collection and clearer draft/result guidance
-- two original looping music tracks, nine sound effects and saved volume/accessibility settings
+- two original looping music tracks, 26 sound effects and saved volume/accessibility settings
 
 - Fire, Water and Earth starter Commanders
 - 12 approved starter Army cards with initial playtest stats/abilities

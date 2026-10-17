@@ -8,6 +8,37 @@ func run() -> void:
     root.size = Vector2i(1280, 720)
     var state = root.get_node("GameState")
     var db = root.get_node("ContentDatabase")
+    var audio = root.get_node("GameAudio")
+    for card in db.get_all_cards():
+        check(CombatCues.catalog().get("units", {}).has(str(card["id"])), "every card has a presentation profile")
+        var profile := CombatCues.profile(str(card["id"]))
+        for key in ["attack_sound", "impact_sound"]:
+            check(audio.EFFECTS.has(str(profile[key])), "unit cue resolves to an exported sound")
+    check(CombatCues.profile("card_earth_04")["projectile"] == "arrow", "archers fire arrows")
+    check(CombatCues.profile("card_fire_03")["projectile"] == "fireball", "Sorcerers fire fireballs")
+    check(CombatCues.profile("card_water_04")["projectile"] == "ice_shard", "Water Wizards fire crystalline magic")
+    check(CombatCues.profile("commander_plant")["projectile"] == "seed", "summoned plants fire seeds")
+    var cues := BattleAudio.new()
+    root.add_child(cues)
+    check(cues.consume_event({"type": "attack", "card_id": "card_earth_04"}, 0.0) == "arrow_release", "bow release has its own sound")
+    check(cues.consume_event({"type": "attack", "card_id": "card_earth_04"}, 0.02).is_empty(), "dense identical cues are throttled")
+    check(cues.consume_event({"type": "attack", "card_id": "card_fire_03"}, 0.02) == "fire_cast", "different simultaneous attacks are not globally silenced")
+    check(cues.consume_event({"type": "commander_skill", "skill_type": "round_debuff"}, 0.02) == "freeze", "Commander sound survives busy attacks")
+    cues.queue_free()
+    var sim := CombatSimulator.new()
+    sim._reset(5, {})
+    var plant := {"id": "player:card_earth_02:0", "side": "player", "x": 2.0, "y": 3.0, "alive": true, "hp": 650.0, "ability_cooldown": 0.0, "attack_timer": 99.0}
+    var target := {"id": "opponent:probe:0", "side": "opponent", "x": 6.0, "y": 3.0, "alive": true, "hp": 700.0}
+    sim._units.assign([plant, target])
+    sim._time = 0.1
+    sim._tick_pull_unit(plant, target, {"pull_range": 5.0, "cooldown_seconds": 5.0})
+    var pull: Dictionary = sim._events.back()
+    check(pull.get("kind") == "pull" and is_equal_approx(float(pull["from_x"]), 6.0) and is_equal_approx(float(pull["to_x"]), float(target["x"])), "pull records exact original and resolved endpoints")
+    var resolved := Vector2(float(target["x"]), float(target["y"]))
+    check(BattleEffects.pull_position(pull, 0.1, resolved).is_equal_approx(Vector2(6, 3)), "enemy waits for the stretching vine to reach it")
+    var midway := BattleEffects.pull_position(pull, 0.38, resolved)
+    check(midway.x < 6.0 and midway.x > resolved.x, "grabbed enemy is visibly dragged toward the plant")
+    check(BattleEffects.pull_position(pull, 0.72, resolved).is_equal_approx(resolved), "vine presentation ends at the exact simulation position")
     state.select_commander("commander_fire_01")
     state.clear_army()
     for card in db.get_cards_by_set("set_fire_01"):
@@ -61,7 +92,7 @@ func run() -> void:
         opening.advance(BattlePrelude.DURATION)
         check(opening.frame() == sample["frames"][0], "skill sequence ends at exact authoritative battle-start frame")
     if not failed:
-        print("Battle presentation tests passed: 1x defaults, no skip, both pre-battle skills, frozen combat clock, pause and unchanged outcomes.")
+        print("Battle presentation tests passed: 1x, no skip, simultaneous pre-battle skills, paused clock, exact vine endpoints, unit projectiles, independent sound cues and unchanged outcomes.")
     quit(1 if failed else 0)
 
 func check(condition: bool, message: String) -> void:

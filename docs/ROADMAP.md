@@ -72,6 +72,14 @@
 - Rounded pixel-edged cards, panel/navigation polish and richer portrait framing.
 - Shared card/battle artwork with nearest-neighbor scaling and export coverage.
 
+## v0.7.4 — Requested battle presentation
+
+- Commander skill openings complete before movement or the combat clock starts.
+- 1× default playback, normal completion without result skipping.
+- Stretch/grab/drag/retract vines, role-appropriate projectiles and stronger attack/impact motion.
+- Seventeen additional original battle SFX and per-cue mixing.
+- Opening, vine, projectile, sound and export regression coverage.
+
 ## Next major phase — Game Director scope decision
 
 The approved elemental PvAI vertical slice is implemented. A new major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved roadmap. Human playtesting should inform further balance values; the current tuning remains provisional.
