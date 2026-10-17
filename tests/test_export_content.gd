@@ -14,6 +14,9 @@ func run() -> void:
     for card in db.get_all_cards():
         var picture := Art.icon(str(card["id"]), str(card["role"]), str(card["element"]))
         check(picture.get_width() == 32 and picture.get_height() == 32, "all roster portraits available")
+    for commander in db.get_all_commanders():
+        var portrait := CommanderArt.icon(str(commander["element"]))
+        check(portrait.get_width() == 32 and portrait.get_height() == 48, "all full-body Commander portraits available in export")
     if not failed:
         print("Export content tests passed: roster, buffs, balance and portraits.")
     quit(1 if failed else 0)

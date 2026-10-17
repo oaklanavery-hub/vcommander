@@ -89,19 +89,24 @@ func _refresh_all() -> void:
 
 func _refresh_offer() -> void:
     for child in offer_row.get_children():
+        offer_row.remove_child(child)
         child.queue_free()
 
     for index in range(GameState.draft.current_offer.size()):
         var option: Dictionary = GameState.draft.current_offer[index]
-        var button := Button.new()
-        button.custom_minimum_size = Vector2(330, 148)
-        button.text = _option_text(option)
+        var button: Button
         if option.get("type") == "unit":
             var card: Dictionary = ContentDatabase.get_card(str(option["id"]))
-            button.icon = UnitArt.icon(str(option["id"]), str(card.get("role", "range")), str(card.get("element", "earth")))
-            button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-            ScreenStyle.card(button, str(card.get("element", "earth")))
-            button.tooltip_text = str(card.get("ability", {}).get("display_name", "")) + " • Pick with " + str(index + 1)
+            var tile := CardTile.new()
+            tile.set_content(card)
+            var current: int = GameState.draft.get_unit_count(str(option["id"]))
+            tile.detail_text = "%d → %d / %d" % [current, mini(int(card["unit_cap"]), current + int(card["summon_amount"])), int(card["unit_cap"])]
+            tile.tooltip_text += "\nPick with " + str(index + 1)
+            button = tile
+        else:
+            button = Button.new()
+            button.text = _option_text(option)
+        button.custom_minimum_size = Vector2(156, 204)
         button.disabled = GameState.draft.is_phase_complete()
         button.pressed.connect(_select_offer.bind(index))
         offer_row.add_child(button)

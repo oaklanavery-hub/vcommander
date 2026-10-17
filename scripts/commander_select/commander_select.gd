@@ -1,14 +1,12 @@
 extends Control
 
-const UnitArt = preload("res://scripts/presentation/pixel_unit_art.gd")
-
-@onready var commander_row: HBoxContainer = $Margin/Main/CommanderRow
-@onready var commander_name: Label = $Margin/Main/DetailPanel/Padding/Details/CommanderName
-@onready var element_label: Label = $Margin/Main/DetailPanel/Padding/Details/Element
-@onready var set_name_label: Label = $Margin/Main/DetailPanel/Padding/Details/SetName
-@onready var cards_grid: GridContainer = $Margin/Main/DetailPanel/Padding/Details/CardsGrid
-@onready var bonus_label: Label = $Margin/Main/DetailPanel/Padding/Details/Bonus
-@onready var build_army_button: Button = $Margin/Main/DetailPanel/Padding/Details/BuildArmy
+@onready var commander_row: GridContainer = $Margin/Main/Body/Gallery/CardsGrid
+@onready var commander_name: Label = $Margin/Main/Body/Details/CommanderName
+@onready var description_label: Label = $Margin/Main/Body/Details/Description/Padding/Content/Body
+@onready var bonus_label: Label = $Margin/Main/Body/Details/Passive/Padding/Content/Body
+@onready var skill_label: Label = $Margin/Main/Body/Details/Active/Padding/Content/Body
+@onready var full_portrait: CardPortrait = $Margin/Main/Body/Portrait/FullPortrait
+@onready var build_army_button: Button = $Margin/Main/Header/Next
 
 var commander_buttons: Dictionary = {}
 var selected_commander_id := ""
@@ -17,153 +15,44 @@ func _ready() -> void:
     ScreenStyle.apply(self)
     ScreenStyle.primary(build_army_button)
     build_army_button.pressed.connect(_open_army_builder)
-
-    var summary := ContentDatabase.get_summary()
-    if not summary.get("ok", false):
-        commander_name.text = "Content data failed to load"
-        element_label.text = "Check the Godot output log."
-        set_name_label.text = ""
-        bonus_label.text = "\n".join(summary.get("errors", []))
+    $Margin/Main/Header/Back.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/main_menu/main_menu.tscn"))
+    if not ContentDatabase.load_errors.is_empty():
+        commander_name.text = "Companions could not be loaded"
+        description_label.text = "Return to the title and try again."
         build_army_button.disabled = true
         return
-
-    _populate_commanders()
-
-func _populate_commanders() -> void:
-    var all_commanders := ContentDatabase.get_all_commanders()
-    if all_commanders.is_empty():
-        commander_name.text = "No Commanders found"
-        build_army_button.disabled = true
-        return
-
-    for commander in all_commanders:
-        var commander_id: String = str(commander.get("id", ""))
-        var button := Button.new()
-        button.custom_minimum_size = Vector2(360, 100)
-        button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-        ScreenStyle.card(button, str(commander.get("element", "earth")))
-        button.add_theme_font_size_override("font_size", 21)
-        button.toggle_mode = true
-        var themed: Array = ContentDatabase.get_cards_by_set(str(commander.get("signature_set_id", "")))
-        if not themed.is_empty():
-            var portrait: Dictionary = themed[0]
-            button.icon = UnitArt.icon(str(portrait["id"]), str(portrait["role"]), str(portrait["element"]))
-            button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-        button.text = "%s\n%s" % [
-            str(commander.get("display_name", commander_id)),
-            str(commander.get("element", "unknown")).capitalize()
-        ]
-        button.pressed.connect(_select_commander.bind(commander_id))
-        commander_buttons[commander_id] = button
-        commander_row.add_child(button)
-
+    for commander in ContentDatabase.get_all_commanders():
+        var id := str(commander.get("id", ""))
+        var tile := CardTile.new()
+        tile.set_content(commander, true)
+        tile.toggle_mode = true
+        tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        tile.pressed.connect(_select_commander.bind(id))
+        commander_buttons[id] = tile
+        commander_row.add_child(tile)
     var initial_id := GameState.selected_commander_id
-    if initial_id.is_empty() or ContentDatabase.get_commander(initial_id).is_empty():
-        initial_id = str(all_commanders[0].get("id", ""))
+    if not commander_buttons.has(initial_id) and not commander_buttons.is_empty():
+        initial_id = str(commander_buttons.keys()[0])
     _select_commander(initial_id)
 
 func _select_commander(commander_id: String) -> void:
     var commander := ContentDatabase.get_commander(commander_id)
     if commander.is_empty():
+        build_army_button.disabled = true
         return
-
     selected_commander_id = commander_id
     GameState.select_commander(commander_id)
-    build_army_button.disabled = false
-
     for id in commander_buttons:
-        commander_buttons[id].button_pressed = str(id) == selected_commander_id
-
-    commander_name.text = str(commander.get("display_name", commander_id))
-    element_label.text = ScreenStyle.skill_description(commander)
-    element_label.tooltip_text = "Costs one pick. Once per round, twice per match."
-
-    var set_id: String = str(commander.get("signature_set_id", ""))
-    var signature_set := ContentDatabase.get_signature_set(set_id)
-    if signature_set.is_empty():
-        set_name_label.text = "Commander theme missing"
-        _clear_cards()
-        bonus_label.text = ""
-        return
-
-    set_name_label.text = "Commander Theme: %s" % str(signature_set.get("display_name", set_id))
-    _show_theme_cards(set_id)
-
+        commander_buttons[id].set_pressed_no_signal(str(id) == commander_id)
+        commander_buttons[id].queue_redraw()
+    commander_name.text = str(commander.get("display_name", "Commander"))
+    description_label.text = str(commander.get("description", "Choose companions to lead into the crossing."))
+    full_portrait.set_content(commander, true)
+    var signature_set := GameState.get_selected_signature_set()
     var bonus: Dictionary = signature_set.get("bonus", {})
-    bonus_label.text = "4-card Theme Bonus: +%s%% %s • Any four unique cards from this theme qualify." % [
-        str(int(bonus.get("percentage", 0))),
-        str(bonus.get("stat", "stat")).replace("_", " ").to_upper()
-    ]
-
-func _show_theme_cards(set_id: String) -> void:
-    _clear_cards()
-    for card in ContentDatabase.get_cards_by_set(set_id):
-        cards_grid.add_child(_make_card_preview(card))
-
-func _make_card_preview(card: Dictionary) -> Control:
-    var panel := PanelContainer.new()
-    panel.custom_minimum_size = Vector2(240, 140)
-
-    var margin := MarginContainer.new()
-    margin.add_theme_constant_override("margin_left", 14)
-    margin.add_theme_constant_override("margin_top", 14)
-    margin.add_theme_constant_override("margin_right", 14)
-    margin.add_theme_constant_override("margin_bottom", 14)
-    panel.add_child(margin)
-
-    var content := VBoxContainer.new()
-    margin.add_child(content)
-
-    var heading := HBoxContainer.new()
-    var portrait := TextureRect.new()
-    portrait.texture = UnitArt.icon(str(card.get("id", "")), str(card.get("role", "range")), str(card.get("element", "earth")))
-    portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-    portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-    portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-    portrait.custom_minimum_size = Vector2(38, 38)
-    heading.add_child(portrait)
-    var heading_text := VBoxContainer.new()
-    heading.add_child(heading_text)
-    content.add_child(heading)
-    var name_label := Label.new()
-    name_label.text = str(card.get("display_name", card.get("id", "Card")))
-    name_label.add_theme_font_size_override("font_size", 19)
-    heading_text.add_child(name_label)
-
-    var role_label := Label.new()
-    role_label.text = "%s • %s" % [
-        str(card.get("element", "unknown")).capitalize(),
-        str(card.get("role", "unit")).capitalize()
-    ]
-    heading_text.add_child(role_label)
-
-    var stats: Dictionary = card.get("stats", {})
-    var stat_label := Label.new()
-    stat_label.text = "HP %s • ATK %s • DEF %s" % [
-        str(int(stats.get("health", 0))),
-        str(int(stats.get("attack", 0))),
-        str(int(stats.get("defense", 0)))
-    ]
-    panel.tooltip_text = stat_label.text
-    stat_label.queue_free()
-
-    var draft_label := Label.new()
-    draft_label.text = "Recruit %s • Up to %s" % [
-        str(int(card.get("summon_amount", 0))),
-        str(int(card.get("unit_cap", 0)))
-    ]
-    content.add_child(draft_label)
-
-    var ability: Dictionary = card.get("ability", {})
-    var ability_label := Label.new()
-    ability_label.text = str(ability.get("display_name", ability.get("id", "Ability")))
-    content.add_child(ability_label)
-
-    return panel
-
-func _clear_cards() -> void:
-    for child in cards_grid.get_children():
-        child.queue_free()
+    bonus_label.text = "+%d%% %s\n\nEquip four unique %s cards to activate this bonus. Mixed armies are welcome too." % [int(bonus.get("percentage", 0)), str(bonus.get("stat", "strength")).replace("_", " ").capitalize(), str(commander.get("element", "themed")).capitalize()]
+    skill_label.text = ScreenStyle.skill_description(commander) + "\n\nCosts one draft pick. Once per round, twice per match."
+    build_army_button.disabled = false
 
 func _open_army_builder() -> void:
     if selected_commander_id.is_empty():

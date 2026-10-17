@@ -17,15 +17,15 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 42.0
-offset_top = 28.0
+offset_top = 24.0
 offset_right = -42.0
-offset_bottom = -28.0
+offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Main" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
 [node name="Header" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
@@ -76,13 +76,13 @@ size_flags_vertical = 3
 [node name="Padding" type="MarginContainer" parent="Margin/Main/OfferPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 18
+theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 18
+theme_override_constants/margin_bottom = 12
 
 [node name="OfferContent" type="VBoxContainer" parent="Margin/Main/OfferPanel/Padding"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
 [node name="Prompt" type="Label" parent="Margin/Main/OfferPanel/Padding/OfferContent"]
 layout_mode = 2
@@ -97,7 +97,7 @@ alignment = 1
 theme_override_constants/separation = 16
 
 [node name="CommanderSkill" type="Button" parent="Margin/Main/OfferPanel/Padding/OfferContent"]
-custom_minimum_size = Vector2(0, 64)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 text = "Commander Skill"
 
@@ -110,7 +110,7 @@ visible = false
 [node name="SummaryRow" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 210)
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
 [node name="ArmyPanel" type="PanelContainer" parent="Margin/Main/SummaryRow"]
 layout_mode = 2

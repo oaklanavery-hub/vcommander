@@ -74,13 +74,13 @@ func run() -> void:
     for button in current_scene.available_card_buttons.values():
         if button.visible:
             visible_cards += 1
-    check(visible_cards == 4, "collection initially shows Commander companions")
+    check(visible_cards == 12, "collection initially shows all available companions")
     current_scene._toggle_filter()
     visible_cards = 0
     for button in current_scene.available_card_buttons.values():
         if button.visible:
             visible_cards += 1
-    check(visible_cards == 12, "browse other elements reveals the full collection")
+    check(visible_cards == 4, "Commander theme filter narrows the collection")
     current_scene._toggle_filter()
     check(state.begin_match(1729), "starter match can begin")
     var draft = await open_scene("res://scenes/draft/draft.tscn")

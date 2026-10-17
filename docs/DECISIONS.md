@@ -50,3 +50,9 @@ Before changing an accepted architectural decision, append a new ADR describing 
 **Status:** accepted
 
 **Reason:** Player-facing help, navigation, music and presentation preferences must be consistent across screens. Presentation-only autoloads own menus and audio; a local ConfigFile stores volume and accessibility preferences. Opening a local modal pauses active selection/replay time, without editing match state or recomputing combat. Leaving an active match requires confirmation. The simulation and data-driven content remain unchanged.
+
+## ADR-010 — Shared portrait cards and local warband presets
+
+**Status:** accepted
+
+**Reason:** The approved wireframes use the same card language in Commander selection and army building. Presentation components render content-driven badges and replaceable portrait catalogs. A separate warband-preset service validates four unique current content IDs before storing three local slots per Commander. UI invokes existing loadout methods; preset persistence does not own combat or change army/draft legality.
