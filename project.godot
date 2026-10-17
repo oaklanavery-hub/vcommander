@@ -5,13 +5,15 @@ config_version=5
 [application]
 
 config/name="VCommander"
-config/version="0.7.0"
-run/main_scene="res://scenes/commander_select/commander_select.tscn"
+config/version="0.7.1"
+run/main_scene="res://scenes/main_menu/main_menu.tscn"
 
 [autoload]
 
 ContentDatabase="*res://scripts/core/content_database.gd"
 GameState="*res://scripts/core/game_state.gd"
+GameAudio="*res://scripts/presentation/game_audio.gd"
+GameMenu="*res://scripts/presentation/game_menu.gd"
 
 [display]
 

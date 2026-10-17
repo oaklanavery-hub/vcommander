@@ -1,19 +1,19 @@
-[gd_resource type="Theme" load_steps=6 format=3]
+[gd_resource type="Theme" load_steps=8 format=3]
 
 [sub_resource type="StyleBoxFlat" id="panel"]
-bg_color = Color(0.12, 0.15, 0.21, 0.98)
+bg_color = Color(0.09, 0.16, 0.13, 0.97)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.42, 0.40, 0.30, 1)
+border_color = Color(0.39, 0.43, 0.29, 1)
 content_margin_left = 10.0
 content_margin_right = 10.0
 content_margin_top = 8.0
 content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="button"]
-bg_color = Color(0.18, 0.24, 0.30, 1)
+bg_color = Color(0.18, 0.27, 0.21, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -25,7 +25,7 @@ content_margin_top = 10.0
 content_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxFlat" id="hover"]
-bg_color = Color(0.24, 0.34, 0.37, 1)
+bg_color = Color(0.28, 0.38, 0.27, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -37,7 +37,7 @@ content_margin_top = 10.0
 content_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxFlat" id="disabled"]
-bg_color = Color(0.13, 0.16, 0.21, 1)
+bg_color = Color(0.13, 0.18, 0.15, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -56,6 +56,14 @@ border_width_right = 3
 border_width_bottom = 3
 border_color = Color(0.65, 0.91, 0.86, 1)
 
+[sub_resource type="StyleBoxFlat" id="progress_bg"]
+bg_color = Color(0.07, 0.12, 0.10, 1)
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="progress_fill"]
+bg_color = Color(0.88, 0.74, 0.46, 1)
+
 [resource]
 default_font_size = 16
 Label/colors/font_color = Color(0.94, 0.91, 0.82, 1)
@@ -68,3 +76,5 @@ Button/styles/disabled = SubResource("disabled")
 Button/styles/focus = SubResource("focus")
 PanelContainer/styles/panel = SubResource("panel")
 RichTextLabel/colors/default_color = Color(0.92, 0.90, 0.82, 1)
+ProgressBar/styles/background = SubResource("progress_bg")
+ProgressBar/styles/fill = SubResource("progress_fill")

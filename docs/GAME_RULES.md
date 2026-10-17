@@ -79,7 +79,7 @@ Once all four Army cards are exhausted, offers may contain three Buff Cards.
 If every Army card and every Buff Card has reached its cap, the remaining selection phase ends automatically.
 
 **R025 — Selection timer**  
-Each individual selection has a 30-second timer. The timer resets after every selection.
+Each individual selection has a 30-second timer. The timer resets after every selection. Local pause, help and settings menus suspend the selection clock until the player returns.
 
 **R026 — Timeout**  
 If time expires, one of the three displayed cards is selected at random. Commander skills are never auto-selected.

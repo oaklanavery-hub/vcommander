@@ -44,3 +44,9 @@ Before changing an accepted architectural decision, append a new ADR describing 
 **Status:** accepted
 
 **Reason:** Original placeholder sprites must evolve alongside gameplay while remaining replaceable by final art. The presentation catalog maps content IDs to silhouettes/palettes and provides generic role/element fallbacks. Animation, VFX and sound consume simulation output only. No visual asset defines combat stats, hit timing or outcomes.
+
+## ADR-009 — Shared player menus and audio
+
+**Status:** accepted
+
+**Reason:** Player-facing help, navigation, music and presentation preferences must be consistent across screens. Presentation-only autoloads own menus and audio; a local ConfigFile stores volume and accessibility preferences. Opening a local modal pauses active selection/replay time, without editing match state or recomputing combat. Leaving an active match requires confirmation. The simulation and data-driven content remain unchanged.

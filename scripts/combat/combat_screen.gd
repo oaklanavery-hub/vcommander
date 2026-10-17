@@ -36,6 +36,12 @@ var _audio = AudioScript.new()
 var _log_lines: Array[String] = []
 
 func _ready() -> void:
+    ScreenStyle.apply(self)
+    GameAudio.set_context("battle")
+    GameAudio.settings_changed.connect(_update_option_labels)
+    ScreenStyle.primary(next_button)
+    get_node("Margin/Main/OptionsRow").hide()
+    seed_label.hide()
     add_child(_audio)
     pause_button.pressed.connect(_toggle_pause)
     details_button.pressed.connect(_toggle_details)
@@ -130,7 +136,7 @@ func _format_event(event: Dictionary) -> String:
             str(event.get("name", "Commander Skill"))
         ]
     if event_type == "ability":
-        return "[%s] %s" % [time_text, str(event.get("ability", "Ability"))]
+        return "[%s] %s" % [time_text, str(event.get("ability", "Ability")).replace("_", " ").capitalize()]
     if event_type == "defeat":
         return "[%s] %s defeated" % [time_text, str(event.get("name", "Unit"))]
     if event_type == "battle_end":
@@ -171,7 +177,7 @@ func _side_summary(title: String, side_config: Dictionary) -> String:
     return "\n".join(lines)
 
 func _update_timer_label() -> void:
-    battle_timer.text = "Battle %05.1f / %05.1f sec" % [_playback_time, _duration]
+    battle_timer.text = "Battle time  %d:%02d" % [int(_playback_time) / 60, int(_playback_time) % 60]
 
 func _update_speed_label() -> void:
     speed_button.text = "Battle speed: %dx" % int(_speed_options[_speed_index])
@@ -198,28 +204,34 @@ func _finish_replay() -> void:
     battlefield.finish_replay()
     var result: Dictionary = GameState.battle_result
     var winner := str(result.get("winner", "draw"))
-    var reason := str(result.get("reason", "complete")).replace("_", " ")
+    GameAudio.play_effect("victory" if winner == "player" else "loss")
     if winner == "player":
-        result_label.text = "PLAYER WINS • %s" % reason
+        result_label.text = "Victory! Your warband holds the crossing."
     elif winner == "opponent":
-        result_label.text = "RIVAL WINS • %s" % reason
+        result_label.text = "A setback. Your next draft gets an extra pick."
     else:
-        result_label.text = "DRAW • %s" % reason
+        result_label.text = "A draw. Both Commanders lose a heart."
     pause_button.disabled = true
     speed_button.disabled = true
     skip_button.disabled = true
     var match_info = GameState.match_state
-    result_label.text += " • Round losses: You %d | Rival %d" % [int(match_info.losses["player"]), int(match_info.losses["opponent"])]
+    if winner == "draw" and match_info.sudden_death:
+        result_label.text = "Sudden Death! Win the next battle outright."
+    result_label.text += "\nYou  %s   •   Rival  %s" % [_hearts(int(match_info.losses["player"])), _hearts(int(match_info.losses["opponent"]))]
     if match_info.is_complete():
-        result_label.text = "MATCH WON!" if match_info.winner == "player" else "MATCH LOST • A new strategy awaits"
-        next_button.text = "Choose a new Commander"
+        result_label.text = "Adventure won! The crossing is yours." if match_info.winner == "player" else "Your warband will rise again. Try a new strategy."
+        next_button.text = "Play again"
     else:
         next_button.text = "Continue to %sRound %d" % ["Sudden Death • " if match_info.sudden_death else "", match_info.round_number + 1]
     next_button.visible = true
+    next_button.grab_focus()
+
+func _hearts(losses: int) -> String:
+    var remaining := clampi(4 - losses, 0, 4)
+    return "♥".repeat(remaining) + "♡".repeat(4 - remaining)
 
 func _go_back() -> void:
-    GameState.leave_match()
-    get_tree().change_scene_to_file("res://scenes/army_builder/army_builder.tscn")
+    GameMenu.confirm_leave("res://scenes/main_menu/main_menu.tscn")
 
 func _next_round() -> void:
     next_button.disabled = true
@@ -242,21 +254,28 @@ func _toggle_details() -> void:
     details_button.text = "Hide details" if summary_row.visible else "Army details"
 
 func _toggle_sound() -> void:
-    AudioScript.sound_enabled = not AudioScript.sound_enabled
+    GameAudio.set_effects_volume(0.0 if GameAudio.effects_volume > 0 else 0.75)
+    GameAudio.save_settings()
     _update_option_labels()
 
 func _toggle_motion() -> void:
     BattlefieldView.reduced_motion = not BattlefieldView.reduced_motion
+    GameAudio.reduced_motion = BattlefieldView.reduced_motion
+    GameAudio.save_settings()
     _update_option_labels()
     battlefield.queue_redraw()
 
 func _toggle_hp() -> void:
     BattlefieldView.show_hp_numbers = not BattlefieldView.show_hp_numbers
+    GameAudio.show_hp_numbers = BattlefieldView.show_hp_numbers
+    GameAudio.save_settings()
     _update_option_labels()
     battlefield.queue_redraw()
 
 func _update_option_labels() -> void:
-    sound_button.text = "Sound: On" if AudioScript.sound_enabled else "Sound: Off"
+    sound_button.text = "Effects: On" if GameAudio.effects_volume > 0 else "Effects: Off"
+    BattlefieldView.reduced_motion = GameAudio.reduced_motion
+    BattlefieldView.show_hp_numbers = GameAudio.show_hp_numbers
     motion_button.text = "Motion: Reduced" if BattlefieldView.reduced_motion else "Motion: Full"
     hp_button.text = "HP numbers: On" if BattlefieldView.show_hp_numbers else "HP numbers: Off"
 

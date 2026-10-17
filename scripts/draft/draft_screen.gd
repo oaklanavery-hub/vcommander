@@ -17,8 +17,18 @@ const SELECTION_SECONDS := 30.0
 @onready var footer: Label = $Margin/Main/Footer
 
 var _time_left: float = SELECTION_SECONDS
+var _timer_bar := ProgressBar.new()
 
 func _ready() -> void:
+    ScreenStyle.apply(self)
+    ScreenStyle.primary(battle_button)
+    _timer_bar.max_value = SELECTION_SECONDS
+    _timer_bar.show_percentage = false
+    _timer_bar.custom_minimum_size.y = 6
+    _timer_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    var content := get_node("Margin/Main/OfferPanel/Padding/OfferContent")
+    content.add_child(_timer_bar)
+    content.move_child(_timer_bar, 1)
     back_button.pressed.connect(_go_back)
     skill_button.pressed.connect(_use_commander_skill)
     battle_button.pressed.connect(_start_battle)
@@ -37,7 +47,9 @@ func _process(delta: float) -> void:
         return
 
     _time_left = maxf(0.0, _time_left - delta)
-    timer_label.text = "Pick timer: %02d" % int(ceil(_time_left))
+    timer_label.text = "%02ds to choose" % int(ceil(_time_left))
+    _timer_bar.value = _time_left
+    timer_label.modulate = Color("f1a27b") if _time_left < 6 else Color.WHITE
     if _time_left <= 0.0:
         if GameState.draft.auto_select():
             _time_left = SELECTION_SECONDS
@@ -45,21 +57,23 @@ func _process(delta: float) -> void:
 
 func _refresh_all() -> void:
     var commander: Dictionary = GameState.get_selected_commander()
-    commander_label.text = "%s • Seed %d" % [
-        str(commander.get("display_name", "Commander")),
-        GameState.match_seed
-    ]
+    commander_label.text = str(commander.get("display_name", "Commander"))
     var round_number: int = GameState.match_state.round_number
     round_label.text = "Round %d • %s" % [round_number, "SUDDEN DEATH" if GameState.match_state.sudden_death else "Command Phase"]
     battle_button.text = "Start Battle %d" % round_number
     selections_label.text = "Selections left: %d" % GameState.draft.selection_points
-    timer_label.text = "Pick timer: %02d" % int(ceil(_time_left))
+    timer_label.text = "%02ds to choose" % int(ceil(_time_left))
+    _timer_bar.value = _time_left
+    timer_label.modulate = Color("f1a27b") if _time_left < 6 else Color.WHITE
 
     _refresh_offer()
     _refresh_skill(commander)
     _refresh_summaries()
 
     var complete: bool = bool(GameState.draft.is_phase_complete())
+    offer_row.visible = not complete
+    _timer_bar.visible = not complete
+    get_node("Margin/Main/OfferPanel/Padding/OfferContent/Prompt").text = "Your warband is ready" if complete else "Choose one card to grow your warband"
     battle_button.visible = complete
     battle_button.disabled = not complete
     if complete:
@@ -80,13 +94,13 @@ func _refresh_offer() -> void:
     for index in range(GameState.draft.current_offer.size()):
         var option: Dictionary = GameState.draft.current_offer[index]
         var button := Button.new()
-        button.custom_minimum_size = Vector2(330, 164)
+        button.custom_minimum_size = Vector2(330, 148)
         button.text = _option_text(option)
         if option.get("type") == "unit":
             var card: Dictionary = ContentDatabase.get_card(str(option["id"]))
             button.icon = UnitArt.icon(str(option["id"]), str(card.get("role", "range")), str(card.get("element", "earth")))
             button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-            button.add_theme_constant_override("icon_max_width", 48)
+            ScreenStyle.card(button, str(card.get("element", "earth")))
             button.tooltip_text = str(card.get("ability", {}).get("display_name", "")) + " • Pick with " + str(index + 1)
         button.disabled = GameState.draft.is_phase_complete()
         button.pressed.connect(_select_offer.bind(index))
@@ -125,6 +139,7 @@ func _option_text(option: Dictionary) -> String:
 
 func _refresh_skill(commander: Dictionary) -> void:
     var skill: Dictionary = commander.get("active_skill", {})
+    skill_button.tooltip_text = ScreenStyle.skill_description(commander)
     skill_button.text = "%s\nCost: 1 selection • Uses left: %d/2" % [
         str(skill.get("display_name", "Commander Skill")),
         GameState.draft.commander_skill_uses_remaining()
@@ -170,11 +185,13 @@ func _refresh_summaries() -> void:
 
 func _select_offer(index: int) -> void:
     if GameState.draft.select_offer(index):
+        GameAudio.play_effect("pick")
         _time_left = SELECTION_SECONDS
         _refresh_all()
 
 func _use_commander_skill() -> void:
     if GameState.draft.use_commander_skill():
+        GameAudio.play_effect("commander_skill")
         _time_left = SELECTION_SECONDS
         _refresh_all()
 
@@ -188,8 +205,7 @@ func _start_battle() -> void:
     footer.text = "Battle could not start. Finish the draft and try again."
 
 func _go_back() -> void:
-    GameState.leave_match()
-    get_tree().change_scene_to_file("res://scenes/army_builder/army_builder.tscn")
+    GameMenu.confirm_leave("res://scenes/army_builder/army_builder.tscn")
 
 func _opponent_text() -> String:
     var side: Dictionary = GameState.opponent_public_side

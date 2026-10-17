@@ -39,7 +39,7 @@ text = "← Army"
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 34
-text = "Pre-Battle Draft"
+text = "Grow your warband"
 horizontal_alignment = 1
 
 [node name="Commander" type="Label" parent="Margin/Main/Header"]
@@ -104,7 +104,7 @@ text = "Commander Skill"
 [node name="StartBattle" type="Button" parent="Margin/Main/OfferPanel/Padding/OfferContent"]
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
-text = "Start Battle 1 Preview"
+text = "To the battlefield →"
 visible = false
 
 [node name="SummaryRow" type="HBoxContainer" parent="Margin/Main"]

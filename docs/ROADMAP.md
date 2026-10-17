@@ -52,6 +52,13 @@
 - Reproducible automated balance samples and capped-roster stress tests; see `PLAYTEST_REPORT.md`.
 - CI screenshots, deployment validation gate, exported-PCK tests and public build identity.
 
+## v0.7.1 — Player experience (requested after playtesting)
+
+- Title menu, How to Play, shared pause/settings and confirmed match exit.
+- Starter warbands, focused collection browsing and clearer draft/results.
+- Original scenery, two music loops, nine effects and saved presentation preferences.
+- Menu/navigation/persistence tests and ten visual captures.
+
 ## Next major phase — Game Director scope decision
 
 The approved elemental PvAI vertical slice is implemented. A new major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved roadmap. Human playtesting should inform further balance values; the current tuning remains provisional.

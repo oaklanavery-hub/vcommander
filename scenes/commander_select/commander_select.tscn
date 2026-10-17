@@ -29,13 +29,13 @@ theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="Margin/Main"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 40
-text = "VCOMMANDER"
+theme_override_font_sizes/font_size = 34
+text = "Choose your Commander"
 
 [node name="Subtitle" type="Label" parent="Margin/Main"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Choose your Commander • Build a warband. Lead it to victory."
+text = "1 / 3   Choose your leader. Their companions are ready to join you."
 
 [node name="CommanderRow" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
@@ -92,4 +92,4 @@ autowrap_mode = 2
 [node name="BuildArmy" type="Button" parent="Margin/Main/DetailPanel/Padding/Details"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-text = "Build Army →"
+text = "Meet your warband →"

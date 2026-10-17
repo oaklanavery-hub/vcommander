@@ -43,6 +43,10 @@ jobs:
             exit 1
           fi
           test -s build/qa/commander.png
+          test -s build/qa/menu.png
+          test -s build/qa/help.png
+          test -s build/qa/settings.png
+          test -s build/qa/pause.png
           test -s build/qa/army.png
           test -s build/qa/draft.png
           test -s build/qa/battle.png

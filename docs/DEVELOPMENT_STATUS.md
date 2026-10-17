@@ -1,25 +1,21 @@
 # Development handoff
 
-Read this with `AGENTS.md` and verify it against the actual Git branch and GitHub Actions before working. Keep this file short and replace stale task details at each checkpoint.
+Verify this handoff against GitHub and the working tree before resuming.
 
-## Product baseline
+## Current task — Player experience and presentation
 
-- Last gameplay baseline: v0.7, main commit `35d636b8039c45670d2cf9aaab7b890fefe72a3c`.
-- The user confirmed that the game works on 18 October 2026 (Malaysia time).
-- The approved v0.0–v0.7 roadmap is implemented. Art and balance remain provisional; see `docs/PLAYTEST_REPORT.md`.
-- The next major product phase needs a direction: campaign/progression, online PvP, or VTuber/mascot integration. Do not choose an expansion on the user's behalf.
+- User request (18 October 2026, Malaysia): the game works, but needs a friendly interface, stronger visuals, a game menu, sound effects and BGM.
+- Branch: `feat/player-experience`, based on main `5753de373916383b72fef0d88df2d0f1c16a86d5`.
+- Scope: title menu, How to Play, shared pause/settings/leave confirmation, cozy original scenery, clearer setup/draft/result hierarchy, original looping music and sound effects, persistent presentation settings.
+- Acceptance: full menu → Commander → army → draft → battle → result flow; help/settings and confirmed exit; preference persistence; audio included in exports; readable 1280×720 screens; passing regression suites and deployment checks.
+- Implemented: title/help/settings/pause, safe exit, starter-warband flow, warm forest scenery, card hierarchy, two music loops and nine effects.
+- Local validation: all 13 suites passed with `python3 tools/run_checks.py --godot /workspace/scratch/5d3e19c21d4d/vcommander-tools/Godot_v4.7-stable_linux.x86_64`; final visual captures, fresh-import CI and deployed-pack checks remain pending.
+- Native visual review: ten 1280×720 Compatibility-renderer captures inspected (title, help, settings, Commander, warband, draft, pause, battle, effects and result). Fixed a collapsed collection, focused-button contrast and undersized portraits. Added a collection visibility/filter regression check.
+- After those fixes, `tests/test_player_experience.gd` and `tests/test_scene_flow.gd` both passed. Audio files were verified as 40.0s / 34.29s original loops plus nine effects.
+- PR: https://github.com/oaklanavery-hub/vcommander/pull/12 — current checks and final run links are recorded there. The initial head passed CI at https://github.com/oaklanavery-hub/vcommander/actions/runs/39053920966. Final-head CI and post-merge deployment verification must pass before release.
+- No hardware/browser audio audition is claimed; the cloud verification browser lacks WebGL2. Native renders and source/export/deployed-pack tests provide the automated evidence.
+- If interrupted: inspect this branch's diff/PR, complete the current-head CI/visual acceptance checks, then merge. If already merged, verify its Deploy Web run. Do not restart completed gameplay work. Final evidence is in the PR and Actions run for its merge commit.
 
-## Current checkpoint: reduce development timeout exposure
+## Product scope
 
-- Branch: `fix/development-checkpoints`, based on the gameplay baseline above.
-- Goal: preserve progress across interrupted AI runs and remove duplicate CI work.
-- Changes: small resumable batches in `AGENTS.md`; this handoff; one validation path on main through Deploy Web; cancellation of superseded validation runs; bounded CI/build/deploy job durations and Godot export/import commands.
-- Evidence for the diagnosis: [the last baseline deployment](https://github.com/oaklanavery-hub/vcommander/actions/runs/38999705615) took about two minutes from validation start through served-build verification. A separate CI workflow also ran the same source validation on main. The exact cause of the user's ChatGPT timeout is unconfirmed.
-- Local validation passed: `git diff --check`; Python/PyYAML parsing of both workflows, trigger ownership, dependency gates, distinct concurrency groups, timeout bounds and handoff links.
-- Remote validation: inspect the checkpoint PR's CI and the merged commit's Deploy Web run in [GitHub Actions](https://github.com/oaklanavery-hub/vcommander/actions). A pending run is not a passing check. Source, visual QA, exported-pack and served-pack checks remain required.
-- Next action if interrupted: find the open PR for this branch and inspect its exact head checks. Complete validation and merge only after it passes. If already merged, inspect that commit's deployment and address any failure before starting other work.
-- After this checkpoint ships: gather the user's remaining concerns or the next product direction. Human playtesting should guide further balance changes.
-
-## Handoff fields for the next task
-
-Record the goal and acceptance checks, branch/base commit, completed changes, exact validation results and run links, remaining work, and the next executable step. Preserve unfinished work on its branch and label unrun or failed checks honestly.
+v0.7 core PvAI is playable. The user prioritizes usability and polish before campaign, online PvP or mascot expansion. Those expansions still need direction. Art and balance remain provisional.

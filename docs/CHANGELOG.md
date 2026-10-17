@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.7.1 — Player experience
+
+- Forest-camp title menu, original pixel scenery and a warmer forest/brass interface.
+- Player guide, shared pause/settings menus, confirmed match exit and active-time draft clocks.
+- Prefilled starter warbands, companion collection filtering, readable card hierarchy and advanced seed controls.
+- Two original music loops, nine original sound effects, first-interaction audio activation and saved device preferences.
+- Clearer battle/result language, heart feedback and a focused battle control bar.
+- Navigation, modal layout, pause/exit safety, preference persistence and exported audio regression checks; ten CI screenshots.
+
 ## Development workflow — Resumable checkpoints
 
 - Added a repository handoff and small-checkpoint instructions so interrupted AI work can resume from saved branches and check results.
