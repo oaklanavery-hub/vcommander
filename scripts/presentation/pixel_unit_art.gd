@@ -26,6 +26,9 @@ static func palette(element: String) -> Dictionary:
     return result
 
 static func icon(card_id: String, role: String = "range", element: String = "earth") -> Texture2D:
+    var detailed := PixelAtlasArt.icon("units", card_id)
+    if detailed != null:
+        return detailed
     var key := card_id + role + element
     if _icons.has(key):
         return _icons[key]
@@ -46,6 +49,10 @@ static func icon(card_id: String, role: String = "range", element: String = "ear
 
 # All animation is derived from replay motion/events, never from game-rule state.
 static func draw_unit(canvas: CanvasItem, position: Vector2, role: String, element: String, pixel: float, flip: bool = false, bob: float = 0.0, card_id: String = "", pose: Dictionary = {}) -> void:
+    var detailed := PixelAtlasArt.icon("units", card_id)
+    if detailed != null:
+        _draw_detailed_unit(canvas, detailed, position, pixel, flip, bob, pose)
+        return
     var sprite := definition(card_id, role, element)
     var colors := palette(element)
     var rows: Array = sprite.get("pixels", [])
@@ -81,3 +88,37 @@ static func draw_unit(canvas: CanvasItem, position: Vector2, role: String, eleme
                 py += stride * facing_offset.y
                 stride *= facing_offset.x
             canvas.draw_rect(Rect2(origin + (Vector2(px + stride, py) + offset) * pixel, Vector2.ONE * pixel), color)
+
+static func _draw_detailed_unit(canvas: CanvasItem, texture: Texture2D, position: Vector2, pixel: float, flip: bool, bob: float, pose: Dictionary) -> void:
+    var state := str(pose.get("state", "idle"))
+    var facing := int(pose.get("facing", 4 if flip else 0))
+    var direction := Vector2(cos(float(facing) * PI / 4.0), sin(float(facing) * PI / 4.0)).round()
+    var mirror := facing in [3, 4, 5] if state in ["move", "attack"] else flip
+    if mirror:
+        texture = PixelAtlasArt.mirrored(texture)
+    var moving := state == "move"
+    var stride := 1.0 if int(pose.get("step", 0)) % 4 < 2 else -1.0
+    var side := roundf(pixel * 24.0)
+    var origin := (position - Vector2(side * 0.5, side * 0.9 + bob)).round()
+    var tint := Color(1.6, 1.5, 1.3) if bool(pose.get("hit", false)) else Color.WHITE
+    tint.a = float(pose.get("alpha", 1.0))
+    if state == "death":
+        canvas.draw_texture_rect(texture, Rect2(origin + Vector2(0, side * 0.45), Vector2(side, side * 0.55)), false, tint)
+        return
+    var source := texture.get_size()
+    # Directional body lean and alternating lower-body strips retain the existing
+    # eight-direction/four-step procedural animation without driving simulation.
+    for y in range(0, int(source.y), 4):
+        var top := roundf(float(y) * side / source.y)
+        var bottom := roundf(minf(float(y + 4), source.y) * side / source.y)
+        var offset := direction * (1.0 if state == "attack" else 0.0)
+        if moving and float(y) < source.y * 0.45:
+            offset = Vector2(direction.x, -absf(direction.y))
+        if moving and float(y) >= source.y * 0.72:
+            for leg in range(2):
+                var step := stride * (1.0 if leg == 0 else -1.0)
+                var shift := Vector2(direction.x * step, -absf(direction.y) * step)
+                var target := Rect2(origin + Vector2(float(leg) * side * 0.5, top) + shift, Vector2(side * 0.5, bottom - top))
+                canvas.draw_texture_rect_region(texture, target, Rect2(float(leg) * source.x * 0.5, y, source.x * 0.5, 4), tint)
+        else:
+            canvas.draw_texture_rect_region(texture, Rect2(origin + Vector2(0, top) + offset, Vector2(side, bottom - top)), Rect2(0, y, source.x, minf(4, source.y - y)), tint)

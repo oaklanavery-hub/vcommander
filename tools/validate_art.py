@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 import re
+import struct
 
 root = Path(__file__).resolve().parents[1]
 catalog = json.loads((root / 'assets/pixel/roster.json').read_text())
@@ -33,3 +34,23 @@ for path in (root / 'data/commanders').glob('*.json'):
     assert all(cell == '.' or cell in colors for row in sprite['pixels'] for cell in row), element
     assert sum(cell != '.' for row in sprite['pixels'] for cell in row) > 100, element
 print('Commander art OK: three original 32x48 portraits and element coverage')
+
+atlas_manifest = json.loads((root / 'assets/pixel/art_manifest.json').read_text())
+assert atlas_manifest['schema_version'] == 1
+for group, expected in [('units', {card['id'] for card in cards} | {'commander_plant'}),
+                        ('commanders', {json.loads(path.read_text())['element'] for path in (root / 'data/commanders').glob('*.json')})]:
+    atlas = atlas_manifest[group]
+    assert set(atlas['frames']) == expected, group
+    path = root / atlas['texture'].removeprefix('res://')
+    with path.open('rb') as stream:
+        header = stream.read(26)
+    assert header[:8] == b'\x89PNG\r\n\x1a\n', path
+    width, height = struct.unpack('>II', header[16:24])
+    assert header[25] == 6, f'Expected RGBA transparency: {path}'
+    assert width % atlas['cell_size'][0] == 0 and height % atlas['cell_size'][1] == 0
+    seen = set()
+    for name, (x, y) in atlas['frames'].items():
+        assert (x, y) not in seen, name
+        seen.add((x, y))
+        assert x >= 0 and y >= 0 and (x + 1) * atlas['cell_size'][0] <= width and (y + 1) * atlas['cell_size'][1] <= height, name
+print('Detailed art OK: three 128x192 Commander frames, thirteen 64x64 roster frames, RGBA textures and unique regions')

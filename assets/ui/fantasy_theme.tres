@@ -1,18 +1,33 @@
-[gd_resource type="Theme" load_steps=8 format=3]
+[gd_resource type="Theme" load_steps=11 format=3]
 
 [sub_resource type="StyleBoxFlat" id="panel"]
-bg_color = Color(0.09, 0.16, 0.13, 0.97)
+anti_aliasing = false
+corner_detail = 4
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+bg_color = Color(0.075, 0.135, 0.115, 0.97)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.39, 0.43, 0.29, 1)
+border_color = Color(0.40, 0.44, 0.31, 1)
+shadow_color = Color(0.02, 0.04, 0.035, 0.25)
+shadow_size = 3
+shadow_offset = Vector2(0, 2)
 content_margin_left = 10.0
 content_margin_right = 10.0
 content_margin_top = 8.0
 content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="button"]
+anti_aliasing = false
+corner_detail = 4
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 bg_color = Color(0.18, 0.27, 0.21, 1)
 border_width_left = 2
 border_width_top = 2
@@ -25,6 +40,12 @@ content_margin_top = 10.0
 content_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxFlat" id="hover"]
+anti_aliasing = false
+corner_detail = 4
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 bg_color = Color(0.28, 0.38, 0.27, 1)
 border_width_left = 2
 border_width_top = 2
@@ -37,6 +58,12 @@ content_margin_top = 10.0
 content_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxFlat" id="disabled"]
+anti_aliasing = false
+corner_detail = 4
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 bg_color = Color(0.13, 0.18, 0.15, 1)
 border_width_left = 1
 border_width_top = 1
@@ -49,6 +76,12 @@ content_margin_top = 10.0
 content_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxFlat" id="focus"]
+anti_aliasing = false
+corner_detail = 4
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 3
 border_width_top = 3
@@ -57,12 +90,50 @@ border_width_bottom = 3
 border_color = Color(0.65, 0.91, 0.86, 1)
 
 [sub_resource type="StyleBoxFlat" id="progress_bg"]
+anti_aliasing = false
+corner_detail = 4
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 bg_color = Color(0.07, 0.12, 0.10, 1)
 content_margin_top = 3.0
 content_margin_bottom = 3.0
 
 [sub_resource type="StyleBoxFlat" id="progress_fill"]
+anti_aliasing = false
+corner_detail = 4
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 bg_color = Color(0.88, 0.74, 0.46, 1)
+
+[sub_resource type="StyleBoxFlat" id="scroll_track"]
+bg_color = Color(0.07, 0.12, 0.10, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 5.0
+content_margin_right = 5.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="scroll_grabber"]
+bg_color = Color(0.44, 0.51, 0.38, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="scroll_hover"]
+bg_color = Color(0.81, 0.70, 0.43, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+anti_aliasing = false
 
 [resource]
 default_font_size = 16
@@ -78,3 +149,18 @@ PanelContainer/styles/panel = SubResource("panel")
 RichTextLabel/colors/default_color = Color(0.92, 0.90, 0.82, 1)
 ProgressBar/styles/background = SubResource("progress_bg")
 ProgressBar/styles/fill = SubResource("progress_fill")
+OptionButton/styles/normal = SubResource("button")
+OptionButton/styles/hover = SubResource("hover")
+OptionButton/styles/pressed = SubResource("hover")
+OptionButton/styles/focus = SubResource("focus")
+OptionButton/colors/font_color = Color(0.98, 0.93, 0.80, 1)
+LineEdit/styles/normal = SubResource("button")
+LineEdit/styles/focus = SubResource("focus")
+LineEdit/colors/font_color = Color(0.98, 0.93, 0.80, 1)
+VScrollBar/styles/scroll = SubResource("scroll_track")
+VScrollBar/styles/grabber = SubResource("scroll_grabber")
+VScrollBar/styles/grabber_highlight = SubResource("scroll_hover")
+VScrollBar/styles/grabber_pressed = SubResource("scroll_hover")
+TooltipPanel/styles/panel = SubResource("panel")
+TooltipLabel/colors/font_color = Color(0.98, 0.93, 0.80, 1)
+TooltipLabel/font_sizes/font_size = 15

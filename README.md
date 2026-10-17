@@ -4,10 +4,12 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.7.2 — Portrait cards and saved warbands**
+**v0.7.3 — Detailed pixel fantasy artwork**
 
 The current playable prototype supports:
 
+- three distinct detailed Commander designs and thirteen detailed army sprites, shared by cards and battles
+- rounded pixel-edged card frames, gold selection borders, darker nameplates and refined panels/navigation
 - portrait Commander/army cards with element, class and recruit/cap badges
 - Commander gallery, full-body portrait and separate description, passive and active panels
 - four warband slots, an eight-column collection, element filters and three saved presets per Commander
@@ -86,6 +88,8 @@ Music and sound begin after the first player interaction. **Settings** has separ
 ## Cards and warband presets
 
 A card’s top-left badge identifies its element. Army cards show recruits per pick / unit cap at the top right, with a class symbol underneath (shield: Tank, sword: Melee, bow: Range, cross: Healer). Hover for ability and stat details. The Commander portrait, theme passive and active skill are shown separately before army building.
+
+Detailed artwork uses transparent 128×192 Commander and 64×64 unit atlas cells with nearest-neighbor display. Designs are original generated fantasy artwork; provenance and exact prompts are in `assets/pixel/CREDITS.md`. Combat movement/attacks remain procedural presentation driven by the replay.
 
 Choose Preset 1, 2 or 3, then **Save** a complete four-card warband. Clicking a populated preset loads it. Empty slots preserve the current selection; **Clear** empties only the current warband. Presets are saved per Commander on this device and are checked against current content before loading. The top-right dropdown filters the collection; a gold card border marks equipped companions.
 

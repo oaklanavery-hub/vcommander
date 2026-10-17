@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.7.3 — Detailed pixel fantasy artwork
+
+- Three distinct original Commander designs: fire battlemage, tide spellcaster and forest warden, at 128×192 native pixels.
+- Thirteen original 64×64 roster sprites with richer silhouettes, layered materials and transparent gutters, shared across cards, battle actors, roster summaries and camp scenery.
+- Rounded pixel-edged cards and panels, darker nameplates, gold selection borders, hover feedback and refined navigation/scrollbar styling.
+- Taller Commander gallery cards, framed portrait backdrops and adjusted battlefield health-bar spacing.
+- Cached data-driven atlas regions, documented art provenance/prompts and exported-frame transparency/coverage checks. Rules, stats and saved presets are unchanged.
+
 ## v0.7.2 — Portrait cards and saved warbands
 
 - Reference-based Commander gallery, full-body view and separate description, passive and active panels.
