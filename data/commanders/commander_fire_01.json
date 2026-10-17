@@ -19,5 +19,6 @@
     "aoe_radius": "medium",
     "damage_reduced_by_def": true,
     "targeting": "spread_enemy_units"
-  }
+  },
+  "description": "A bold leader whose companions favour hard-hitting attacks and explosive magic."
 }

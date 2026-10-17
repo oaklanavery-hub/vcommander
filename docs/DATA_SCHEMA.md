@@ -32,6 +32,8 @@ Required core fields:
 
 `active_skill.type` selects a generic combat behavior. Skill-specific parameters live beside it inside `active_skill`; generic systems must not branch on Commander IDs.
 
+The optional Commander `description` is player-facing flavor text. It does not grant abilities or modify stats.
+
 Starter skill behavior types in v0.4 are:
 
 - `targeted_aoe_max_hp`
@@ -173,3 +175,5 @@ The simulator returns a result with winner/reason/duration, a battle-event array
 Combat replay units include stable `card_id`, `element`, HP, position, ability type, aura radius and burn state. Frames also include projectile positions and temporary healing areas. Commander/meteor events carry generic behavior types, elemental colors and impact coordinates. These fields are read-only presentation output; they never provide gameplay input.
 
 The separate `assets/pixel/roster.json` catalog uses its own schema version 1: common colors, elemental palettes and a `sprites` dictionary keyed by presentation/content ID. Each sprite defines a name, element, role and sixteen rows of sixteen palette characters. `.` is transparent. `tools/validate_art.py` verifies palette validity, dimensions and coverage of all starter cards independently of gameplay content validation.
+
+`assets/pixel/commanders.json` uses the same palette-character approach for original 32×48 full-body portraits keyed by element. Commander cards and the full portrait share this catalog. A card's recruit/cap fraction and class badge always read its content definition, independently of the artwork.

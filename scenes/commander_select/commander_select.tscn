@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
-[ext_resource path="res://scripts/commander_select/commander_select.gd" type="Script" id="1"]
+[ext_resource type="Script" path="res://scripts/commander_select/commander_select.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/presentation/card_portrait.gd" id="2"]
 
 [node name="CommanderSelect" type="Control"]
 layout_mode = 3
@@ -20,76 +21,152 @@ offset_left = 24.0
 offset_top = 24.0
 offset_right = -24.0
 offset_bottom = -24.0
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="Main" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 18
 
-[node name="Title" type="Label" parent="Margin/Main"]
+[node name="Header" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
-text = "Choose your Commander"
+theme_override_constants/separation = 10
 
-[node name="Subtitle" type="Label" parent="Margin/Main"]
+[node name="Title" type="Label" parent="Margin/Main/Header"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "1 / 3   Choose your leader. Their companions are ready to join you."
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "CHOOSE YOUR COMMANDER"
 
-[node name="CommanderRow" type="HBoxContainer" parent="Margin/Main"]
+[node name="Back" type="Button" parent="Margin/Main/Header"]
 layout_mode = 2
-theme_override_constants/separation = 14
+custom_minimum_size = Vector2(100, 46)
+text = "Back"
 
-[node name="Divider" type="HSeparator" parent="Margin/Main"]
+[node name="Next" type="Button" parent="Margin/Main/Header"]
 layout_mode = 2
+custom_minimum_size = Vector2(122, 46)
+text = "Next →"
 
-[node name="DetailPanel" type="PanelContainer" parent="Margin/Main"]
+[node name="Body" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/separation = 18
 
-[node name="Padding" type="MarginContainer" parent="Margin/Main/DetailPanel"]
+[node name="Gallery" type="ScrollContainer" parent="Margin/Main/Body"]
 layout_mode = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 14
+custom_minimum_size = Vector2(438, 0)
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.2
+horizontal_scroll_mode = 0
+follow_focus = true
 
-[node name="Details" type="VBoxContainer" parent="Margin/Main/DetailPanel/Padding"]
+[node name="CardsGrid" type="GridContainer" parent="Margin/Main/Body/Gallery"]
 layout_mode = 2
-theme_override_constants/separation = 8
+size_flags_horizontal = 3
+columns = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 14
 
-[node name="CommanderName" type="Label" parent="Margin/Main/DetailPanel/Padding/Details"]
+[node name="Portrait" type="PanelContainer" parent="Margin/Main/Body"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
+custom_minimum_size = Vector2(260, 0)
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.8
+
+[node name="FullPortrait" type="Control" parent="Margin/Main/Body/Portrait"]
+layout_mode = 2
+script = ExtResource("2")
+
+[node name="Details" type="VBoxContainer" parent="Margin/Main/Body"]
+layout_mode = 2
+custom_minimum_size = Vector2(320, 0)
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="CommanderName" type="Label" parent="Margin/Main/Body/Details"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
 text = "Commander"
 
-[node name="Element" type="Label" parent="Margin/Main/DetailPanel/Padding/Details"]
+[node name="Description" type="PanelContainer" parent="Margin/Main/Body/Details"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Element"
+custom_minimum_size = Vector2(0, 128)
+size_flags_vertical = 1
 
-[node name="SetName" type="Label" parent="Margin/Main/DetailPanel/Padding/Details"]
+[node name="Padding" type="MarginContainer" parent="Margin/Main/Body/Details/Description"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Signature Set"
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
 
-[node name="CardsGrid" type="GridContainer" parent="Margin/Main/DetailPanel/Padding/Details"]
+[node name="Content" type="VBoxContainer" parent="Margin/Main/Body/Details/Description/Padding"]
 layout_mode = 2
-columns = 4
-theme_override_constants/h_separation = 12
+theme_override_constants/separation = 10
 
-[node name="Bonus" type="Label" parent="Margin/Main/DetailPanel/Padding/Details"]
+[node name="Title" type="Label" parent="Margin/Main/Body/Details/Description/Padding/Content"]
 layout_mode = 2
-text = "Commander bonus"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.88, 0.74, 0.46, 1)
+text = "COMMANDER"
+
+[node name="Body" type="Label" parent="Margin/Main/Body/Details/Description/Padding/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
 autowrap_mode = 2
+text = "Select a Commander"
 
-[node name="NextStep" type="Label" parent="Margin/Main/DetailPanel/Padding/Details"]
+[node name="Passive" type="PanelContainer" parent="Margin/Main/Body/Details"]
 layout_mode = 2
-text = "Choose a Commander, then continue to build a four-card Army."
+custom_minimum_size = Vector2(0, 152)
+size_flags_vertical = 1
+
+[node name="Padding" type="MarginContainer" parent="Margin/Main/Body/Details/Passive"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="Margin/Main/Body/Details/Passive/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Margin/Main/Body/Details/Passive/Padding/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.88, 0.74, 0.46, 1)
+text = "PASSIVE · THEME BONUS"
+
+[node name="Body" type="Label" parent="Margin/Main/Body/Details/Passive/Padding/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
 autowrap_mode = 2
+text = "Select a Commander"
 
-[node name="BuildArmy" type="Button" parent="Margin/Main/DetailPanel/Padding/Details"]
-custom_minimum_size = Vector2(0, 50)
+[node name="Active" type="PanelContainer" parent="Margin/Main/Body/Details"]
 layout_mode = 2
-text = "Meet your warband →"
+custom_minimum_size = Vector2(0, 180)
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Margin/Main/Body/Details/Active"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="Margin/Main/Body/Details/Active/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Margin/Main/Body/Details/Active/Padding/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.88, 0.74, 0.46, 1)
+text = "ACTIVE SKILL"
+
+[node name="Body" type="Label" parent="Margin/Main/Body/Details/Active/Padding/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 2
+text = "Select a Commander"

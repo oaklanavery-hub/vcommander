@@ -25,5 +25,6 @@
       "damage_reduced_by_def": true,
       "stationary": true
     }
-  }
+  },
+  "description": "A steadfast protector whose companions hold the line and support one another."
 }
