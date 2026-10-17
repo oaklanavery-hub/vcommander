@@ -10,6 +10,7 @@
 - Improved generic AI valuation of first healing support; adjusted Ice Giant/Sea Serpent ATK and Giant Tree healing for the provisional baseline.
 - Automated validation over 108 final-sample matches/652 battles, max-cap roster stress and visual captures.
 - Deployment depends on validation, tests the actual exported PCK, excludes generated output and publishes source identity.
+- Post-deployment CI verifies the served commit and game-pack SHA-256, then runs all suites from the downloaded Pages payload.
 - Reusable local/deployed validation tools and an evidence-based playtest report.
 
 
