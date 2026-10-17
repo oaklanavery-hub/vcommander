@@ -9,6 +9,7 @@ const SELECTION_SECONDS := 30.0
 @onready var timer_label: Label = $Margin/Main/StatusRow/Timer
 @onready var offer_row: HBoxContainer = $Margin/Main/OfferPanel/Padding/OfferContent/OfferRow
 @onready var skill_button: Button = $Margin/Main/OfferPanel/Padding/OfferContent/CommanderSkill
+@onready var battle_button: Button = $Margin/Main/OfferPanel/Padding/OfferContent/StartBattle
 @onready var army_summary: RichTextLabel = $Margin/Main/SummaryRow/ArmyPanel/Padding/ArmySummary
 @onready var buff_summary: RichTextLabel = $Margin/Main/SummaryRow/BuffPanel/Padding/BuffSummary
 @onready var footer: Label = $Margin/Main/Footer
@@ -18,10 +19,12 @@ var _time_left: float = SELECTION_SECONDS
 func _ready() -> void:
     back_button.pressed.connect(_go_back)
     skill_button.pressed.connect(_use_commander_skill)
+    battle_button.pressed.connect(_start_battle)
 
     if not GameState.match_started:
         footer.text = "No active draft. Return to the Army Builder."
         skill_button.disabled = true
+        battle_button.visible = false
         set_process(false)
         return
 
@@ -52,8 +55,11 @@ func _refresh_all() -> void:
     _refresh_skill(commander)
     _refresh_summaries()
 
-    if GameState.draft.is_phase_complete():
-        footer.text = "Opening draft complete. Your army state is ready for v0.4 deterministic auto-combat."
+    var complete: bool = bool(GameState.draft.is_phase_complete())
+    battle_button.visible = complete
+    battle_button.disabled = not complete
+    if complete:
+        footer.text = "Opening draft complete. Run the deterministic Battle 1 combat preview."
         timer_label.text = "Draft complete"
     else:
         footer.text = "Round 1 is Army-only. Every pick rerolls all three choices."
@@ -152,6 +158,17 @@ func _use_commander_skill() -> void:
         _time_left = SELECTION_SECONDS
         _refresh_all()
 
+func _start_battle() -> void:
+    battle_button.disabled = true
+    footer.text = "Simulating deterministic Battle 1…"
+    if GameState.run_combat_preview():
+        get_tree().change_scene_to_file("res://scenes/combat/combat.tscn")
+        return
+    battle_button.disabled = false
+    footer.text = "Combat preview could not start. Finish the draft and try again."
+
 func _go_back() -> void:
     GameState.match_started = false
+    GameState.battle_result.clear()
+    GameState.training_opponent.clear()
     get_tree().change_scene_to_file("res://scenes/army_builder/army_builder.tscn")

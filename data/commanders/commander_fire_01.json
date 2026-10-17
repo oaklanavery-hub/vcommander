@@ -8,6 +8,7 @@
   "active_skill": {
     "id": "meteor_barrage",
     "display_name": "Meteor Barrage",
+    "type": "targeted_aoe_max_hp",
     "uses_per_match": 2,
     "uses_per_round": 1,
     "selection_cost": 1,
@@ -15,6 +16,7 @@
     "meteors": 6,
     "direct_max_hp_pct": 20,
     "aoe_max_hp_pct": 10,
+    "aoe_radius": "medium",
     "damage_reduced_by_def": true,
     "targeting": "spread_enemy_units"
   }

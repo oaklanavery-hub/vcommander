@@ -8,6 +8,7 @@
   "active_skill": {
     "id": "plant_summon",
     "display_name": "Plant Summon",
+    "type": "summon_stationary_units",
     "uses_per_match": 2,
     "uses_per_round": 1,
     "selection_cost": 1,

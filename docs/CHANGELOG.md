@@ -3,22 +3,26 @@
 ## Unreleased
 
 ### Added
-- v0.3 seeded three-choice Draft System and opening pre-battle draft screen.
-- 30-second selection timer with random card auto-pick.
-- Unit summon amounts/caps, persistent unit-count progression and card exhaustion.
-- Five stackable Army-wide Buff Card definitions with three-stack caps.
-- Commander active-skill selection cost and use-limit state.
-- Finalized starter Fire/Water/Earth roster names, initial stats and ability data.
-- Data-driven Commander themed-set bonuses.
-- Expanded authoritative match, draft, combat, targeting and presentation rules.
-- Draft-system automated tests.
+- v0.4 deterministic fixed-timestep `CombatSimulator`.
+- Battle events and periodic replay frames separated from presentation.
+- Left-vs-right automatic formations with tank, melee and backline placement.
+- Target locking, tank targeting priority, ranged kiting, collision-aware movement and retargeting.
+- Normal attack, projectile, DEF, healing, DoT, aura, push/pull and empowered-hit simulation.
+- Fire, Water and Earth Commander active-skill resolution immediately before combat.
+- Starter unit ability execution driven by generic JSON ability `type` values.
+- Battle 1 placeholder replay screen with speed controls, event feed, HP bars and skip-to-result.
+- Deterministic training opponent for the v0.4 combat harness.
+- Combat simulator regression/determinism tests.
+- Simulation/battlefield playtest parameters in `game_balance.json`.
 
 ### Changed
-- Army loadouts now reject duplicate card IDs.
-- Commander set activation now checks whether all four equipped cards match the Commander's theme rather than four permanently hardcoded required card IDs.
-- Army Builder now shows approved starter stats, uniqueness, themed-set effect and a path into the Draft prototype.
+- `ContentDatabase` now loads the global balance definition.
+- Commander active-skill data now declares a generic `type` consumed by combat systems.
+- The opening Draft screen now leads into the v0.4 Battle 1 preview after all selections are spent.
+- CI now runs headless Combat Simulator tests.
 
 ### Previous
+- v0.3 seeded Draft System, starter roster and finalized rules.
 - v0.2 four-slot Army Builder and shared `GameState`.
 - v0.1 data-driven Commander selection.
 - v0.0 project foundation, validation, CI and GitHub Pages deployment.

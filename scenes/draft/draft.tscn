@@ -101,6 +101,12 @@ custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "Commander Skill"
 
+[node name="StartBattle" type="Button" parent="Margin/Main/OfferPanel/Padding/OfferContent"]
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+text = "Start Battle 1 Preview"
+visible = false
+
 [node name="SummaryRow" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 180)

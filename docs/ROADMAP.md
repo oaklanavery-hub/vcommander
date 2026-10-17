@@ -20,17 +20,22 @@
 - 30-second per-selection timeout with random auto-pick.
 - Interactive opening pre-battle draft screen.
 
-## v0.4 — Deterministic auto-combat
-- Seeded simulation independent from visuals.
-- Open left-vs-right battlefield.
-- Formation, targeting, movement/collision and damage model.
-- Commander skills and starter unit abilities.
-- Battle event log and round resolution.
+## v0.4 — Deterministic auto-combat ✅
+- Headless seeded fixed-timestep combat simulation.
+- Open left-vs-right battlefield with automatic formation.
+- Target locking, tank/frontline priority, ranged spacing and collision-aware movement.
+- Normal `ATK - DEF` combat with speed ratings/caps and deterministic projectiles.
+- Commander pre-battle skills.
+- Data-driven starter unit abilities: aura damage/healing/debuffs, AoE, DoT, healing puddles, push/pull and empowered attacks.
+- Battle event log, replay frames and 120-second round resolution.
+- Placeholder Battle 1 visual replay against a deterministic training opponent.
+- Combat determinism/regression tests.
 
 ## v0.5 — AI
 - Legal Army/draft choices.
 - Basic decision policy.
 - Hidden-current-pick opponent drafting.
+- Replace the v0.4 training opponent with strategic PvAI decisions.
 
 ## v0.6 — Fire/Water/Earth vertical slice
 - Complete multi-round match loop.

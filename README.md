@@ -4,7 +4,7 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.3 — Draft Prototype**
+**v0.4 — Deterministic Auto-Combat**
 
 The current playable prototype supports:
 
@@ -18,9 +18,13 @@ The current playable prototype supports:
 - 5 persistent Army-wide Buff Cards with multiplicative stacking and 3-stack caps
 - Commander skill selection cost and twice-per-match / once-per-round limits
 - 30-second pick timer and random auto-selection on timeout
-- current army/Buff progress display
+- deterministic left-vs-right auto-combat after the opening draft
+- automatic Tank → Melee → Backline formation, target locking, movement/collision and ranged spacing
+- Commander skills and the starter roster's data-driven unit abilities
+- battle event log and placeholder full-field replay with HP bars
+- 120-second draw resolution
 
-v0.3 stops after the opening draft. Deterministic auto-combat is the v0.4 milestone.
+v0.4 uses a clearly labeled **training opponent** that mirrors your four-card loadout and auto-drafts three legal opening Army selections from a separate deterministic seed. Strategic PvAI drafting is the v0.5 milestone; the full multi-round/four-loss match loop is v0.6.
 
 ## Technology
 
@@ -28,6 +32,7 @@ v0.3 stops after the opening draft. Deterministic auto-combat is the v0.4 milest
 - GDScript
 - Compatibility renderer for browser support
 - JSON-driven gameplay content
+- deterministic fixed-timestep combat simulation
 - GitHub Actions for validation and web deployment
 - GitHub Pages for the browser build
 
@@ -47,4 +52,4 @@ Read these before changing gameplay:
 
 ## Local start
 
-Open `project.godot` using Godot 4.7 stable and run the project. Choose a Commander, equip four unique Army cards, then choose **Begin Match Draft**.
+Open `project.godot` using Godot 4.7 stable and run the project. Choose a Commander, equip four unique Army cards, choose **Begin Match Draft**, spend all three opening selections, then choose **Start Battle 1 Preview**.
