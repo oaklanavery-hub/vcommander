@@ -113,15 +113,15 @@ func _draw() -> void:
         var direction := Vector2(float(next.get("x", 0)) - float(original.get("x", 0)), float(next.get("y", 0)) - float(original.get("y", 0)))
         unit["x"] = lerpf(float(original.get("x", 0)), float(next.get("x", 0)), _blend)
         unit["y"] = lerpf(float(original.get("y", 0)), float(next.get("y", 0)), _blend)
-        for effect in _effects:
-            var age := _visual_time - float(effect.get("time", 0))
-            if effect.get("kind") == "pull" and effect.get("target_id") == id_value and age >= 0 and age < BattleEffects.PULL_SECONDS:
-                var point := BattleEffects.pull_position(effect, age, Vector2(float(unit["x"]), float(unit["y"])))
-                unit["x"] = point.x
-                unit["y"] = point.y
-                unit["_pull_visual"] = true
-                if age < 0.45:
-                    unit["hp"] = effect.get("from_hp", unit.get("hp", 0))
+        var pull := BattleEffects.pull_chain(_effects, id_value, _visual_time)
+        if not pull.is_empty():
+            var age := _visual_time - float(pull.get("time", 0))
+            var point := BattleEffects.pull_position(pull, age, Vector2(float(unit["x"]), float(unit["y"])))
+            unit["x"] = point.x
+            unit["y"] = point.y
+            unit["_pull_visual"] = true
+            if age < 0.45:
+                unit["hp"] = pull.get("from_hp", unit.get("hp", 0))
         var pose: Dictionary = _poses.get(id_value, {"facing": 4 if unit.get("side") == "opponent" else 0})
         pose["state"] = "move" if direction.length() > 0.01 else "idle"
         if direction.length() > 0.01:
@@ -296,11 +296,11 @@ func _draw_effects() -> void:
         var type := str(effect.get("type", ""))
         var p := _point(float(effect.get("x", 0)), float(effect.get("y", 0)))
         if effect.get("kind") == "pull":
-            var source := _point(float(effect.get("source_x", 0)), float(effect.get("source_y", 0))) + Vector2(0, -20)
-            var start := _point(float(effect.get("from_x", 0)), float(effect.get("from_y", 0))) + Vector2(0, -20)
+            var origin: Dictionary = _known.get(str(effect.get("unit_id", "")), {})
+            var source := _point(float(origin.get("x", effect.get("source_x", 0))), float(origin.get("y", effect.get("source_y", 0)))) + Vector2(0, -20)
             var target: Dictionary = _known.get(str(effect.get("target_id", "")), {})
             var current := _point(float(target.get("x", effect.get("to_x", 0))), float(target.get("y", effect.get("to_y", 0)))) + Vector2(0, -20)
-            BattleEffects.vine(self, source, start, current, age, reduced_motion)
+            BattleEffects.vine(self, source, current, age, reduced_motion)
         elif type == "projectile_impact":
             BattleEffects.impact(self, p + Vector2(0, -22), str(effect.get("style", "magic")), age, reduced_motion)
         elif type == "summon" and age < 0.8:

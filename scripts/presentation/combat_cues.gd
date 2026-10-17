@@ -26,6 +26,8 @@ static func event_profile(event: Dictionary) -> Dictionary:
 static func sound(event: Dictionary) -> String:
     var type := str(event.get("type", ""))
     var profile := event_profile(event)
+    if type == "spawn" and event.get("source") == "commander_skill":
+        return "plant_grow"
     if type == "commander_skill":
         return {"targeted_aoe_max_hp": "fire_cast", "round_debuff": "freeze", "summon_stationary_units": "plant_grow"}.get(str(event.get("skill_type", "")), "commander_skill")
     if type == "ability":

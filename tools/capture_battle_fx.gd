@@ -46,6 +46,7 @@ func seek(scene, time: float) -> void:
     scene._event_index = scene._prelude.event_end
     scene._advance_frames()
     scene._advance_events()
+    scene._update_timer_label()
 
 func run() -> void:
     for argument in OS.get_cmdline_user_args():

@@ -39,6 +39,12 @@ func run() -> void:
     var midway := BattleEffects.pull_position(pull, 0.38, resolved)
     check(midway.x < 6.0 and midway.x > resolved.x, "grabbed enemy is visibly dragged toward the plant")
     check(BattleEffects.pull_position(pull, 0.72, resolved).is_equal_approx(resolved), "vine presentation ends at the exact simulation position")
+    var second := pull.duplicate()
+    second["time"] = float(pull["time"]) + 0.1
+    second["from_x"] = pull["to_x"]
+    second["to_x"] = float(pull["to_x"]) - 0.3
+    var chain := BattleEffects.pull_chain([pull, second], str(pull["target_id"]), 0.25)
+    check(chain["from_x"] == pull["from_x"] and chain["to_x"] == second["to_x"] and chain["time"] == pull["time"], "overlapping vines retain the earliest grab and latest resolved destination")
     state.select_commander("commander_fire_01")
     state.clear_army()
     for card in db.get_cards_by_set("set_fire_01"):
@@ -75,9 +81,19 @@ func run() -> void:
     check(not combat.speed_button.disabled and not combat.next_button.visible, "battle begins after the prelude")
     combat._process(0.1)
     check(combat._playback_time <= 0.101, "battle runs at 1x after skills")
+    combat._cycle_speed()
+    check(combat._speed_index == 1, "player can still choose a faster combat speed")
     combat._process(combat._duration + 1.0)
     check(combat.next_button.visible, "normal replay completion reveals results")
     check(state.match_state.losses == losses and state.battle_result == result, "presentation timing never alters scored battle or losses")
+    check(state.begin_next_round(), "next-round fixture begins normally")
+    while not state.draft.is_phase_complete():
+        state.draft.auto_select()
+    check(state.run_battle(), "next battle resolves")
+    change_scene_to_file("res://scenes/combat/combat.tscn")
+    await scene_changed
+    current_scene.set_process(false)
+    check(current_scene._speed_index == 0 and current_scene.speed_button.text.contains("1x"), "next battle resets the manually changed speed to 1x")
     for commander in db.get_all_commanders():
         var cards: Array = db.get_cards_by_set(str(commander["signature_set_id"]))
         var counts := {}

@@ -3,6 +3,19 @@ extends RefCounted
 
 const PULL_SECONDS := 0.72
 
+static func pull_chain(effects: Array, target_id: String, clock: float) -> Dictionary:
+    var result := {}
+    for effect in effects:
+        var age := clock - float(effect.get("time", 0))
+        if effect.get("kind") != "pull" or effect.get("target_id") != target_id or age < 0 or age >= PULL_SECONDS:
+            continue
+        if result.is_empty():
+            result = effect.duplicate()
+        else:
+            result["to_x"] = effect.get("to_x", result.get("to_x", 0))
+            result["to_y"] = effect.get("to_y", result.get("to_y", 0))
+    return result
+
 static func pull_position(event: Dictionary, age: float, current: Vector2) -> Vector2:
     var start := Vector2(float(event.get("from_x", current.x)), float(event.get("from_y", current.y)))
     var end := Vector2(float(event.get("to_x", current.x)), float(event.get("to_y", current.y)))
@@ -13,10 +26,10 @@ static func pull_position(event: Dictionary, age: float, current: Vector2) -> Ve
         return start.lerp(end, t * t * (3.0 - 2.0 * t))
     return end.lerp(current, clampf((age - 0.54) / 0.18, 0, 1))
 
-static func vine(canvas: CanvasItem, root: Vector2, start: Vector2, caught: Vector2, age: float, reduced: bool) -> void:
+static func vine(canvas: CanvasItem, root: Vector2, caught: Vector2, age: float, reduced: bool) -> void:
     if age < 0 or age >= PULL_SECONDS:
         return
-    var tip := root.lerp(start, clampf(age / 0.22, 0, 1)) if age < 0.22 else caught
+    var tip := root.lerp(caught, clampf(age / 0.22, 0, 1)) if age < 0.22 else caught
     if age > 0.54:
         tip = caught.lerp(root, clampf((age - 0.54) / 0.18, 0, 1))
     var direction := (tip - root).normalized()
