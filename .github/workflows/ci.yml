@@ -45,3 +45,9 @@ jobs:
 
       - name: Run Combat Simulator tests
         run: timeout 30s godot --headless --path . --script tests/test_combat_simulator.gd
+
+      - name: Run AI Controller tests
+        run: timeout 30s godot --headless --path . --script tests/test_ai_controller.gd
+
+      - name: Run PvAI integration tests
+        run: timeout 30s godot --headless --path . --script tests/test_pvai_preview.gd

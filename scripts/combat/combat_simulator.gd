@@ -200,6 +200,7 @@ func _spawn_unit(spec: Dictionary, position: Vector2) -> void:
     var unit: Dictionary = {
         "id": unit_id,
         "card_id": card_id,
+        "element": str(card.get("element", "earth")),
         "display_name": str(card.get("display_name", card_id)),
         "side": side_id,
         "role": role,
@@ -1217,6 +1218,8 @@ func _capture_frame(force: bool) -> void:
         frame_units.append({
             "id": str(unit.get("id", "")),
             "name": str(unit.get("display_name", "Unit")),
+            "element": str(unit.get("element", "earth")),
+            "card_id": str(unit.get("card_id", "")),
             "side": str(unit.get("side", "")),
             "role": str(unit.get("role", "")),
             "x": float(unit.get("x", 0.0)),

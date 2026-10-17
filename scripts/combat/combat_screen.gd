@@ -48,6 +48,7 @@ func _ready() -> void:
     if not _frames.is_empty():
         battlefield.set_frame(_frames[0])
 
+    title_label.text = "Battle 1 • The Verdant Crossing"
     _refresh_summaries()
     _update_speed_label()
     _update_timer_label()
@@ -115,8 +116,8 @@ func _refresh_summaries() -> void:
         GameState.get_player_combat_side()
     )
     opponent_summary.text = _side_summary(
-        "[b]Training Opponent[/b]\n[i]Same loadout; deterministic random opening draft. Strategic AI arrives in v0.5.[/i]",
-        GameState.training_opponent
+        "[b]Rival Commander[/b]",
+        GameState.opponent_combat_side
     )
 
 func _side_summary(title: String, side_config: Dictionary) -> String:
@@ -166,7 +167,7 @@ func _finish_replay() -> void:
     if winner == "player":
         result_label.text = "PLAYER WINS • %s" % reason
     elif winner == "opponent":
-        result_label.text = "TRAINING OPPONENT WINS • %s" % reason
+        result_label.text = "RIVAL WINS • %s" % reason
     else:
         result_label.text = "DRAW • %s" % reason
     speed_button.disabled = true

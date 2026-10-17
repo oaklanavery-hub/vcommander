@@ -3,6 +3,7 @@ extends Node
 const ArmyLoadoutScript = preload("res://scripts/army/army_loadout.gd")
 const SetBonusCheckerScript = preload("res://scripts/commanders/set_bonus_checker.gd")
 const DraftSystemScript = preload("res://scripts/draft/draft_system.gd")
+const AiScript = preload("res://scripts/ai/ai_controller.gd")
 const CombatSimulatorScript = preload("res://scripts/combat/combat_simulator.gd")
 
 var selected_commander_id := ""
@@ -12,7 +13,9 @@ var match_seed := 0
 var match_started := false
 
 var battle_result: Dictionary = {}
-var training_opponent: Dictionary = {}
+var opponent = AiScript.new()
+var opponent_public_side: Dictionary = {}
+var opponent_combat_side: Dictionary = {}
 
 func select_commander(commander_id: String) -> bool:
     if ContentDatabase.get_commander(commander_id).is_empty():
@@ -82,39 +85,30 @@ func begin_match(seed_value: int) -> bool:
     draft.begin_round(true, false, false)
     match_started = true
     battle_result.clear()
-    training_opponent.clear()
-    return true
+    opponent = AiScript.new()
+    if not opponent.configure(ContentDatabase.get_all_commanders(), ContentDatabase.get_all_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571):
+        match_started = false
+        return false
+    opponent_public_side = opponent.get_side()
+    return opponent.begin_round(true, false, false, get_player_combat_side())
 
 func run_combat_preview() -> bool:
     if not match_started or not draft.is_phase_complete():
         return false
-
-    var opponent_draft = DraftSystemScript.new()
-    opponent_draft.configure(
-        army.get_cards(),
-        ContentDatabase.get_cards_by_ids(army.get_cards()),
-        ContentDatabase.get_all_buffs(),
-        match_seed + 7919
-    )
-    opponent_draft.begin_round(true, false, false)
-
-    var guard := 0
-    while not opponent_draft.is_phase_complete() and guard < 12:
-        if not opponent_draft.auto_select():
-            break
-        guard += 1
+    if not battle_result.is_empty():
+        return true
 
     var player_side := _build_combat_side(
         "player",
         draft,
         draft.commander_skill_used_this_round
     )
-    training_opponent = _build_combat_side("opponent", opponent_draft, false)
+    opponent_combat_side = opponent.get_side(opponent.draft.commander_skill_used_this_round)
 
     var simulator = CombatSimulatorScript.new()
     battle_result = simulator.simulate(
         player_side,
-        training_opponent,
+        opponent_combat_side,
         match_seed + 104729,
         ContentDatabase.get_game_balance()
     )
@@ -163,4 +157,5 @@ func _build_combat_side(side_id: String, draft_state, skill_active: bool) -> Dic
 func _reset_match_runtime() -> void:
     match_started = false
     battle_result.clear()
-    training_opponent.clear()
+    opponent_public_side.clear()
+    opponent_combat_side.clear()

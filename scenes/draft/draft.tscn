@@ -126,7 +126,8 @@ theme_override_constants/margin_bottom = 12
 [node name="ArmySummary" type="RichTextLabel" parent="Margin/Main/SummaryRow/ArmyPanel/Padding"]
 layout_mode = 2
 bbcode_enabled = true
-fit_content = true
+fit_content = false
+theme_override_font_sizes/normal_font_size = 16
 text = "[b]Current Army[/b]"
 
 [node name="BuffPanel" type="PanelContainer" parent="Margin/Main/SummaryRow"]
@@ -143,8 +144,27 @@ theme_override_constants/margin_bottom = 12
 [node name="BuffSummary" type="RichTextLabel" parent="Margin/Main/SummaryRow/BuffPanel/Padding"]
 layout_mode = 2
 bbcode_enabled = true
-fit_content = true
+fit_content = false
+theme_override_font_sizes/normal_font_size = 16
 text = "[b]Active Buffs[/b]"
+
+[node name="OpponentPanel" type="PanelContainer" parent="Margin/Main/SummaryRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Margin/Main/SummaryRow/OpponentPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="OpponentSummary" type="RichTextLabel" parent="Margin/Main/SummaryRow/OpponentPanel/Padding"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = false
+theme_override_font_sizes/normal_font_size = 16
+text = "[b]Rival Commander[/b]"
 
 [node name="Footer" type="Label" parent="Margin/Main"]
 layout_mode = 2

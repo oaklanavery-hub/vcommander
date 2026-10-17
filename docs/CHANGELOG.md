@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased
+## v0.5 — Seeded AI and battlefield art
+
+- Independent legal AI Commander/loadout selection, role-aware draft policy and skill conservation.
+- Opponent information snapshots conceal current selections until combat.
+- Original element-colored pixel silhouettes, side markers, HP bars and meadow tiles.
+- Explicit JSON inclusion in Web exports.
+- Regression coverage over 50 seeds and 700 AI draft phases.
+
+## v0.4 — Deterministic combat
 
 ### Added
 - v0.4 deterministic fixed-timestep `CombatSimulator`.
