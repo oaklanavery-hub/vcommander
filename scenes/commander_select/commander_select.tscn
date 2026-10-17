@@ -30,12 +30,12 @@ theme_override_constants/separation = 12
 [node name="Title" type="Label" parent="Margin/Main"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "Choose Your Commander"
+text = "VCOMMANDER"
 
 [node name="Subtitle" type="Label" parent="Margin/Main"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Build a warband. Draft reinforcements. Lead it to victory."
+text = "Choose your Commander • Build a warband. Lead it to victory."
 
 [node name="CommanderRow" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2

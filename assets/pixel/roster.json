@@ -1,0 +1,328 @@
+{
+  "schema_version": 1,
+  "colors": {
+    "o": "302c3c",
+    "d": "34455e",
+    "b": "936348",
+    "c": "f2d6ac",
+    "w": "e7f5e9",
+    "g": "e6ae4f",
+    "p": "c55e83",
+    "e": "fff3c4"
+  },
+  "palettes": {
+    "fire": {
+      "a": "cc573d",
+      "l": "ffcf6d"
+    },
+    "water": {
+      "a": "4b9eae",
+      "l": "a0e8e5"
+    },
+    "earth": {
+      "a": "638f4c",
+      "l": "b8ce74"
+    }
+  },
+  "sprites": {
+    "card_fire_01": {
+      "name": "Magma Golem",
+      "element": "fire",
+      "role": "tank",
+      "pixels": [
+        "................",
+        "....ooo.ooo.....",
+        "...ollolllo.....",
+        "..oalalllaao....",
+        ".oaaalaalaaao...",
+        "oaaaeeaeeaaaao..",
+        "oaaaoolooaaaao..",
+        "oaaalaalalaaao..",
+        "oaaalllllaaaao..",
+        ".oaaalalaaaao...",
+        "..oaaaaaaaao....",
+        "..oaao.oaao.....",
+        ".oaaao.oaaao....",
+        ".ooooo.ooooo....",
+        "................",
+        "................"
+      ]
+    },
+    "card_fire_02": {
+      "name": "Fire Imp",
+      "element": "fire",
+      "role": "melee",
+      "pixels": [
+        "................",
+        "..o.......o.....",
+        "..oa.....ao.....",
+        "...oao.oao......",
+        "...oaaaaao......",
+        "...oeeaeeo......",
+        "....oaaao.......",
+        ".....ooo........",
+        "...ooaaaoo..o...",
+        "..oaaaaaaao.ao..",
+        "...oaaaaao.oao..",
+        "....oaao...oo...",
+        "...oa..ao.......",
+        "..ooo..ooo......",
+        "................",
+        "................"
+      ]
+    },
+    "card_fire_03": {
+      "name": "Sorcerer",
+      "element": "fire",
+      "role": "range",
+      "pixels": [
+        "................",
+        ".......o........",
+        "......oao.......",
+        ".....oalao......",
+        "....oaaalao.....",
+        "...oaaaaalao....",
+        "..ooooooooooo...",
+        ".....occco..l...",
+        ".....oeeeo.olo..",
+        "......ooo..o....",
+        "....ooaaaooo....",
+        "...oaaalaaoo....",
+        "..oaaaalaaao....",
+        "..ooooooooooo...",
+        "................",
+        "................"
+      ]
+    },
+    "card_fire_04": {
+      "name": "Dragon",
+      "element": "fire",
+      "role": "range",
+      "pixels": [
+        "................",
+        "....o......o....",
+        "...oao....oao...",
+        "...oaao..oaao...",
+        "o..oaaaooaaao...",
+        "oaooaalaaaao....",
+        "oaaaaleeaaao....",
+        ".oaaaaaaalaao...",
+        "..oaaaaaallcco..",
+        "...oaalllllccco.",
+        "..oaallllloo....",
+        ".oaaaalllaao....",
+        "oaaoaaaaaaao....",
+        "ooo.oo..oooo....",
+        "................",
+        "................"
+      ]
+    },
+    "card_water_01": {
+      "name": "Ice Giant",
+      "element": "water",
+      "role": "tank",
+      "pixels": [
+        "................",
+        "....o...o.......",
+        "...olooolo......",
+        "..olllllllo.....",
+        ".olalaaalalo....",
+        "olaaeeaeeaalo...",
+        "olaaaaaaaaalo...",
+        "olalallllalalo..",
+        "olaaallllaaalo..",
+        ".olaaaaaaaalo...",
+        "..olaaaaaalo....",
+        "..olla.allao....",
+        ".ollla.allllo...",
+        ".ooooo.oooooo...",
+        "................",
+        "................"
+      ]
+    },
+    "card_water_02": {
+      "name": "Sea Serpent",
+      "element": "water",
+      "role": "range",
+      "pixels": [
+        "................",
+        ".........oo.....",
+        "........olao....",
+        ".......olaao....",
+        "...oo.olaeeao...",
+        "..olaoolaaao....",
+        ".olaaaalaaaao...",
+        "olaaalllaaao....",
+        "olaallllaoo.....",
+        "olallllao.......",
+        ".oallllao.......",
+        "..oaalllaoo.....",
+        "...ooallllaao...",
+        ".....ooooooo....",
+        "................",
+        "................"
+      ]
+    },
+    "card_water_03": {
+      "name": "Penguins",
+      "element": "water",
+      "role": "healer",
+      "pixels": [
+        "................",
+        "......ooo.......",
+        ".....odddo......",
+        "....odddddo.....",
+        "....odwdwdo.....",
+        "....odggedo.....",
+        ".....owwwo......",
+        "....odwwwdo.....",
+        "...oddwwwddo....",
+        "..odddwwwdddo...",
+        "...oddwwwddo....",
+        "....owwwwwo.....",
+        "....ooooooo.....",
+        "...ogg.oggo.....",
+        "................",
+        "................"
+      ]
+    },
+    "card_water_04": {
+      "name": "Water Wizard",
+      "element": "water",
+      "role": "range",
+      "pixels": [
+        "................",
+        ".....oo.........",
+        "....olao........",
+        "...ollaao.......",
+        "..olllaaao......",
+        ".oooooooooo.....",
+        "....occcco...l..",
+        "....oeecco..olo.",
+        ".....oooo....o..",
+        "....ollao...oo..",
+        "...olllaaooo....",
+        "..ollllaao.o....",
+        ".olllllaaao.o...",
+        ".oooooooooo.o...",
+        "................",
+        "................"
+      ]
+    },
+    "card_earth_01": {
+      "name": "Giant Tree",
+      "element": "earth",
+      "role": "tank",
+      "pixels": [
+        "................",
+        "....ooo.ooo.....",
+        "..ooaaaoaaaoo...",
+        ".oaalalllllaao..",
+        "oaaalllllllaaao.",
+        "oaalllalllllaao.",
+        "oaaaallllaaaaao.",
+        ".oaaaoooaaaao...",
+        "..oobeeeboo.....",
+        ".obbbbbbbbbo....",
+        "obbooobbbobbo...",
+        "ooo..obbo.ooo...",
+        "....obbbbo......",
+        "...oobbbboo.....",
+        "................",
+        "................"
+      ]
+    },
+    "card_earth_02": {
+      "name": "Pitcher Plant",
+      "element": "earth",
+      "role": "range",
+      "pixels": [
+        "................",
+        ".....oooo.......",
+        "....oppppo......",
+        "...opwwwppo.....",
+        "..opoooooppo....",
+        "..opdddddpo.....",
+        "...opdddpo......",
+        "....opppo.......",
+        ".....oao........",
+        "..oo.oao.oo.....",
+        ".oaaoaaaoaao....",
+        "..oaaaaaaaao....",
+        "...ooaaaooo.....",
+        "....ooooo.......",
+        "................",
+        "................"
+      ]
+    },
+    "card_earth_03": {
+      "name": "Bear",
+      "element": "earth",
+      "role": "melee",
+      "pixels": [
+        "................",
+        "...oo...oo......",
+        "..obbooobbo.....",
+        "..obbbbbbbbo....",
+        ".obbeebbeebbo...",
+        ".obbbcccbbbbo...",
+        ".obbbcocbbbo....",
+        "..obbbbbbbbo....",
+        ".obbbbbbbbbbo...",
+        "obbbbccccbbbbo..",
+        "obbbbccccbbbbo..",
+        ".obbbbbbbbbbo...",
+        "..obbo..obbo....",
+        ".ooooo..ooooo...",
+        "................",
+        "................"
+      ]
+    },
+    "card_earth_04": {
+      "name": "Wood Archers",
+      "element": "earth",
+      "role": "range",
+      "pixels": [
+        "................",
+        ".....ooo........",
+        "....oaaao.......",
+        "...oaaaaao......",
+        "..oaaaaaaao.....",
+        "...occccco..bo..",
+        "...occeeeo...bo.",
+        "....ooooo....bo.",
+        "...oaaaooo..bo..",
+        "..oaaaaaaoo.bo..",
+        "...oaaaaao..bo..",
+        "....oaao....bo..",
+        "...ob..bo.......",
+        "..ooo..ooo......",
+        "................",
+        "................"
+      ]
+    },
+    "commander_plant": {
+      "name": "Seedling",
+      "element": "earth",
+      "role": "range",
+      "pixels": [
+        "................",
+        "................",
+        "......oo........",
+        ".....ollo.......",
+        "....ollllo......",
+        "...ollaallo.....",
+        "....oeeaao......",
+        ".....oaao.......",
+        "......oo........",
+        "......bo........",
+        "...oo.bo.oo.....",
+        "..olaoboalao....",
+        "...oalaalao.....",
+        "....oooooo......",
+        "................",
+        "................"
+      ]
+    }
+  }
+}

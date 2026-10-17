@@ -35,3 +35,7 @@ Desktop.ini
 build/
 builds/
 dist/
+
+# Python validation cache
+__pycache__/
+*.pyc

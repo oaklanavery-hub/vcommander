@@ -21,7 +21,7 @@
     "display_name": "Regenerative Canopy",
     "type": "aura_heal",
     "radius": "large",
-    "heal_ally_max_hp_pct": 3,
+    "heal_ally_max_hp_pct": 2,
     "tick_seconds": 2
   },
   "tags": [

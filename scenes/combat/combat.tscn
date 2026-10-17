@@ -70,8 +70,41 @@ custom_minimum_size = Vector2(150, 38)
 layout_mode = 2
 text = "Skip to Result"
 
+[node name="Pause" type="Button" parent="Margin/Main/StatusRow"]
+layout_mode = 2
+text = "Pause"
+tooltip_text = "Pause the replay (Space)"
+
+[node name="Details" type="Button" parent="Margin/Main/StatusRow"]
+layout_mode = 2
+text = "Army details"
+
+[node name="OptionsRow" type="HBoxContainer" parent="Margin/Main"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Sound" type="Button" parent="Margin/Main/OptionsRow"]
+layout_mode = 2
+text = "Sound: Off"
+tooltip_text = "Toggle original battle tones (M)"
+
+[node name="Motion" type="Button" parent="Margin/Main/OptionsRow"]
+layout_mode = 2
+text = "Motion: Full"
+tooltip_text = "Disable bobbing, flashes and expanding effects"
+
+[node name="HP" type="Button" parent="Margin/Main/OptionsRow"]
+layout_mode = 2
+text = "HP numbers: Off"
+
+[node name="Hint" type="Label" parent="Margin/Main/OptionsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Space: pause • 1/2/4: speed • Enter: next round"
+horizontal_alignment = 2
+
 [node name="BattlePanel" type="PanelContainer" parent="Margin/Main"]
-custom_minimum_size = Vector2(0, 260)
+custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -83,12 +116,13 @@ theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
 [node name="Battlefield" type="Control" parent="Margin/Main/BattlePanel/Padding"]
-custom_minimum_size = Vector2(0, 224)
+custom_minimum_size = Vector2(0, 164)
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("2")
 
 [node name="SummaryRow" type="HBoxContainer" parent="Margin/Main"]
+visible = false
 custom_minimum_size = Vector2(0, 115)
 layout_mode = 2
 theme_override_constants/separation = 10

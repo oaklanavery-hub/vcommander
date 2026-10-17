@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_call:
   pull_request:
   push:
     branches: [main]
@@ -15,9 +16,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Validate content data
-        run: python3 tools/validate_data.py
-
       - name: Setup Godot 4.7
         uses: chickensoft-games/setup-godot@v2
         with:
@@ -25,38 +23,32 @@ jobs:
           use-dotnet: false
           include-templates: false
 
-      - name: Verify Godot project loads
+      - name: Validate content, art, project and every regression suite
+        run: python3 tools/run_checks.py
+
+      - name: Render desktop visual QA with the Compatibility renderer
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 1
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb
+          mkdir -p build/qa
+          touch build/.gdignore
           set -o pipefail
-          godot --headless --path . --editor --quit 2>&1 | tee /tmp/godot-load.log
-          if grep -E "SCRIPT ERROR:|ERROR: Failed to load script" /tmp/godot-load.log; then
-            echo "Godot reported script load errors."
+          timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_ui.gd -- --output-dir=build/qa 2>&1 | tee /tmp/visual-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/visual-qa.log; then
             exit 1
           fi
+          test -s build/qa/commander.png
+          test -s build/qa/army.png
+          test -s build/qa/draft.png
+          test -s build/qa/battle.png
+          test -s build/qa/combat_effects.png
+          test -s build/qa/result.png
 
-      - name: Run set bonus tests
-        run: timeout 30s godot --headless --path . --script tests/test_set_bonus_checker.gd
-
-      - name: Run Army loadout tests
-        run: timeout 30s godot --headless --path . --script tests/test_army_loadout.gd
-
-      - name: Run Draft System tests
-        run: timeout 30s godot --headless --path . --script tests/test_draft_system.gd
-
-      - name: Run Combat Simulator tests
-        run: timeout 30s godot --headless --path . --script tests/test_combat_simulator.gd
-
-      - name: Run AI Controller tests
-        run: timeout 30s godot --headless --path . --script tests/test_ai_controller.gd
-
-      - name: Run PvAI integration tests
-        run: timeout 30s godot --headless --path . --script tests/test_pvai_preview.gd
-
-      - name: Run Match State tests
-        run: timeout 30s godot --headless --path . --script tests/test_match_state.gd
-
-      - name: Run full PvAI match integration tests
-        run: timeout 90s godot --headless --path . --script tests/test_full_match.gd
-
-      - name: Run desktop scene flow tests
-        run: timeout 30s godot --headless --path . --script tests/test_scene_flow.gd
+      - name: Upload visual QA screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-visual-qa
+          path: build/qa
+          retention-days: 7

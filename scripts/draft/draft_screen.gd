@@ -1,5 +1,6 @@
 extends Control
 
+const UnitArt = preload("res://scripts/presentation/pixel_unit_art.gd")
 const SELECTION_SECONDS := 30.0
 
 @onready var back_button: Button = $Margin/Main/Header/Back
@@ -62,7 +63,7 @@ func _refresh_all() -> void:
     battle_button.visible = complete
     battle_button.disabled = not complete
     if complete:
-        footer.text = "Your army is ready. The rival reveals their new picks when battle begins."
+        footer.text = "Ready for battle • Enter to begin. The rival reveals new picks at combat."
         timer_label.text = "Draft complete"
     else:
         if GameState.match_state.sudden_death:
@@ -79,8 +80,14 @@ func _refresh_offer() -> void:
     for index in range(GameState.draft.current_offer.size()):
         var option: Dictionary = GameState.draft.current_offer[index]
         var button := Button.new()
-        button.custom_minimum_size = Vector2(330, 180)
+        button.custom_minimum_size = Vector2(330, 164)
         button.text = _option_text(option)
+        if option.get("type") == "unit":
+            var card: Dictionary = ContentDatabase.get_card(str(option["id"]))
+            button.icon = UnitArt.icon(str(option["id"]), str(card.get("role", "range")), str(card.get("element", "earth")))
+            button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+            button.add_theme_constant_override("icon_max_width", 48)
+            button.tooltip_text = str(card.get("ability", {}).get("display_name", "")) + " • Pick with " + str(index + 1)
         button.disabled = GameState.draft.is_phase_complete()
         button.pressed.connect(_select_offer.bind(index))
         offer_row.add_child(button)
@@ -95,7 +102,7 @@ func _option_text(option: Dictionary) -> String:
         var amount: int = int(card.get("summon_amount", 0))
         var cap: int = int(card.get("unit_cap", 0))
         var after: int = mini(cap, current + amount)
-        return "%s\n%s • %s\n+%d units\n%d/%d → %d/%d" % [
+        return "%s\n%s • %s\nSummon +%d\n%d/%d → %d/%d" % [
             str(card.get("display_name", option_id)),
             str(card.get("element", "")).capitalize(),
             str(card.get("role", "unit")).capitalize(),
@@ -110,7 +117,7 @@ func _option_text(option: Dictionary) -> String:
     var stack: int = GameState.draft.get_buff_stacks(option_id)
     return "%s\n+%s%% %s\nStacks %d/%d" % [
         str(buff.get("display_name", option_id)),
-        str(buff.get("percentage", 0)),
+        str(int(buff.get("percentage", 0))),
         str(buff.get("stat", "stat")).replace("_", " ").to_upper(),
         stack,
         int(buff.get("max_stacks", 3))
@@ -139,6 +146,8 @@ func _refresh_summaries() -> void:
             GameState.draft.get_unit_count(card_id),
             int(card.get("unit_cap", 0))
         ])
+    var bonus: Dictionary = GameState.get_selected_signature_set().get("bonus", {})
+    army_lines.append("Theme: +%d%% %s" % [int(bonus.get("percentage", 0)), str(bonus.get("stat", ""))] if GameState.is_full_set_active() else "Theme: inactive")
     army_summary.text = "\n".join(army_lines)
 
     var buff_lines: Array[String] = ["[b]Active Buffs[/b]"]
@@ -187,11 +196,34 @@ func _opponent_text() -> String:
     var commander: Dictionary = side.get("commander", {})
     var bonus: Dictionary = side.get("set_bonus", {})
     var lines: Array[String] = ["[b]Rival • %s[/b]" % str(commander.get("display_name", "Commander"))]
+    var army_entries: Array[String] = []
     for card in side.get("cards", []):
-        lines.append("%s ×%d" % [str(card.get("display_name", "Unit")), int(side.get("unit_counts", {}).get(card.get("id"), 0))])
-    lines.append("Skill uses: %d/2 • Losses: %d" % [int(side.get("skill_uses_remaining", 2)), int(GameState.match_state.losses["opponent"])])
-    lines.append("Theme: +%s%% %s" % [str(bonus.get("percentage", 0)), str(bonus.get("stat", "inactive"))])
+        army_entries.append("%s ×%d" % [str(card.get("display_name", "Unit")), int(side.get("unit_counts", {}).get(card.get("id"), 0))])
+    for index in range(0, army_entries.size(), 2):
+        lines.append(" • ".join(army_entries.slice(index, mini(index + 2, army_entries.size()))))
+    lines.append("Skill uses: %d/2 • Round losses: %d" % [int(side.get("skill_uses_remaining", 2)), int(GameState.match_state.losses["opponent"])])
+    lines.append("Theme: inactive" if bonus.is_empty() else "Theme: +%d%% %s" % [int(bonus.get("percentage", 0)), str(bonus.get("stat", ""))])
+    var buff_entries: Array[String] = []
+    var names := {"attack": "ATK", "health": "HP", "defense": "DEF", "attack_speed": "ASPD", "movement_speed": "MOVE"}
     for buff in side.get("buffs", []):
-        lines.append("%s ×%d" % [str(buff.get("definition", {}).get("display_name", "Buff")), int(buff.get("stacks", 0))])
-    lines.append("[i]Current picks hidden until battle.[/i]")
+        var definition: Dictionary = buff.get("definition", {})
+        var stat := str(definition.get("stat", ""))
+        buff_entries.append("%s +%d%% ×%d" % [str(names.get(stat, stat)), int(definition.get("percentage", 0)), int(buff.get("stacks", 0))])
+    if buff_entries.is_empty():
+        lines.append("Buffs: none")
+    for index in range(0, buff_entries.size(), 2):
+        lines.append(" • ".join(buff_entries.slice(index, mini(index + 2, buff_entries.size()))))
     return "\n".join(lines)
+
+func _unhandled_key_input(event: InputEvent) -> void:
+    if not event is InputEventKey or not event.pressed or event.echo:
+        return
+    if event.keycode in [KEY_1, KEY_2, KEY_3]:
+        _select_offer(int(event.keycode - KEY_1))
+    elif event.keycode == KEY_S:
+        _use_commander_skill()
+    elif event.keycode == KEY_ENTER and battle_button.visible:
+        _start_battle()
+    else:
+        return
+    get_viewport().set_input_as_handled()

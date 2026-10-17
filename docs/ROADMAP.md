@@ -44,8 +44,14 @@
 - Full starter content playable.
 - Fantasy UI theme and viewport-tested draft, replay and result screens.
 
-## v0.7+ — Presentation and balance
-- Pixel-art animation/VFX/audio.
-- UI polish.
-- Simulation-based balance testing.
-- Playtesting and accessibility improvements.
+## v0.7 — Presentation and balance baseline ✅
+- Thirteen original pixel silhouettes (twelve roster units and the Commander plant), shared portraits and elemental palettes.
+- Procedural eight-direction movement, four-direction attacks, neutral idle/death, interpolation and event-driven VFX.
+- Optional synthesized audio, pause, reduced motion, HP numbers and keyboard controls.
+- Fantasy UI polish, readable rival information and full-field aspect preservation.
+- Reproducible automated balance samples and capped-roster stress tests; see `PLAYTEST_REPORT.md`.
+- CI screenshots, deployment validation gate, exported-PCK tests and public build identity.
+
+## Next major phase — Game Director scope decision
+
+The approved elemental PvAI vertical slice is implemented. A new major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved roadmap. Human playtesting should inform further balance values; the current tuning remains provisional.

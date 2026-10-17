@@ -1,5 +1,7 @@
 extends Control
 
+const UnitArt = preload("res://scripts/presentation/pixel_unit_art.gd")
+
 @onready var commander_row: HBoxContainer = $Margin/Main/CommanderRow
 @onready var commander_name: Label = $Margin/Main/DetailPanel/Padding/Details/CommanderName
 @onready var element_label: Label = $Margin/Main/DetailPanel/Padding/Details/Element
@@ -37,6 +39,11 @@ func _populate_commanders() -> void:
         var button := Button.new()
         button.custom_minimum_size = Vector2(220, 82)
         button.toggle_mode = true
+        var themed: Array = ContentDatabase.get_cards_by_set(str(commander.get("signature_set_id", "")))
+        if not themed.is_empty():
+            var portrait: Dictionary = themed[0]
+            button.icon = UnitArt.icon(str(portrait["id"]), str(portrait["role"]), str(portrait["element"]))
+            button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
         button.text = "%s\n%s" % [
             str(commander.get("display_name", commander_id)),
             str(commander.get("element", "unknown")).capitalize()
@@ -78,7 +85,7 @@ func _select_commander(commander_id: String) -> void:
 
     var bonus: Dictionary = signature_set.get("bonus", {})
     bonus_label.text = "4-card Theme Bonus: +%s%% %s • Any four unique cards from this theme qualify." % [
-        str(bonus.get("percentage", "—")),
+        str(int(bonus.get("percentage", 0))),
         str(bonus.get("stat", "stat")).replace("_", " ").to_upper()
     ]
 
@@ -101,31 +108,42 @@ func _make_card_preview(card: Dictionary) -> Control:
     var content := VBoxContainer.new()
     margin.add_child(content)
 
+    var heading := HBoxContainer.new()
+    var portrait := TextureRect.new()
+    portrait.texture = UnitArt.icon(str(card.get("id", "")), str(card.get("role", "range")), str(card.get("element", "earth")))
+    portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+    portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+    portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+    portrait.custom_minimum_size = Vector2(38, 38)
+    heading.add_child(portrait)
+    var heading_text := VBoxContainer.new()
+    heading.add_child(heading_text)
+    content.add_child(heading)
     var name_label := Label.new()
     name_label.text = str(card.get("display_name", card.get("id", "Card")))
     name_label.add_theme_font_size_override("font_size", 19)
-    content.add_child(name_label)
+    heading_text.add_child(name_label)
 
     var role_label := Label.new()
     role_label.text = "%s • %s" % [
         str(card.get("element", "unknown")).capitalize(),
         str(card.get("role", "unit")).capitalize()
     ]
-    content.add_child(role_label)
+    heading_text.add_child(role_label)
 
     var stats: Dictionary = card.get("stats", {})
     var stat_label := Label.new()
     stat_label.text = "HP %s • ATK %s • DEF %s" % [
-        str(stats.get("health", "—")),
-        str(stats.get("attack", "—")),
-        str(stats.get("defense", "—"))
+        str(int(stats.get("health", 0))),
+        str(int(stats.get("attack", 0))),
+        str(int(stats.get("defense", 0)))
     ]
     content.add_child(stat_label)
 
     var draft_label := Label.new()
     draft_label.text = "Draft +%s • Cap %s" % [
-        str(card.get("summon_amount", "—")),
-        str(card.get("unit_cap", "—"))
+        str(int(card.get("summon_amount", 0))),
+        str(int(card.get("unit_cap", 0)))
     ]
     content.add_child(draft_label)
 
