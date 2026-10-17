@@ -41,7 +41,7 @@ text = "← Draft"
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 30
-text = "v0.4 Deterministic Combat Preview"
+text = "Battle 1 • The Verdant Crossing"
 horizontal_alignment = 1
 
 [node name="Seed" type="Label" parent="Margin/Main/Header"]
@@ -125,7 +125,7 @@ theme_override_constants/margin_bottom = 8
 layout_mode = 2
 bbcode_enabled = true
 fit_content = true
-text = "[b]Training Opponent[/b]"
+text = "[b]Rival Commander[/b]"
 
 [node name="EventPanel" type="PanelContainer" parent="Margin/Main/SummaryRow"]
 layout_mode = 2

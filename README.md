@@ -4,7 +4,7 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.4 — Deterministic Auto-Combat**
+**v0.5 — Seeded AI**
 
 The current playable prototype supports:
 
@@ -24,7 +24,7 @@ The current playable prototype supports:
 - battle event log and placeholder full-field replay with HP bars
 - 120-second draw resolution
 
-v0.4 uses a clearly labeled **training opponent** that mirrors your four-card loadout and auto-drafts three legal opening Army selections from a separate deterministic seed. Strategic PvAI drafting is the v0.5 milestone; the full multi-round/four-loss match loop is v0.6.
+The opponent now selects its own Commander and unique four-card loadout, drafts legally using a seeded policy, and conceals current picks until combat. The battlefield uses original elemental pixel silhouettes and meadow scenery. Full multi-round matches arrive in v0.6.
 
 ## Technology
 
@@ -52,4 +52,4 @@ Read these before changing gameplay:
 
 ## Local start
 
-Open `project.godot` using Godot 4.7 stable and run the project. Choose a Commander, equip four unique Army cards, choose **Begin Match Draft**, spend all three opening selections, then choose **Start Battle 1 Preview**.
+Open `project.godot` using Godot 4.7 stable and run the project. Choose a Commander, equip four unique Army cards, choose **Begin Match Draft**, spend all three opening selections, then choose **Start Battle 1**.

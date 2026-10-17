@@ -50,10 +50,10 @@ scripts/
     battlefield_view.gd
     combat_screen.gd
   ai/
-    ai_controller.gd       (v0.5)
+    ai_controller.gd
 ```
 
-`GameState` owns the selected Commander, four-slot unique `ArmyLoadout`, match seed, current `DraftSystem`, and the latest combat-preview result.
+`GameState` owns the selected Commander, four-slot unique `ArmyLoadout`, match seed, current `DraftSystem`, seeded AI opponent, immutable public opponent snapshot, and latest combat result.
 
 `DraftSystem` owns draft legality and progression: selection points, unit counts, Buff stacks, Commander skill-use limits, seeded offer generation and auto-selection. The draft UI only displays and invokes this state.
 
@@ -84,16 +84,11 @@ Combat emits plain dictionaries for events such as:
 
 The simulator also emits periodic position/HP frames for the temporary combat replay. Visual scenes consume these outputs; animations never decide damage.
 
-## v0.4 training opponent boundary
+## AI information boundary
 
-Strategic AI belongs to v0.5. The v0.4 playable combat preview therefore uses a clearly labeled training opponent that:
+`AiController` owns a separate seeded `DraftSystem`, Commander and unique four-card loadout. Its generic policy scores legal offered units by summon gain, stats and role coverage, and army-wide Buffs by marginal value. Commander skills are conserved for later or critical rounds. Setup and tie-breaks accept an explicit seed.
 
-- mirrors the player's four-card pre-match loadout,
-- performs three legal opening Army-card selections from a separate deterministic seed,
-- does not use a Commander skill,
-- exists only to exercise combat end-to-end.
-
-This is a test harness, not the final opponent policy.
+At the start of drafting, `GameState` captures a deep public opponent snapshot before the AI spends points. The AI receives only the player's previous-round public composition. Neither side can inspect the other's current picks. The completed opponent draft is revealed only when combat begins. Presentation-only pixel silhouettes live in `scripts/presentation/` and consume replay metadata.
 
 ## Multiplayer future-proofing
 

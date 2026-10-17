@@ -12,6 +12,7 @@ const SELECTION_SECONDS := 30.0
 @onready var battle_button: Button = $Margin/Main/OfferPanel/Padding/OfferContent/StartBattle
 @onready var army_summary: RichTextLabel = $Margin/Main/SummaryRow/ArmyPanel/Padding/ArmySummary
 @onready var buff_summary: RichTextLabel = $Margin/Main/SummaryRow/BuffPanel/Padding/BuffSummary
+@onready var opponent_summary: RichTextLabel = $Margin/Main/SummaryRow/OpponentPanel/Padding/OpponentSummary
 @onready var footer: Label = $Margin/Main/Footer
 
 var _time_left: float = SELECTION_SECONDS
@@ -28,6 +29,7 @@ func _ready() -> void:
         set_process(false)
         return
 
+    battle_button.text = "Start Battle 1"
     _refresh_all()
 
 func _process(delta: float) -> void:
@@ -59,7 +61,7 @@ func _refresh_all() -> void:
     battle_button.visible = complete
     battle_button.disabled = not complete
     if complete:
-        footer.text = "Opening draft complete. Run the deterministic Battle 1 combat preview."
+        footer.text = "Your army is ready. The rival reveals their new picks when battle begins."
         timer_label.text = "Draft complete"
     else:
         footer.text = "Round 1 is Army-only. Every pick rerolls all three choices."
@@ -146,6 +148,7 @@ func _refresh_summaries() -> void:
         ])
     if not any_buff:
         buff_lines.append("None — buffs begin from Round 2")
+    opponent_summary.text = _opponent_text()
     buff_summary.text = "\n".join(buff_lines)
 
 func _select_offer(index: int) -> void:
@@ -170,5 +173,20 @@ func _start_battle() -> void:
 func _go_back() -> void:
     GameState.match_started = false
     GameState.battle_result.clear()
-    GameState.training_opponent.clear()
+    GameState.opponent_public_side.clear()
+    GameState.opponent_combat_side.clear()
     get_tree().change_scene_to_file("res://scenes/army_builder/army_builder.tscn")
+
+func _opponent_text() -> String:
+    var side: Dictionary = GameState.opponent_public_side
+    var commander: Dictionary = side.get("commander", {})
+    var bonus: Dictionary = side.get("set_bonus", {})
+    var lines: Array[String] = ["[b]Rival • %s[/b]" % str(commander.get("display_name", "Commander"))]
+    for card in side.get("cards", []):
+        lines.append("%s ×%d" % [str(card.get("display_name", "Unit")), int(side.get("unit_counts", {}).get(card.get("id"), 0))])
+    lines.append("Skill uses: %d/2 • Losses: 0/4" % int(side.get("skill_uses_remaining", 2)))
+    lines.append("Theme: +%s%% %s" % [str(bonus.get("percentage", 0)), str(bonus.get("stat", "inactive"))])
+    for buff in side.get("buffs", []):
+        lines.append("%s ×%d" % [str(buff.get("definition", {}).get("display_name", "Buff")), int(buff.get("stacks", 0))])
+    lines.append("[i]Current picks hidden until battle.[/i]")
+    return "\n".join(lines)

@@ -31,11 +31,12 @@
 - Placeholder Battle 1 visual replay against a deterministic training opponent.
 - Combat determinism/regression tests.
 
-## v0.5 — AI
+## v0.5 — AI ✅
 - Legal Army/draft choices.
 - Basic decision policy.
 - Hidden-current-pick opponent drafting.
 - Replace the v0.4 training opponent with strategic PvAI decisions.
+- Original pixel silhouettes, elemental palettes and a decorated meadow battlefield.
 
 ## v0.6 — Fire/Water/Earth vertical slice
 - Complete multi-round match loop.
