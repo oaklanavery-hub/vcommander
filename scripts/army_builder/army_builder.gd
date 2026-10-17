@@ -14,8 +14,25 @@ const UnitArt = preload("res://scripts/presentation/pixel_unit_art.gd")
 @onready var begin_draft_button: Button = $Margin/Main/BeginDraft
 
 var available_card_buttons: Dictionary = {}
+var _show_all := false
+var _filter_button := Button.new()
 
 func _ready() -> void:
+    ScreenStyle.apply(self)
+    ScreenStyle.primary(begin_draft_button)
+    _filter_button.text = "Browse other elements"
+    _filter_button.pressed.connect(_toggle_filter)
+    var main := get_node("Margin/Main")
+    main.add_child(_filter_button)
+    main.move_child(_filter_button, get_node("Margin/Main/CardScroll").get_index())
+    get_node("Margin/Main/SeedRow/SeedLabel").hide()
+    seed_input.hide()
+    var advanced := Button.new()
+    advanced.text = "Advanced"
+    advanced.pressed.connect(func():
+        seed_input.visible = not seed_input.visible
+        get_node("Margin/Main/SeedRow/SeedLabel").visible = seed_input.visible)
+    get_node("Margin/Main/SeedRow").add_child(advanced)
     back_button.pressed.connect(_go_back)
     theme_button.pressed.connect(_equip_theme)
     begin_draft_button.pressed.connect(_begin_draft)
@@ -39,27 +56,22 @@ func _populate_available_cards() -> void:
     for card in ContentDatabase.get_all_cards():
         var card_id: String = str(card.get("id", ""))
         var button := Button.new()
-        button.custom_minimum_size = Vector2(270, 120)
+        button.custom_minimum_size = Vector2(250, 104)
         button.text = _card_button_text(card)
         button.icon = UnitArt.icon(card_id, str(card.get("role", "range")), str(card.get("element", "earth")))
         button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-        button.add_theme_constant_override("icon_max_width", 40)
-        button.tooltip_text = "Equip %s" % str(card.get("display_name", card_id))
+        ScreenStyle.card(button, str(card.get("element", "earth")))
+        button.tooltip_text = "HP %d • Attack %d • Defense %d\n%s" % [int(card.get("stats", {}).get("health", 0)), int(card.get("stats", {}).get("attack", 0)), int(card.get("stats", {}).get("defense", 0)), str(card.get("ability", {}).get("display_name", ""))]
         button.pressed.connect(_equip_card.bind(card_id))
         available_card_buttons[card_id] = button
         cards_grid.add_child(button)
 
 func _card_button_text(card: Dictionary) -> String:
-    var stats: Dictionary = card.get("stats", {})
-    return "%s\n%s • %s\nHP %s • ATK %s • DEF %s\nSummon +%s • Cap %s" % [
-        str(card.get("display_name", card.get("id", "Card"))),
-        str(card.get("element", "unknown")).capitalize(),
+    return "%s\n%s • Recruit %d\n%s" % [
+        str(card.get("display_name", "Companion")),
         str(card.get("role", "unit")).capitalize(),
-        str(int(stats.get("health", 0))),
-        str(int(stats.get("attack", 0))),
-        str(int(stats.get("defense", 0))),
-        str(int(card.get("summon_amount", 0))),
-        str(int(card.get("unit_cap", 0)))
+        int(card.get("summon_amount", 0)),
+        str(card.get("ability", {}).get("display_name", ""))
     ]
 
 func _equip_card(card_id: String) -> void:
@@ -83,13 +95,14 @@ func _refresh_slots() -> void:
     var equipped: Array[String] = GameState.army.get_cards()
     for index in range(GameState.army.max_slots):
         var slot := Button.new()
-        slot.custom_minimum_size = Vector2(270, 84)
+        slot.custom_minimum_size = Vector2(250, 80)
         if index < equipped.size():
             var card := ContentDatabase.get_card(equipped[index])
-            slot.text = "Slot %d\n%s\nClick to remove" % [
-                index + 1,
-                str(card.get("display_name", equipped[index]))
-            ]
+            slot.text = str(card.get("display_name", equipped[index])) + "\nIn your warband"
+            slot.icon = UnitArt.icon(str(card["id"]), str(card["role"]), str(card["element"]))
+            slot.add_theme_constant_override("icon_max_width", 40)
+            slot.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+            slot.tooltip_text = "Click to remove this companion"
             slot.pressed.connect(_unequip_slot.bind(index))
         else:
             slot.text = "Slot %d\nEmpty" % (index + 1)
@@ -126,6 +139,8 @@ func _refresh_available_cards() -> void:
     var full := GameState.army.is_full()
     for card_id in available_card_buttons:
         var button: Button = available_card_buttons[card_id]
+        var card := ContentDatabase.get_card(str(card_id))
+        button.visible = _show_all or str(card.get("set_id", "")) == str(GameState.get_selected_commander().get("signature_set_id", ""))
         button.disabled = full or GameState.army.contains(str(card_id))
 
 func _begin_draft() -> void:
@@ -152,3 +167,8 @@ func _equip_theme() -> void:
     for index in range(GameState.army.max_slots):
         GameState.equip_card(str(themed[index]["id"]))
     _refresh()
+
+func _toggle_filter() -> void:
+    _show_all = not _show_all
+    _filter_button.text = "Show Commander companions" if _show_all else "Browse other elements"
+    _refresh_available_cards()

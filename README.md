@@ -4,9 +4,13 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.7 — Elemental PvAI Vertical Slice**
+**v0.7.1 — Player experience and elemental PvAI**
 
 The current playable prototype supports:
+
+- a forest-camp title menu, How to Play and shared pause/settings menus
+- starter warbands, a filtered companion collection and clearer draft/result guidance
+- two original looping music tracks, nine sound effects and saved volume/accessibility settings
 
 - Fire, Water and Earth starter Commanders
 - 12 approved starter Army cards with initial playtest stats/abilities
@@ -59,12 +63,13 @@ Pull requests run CI. On `main`, Deploy Web calls that same validation workflow 
 
 ## Local start
 
-Open `project.godot` using Godot 4.7 stable and run the project. Choose a Commander, equip four unique Army cards, choose **Begin Match Draft**, spend all three opening selections, then choose **Start Battle 1**. Continue through the result screen until the match ends.
+Open `project.godot` using Godot 4.7 stable and run the project. Choose **Play**, select a Commander and meet their prefilled starter warband. Keep it or replace companions, choose **Begin adventure**, spend all opening picks, then start the battle. Continue through the results until the match ends. **How to play** is available from the title menu and **Menu / Esc** throughout the game. Local menus pause the draft clock; leaving an active match asks for confirmation.
 
 ## Controls
 
 | Screen | Input | Action |
 | --- | --- | --- |
+| Any game screen | Esc | Pause menu, help and settings |
 | Draft | 1 / 2 / 3 | Choose the corresponding offered card |
 | Draft | S | Prepare Commander skill |
 | Draft | Enter | Start battle after selections are spent |
@@ -73,10 +78,10 @@ Open `project.godot` using Godot 4.7 stable and run the project. Choose a Comman
 | Battle | M | Toggle sound |
 | Result | Enter | Continue to the next round |
 
-Use **Equip Commander theme** for a quick themed army. Leave the optional seed empty for a new match, or reuse a seed with the same setup and picks to reproduce a match. Sound starts off; motion and HP-number controls are available during battle. Current rival draft choices are concealed until combat.
+Music and sound begin after the first player interaction. **Settings** has separate music/effects volume and accessibility controls, saved on the current device. Set a volume to zero to mute it. **Advanced** in the warband screen reveals the optional match seed; reuse it with the same setup and picks to reproduce a match. Current rival draft choices are concealed until combat. Audio credits and composition source are in `assets/audio/CREDITS.md` and `tools/compose_audio.py`.
 
 ## Verification and playtesting
 
 Run `python3 tools/run_checks.py --godot /path/to/godot` for all content/art validation and headless suites. Run `godot --headless --path . --script tools/run_balance.gd -- --seeds=8 --seed-start=1000 --output=/tmp/balance.json` for a reproducible AI sample. See `docs/PLAYTEST_REPORT.md` for methods, tuning and limitations.
 
-CI also renders six desktop screenshots and tests the exported game pack. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.
+CI also renders ten desktop screenshots, including title/help/settings/pause, and tests the exported game pack. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.

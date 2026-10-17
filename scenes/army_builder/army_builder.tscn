@@ -43,11 +43,11 @@ size_flags_horizontal = 3
 [node name="Title" type="Label" parent="Margin/Main/Header/HeaderText"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 34
-text = "Build Your Army"
+text = "Meet your warband"
 
 [node name="Subtitle" type="Label" parent="Margin/Main/Header/HeaderText"]
 layout_mode = 2
-text = "Equip exactly four unique cards from any element"
+text = "2 / 3   Start with your Commander companions, or choose your own four."
 
 [node name="Commander" type="Label" parent="Margin/Main/Header"]
 layout_mode = 2
@@ -72,7 +72,7 @@ theme_override_constants/separation = 9
 [node name="ArmyTitle" type="Label" parent="Margin/Main/SlotsPanel/Padding/SlotsContent"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "Army Slots"
+text = "Your companions"
 
 [node name="SlotsRow" type="HBoxContainer" parent="Margin/Main/SlotsPanel/Padding/SlotsContent"]
 layout_mode = 2
@@ -97,11 +97,11 @@ layout_mode = 2
 [node name="AvailableTitle" type="Label" parent="Margin/Main"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
-text = "Available Army Cards"
+text = "Companion collection"
 
 [node name="Hint" type="Label" parent="Margin/Main"]
 layout_mode = 2
-text = "Mix any elements. Click a card to equip it; click an occupied slot to remove it."
+text = "Click a companion above to remove it, then recruit a replacement below."
 
 [node name="CardScroll" type="ScrollContainer" parent="Margin/Main"]
 layout_mode = 2
@@ -137,9 +137,9 @@ tooltip_text = "Use the same Commander, army and seed to replay a strategy"
 [node name="BeginDraft" type="Button" parent="Margin/Main"]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
-text = "Begin Match Draft"
+text = "Begin adventure →"
 disabled = true
 
 [node name="Footer" type="Label" parent="Margin/Main"]
 layout_mode = 2
-text = "Fill all four slots to continue to the opening pre-battle draft."
+text = "Your four cards form the choices you can recruit during the match."

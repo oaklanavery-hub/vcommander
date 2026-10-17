@@ -14,6 +14,8 @@ var commander_buttons: Dictionary = {}
 var selected_commander_id := ""
 
 func _ready() -> void:
+    ScreenStyle.apply(self)
+    ScreenStyle.primary(build_army_button)
     build_army_button.pressed.connect(_open_army_builder)
 
     var summary := ContentDatabase.get_summary()
@@ -37,7 +39,10 @@ func _populate_commanders() -> void:
     for commander in all_commanders:
         var commander_id: String = str(commander.get("id", ""))
         var button := Button.new()
-        button.custom_minimum_size = Vector2(220, 82)
+        button.custom_minimum_size = Vector2(360, 100)
+        button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        ScreenStyle.card(button, str(commander.get("element", "earth")))
+        button.add_theme_font_size_override("font_size", 21)
         button.toggle_mode = true
         var themed: Array = ContentDatabase.get_cards_by_set(str(commander.get("signature_set_id", "")))
         if not themed.is_empty():
@@ -70,7 +75,8 @@ func _select_commander(commander_id: String) -> void:
         commander_buttons[id].button_pressed = str(id) == selected_commander_id
 
     commander_name.text = str(commander.get("display_name", commander_id))
-    element_label.text = "Element: %s" % str(commander.get("element", "unknown")).capitalize()
+    element_label.text = ScreenStyle.skill_description(commander)
+    element_label.tooltip_text = "Costs one pick. Once per round, twice per match."
 
     var set_id: String = str(commander.get("signature_set_id", ""))
     var signature_set := ContentDatabase.get_signature_set(set_id)
@@ -138,7 +144,8 @@ func _make_card_preview(card: Dictionary) -> Control:
         str(int(stats.get("attack", 0))),
         str(int(stats.get("defense", 0)))
     ]
-    content.add_child(stat_label)
+    panel.tooltip_text = stat_label.text
+    stat_label.queue_free()
 
     var draft_label := Label.new()
     draft_label.text = "Draft +%s • Cap %s" % [
@@ -162,4 +169,8 @@ func _open_army_builder() -> void:
     if selected_commander_id.is_empty():
         return
     GameState.select_commander(selected_commander_id)
+    if GameState.army.size() == 0:
+        for card in ContentDatabase.get_cards_by_set(str(GameState.get_selected_commander().get("signature_set_id", ""))):
+            if not GameState.equip_card(str(card["id"])):
+                break
     get_tree().change_scene_to_file("res://scenes/army_builder/army_builder.tscn")
