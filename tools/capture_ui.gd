@@ -33,7 +33,7 @@ func run() -> void:
     await capture("res://scenes/main_menu/main_menu.tscn", "menu")
     var audio = root.get_node("GameAudio")
     var reduced: bool = audio.reduced_motion
-    var showcase = current_scene.get_node("Margin/Main/Commanders/Showcase")
+    var showcase = current_scene.get_node("CampfireScene")
     showcase.set_process(false)
     audio.reduced_motion = false
     showcase._clock = 1.2

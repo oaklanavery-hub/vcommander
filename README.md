@@ -4,11 +4,11 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.8.2 — Animated Commander title menu**
+**v0.8.3 — Campfire title scene**
 
 The current playable prototype supports:
 
-- a title-screen showcase of all four full-body Commanders with looping idle poses, cloth/hair motion and elemental motes; reduced motion keeps the illustration still
+- a centered title and menu over an original moonlit pixel forest, with all four Commanders seated around an animated campfire; idle poses, cloth/hair, embers, stars and elemental motes respect reduced motion
 
 - shared tactical formation AI: multi-rank deployment, Tank screens, melee wings, central healer coverage, range-aware placement and spacing against opposing area damage
 - Commander skill openings that finish before armies move and the battle clock begins

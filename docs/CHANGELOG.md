@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.8.3 — Centered campfire title scene
+
+- Center the title and Play/help/settings controls over a calm moonlit pixel forest clearing.
+- Original seated Fire, Water, Earth and pink Slime Princess artwork replaces the standing gallery arrangement, with poses inspired by the supplied campfire references.
+- Animate six separately illustrated pixel flame frames, embers, stars and Commander idle layers; keep reduced motion and modal pause.
+- Add native menu art validation and exported texture/gutter coverage. Existing menu phase captures review the new composition.
+
 ## v0.8.2 — Animated Commander title menu
 
 - Replace the title camp army units with a larger full-body showcase of Fire, Water, Earth and Slime Princess.
