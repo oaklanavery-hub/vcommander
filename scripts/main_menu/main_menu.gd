@@ -57,7 +57,7 @@ func _ready() -> void:
     settings.custom_minimum_size.y = 48
     settings.pressed.connect(GameMenu.open_settings)
     left.add_child(settings)
-    left.add_child(ScreenStyle.label("FIRE  ·  WATER  ·  EARTH", 15))
+    left.add_child(ScreenStyle.label("FIRE  ·  WATER  ·  EARTH  ·  SLIME", 15))
     var right := VBoxContainer.new()
     right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     right.alignment = BoxContainer.ALIGNMENT_END

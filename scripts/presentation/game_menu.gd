@@ -123,7 +123,7 @@ func _apply_accessibility() -> void:
 func open_help() -> void:
     _page("Your first adventure", "Build a little warband. Make a few choices. Let your army do the fighting.")
     var steps := [
-        ["1   Choose a Commander", "Fire, Water or Earth. Start with their four-card warband, or mix your own."],
+        ["1   Choose a Commander", "Fire, Water, Earth or Slime. Start with their four-card warband, or mix your own."],
         ["2   Grow your army", "Choose from three cards each pick. Spend all your picks, then start the battle. Armies and buffs stay with you."],
         ["3   Watch the battle", "Your units fight automatically. Each side has four hearts. Take your rival's last heart to win; draws cost both sides a heart."],
         ["A little magic helps", "Your Commander skill costs one pick. Use it once per round and twice per match. Losing a round gives you an extra pick next round."]
