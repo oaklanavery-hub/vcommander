@@ -2,7 +2,20 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Strategic automatic formations
+## Current task — Animated Commander title menu
+
+- User requests that the main menu feature Commanders instead of army units, with all Commanders animated.
+- Branch `feat/commander-menu`, base verified v0.8.1 main `6148e53ca956bbd8941801a7e343a62ba09fef31`. Previous release: [PR #20](https://github.com/oaklanavery-hub/vcommander/pull/20), [CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39097553409), [export/live verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39097650761); all passed.
+- Scope: replace title camp army-unit decoration with a full-body showcase using existing Commander artwork and cosmetic, pixel-filtered idle motion and elemental effects for every loaded Commander. Preserve Play/help/settings and respect reduced motion and local modal pause. No gameplay changes or new bitmap assets.
+- Acceptance checks: clean import/content checks; existing player-experience and scene-flow suites; native captures of the title at several animation phases and reduced motion; remote CI, Web export and served-pack verification.
+- Implemented: content-driven two-column full-body showcase, cached procedural idle poses/cloth/hair/bob, per-element motes, still reduced-motion poses and normal modal pause. Removed camp army-unit draws. Added three native title views (76 total); version v0.8.2 and presentation docs updated. No gameplay or bitmap asset changes.
+- Passing: content validation (4 Commanders/16 cards/4 sets), art validation, clean Godot editor import, `test_player_experience.gd`, `test_scene_flow.gd`, and `git diff --check`. Initial import caught an invalid three-argument `minf` call; fixed and the import passed.
+- Local native preview blocked: the environment denies AF_UNIX socket creation (`Operation not permitted`), so Xvfb cannot start; no successful local graphical review is claimed. CI has the existing native Compatibility renderer and will produce the requested animation/reduced-motion captures for review before merge.
+- Checkpoint saved at `536819825dd9c8582c572cf42dea6d9facaa0e08`, [PR #21](https://github.com/oaklanavery-hub/vcommander/pull/21). [Checkpoint CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39099502539) passed all 20 suites and 76 native captures.
+- Native review completed using the verified CI archive: title, two motion phases, reduced motion, help and settings. Every Commander is full-body, named and readable; pixel comparisons of all four portrait regions confirm different rendered poses between phases. The still mode retains all four portraits without animated posing/particles. No further visual edits were required.
+- Next: save this reviewed handoff, require passing [final PR checks](https://github.com/oaklanavery-hub/vcommander/pull/21/checks), merge and complete Web export and served-pack verification. Final run links, main SHA and exported pack identity belong in PR #21; verify actual remote state before resuming.
+
+## Previous task — Strategic automatic formations (released v0.8.1)
 
 - User reports a single backline column sorted into Serpents/Penguins/Mages, and requests an AI that determines battle-ready strategic placement.
 - Branch `feat/strategic-formation`, base verified v0.8.0 main `ffab11b977486270c1546b16896bfbd044e0ddf3`. Previous release: [PR #19](https://github.com/oaklanavery-hub/vcommander/pull/19), [CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39095018306), [export/served verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39095098422); all passed.
