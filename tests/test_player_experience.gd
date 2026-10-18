@@ -114,11 +114,31 @@ func run() -> void:
         file.close()
     else:
         DirAccess.remove_absolute(_audio.SETTINGS_PATH)
-    if not failed:
-        print("Player experience tests passed: title flow, modal bounds, pause/exit safety, saved preferences and all audio assets.")
+    var decoders: Array[WeakRef] = [_music_decoder()]
     _audio.stop_all()
-    await create_timer(0.1, true).timeout
+    _audio.set_context("menu")
+    check(_audio._music.playing, "stopped audio can restart the same cached menu score")
+    await process_frame
+    decoders.append(_music_decoder())
+    _audio.stop_all()
+    # AudioServer drains stopped Ogg playbacks on its own thread. Poll weak
+    # references without retaining the decoder across the await itself.
+    var deadline := Time.get_ticks_msec() + 1500
+    while _decoders_alive(decoders) and Time.get_ticks_msec() < deadline:
+        await process_frame
+    check(not _decoders_alive(decoders), "stopped music decoders release before engine shutdown")
+    if not failed:
+        print("Player experience tests passed: title flow, modal bounds, pause/exit safety, saved preferences, audio restart and decoder cleanup.")
     quit(1 if failed else 0)
+
+func _music_decoder() -> WeakRef:
+    return weakref(_audio._music.get_stream_playback())
+
+func _decoders_alive(references: Array[WeakRef]) -> bool:
+    for reference in references:
+        if reference != null and reference.get_ref() != null:
+            return true
+    return false
 
 func check(condition: bool, message: String) -> void:
     if not condition:

@@ -141,17 +141,18 @@ func load_settings() -> void:
 
 func stop_all() -> void:
     _music.stop()
+    # Detach the decoder while the audio server can still drain playback.
+    # Keeping it until _exit_tree can retain Ogg resources during shutdown.
+    _music.stream = null
     _playing_context = ""
     stop_effects()
 
 func stop_effects() -> void:
     for player in _effects:
         player.stop()
+        player.stream = null
 
 func _exit_tree() -> void:
     stop_all()
-    _music.stream = null
-    for player in _effects:
-        player.stream = null
     _music_streams.clear()
     _effect_streams.clear()

@@ -2,7 +2,17 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Centered campfire title scene
+## Current task — Complete campfire release after audio cleanup
+
+- Campfire scene is implemented and natively reviewed in [PR #22](https://github.com/oaklanavery-hub/vcommander/pull/22), merged as `ad0ffd7e941ce6cbee9830c258942db54e0553d8`. [Final scene CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39108409405) passed 20 suites/76 captures and the final illustrated fire was reviewed. The last verified live build remains v0.8.2.
+- Deployment [39108636237](https://github.com/oaklanavery-hub/vcommander/actions/runs/39108636237) failed at the player-experience suite after its assertions passed: four leaked objects/two Ogg resources at shutdown. No new pack was published.
+- Branch `fix/menu-audio-cleanup`, base the merged main above. Reproduced with fresh isolated XDG player data and verbose diagnostics: leaked `AudioStreamPlaybackOggVorbis`, `OggPacketSequencePlayback`, `OggPacketSequence` and the `campfire.ogg` resource. Existing local profiles masked the intermittent teardown timing; do not rely on a simple retry.
+- Focused fix: detach stopped music/effect streams in `GameAudio.stop_all/stop_effects` before audio-server shutdown, retaining cached assets for restart. The test tracks weak decoder references, asserts same-context playback can resume, and waits for actual decoder release (bounded 1.5 seconds) instead of a fixed 100ms delay. The stream-detach-only attempt still failed once in 26 fresh profiles, so do not claim that alone resolves the race. No changes to the reviewed visual assets or gameplay.
+- Passing: thirty fresh isolated player-profile runs with cached audio restart and bounded decoder-drain assertions; no errors or leaked-object reports. The prior stream-detach-only version still failed on profile 26; waiting for the actual weak playback references to expire resolves that test timing race.
+- Repair checkpoint saved at `3e271ed5026642120e27d8f546a3f55095e9fa5f`. [PR #23](https://github.com/oaklanavery-hub/vcommander/pull/23) tracks the [latest exact-head checks](https://github.com/oaklanavery-hub/vcommander/pull/23/checks).
+- Next: require passing final PR CI, merge, then complete Web export, exported-pack tests and served-pack verification. Keep logged errors fatal; final release/run identity belongs in PR #23 and PR #22. Verify actual remote state before resuming; v0.8.3 is not released until those gates pass.
+
+## Previous implementation — Centered campfire title scene
 
 - User supplied three pixel campfire scene/pose references and requests title and selection buttons in the center. Preserve the prior requirement that every Commander is animated.
 - Branch `feat/campfire-menu`, base verified v0.8.2 main `8501aaaf1f3e516ad580f12ca37a366672f5f707`. Previous release: [PR #21](https://github.com/oaklanavery-hub/vcommander/pull/21), [CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39099683180), [export/live verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39099779507); all passed.
