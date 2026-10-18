@@ -11,7 +11,9 @@ Verify this handoff against GitHub and the working tree before resuming.
 - Checkpoint 1: implement planner and meaningful regressions for Water/crowded/mixed/no-frontline armies, input ordering, mirrored sides, support cover, area-damage response, collision and determinism. Record R047/schema/architecture changes.
 - Checkpoint 1 implemented: shared role/ability-aware rank scoring, central support/healing coverage, range/death-contact placement, enemy area/melee pressure, canonical ordering, mirrored sides and recorded starting placements. Formation spacing tuning is data-driven.
 - Passing: content validation, clean Godot import and new formation suite (after correcting two test type annotations), combat simulator, Slime mechanics, summon allegiance, battle presentation, scene flow and capped-roster stress (eight battles, all Buffs/skills). Full PR/export/live gates have not run.
-- Checkpoint 2: native opening/engagement captures, save checkpoint, full PR CI/export/served-pack verification. Next: finish focused checks, save the mechanics checkpoint, then visually review the supplied Water/mixed scenario and every theme.
+- Checkpoint 1 saved at `a154ff7bd9ca11546fa0af0d82c1c248800d5f9b`. [Checkpoint CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39097346413) passed all 20 suites and the existing 66 views.
+- Native formation review passed: seven new captures show the reported 19-unit Water army against the mixed Slime/Dragon/Penguin opponent, skill opening, battle start, engagement, Fire/Earth/Slime and ranged-only armies. Tank screens, multiple non-overlapping backline ranks and central support are visible.
+- [PR #20](https://github.com/oaklanavery-hub/vcommander/pull/20) records final validation/deployed identity. Added native captures to CI (73 total) and documented the release. Next: save this reviewed checkpoint, require passing [latest PR checks](https://github.com/oaklanavery-hub/vcommander/pull/20/checks), merge and complete export/served-pack verification. Final run links and main SHA belong in the PR; verify actual remote state before resuming.
 
 ## Previous task — Slime Princess and her army (released v0.8.0)
 

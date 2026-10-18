@@ -103,6 +103,9 @@ func test_simulator(own: Dictionary) -> void:
     var a := CombatSimulator.new().simulate(own, enemy, 1018, {"match": {"round_time_seconds": 1}})
     var b := CombatSimulator.new().simulate(own, enemy, 1018, {"match": {"round_time_seconds": 1}})
     check(a == b, "same battle inputs and seed preserve deterministic simulation")
+    var reordered := own.duplicate(true)
+    reordered["cards"].reverse()
+    check(a == CombatSimulator.new().simulate(reordered, enemy, 1018, {"match": {"round_time_seconds": 1}}), "reordering equipped cards cannot alter layout or simultaneous combat ordering")
     check(a["formations"]["player"]["placements"].size() == 19 and a["formations"]["opponent"]["placements"].size() == 19, "both armies actually use their planned positions before combat")
     var positions := {}
     for event in a["events"]:

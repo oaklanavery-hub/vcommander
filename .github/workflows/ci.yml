@@ -86,6 +86,17 @@ jobs:
           test -s build/qa/slime_split.png
           test -s build/qa/slime_cannon_hit.png
           test -s build/qa/slime_pool_late.png
+          timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_formations.gd -- --output-dir=build/qa 2>&1 | tee /tmp/formation-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/formation-qa.log; then
+            exit 1
+          fi
+          test -s build/qa/formation_water_opening.png
+          test -s build/qa/formation_water_start.png
+          test -s build/qa/formation_water_engagement.png
+          test -s build/qa/formation_fire_start.png
+          test -s build/qa/formation_earth_start.png
+          test -s build/qa/formation_slime_start.png
+          test -s build/qa/formation_ranged_start.png
 
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4

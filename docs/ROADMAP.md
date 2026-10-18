@@ -93,6 +93,12 @@
 - Generic one-generation death splitting, once-only revival, refreshing small-area speed slows and ten-second damaging death areas.
 - Original pink/green/white pixel artwork, matching battle motion/VFX and five SFX, roster UI/tooltips, focused mechanics/presentation tests and native captures.
 
+## v0.8.1 — Tactical formation feedback
+
+- Shared deterministic formation AI for both revealed battle rosters.
+- Spaced multiple ranks, frontline screening, melee wings, central healer coverage and range-aware backline placement.
+- Enemy area/melee pressure, input-order invariance, mirrored policy, collision/bounds regressions and seven native formation views.
+
 ## Further major phase — Game Director scope decision
 
 The elemental PvAI vertical slice and requested Slime Court roster expansion are implemented. A further major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved scope. Human playtesting should inform further balance values; the current tuning remains provisional.

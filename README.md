@@ -4,10 +4,11 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.8.0 — Slime Princess and the Slime Court**
+**v0.8.1 — Strategic automatic formations**
 
 The current playable prototype supports:
 
+- shared tactical formation AI: multi-rank deployment, Tank screens, melee wings, central healer coverage, range-aware placement and spacing against opposing area damage
 - Commander skill openings that finish before armies move and the battle clock begins
 - stretching/retracting Pitcher Plant vines, visible enemy pulls, distinct arrows/fireballs/flames/water/ice/seeds and impact/attack motion
 - every battle starts at 1×, with results shown after the battle completes
@@ -102,4 +103,4 @@ Choose Preset 1, 2 or 3, then **Save** a complete four-card warband. Clicking a 
 
 Run `python3 tools/run_checks.py --godot /path/to/godot` for all content/art validation and headless suites. Run `godot --headless --path . --script tools/run_balance.gd -- --seeds=8 --seed-start=1000 --output=/tmp/balance.json` for a reproducible AI sample. See `docs/PLAYTEST_REPORT.md` for methods, tuning and limitations.
 
-CI renders 66 desktop captures, including title/help/settings/pause, projectile contact, attack phases, frost, summon ownership and the Slime Court, and tests the exported game pack. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.
+CI renders 73 desktop captures, including title/help/settings/pause, projectile contact, attack phases, frost, summon ownership, the Slime Court and tactical formations, and tests the exported game pack. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.

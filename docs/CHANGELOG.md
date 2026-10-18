@@ -6,6 +6,7 @@
 - Spaced multi-rank deployment, Tank screens, melee wings, range-aware caster placement and central healer coverage, with wider spacing against recruited area-damage threats.
 - Stable placement independent of loadout card order, mirrored team rules, collision/bounds checks and recorded formation metadata. Free movement, targeting, skills, stats and recruitment remain unchanged.
 - Focused formation tests cover crowded Water, mixed/role-deficient/single/empty armies, future generic abilities, enemy pressure, custom field bounds and simulator/replay determinism.
+- Seven native formation captures cover the reported Water/mixed matchup before skills, at battle start and during engagement, all themes and ranged-only support protection; CI now records 73 views.
 ## v0.8.0 — Slime Princess
 
 - Added the Slime Court: Giant Slime 1/4, Slime Cannon 2/4, Slime Ball 2/6 and Slime Barrel 2/6.
