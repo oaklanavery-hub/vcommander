@@ -85,6 +85,8 @@ func consume_event(event: Dictionary) -> void:
     if _visual_time - float(event.get("time", 0)) > 1.2:
         return
     var source: Dictionary = _known.get(unit_id, {})
+    if type == "defeat" and event.has("unit"):
+        source = event["unit"]
     var target: Dictionary = _known.get(target_id, {})
     if type == "attack":
         var pose: Dictionary = _poses.get(unit_id, {})
@@ -184,6 +186,13 @@ func _draw() -> void:
                 var point := start.lerp(end, 1 - pow(1 - progress, 3))
                 unit["x"] = point.x
                 unit["y"] = point.y
+            else:
+                var pending := replay.pending_pushback(id_value, _visual_time, float(_next_frame.get("time", 0)))
+                if not pending.is_empty():
+                    # Coarse snapshots include the jump: do not anticipate it before impact.
+                    var progress := clampf((_visual_time - float(_frame.get("time", 0))) / maxf(0.001, float(pending["time"]) - float(_frame.get("time", 0))), 0, 1)
+                    unit["x"] = lerpf(float(original.get("x", 0)), float(pending["from_x"]), progress)
+                    unit["y"] = lerpf(float(original.get("y", 0)), float(pending["from_y"]), progress)
         var pull := BattleEffects.pull_chain(_effects, id_value, _visual_time)
         if not pull.is_empty():
             var age := _visual_time - float(pull.get("time", 0))

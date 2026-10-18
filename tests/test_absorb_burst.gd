@@ -149,6 +149,8 @@ func test_death_and_chains() -> void:
     check(not ball["alive"] and bursts(sim).size() == 1, "a lethal deadline hit produces exactly one death burst, never a normal burst first")
     check(bursts(sim)[0]["on_death"] and bursts(sim)[0]["amount"] == 60 and enemy["hp"] == 940, "the lethal hit is absorbed and the stored amount is doubled before round elimination")
     check(ball["absorbed_damage"] == 0, "death discharge consumes its charge")
+    var defeat: Dictionary = sim._events.filter(func(event): return event.get("type") == "defeat")[0]
+    check(defeat["x"] == bursts(sim)[0]["x"] and defeat["y"] == bursts(sim)[0]["y"] and defeat["unit"]["card_id"] == ball["card_id"], "death snapshot records the same position and actor as its burst, even between frames")
     sim = setup()
     ball = sim._units[0]
     enemy = sim._units[1]

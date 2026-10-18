@@ -116,6 +116,11 @@ func pushback_at(id: String, clock: float) -> Dictionary:
     var index := _last_at(records, clock)
     return records[index] if index >= 0 and clock - float(records[index]["time"]) < 0.22 else {}
 
+func pending_pushback(id: String, clock: float, next_frame_time: float) -> Dictionary:
+    var records: Array = pushbacks.get(id, [])
+    var index := _last_at(records, clock) + 1
+    return records[index] if index < records.size() and float(records[index]["time"]) <= next_frame_time + 0.00001 else {}
+
 func attack_at(id: String, clock: float) -> Dictionary:
     var records: Array = attacks.get(id, [])
     var index := _last_at(records, clock + UnitAttackMotion.WINDUP)

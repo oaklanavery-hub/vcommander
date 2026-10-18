@@ -96,6 +96,7 @@ func test_absorb_replay() -> void:
     check(replay.absorbed_at("ball", 10, 99) == 0 and is_equal_approx(replay.absorbed_at("ball", 10.1, 0), 0.3), "charge resets at the burst and later hits refill from zero")
     check(replay.health_at("ball", 9.95, 0) == 100.7, "fractional actual health remains exact in replay")
     check(replay.pushback_at("enemy", 9.99).is_empty() and not replay.pushback_at("enemy", 10.1).is_empty() and replay.pushback_at("enemy", 10.23).is_empty(), "pushback animation only occupies its recorded contact window")
+    check(not replay.pending_pushback("enemy", 9.99, 10.0).is_empty() and replay.pending_pushback("enemy", 9.8, 9.9).is_empty() and replay.pending_pushback("enemy", 10, 10.2).is_empty(), "coarse frame interpolation holds imminent pushback until contact")
     check(CombatCues.sound(events[1]) == "slime_burst", "stored-damage explosions use the Slime burst sound")
     replay.configure([], [])
     check(replay.absorbed_at("ball", 20, 0) == 0 and replay.pushback_at("enemy", 10.1).is_empty(), "reconfiguring replay clears previous battle charge and pushback")

@@ -1065,7 +1065,8 @@ func _mark_newly_dead() -> Array[Dictionary]:
         _events.append(BattleEventScript.make("defeat", _time, {
             "side": str(unit.get("side", "")),
             "unit_id": str(unit.get("id", "")),
-            "name": str(unit.get("display_name", "Unit"))
+            "name": str(unit.get("display_name", "Unit")),
+            "x": float(unit["x"]), "y": float(unit["y"]), "unit": _unit_snapshot(unit)
         }))
     return dead
 
