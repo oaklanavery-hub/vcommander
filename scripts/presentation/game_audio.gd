@@ -30,7 +30,12 @@ const EFFECTS := {
     "freeze": "res://assets/audio/freeze.wav",
     "plant_grow": "res://assets/audio/plant_grow.wav",
     "explosion": "res://assets/audio/explosion.wav",
-    "healing_water": "res://assets/audio/healing_water.wav"
+    "healing_water": "res://assets/audio/healing_water.wav",
+    "slime_bounce": "res://assets/audio/slime_bounce.wav",
+    "slime_shot": "res://assets/audio/slime_shot.wav",
+    "slime_splat": "res://assets/audio/slime_splat.wav",
+    "slime_burst": "res://assets/audio/slime_burst.wav",
+    "slime_rebirth": "res://assets/audio/slime_rebirth.wav"
 }
 
 var music_volume := 0.55

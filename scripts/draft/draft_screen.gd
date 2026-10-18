@@ -176,7 +176,7 @@ func _refresh_summaries() -> void:
             int(card.get("unit_cap", 0))
         ])
     var bonus: Dictionary = GameState.get_selected_signature_set().get("bonus", {})
-    army_lines.append("Theme: +%d%% %s" % [int(bonus.get("percentage", 0)), str(bonus.get("stat", ""))] if GameState.is_full_set_active() else "Theme: inactive")
+    army_lines.append("Theme: " + ScreenStyle.bonus_description(bonus, true) if GameState.is_full_set_active() else "Theme: inactive")
     army_summary.text = "\n".join(army_lines)
 
     var buff_lines: Array[String] = ["[b]Active Buffs[/b]"]
@@ -232,7 +232,7 @@ func _opponent_text() -> String:
     for index in range(0, army_entries.size(), 2):
         lines.append(" • ".join(army_entries.slice(index, mini(index + 2, army_entries.size()))))
     lines.append("Skill uses: %d/2 • Round losses: %d" % [int(side.get("skill_uses_remaining", 2)), int(GameState.match_state.losses["opponent"])])
-    lines.append("Theme: inactive" if bonus.is_empty() else "Theme: +%d%% %s" % [int(bonus.get("percentage", 0)), str(bonus.get("stat", ""))])
+    lines.append("Theme: inactive" if bonus.is_empty() else "Theme: " + ScreenStyle.bonus_description(bonus, true))
     var buff_entries: Array[String] = []
     var names := {"attack": "ATK", "health": "HP", "defense": "DEF", "attack_speed": "ASPD", "movement_speed": "MOVE"}
     for buff in side.get("buffs", []):

@@ -18,6 +18,8 @@ var _area_effects: Array[Dictionary] = []
 var _pending_damage: Array[Dictionary] = []
 var _pending_heal: Array[Dictionary] = []
 var _pre_battle: Dictionary = {}
+var _death_spawn_attack_pct: Dictionary = {}
+var _spawn_sequence := 0
 
 var _time := 0.0
 var _step := 0.1
@@ -92,6 +94,8 @@ func _reset(battle_seed: int, balance: Dictionary) -> void:
     _pending_damage.clear()
     _pending_heal.clear()
     _pre_battle.clear()
+    _death_spawn_attack_pct.clear()
+    _spawn_sequence = 0
     _time = 0.0
     _next_frame_time = 0.0
 
@@ -130,6 +134,9 @@ func _reset(battle_seed: int, balance: Dictionary) -> void:
 
 func _spawn_side(side_config: Dictionary, on_right: bool) -> void:
     var side_id := str(side_config.get("id", OPPONENT_SIDE if on_right else PLAYER_SIDE))
+    var bonus: Dictionary = side_config.get("set_bonus", {})
+    if str(bonus.get("trigger", "")) == "on_death_spawn" and str(bonus.get("stat", "")) == "attack":
+        _death_spawn_attack_pct[side_id] = float(bonus.get("percentage", 0))
     var cards: Array = side_config.get("cards", [])
     var counts: Dictionary = side_config.get("unit_counts", {})
 
@@ -233,6 +240,9 @@ func _spawn_unit(spec: Dictionary, position: Vector2) -> void:
         "ability_cooldown": 0.0,
         "attack_count": 0,
         "blocked_steps": 0,
+        "starting_army": true,
+        "visual_scale": 1.0,
+        "speed_debuffs": [],
         "dots": []
     }
     _units.append(unit)
@@ -242,7 +252,8 @@ func _spawn_unit(spec: Dictionary, position: Vector2) -> void:
         "name": unit["display_name"],
         "role": role,
         "x": position.x,
-        "y": position.y
+        "y": position.y,
+        "unit": _unit_snapshot(unit)
     }))
 
 
@@ -250,7 +261,7 @@ func _modified_stat(base_value: int, stat_name: String, side_config: Dictionary)
     var value := float(base_value)
 
     var set_bonus: Dictionary = side_config.get("set_bonus", {})
-    if str(set_bonus.get("stat", "")) == stat_name:
+    if str(set_bonus.get("stat", "")) == stat_name and str(set_bonus.get("trigger", "")).is_empty():
         value *= 1.0 + float(set_bonus.get("percentage", 0)) / 100.0
 
     var buffs: Array = side_config.get("buffs", [])
@@ -276,6 +287,9 @@ func _resolve_pre_battle_skills(player_side: Dictionary, opponent_side: Dictiona
     _emit_skill_event_if_active(player_side)
     _emit_skill_event_if_active(opponent_side)
 
+    _grant_revival_if_active(player_side)
+    _grant_revival_if_active(opponent_side)
+
     _apply_round_debuff_if_active(player_side, str(opponent_side.get("id", OPPONENT_SIDE)))
     _apply_round_debuff_if_active(opponent_side, str(player_side.get("id", PLAYER_SIDE)))
 
@@ -283,6 +297,17 @@ func _resolve_pre_battle_skills(player_side: Dictionary, opponent_side: Dictiona
     _queue_damage_skill_if_active(opponent_side, str(player_side.get("id", PLAYER_SIDE)))
 
     _resolve_pending_effects()
+
+
+func _grant_revival_if_active(side_config: Dictionary) -> void:
+    var skill := _skill_if_active(side_config)
+    if str(skill.get("type", "")) != "army_revival":
+        return
+    for unit in _alive_units(str(side_config.get("id", PLAYER_SIDE))):
+        if not bool(unit.get("starting_army", false)):
+            continue
+        unit["revives_remaining"] = maxi(0, int(skill.get("revives_per_unit", 1)))
+        unit["revive_health_pct"] = clampf(float(skill.get("revive_health_pct", 50)), 1, 100)
 
 
 func _skill_if_active(side_config: Dictionary) -> Dictionary:
@@ -463,6 +488,12 @@ func _tick_status_effects() -> void:
     for unit in _units:
         if not bool(unit.get("alive", false)):
             continue
+        var active_slows: Array[Dictionary] = []
+        for slow in unit.get("speed_debuffs", []):
+            slow["remaining"] = float(slow.get("remaining", 0)) - _step
+            if float(slow["remaining"]) > EPSILON:
+                active_slows.append(slow)
+        unit["speed_debuffs"] = active_slows
         var dots: Array = unit.get("dots", [])
         var kept: Array = []
         for raw_dot in dots:
@@ -498,16 +529,21 @@ func _tick_area_effects() -> void:
             var side_id := str(effect.get("side", ""))
             var center := Vector2(float(effect.get("x", 0.0)), float(effect.get("y", 0.0)))
             var radius := float(effect.get("radius", _radius_medium))
-            var heal_pct := float(effect.get("heal_max_hp_pct", 0))
-            for ally in _alive_units(side_id):
-                if center.distance_to(_unit_position(ally)) <= radius + EPSILON:
-                    var amount := float(ally.get("max_hp", 1)) * heal_pct / 100.0
-                    _pending_heal.append({
-                        "target_id": str(ally.get("id", "")),
-                        "amount": amount,
-                        "source_unit_id": str(effect.get("source_unit_id", "")),
-                        "source": "area_heal"
-                    })
+            if str(effect.get("type", "")) == "damage_area":
+                for enemy in _alive_units(_other_side(side_id)):
+                    if center.distance_to(_unit_position(enemy)) <= radius + EPSILON:
+                        _queue_raw_damage(str(enemy["id"]), float(effect.get("damage", 0)), side_id, str(effect.get("source_unit_id", "")), "damage_area")
+            else:
+                var heal_pct := float(effect.get("heal_max_hp_pct", 0))
+                for ally in _alive_units(side_id):
+                    if center.distance_to(_unit_position(ally)) <= radius + EPSILON:
+                        var amount := float(ally.get("max_hp", 1)) * heal_pct / 100.0
+                        _pending_heal.append({
+                            "target_id": str(ally.get("id", "")),
+                            "amount": amount,
+                            "source_unit_id": str(effect.get("source_unit_id", "")),
+                            "source": "area_heal"
+                        })
             tick_timer += maxf(0.1, float(effect.get("tick_seconds", 2.0)))
         effect["remaining"] = remaining
         effect["tick_timer"] = tick_timer
@@ -814,12 +850,37 @@ func _tick_projectiles() -> void:
                         source_side,
                         raw_damage
                     )
+        elif ability_type == "ranged_aoe_slow":
+            var radius := _radius_from_value(str(ability.get("radius", "small")))
+            for other in _alive_units(_other_side(source_side)):
+                if impact_position.distance_to(_unit_position(other)) <= radius + EPSILON:
+                    _apply_speed_debuff(other, ability)
+            _events.append(BattleEventScript.make("ability", _time, {
+                "side": source_side, "unit_id": source_id, "card_id": str(projectile.get("card_id", "")),
+                "kind": "slow_splash", "x": impact_position.x, "y": impact_position.y, "radius": radius
+            }))
         elif ability_type == "ranged_pushback":
             var source := _unit_by_id(source_id)
             if not source.is_empty():
                 _push_from_source(target, source, _push_from_value(str(ability.get("pushback", "small"))))
 
     _projectiles = kept
+
+
+func _apply_speed_debuff(target: Dictionary, ability: Dictionary) -> void:
+    var slow := {
+        "key": str(ability.get("id", "slow")),
+        "remaining": maxf(0, float(ability.get("slow_seconds", 0))),
+        "attack_speed_pct": minf(0, float(ability.get("enemy_attack_speed_pct", 0))),
+        "movement_speed_pct": minf(0, float(ability.get("enemy_movement_speed_pct", 0)))
+    }
+    var slows: Array = target.get("speed_debuffs", [])
+    for existing in slows:
+        if existing.get("key") == slow["key"]:
+            existing.merge(slow, true)
+            return
+    slows.append(slow)
+    target["speed_debuffs"] = slows
 
 
 # Swept circles prevent fast projectiles tunneling through the first enemy.
@@ -937,8 +998,16 @@ func _resolve_pending_effects() -> void:
         var chained_damage: Array[Dictionary] = []
         for dead_unit in newly_dead:
             var ability: Dictionary = dead_unit.get("ability", {})
-            if str(ability.get("trigger", "")) == "on_death" and str(ability.get("type", "")) == "explosion":
-                _queue_death_explosion(dead_unit, ability, chained_damage)
+            if str(ability.get("trigger", "")) == "on_death":
+                match str(ability.get("type", "")):
+                    "explosion":
+                        _queue_death_explosion(dead_unit, ability, chained_damage)
+                    "death_split":
+                        _spawn_death_children(dead_unit, ability)
+                    "death_damage_area":
+                        _queue_death_damage_area(dead_unit, ability, chained_damage)
+            if int(dead_unit.get("revives_remaining", 0)) > 0:
+                _revive_unit(dead_unit)
 
         if chained_damage.is_empty():
             break
@@ -977,6 +1046,96 @@ func _mark_newly_dead() -> Array[Dictionary]:
             "name": str(unit.get("display_name", "Unit"))
         }))
     return dead
+
+
+func _spawn_death_children(source: Dictionary, ability: Dictionary) -> void:
+    if bool(source.get("split_spent", false)):
+        return
+    source["split_spent"] = true
+    for _index in range(maxi(0, int(ability.get("spawn_count", 2)))):
+        var child := source.duplicate(true)
+        child["display_name"] = "Small " + str(source.get("display_name", "Unit"))
+        child["max_hp"] = maxi(1, int(round(float(source.get("max_hp", 1)) * float(ability.get("child_health_pct", 50)) / 100.0)))
+        child["hp"] = float(child["max_hp"])
+        child["attack"] = maxi(1, int(round(float(source.get("attack", 1)) * float(ability.get("child_attack_pct", 50)) / 100.0)))
+        child["ability"] = {"type": "basic_melee"}
+        child["visual_scale"] = float(ability.get("child_visual_scale", 0.68))
+        child["revives_remaining"] = 0
+        _add_death_spawn(child, source, "death_split")
+
+
+func _revive_unit(source: Dictionary) -> void:
+    var revived := source.duplicate(true)
+    revived["revives_remaining"] = int(source.get("revives_remaining", 1)) - 1
+    revived["hp"] = maxf(1, round(float(source.get("max_hp", 1)) * float(source.get("revive_health_pct", 50)) / 100.0))
+    _add_death_spawn(revived, source, "revival")
+
+
+func _add_death_spawn(unit: Dictionary, source: Dictionary, cause: String) -> void:
+    _spawn_sequence += 1
+    var side_id := str(source.get("side", ""))
+    unit["id"] = "%s:%s:spawn%d" % [side_id, str(unit.get("card_id", "unit")), _spawn_sequence]
+    unit["attack"] = maxi(1, int(round(float(unit.get("attack", 1)) * (1.0 + float(_death_spawn_attack_pct.get(side_id, 0)) / 100.0))))
+    unit["alive"] = true
+    unit["summoned"] = true
+    unit["starting_army"] = false
+    unit["target_id"] = ""
+    unit["dots"] = []
+    unit["speed_debuffs"] = []
+    unit["attack_timer"] = 0.0
+    unit["ability_timer"] = float(unit.get("ability", {}).get("tick_seconds", 0))
+    unit["ability_cooldown"] = 0.0
+    unit["attack_count"] = 0
+    unit["blocked_steps"] = 0
+    unit["spawned_at"] = _time
+    var position := _death_spawn_position(_unit_position(source))
+    unit["x"] = position.x
+    unit["y"] = position.y
+    _units.append(unit)
+    _events.append(BattleEventScript.make("spawn", _time, {
+        "side": side_id, "unit_id": unit["id"], "source_unit_id": str(source.get("id", "")),
+        "source": cause, "summoned": true, "name": str(unit.get("display_name", "Unit")),
+        "card_id": str(unit.get("card_id", "")), "role": str(unit.get("role", "melee")),
+        "x": position.x, "y": position.y, "unit": _unit_snapshot(unit)
+    }))
+
+
+func _death_spawn_position(origin: Vector2) -> Vector2:
+    var spacing := _collision_radius * 2.0 + 0.02
+    for ring in range(0, int(ceil(maxf(_field_width, _field_height) / spacing)) + 1):
+        for angle_index in range(16):
+            var angle := TAU * float(angle_index) / 16.0
+            var position := _clamp_position(origin + Vector2.from_angle(angle) * float(ring) * spacing)
+            if not _position_collides(position, ""):
+                return position
+    return _clamp_position(origin)
+
+
+func _queue_death_damage_area(source: Dictionary, ability: Dictionary, damage_output: Array[Dictionary]) -> void:
+    var radius := _radius_from_value(str(ability.get("radius", "large")))
+    var side_id := str(source.get("side", ""))
+    var origin := _unit_position(source)
+    var attack := float(source.get("attack", 0))
+    for enemy in _alive_units(_other_side(side_id)):
+        if origin.distance_to(_unit_position(enemy)) <= radius + EPSILON:
+            damage_output.append({
+                "target_id": str(enemy["id"]), "amount": _damage_after_defense(attack * float(ability.get("attack_pct", 100)) / 100.0, enemy),
+                "source_side": side_id, "source_unit_id": str(source["id"])
+            })
+    var duration := maxf(_step, float(ability.get("duration_seconds", 10)))
+    var interval := maxf(_step, float(ability.get("tick_seconds", 1)))
+    _area_effects.append({
+        "type": "damage_area", "side": side_id, "source_unit_id": str(source["id"]),
+        "x": origin.x, "y": origin.y, "radius": radius, "remaining": duration,
+        "duration": duration, "created_at": _time, "tick_timer": interval, "tick_seconds": interval,
+        "damage": attack * float(ability.get("damage_attack_pct_per_tick", 35)) / 100.0
+    })
+    _events.append(BattleEventScript.make("ability", _time, {
+        "side": side_id, "unit_id": str(source["id"]), "card_id": str(source.get("card_id", "")),
+        "ability": str(ability.get("display_name", "Spill")), "kind": "death_area",
+        "x": origin.x, "y": origin.y, "radius": radius, "duration": duration,
+        "area": _area_effects.back().duplicate(true)
+    }))
 
 
 func _queue_death_explosion(
@@ -1125,7 +1284,7 @@ func _attempt_move(unit: Dictionary, direction: Vector2) -> void:
     if direction.length_squared() <= EPSILON:
         return
 
-    var rating := int(unit.get("movement_speed", 1))
+    var rating := _speed_after_debuffs(unit, "movement_speed")
     var distance := _move_units_per_second_at_100 * float(rating) / 100.0 * _step
     var origin := _unit_position(unit)
     var angles := [0.0, PI / 4.0, -PI / 4.0, PI / 2.0, -PI / 2.0]
@@ -1192,7 +1351,7 @@ func _attack_interval(unit: Dictionary) -> float:
 
 
 func _effective_attack_speed(unit: Dictionary) -> int:
-    var speed := int(unit.get("attack_speed", 1))
+    var speed := _speed_after_debuffs(unit, "attack_speed")
     var side_id := str(unit.get("side", ""))
     var origin := _unit_position(unit)
     var has_freezing_aura := false
@@ -1218,6 +1377,14 @@ func _effective_attack_speed(unit: Dictionary) -> int:
                 break
         speed = maxi(1, int(round(float(speed) * (1.0 + pct / 100.0))))
     return speed
+
+
+func _speed_after_debuffs(unit: Dictionary, stat: String) -> int:
+    var percentage := 0.0
+    for slow in unit.get("speed_debuffs", []):
+        if float(slow.get("remaining", 0)) > EPSILON:
+            percentage = minf(percentage, float(slow.get(stat + "_pct", 0)))
+    return maxi(1, int(round(float(unit.get(stat, 1)) * (1.0 + percentage / 100.0))))
 
 
 func _is_ranged(unit: Dictionary) -> bool:
@@ -1306,7 +1473,17 @@ func _snapshot() -> Dictionary:
     for unit in _units:
         if not bool(unit.get("alive", false)):
             continue
-        frame_units.append({
+        frame_units.append(_unit_snapshot(unit))
+    return {
+        "time": snappedf(_time, 0.001),
+        "units": frame_units,
+        "projectiles": _projectiles.duplicate(true),
+        "areas": _area_effects.duplicate(true)
+    }
+
+
+func _unit_snapshot(unit: Dictionary) -> Dictionary:
+    return {
             "id": str(unit.get("id", "")),
             "name": str(unit.get("display_name", "Unit")),
             "element": str(unit.get("element", "earth")),
@@ -1314,6 +1491,11 @@ func _snapshot() -> Dictionary:
             "side": str(unit.get("side", "")),
             "role": str(unit.get("role", "")),
             "summoned": bool(unit.get("summoned", false)),
+            "visual_scale": float(unit.get("visual_scale", 1)),
+            "spawned_at": float(unit.get("spawned_at", 0)),
+            "attack": int(unit.get("attack", 0)),
+            "slowed": not unit.get("speed_debuffs", []).is_empty(),
+            "revival_ready": int(unit.get("revives_remaining", 0)) > 0,
             "x": float(unit.get("x", 0.0)),
             "y": float(unit.get("y", 0.0)),
             "hp": maxi(0, int(round(float(unit.get("hp", 0.0))))),
@@ -1321,12 +1503,6 @@ func _snapshot() -> Dictionary:
             "burning": not unit.get("dots", []).is_empty(),
             "ability_type": str(unit.get("ability", {}).get("type", "")),
             "aura_radius": _radius_from_value(str(unit.get("ability", {}).get("radius", "small"))) if str(unit.get("ability", {}).get("type", "")).begins_with("aura_") else 0.0
-        })
-    return {
-        "time": snappedf(_time, 0.001),
-        "units": frame_units,
-        "projectiles": _projectiles.duplicate(true),
-        "areas": _area_effects.duplicate(true)
     }
 
 

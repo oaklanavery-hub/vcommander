@@ -105,7 +105,7 @@ func _refresh() -> void:
     var bonus: Dictionary = GameState.get_selected_signature_set().get("bonus", {})
     if GameState.army.is_full():
         army_status_label.text = "4 / 4 companions ready"
-        army_status_label.text += " • +%d%% %s" % [int(bonus.get("percentage", 0)), str(bonus.get("stat", "strength")).capitalize()] if GameState.is_full_set_active() else " • Mixed warband"
+        army_status_label.text += " • " + ScreenStyle.bonus_description(bonus, true) if GameState.is_full_set_active() else " • Mixed warband"
     else:
         army_status_label.text = "Choose %d more companion%s" % [GameState.army.max_slots - cards.size(), "" if cards.size() == 3 else "s"]
     _refresh_available_cards()

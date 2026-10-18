@@ -31,7 +31,7 @@ func run() -> void:
                 check(float(unit["hp"]) >= 0 and float(unit["hp"]) <= float(unit["max_hp"]), "HP remains valid")
     check(maximum_units == 46, "Earth mirrors include all capped units and both six-plant skills")
     if not failed:
-        print("Roster stress tests passed: six capped battles, all Buffs, all skills, up to 46 units.")
+        print("Roster stress tests passed: %d capped battles, all Buffs, all skills, up to %d starting units." % [db.get_all_commanders().size() * 2, maximum_units])
     quit(1 if failed else 0)
 
 func check(condition: bool, message: String) -> void:

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "commanders": {
-    "texture": "res://assets/pixel/commanders-v2.png",
+    "texture": "res://assets/pixel/commanders-v3.png",
     "cell_size": [
       128,
       192
@@ -18,11 +18,15 @@
       "earth": [
         2,
         0
+      ],
+      "slime": [
+        3,
+        0
       ]
     }
   },
   "units": {
-    "texture": "res://assets/pixel/roster-v2.png",
+    "texture": "res://assets/pixel/roster-v3.png",
     "cell_size": [
       64,
       64
@@ -79,6 +83,22 @@
       "commander_plant": [
         0,
         3
+      ],
+      "card_slime_01": [
+        0,
+        4
+      ],
+      "card_slime_02": [
+        1,
+        4
+      ],
+      "card_slime_03": [
+        2,
+        4
+      ],
+      "card_slime_04": [
+        3,
+        4
       ]
     }
   }

@@ -33,7 +33,7 @@ for path in (root / 'data/commanders').glob('*.json'):
     assert len(sprite['pixels']) == 48 and all(len(row) == 32 for row in sprite['pixels']), element
     assert all(cell == '.' or cell in colors for row in sprite['pixels'] for cell in row), element
     assert sum(cell != '.' for row in sprite['pixels'] for cell in row) > 100, element
-print('Commander art OK: three original 32x48 portraits and element coverage')
+print(f"Commander art OK: {len(commanders['sprites'])} original 32x48 portraits and element coverage")
 
 atlas_manifest = json.loads((root / 'assets/pixel/art_manifest.json').read_text())
 assert atlas_manifest['schema_version'] == 1
@@ -53,4 +53,4 @@ for group, expected in [('units', {card['id'] for card in cards} | {'commander_p
         assert (x, y) not in seen, name
         seen.add((x, y))
         assert x >= 0 and y >= 0 and (x + 1) * atlas['cell_size'][0] <= width and (y + 1) * atlas['cell_size'][1] <= height, name
-print('Detailed art OK: three 128x192 Commander frames, thirteen 64x64 roster frames, RGBA textures and unique regions')
+print(f"Detailed art OK: {len(atlas_manifest['commanders']['frames'])} Commander frames, {len(atlas_manifest['units']['frames'])} roster frames, RGBA textures and unique regions")

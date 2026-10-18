@@ -83,6 +83,18 @@ static func projectile(canvas: CanvasItem, p: Vector2, direction: Vector2, style
             canvas.draw_circle(p, 6, Color("397c9b"))
             canvas.draw_circle(p, 4, Color("81d3d7"))
             canvas.draw_rect(Rect2((p - Vector2(3, 3)).round(), Vector2(2, 3)), Color("e3f5e9"))
+        "slime_green", "slime_white", "slime_pink":
+            var color := slime_color(style)
+            var outline := color.darkened(0.55)
+            var wobble := 0.0 if reduced else roundf(sin(clock * 16) * 1.5)
+            for index in range(3):
+                var tail := (p - direction * (10 + index * 5) + side * wobble * (index + 1)).round()
+                canvas.draw_circle(tail, 3 - index * 0.5, Color(color, 0.6 - index * 0.15))
+            canvas.draw_circle(p, 8, outline)
+            canvas.draw_circle(p + Vector2(0, wobble), 6, color)
+            canvas.draw_rect(Rect2(p + Vector2(-4, -4), Vector2(3, 2)), color.lightened(0.65))
+            canvas.draw_rect(Rect2(p + Vector2(0, 0), Vector2(2, 3)), outline)
+            canvas.draw_rect(Rect2(p + Vector2(4, 0), Vector2(2, 3)), outline)
         _:
             for index in range(3):
                 var drift := 0.0 if reduced else sin(clock * 18 + index) * 2
@@ -95,11 +107,17 @@ static func impact(canvas: CanvasItem, p: Vector2, style: String, age: float, re
     if age < 0 or progress >= 1:
         return
     var colors := {"arrow": Color("e5c991"), "seed": Color("b8ce6f"), "water_orb": Color("9ae0e1"), "ice_shard": Color("d0f6f4"), "slam": Color("c9ad80"), "slash": Color("efdcb5"), "bite": Color("b8cb78")}
-    var color: Color = colors.get(style, Color("ffb85e"))
+    var color: Color = slime_color(style) if style.begins_with("slime_") else colors.get(style, Color("ffb85e"))
     color.a = 1.0 - progress
     if age < 0.1:
         canvas.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -8), p + Vector2(8, 0), p + Vector2(0, 8), p + Vector2(-8, 0)]), Color("fff3d5"))
-    if style == "water_orb":
+    if style.begins_with("slime_"):
+        canvas.draw_arc(p, 5 + progress * 14, 0, TAU, 10, color, 3)
+        for index in range(6):
+            var ray := Vector2.from_angle(float(index) * TAU / 6)
+            var point: Vector2 = (p + ray * (6 + (0 if reduced else progress * 22))).round()
+            canvas.draw_circle(point, maxf(1, 4 - progress * 3), color)
+    elif style == "water_orb":
         canvas.draw_arc(p, 7 + progress * 14, 0, TAU, 12, color, 2)
     elif style == "slash":
         for offset in [-6, 0, 6]:
@@ -113,3 +131,23 @@ static func impact(canvas: CanvasItem, p: Vector2, style: String, age: float, re
                 canvas.draw_line(point, (point + ray * 6).round(), color, 2)
             else:
                 canvas.draw_rect(Rect2(point - Vector2(2, 2), Vector2(4, 4)), color)
+
+static func slime_color(style: String) -> Color:
+    return {"slime_green": Color("91e876"), "slime_white": Color("f0edff"), "slime_pink": Color("f69bc9")}.get(style, Color("f69bc9"))
+
+static func slime_pool(canvas: CanvasItem, center: Vector2, radius: float, remaining: float, duration: float, clock: float, reduced: bool) -> void:
+    var fade := clampf(remaining, 0, 1)
+    var rim := slime_color("slime_pink")
+    var polygon := PackedVector2Array()
+    for index in range(17):
+        var angle := TAU * float(index) / 16
+        var ripple := 0.0 if reduced else sin(clock * 2 + float(index) * 1.7) * 2
+        polygon.append((center + Vector2.from_angle(angle) * (radius + ripple)).round())
+    canvas.draw_colored_polygon(polygon, Color(0.73, 0.23, 0.48, fade * 0.08))
+    canvas.draw_polyline(polygon, Color(rim, fade * 0.22), 1)
+    var age_fraction := 1 - clampf(remaining / maxf(0.01, duration), 0, 1)
+    for index in range(5):
+        var angle := float(index) * 2.4
+        var position := center + Vector2.from_angle(angle) * radius * (0.25 + float(index % 3) * 0.23)
+        var bubble := 2.0 if reduced else 2 + sin(clock * 3 + index) * 1.3
+        canvas.draw_arc(position.round(), bubble, 0, TAU, 6, Color(rim, fade * (0.5 - age_fraction * 0.2)), 1)

@@ -109,6 +109,13 @@ static func _draw_detailed_unit(canvas: CanvasItem, texture: Texture2D, position
         var attack_mesh := UnitAttackMotion.mesh(str(pose["rig"]), float(pose.get("charge", 0)), float(pose.get("power", 0)), mirror)
         canvas.draw_mesh(attack_mesh, PixelAtlasArt.standalone(texture), Transform2D(Vector2(side, 0), Vector2(0, side), origin), tint)
         return
+    if pose.get("rig") in ["slime", "cannon", "barrel"]:
+        var pulse := sin(float(pose.get("cycle", 0))) * (0.09 if moving else 0.025) if pose.get("rig") == "slime" else 0.0
+        var birth := clampf(float(pose.get("birth_progress", 1)), 0.05, 1)
+        var dimensions := Vector2(side * (1 + pulse) * (1.2 - birth * 0.2), side * (1 - pulse) * birth)
+        var foot := position - Vector2(0, bob)
+        canvas.draw_texture_rect(texture, Rect2((foot - Vector2(dimensions.x * 0.5, dimensions.y * 0.9)).round(), dimensions.round()), false, tint)
+        return
     var source := texture.get_size()
     # Directional body lean and alternating lower-body strips retain the existing
     # eight-direction/four-step procedural animation without driving simulation.

@@ -4,24 +4,26 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.7.4 — Battle animation and sound**
+**v0.8.0 — Slime Princess and the Slime Court**
 
 The current playable prototype supports:
 
 - Commander skill openings that finish before armies move and the battle clock begins
 - stretching/retracting Pitcher Plant vines, visible enemy pulls, distinct arrows/fireballs/flames/water/ice/seeds and impact/attack motion
 - every battle starts at 1×, with results shown after the battle completes
-- three distinct detailed Commander designs and thirteen detailed army sprites, shared by cards and battles
+- four distinct detailed Commander designs and seventeen detailed army sprites, shared by cards and battles
+- Slime Princess: pink royal artwork, Royal Jelly's once-per-ally revival and +100% attack for qualifying death spawns
+- Giant Slime 1/4 (green split Tank), Slime Cannon 2/4 (green slowing shots), Slime Ball 2/6 (white Melee), Slime Barrel 2/6 (pink ten-second death pools)
 - rounded pixel-edged card frames, gold selection borders, darker nameplates and refined panels/navigation
 - portrait Commander/army cards with element, class and recruit/cap badges
 - Commander gallery, full-body portrait and separate description, passive and active panels
 - four warband slots, an eight-column collection, element filters and three saved presets per Commander
 - a forest-camp title menu, How to Play and shared pause/settings menus
 - starter warbands, a filtered companion collection and clearer draft/result guidance
-- two original looping music tracks, 26 sound effects and saved volume/accessibility settings
+- two original looping music tracks, 31 sound effects and saved volume/accessibility settings
 
 - Fire, Water and Earth starter Commanders
-- 12 approved starter Army cards with initial playtest stats/abilities
+- 12 approved starter Army cards plus 4 Slime cards with provisional playtest stats/ability tuning
 - exactly 4 unique pre-match Army cards, freely mixed across elements
 - Commander themed-set bonuses when all four selected cards match the theme
 - seeded 3-choice pre-battle drafting
@@ -33,7 +35,7 @@ The current playable prototype supports:
 - deterministic left-vs-right auto-combat after the opening draft
 - automatic Tank → Melee → Backline formation, target locking, movement/collision and ranged spacing
 - Commander skills and the starter roster's data-driven unit abilities
-- twelve distinct original pixel units, full-field battle playback and HP bars
+- sixteen distinct Army units plus summoned plants, full-field battle playback, HP bars and match heart meters
 - eight-direction movement poses, four-direction attacks, neutral idle/death and combat VFX
 - optional sound, reduced motion, HP numbers, pause and keyboard shortcuts
 - seeded match input, Commander-theme quick equip and visible opponent progress
@@ -100,4 +102,4 @@ Choose Preset 1, 2 or 3, then **Save** a complete four-card warband. Clicking a 
 
 Run `python3 tools/run_checks.py --godot /path/to/godot` for all content/art validation and headless suites. Run `godot --headless --path . --script tools/run_balance.gd -- --seeds=8 --seed-start=1000 --output=/tmp/balance.json` for a reproducible AI sample. See `docs/PLAYTEST_REPORT.md` for methods, tuning and limitations.
 
-CI also renders ten desktop screenshots, including title/help/settings/pause, and tests the exported game pack. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.
+CI renders 66 desktop captures, including title/help/settings/pause, projectile contact, attack phases, frost, summon ownership and the Slime Court, and tests the exported game pack. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.

@@ -28,10 +28,12 @@ static func sound(event: Dictionary) -> String:
     var profile := event_profile(event)
     if type == "spawn" and event.get("source") == "commander_skill":
         return "plant_grow"
+    if type == "spawn" and event.get("source") in ["death_split", "revival"]:
+        return "slime_rebirth" if event.get("source") == "revival" else "slime_bounce"
     if type == "commander_skill":
-        return {"targeted_aoe_max_hp": "fire_cast", "round_debuff": "freeze", "summon_stationary_units": "plant_grow"}.get(str(event.get("skill_type", "")), "commander_skill")
+        return {"targeted_aoe_max_hp": "fire_cast", "round_debuff": "freeze", "summon_stationary_units": "plant_grow", "army_revival": "slime_rebirth"}.get(str(event.get("skill_type", "")), "commander_skill")
     if type == "ability":
-        return {"pull": "vine_pull", "meteor": "meteor", "on_death": "explosion", "area_heal": "healing_water"}.get(str(event.get("kind", "")), "")
+        return {"pull": "vine_pull", "meteor": "meteor", "on_death": "explosion", "area_heal": "healing_water", "death_area": "slime_burst", "slow_splash": "slime_splat"}.get(str(event.get("kind", "")), "")
     if type == "projectile_impact":
         return str(profile.get("impact_sound", "magic_hit"))
     if type == "attack":

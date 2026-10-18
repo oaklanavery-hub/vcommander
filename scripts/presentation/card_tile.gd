@@ -61,6 +61,9 @@ func set_content(content: Dictionary, is_commander := false) -> void:
         detail += "\nRecruit %d per pick • Maximum %d\n%s" % [int(content.get("summon_amount", 0)), int(content.get("unit_cap", 0)), str(content.get("ability", {}).get("display_name", ""))]
         var stats: Dictionary = content.get("stats", {})
         detail += "\nHealth %d • Attack %d • Defense %d" % [int(stats.get("health", 0)), int(stats.get("attack", 0)), int(stats.get("defense", 0))]
+        var description := str(content.get("ability", {}).get("description", ""))
+        if not description.is_empty():
+            detail += "\n\n" + description
     tooltip_text = detail
 
 func _draw() -> void:
@@ -100,6 +103,13 @@ func _element_badge(center: Vector2, element: String, canvas: Control) -> void:
         color = Color("eea35c")
     elif element == "water":
         color = Color("8bd0dd")
+    elif element == "slime":
+        color = Color("f2a1c6")
+        canvas.draw_circle(center + Vector2(0, 2), 7, color)
+        canvas.draw_circle(center + Vector2(-2, -3), 4, color)
+        canvas.draw_rect(Rect2(center + Vector2(-3, 1), Vector2(2, 3)), Color("543247"))
+        canvas.draw_rect(Rect2(center + Vector2(2, 1), Vector2(2, 3)), Color("543247"))
+        return
     var points := PackedVector2Array([center + Vector2(0, -9), center + Vector2(-7, 3), center + Vector2(-4, 8), center + Vector2(4, 8), center + Vector2(7, 3)])
     canvas.draw_colored_polygon(points, color)
     if element == "earth":

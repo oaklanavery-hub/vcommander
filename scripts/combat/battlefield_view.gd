@@ -69,7 +69,7 @@ func consume_event(event: Dictionary) -> void:
     var target_id := str(event.get("target_id", ""))
     if type == "spawn":
         var pieces := unit_id.split(":")
-        var info: Dictionary = _known.get(unit_id, {}).duplicate()
+        var info: Dictionary = event.get("unit", _known.get(unit_id, {})).duplicate()
         info.merge({"id": unit_id, "x": info.get("x", event.get("x", 0)), "y": info.get("y", event.get("y", 0)), "side": event.get("side", "player"), "role": event.get("role", "range"), "card_id": pieces[1] if pieces.size() > 1 else ""}, true)
         info["summoned"] = bool(event.get("summoned", info.get("summoned", false)))
         _known[unit_id] = info
@@ -77,6 +77,10 @@ func consume_event(event: Dictionary) -> void:
             var sprout := event.duplicate(true)
             sprout["type"] = "summon"
             _effects.append(sprout)
+        elif event.get("source") in ["death_split", "revival"]:
+            var birth := event.duplicate(true)
+            birth["type"] = "rebirth" if event.get("source") == "revival" else "split_birth"
+            _effects.append(birth)
         return
     if _visual_time - float(event.get("time", 0)) > 1.2:
         return
@@ -102,6 +106,8 @@ func consume_event(event: Dictionary) -> void:
             effect["target_unit"] = target.duplicate()
         var profile := CombatCues.event_profile(event)
         effect.merge({"x": event.get("x", at.get("x", 0)), "y": event.get("y", at.get("y", 0)), "unit": at.duplicate(), "unit_id": target_id if type in ["damage", "heal"] else unit_id, "element": event.get("element", source.get("element", "earth")), "style": profile.get("projectile" if type == "projectile_impact" else "motion", "slash")}, true)
+        if type == "attack" and event.get("kind") == "melee" and profile.has("impact_style"):
+            effect["style"] = profile["impact_style"]
         if type == "attack":
             effect["time"] = _poses.get(unit_id, {}).get("attack_started", event.get("time", 0))
         if type == "damage" and event.get("source") == "normal_attack":
@@ -147,14 +153,24 @@ func _draw() -> void:
     for id in held:
         if not ids.has(id):
             originals.append(held[id])
+            ids[id] = true
+    if replay_enabled:
+        for birth in replay.births_since(float(_frame.get("time", 0)), _visual_time):
+            if not ids.has(str(birth["id"])):
+                originals.append(birth)
+                ids[str(birth["id"])] = true
     var units: Array = []
     for original in originals:
         var unit: Dictionary = original.duplicate()
         var id_value := str(unit.get("id", ""))
         var next: Dictionary = next_units.get(id_value, original)
         var direction := Vector2(float(next.get("x", 0)) - float(original.get("x", 0)), float(next.get("y", 0)) - float(original.get("y", 0)))
-        unit["x"] = lerpf(float(original.get("x", 0)), float(next.get("x", 0)), _blend)
-        unit["y"] = lerpf(float(original.get("y", 0)), float(next.get("y", 0)), _blend)
+        var unit_blend := _blend
+        var born_at := float(original.get("spawned_at", 0))
+        if born_at > float(_frame.get("time", 0)):
+            unit_blend = clampf((_visual_time - born_at) / maxf(0.001, float(_next_frame.get("time", born_at)) - born_at), 0, 1)
+        unit["x"] = lerpf(float(original.get("x", 0)), float(next.get("x", 0)), unit_blend)
+        unit["y"] = lerpf(float(original.get("y", 0)), float(next.get("y", 0)), unit_blend)
         if replay_enabled:
             unit["hp"] = replay.health_at(id_value, _visual_time, float(unit.get("hp", 0)))
             if float(unit["hp"]) <= 0 and not held.has(id_value):
@@ -169,6 +185,9 @@ func _draw() -> void:
             if age < 0.54:
                 unit["hp"] = pull.get("from_hp", unit.get("hp", 0))
         var pose: Dictionary = _poses.get(id_value, {"facing": 4 if unit.get("side") == "opponent" else 0})
+        pose["rig"] = CombatCues.profile(str(unit.get("card_id", ""))).get("rig", "claw")
+        pose["cycle"] = _visual_time * 8 + float(unit.get("y", 0))
+        pose["birth_progress"] = clampf((_visual_time - born_at) / 0.35, 0, 1) if born_at > 0 and not reduced_motion else 1.0
         pose["state"] = "move" if direction.length() > 0.01 else "idle"
         if direction.length() > 0.01:
             pose["facing"] = posmod(int(round(direction.angle() / (PI / 4.0))), 8)
@@ -186,14 +205,21 @@ func _draw() -> void:
         _known[id_value] = unit
         units.append(unit)
         _draw_aura(unit)
-    for area in _frame.get("areas", []):
+    var areas: Array = _frame.get("areas", []).filter(func(area): return not replay_enabled or area.get("type") != "damage_area")
+    if replay_enabled:
+        areas.append_array(replay.death_areas_at(_visual_time))
+    for area in areas:
         var center := _point(float(area.get("x", 0)), float(area.get("y", 0)))
         var radius := float(area.get("radius", 1)) / _field_width * _arena.size.x
-        draw_circle(center, radius, Color(0.35, 0.8, 0.71, 0.16))
-        draw_arc(center, radius, 0, TAU, 16, Color("8bc7c0"), 1)
+        if area.get("type") == "damage_area":
+            BattleEffects.slime_pool(self, center, radius, float(area.get("remaining", 0)), float(area.get("duration", 10)), _visual_time, reduced_motion)
+        else:
+            draw_circle(center, radius, Color(0.35, 0.8, 0.71, 0.16))
+            draw_arc(center, radius, 0, TAU, 16, Color("8bc7c0"), 1)
     units.sort_custom(func(a, b): return float(a.get("y", 0)) < float(b.get("y", 0)))
     for unit in units:
         _draw_unit(unit)
+    _draw_royal_opening()
     for effect in _effects:
         var age := _visual_time - float(effect.get("time", 0))
         if effect.get("type") == "defeat" and age >= 0 and age < 0.5:
@@ -275,7 +301,7 @@ func _draw_rosters() -> void:
             draw_string(ThemeDB.fallback_font, Vector2(x + 34, y + 8), "Recruited: %d" % count, HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 60, 11, Color("a8b9a5"))
             y += 48
         var bonus: Dictionary = config.get("set_bonus", {})
-        var bonus_text := "Theme inactive" if bonus.is_empty() else "+%d%% %s" % [int(bonus.get("percentage", 0)), str(bonus.get("stat", "")).replace("_", " ")]
+        var bonus_text := "Theme inactive" if bonus.is_empty() else ScreenStyle.bonus_description(bonus, true)
         draw_string(ThemeDB.fallback_font, Vector2(x, y + 8), bonus_text, HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 24, 13, color)
         var skill: Dictionary = config.get("commander", {}).get("active_skill", {})
         if bool(config.get("commander_skill_active", false)) and skill.get("type") == "summon_stationary_units":
@@ -302,7 +328,7 @@ func _draw_unit(unit: Dictionary) -> void:
     var id_value := str(unit.get("id", ""))
     var side := str(unit.get("side", "player"))
     var pose: Dictionary = _poses.get(id_value, {})
-    var pixel := 2.0 if _arena.size.y >= 300 else 1.0
+    var pixel := (2.0 if _arena.size.y >= 300 else 1.0) * float(unit.get("visual_scale", 1))
     var bob := 0.0 if reduced_motion else floorf(sin(_visual_time * 4.0 + float(unit.get("y", 0))) + 1.0)
     pose["hit"] = false
     if not reduced_motion:
@@ -334,13 +360,21 @@ func _draw_unit(unit: Dictionary) -> void:
     if frozen_sides.has(side) and frost_coverage() >= 1.0:
         draw_arc(p, 14, 0, TAU, 8, Color(0.7, 0.93, 0.98, 0.7), 1)
         draw_rect(Rect2(bar + Vector2(-5, 0), Vector2(3, 4)), Color("bdeff3"))
+    if bool(unit.get("slowed", false)):
+        draw_arc(p, 11, 0, TAU, 8, Color("9de47f"), 2)
+        draw_rect(Rect2(bar + Vector2(33, 0), Vector2(3, 4)), Color("a9e383"))
+    if bool(unit.get("revival_ready", false)):
+        var crown := bar + Vector2(31, -5)
+        draw_rect(Rect2(crown, Vector2(9, 3)), Color("f5c77d"))
+        for tip in [0, 4, 8]:
+            draw_rect(Rect2(crown + Vector2(tip, -3), Vector2(2, 4)), Color("f2a1c6"))
     if show_hp_numbers:
         draw_string(ThemeDB.fallback_font, bar + Vector2(-4, -3), "%d/%d" % [int(unit.get("hp", 0)), int(unit.get("max_hp", 1))], HORIZONTAL_ALIGNMENT_CENTER, 40, 10, Color("fff3d5"))
 
 func _sprite_position(unit: Dictionary, pose: Dictionary) -> Vector2:
     var sprite_position := _point(float(unit.get("x", 0)), float(unit.get("y", 0)))
     if not reduced_motion and pose.get("state") == "attack" and pose.has("rig"):
-        sprite_position += UnitAttackMotion.displacement(pose)
+        sprite_position += UnitAttackMotion.displacement(pose) * float(unit.get("visual_scale", 1))
     elif not reduced_motion and pose.get("state") == "attack":
         var progress := clampf((_visual_time - float(pose.get("attack_started", 0))) / maxf(0.01, float(pose.get("attack_duration", 0.32))), 0, 1)
         var direction := Vector2.from_angle(float(pose.get("facing", 0)) * PI / 4.0)
@@ -364,9 +398,24 @@ func _sprite_position(unit: Dictionary, pose: Dictionary) -> Vector2:
     return sprite_position
 
 func _body_point(unit: Dictionary) -> Vector2:
-    var pixel := 2.0 if _arena.size.y >= 300 else 1.0
+    var pixel := (2.0 if _arena.size.y >= 300 else 1.0) * float(unit.get("visual_scale", 1))
     var bob := 0.0 if reduced_motion else floorf(sin(_visual_time * 4.0 + float(unit.get("y", 0))) + 1.0)
     return _sprite_position(unit, _poses.get(str(unit.get("id", "")), {})) - Vector2(0, pixel * 11 + bob)
+
+func _draw_royal_opening() -> void:
+    for skill in prelude_skills:
+        if skill.get("skill_type") != "army_revival":
+            continue
+        var progress := clampf((prelude_time - 0.2) / 1.6, 0, 1)
+        var fade := minf(progress * 3, clampf((BattlePrelude.DURATION - prelude_time) / 0.6, 0, 1))
+        for unit in _frame.get("units", []):
+            if unit.get("side") != skill.get("side"):
+                continue
+            var p := _point(float(unit["x"]), float(unit["y"]))
+            draw_arc(p, 15 + progress * 8, 0, TAU, 12, Color(1, 0.64, 0.83, fade * 0.8), 2)
+            for index in range(3):
+                var height: float = 12 + (0 if reduced_motion else fmod(prelude_time * 30 + index * 13, 52))
+                draw_arc((p + Vector2(index * 10 - 10, -height)).round(), 3 + index, 0, TAU, 8, Color(1, 0.75, 0.88, fade), 2)
 
 func _draw_projectiles() -> void:
     if not replay_enabled or replay_complete:
@@ -416,6 +465,14 @@ func _draw_effects() -> void:
                 var height := 7.0 if reduced_motion else 5 + sin(clampf(age / 0.8, 0, 1) * PI) * 18
                 draw_line((p + offset).round(), (p + offset - Vector2(0, height)).round(), Color("a4c974"), 3)
             draw_arc(p, 16, 0, TAU, 12, Color(0.8, 0.86, 0.47, 1.0 - age), 2)
+        elif type in ["rebirth", "split_birth"] and age < 0.7:
+            var color := BattleEffects.slime_color("slime_pink" if type == "rebirth" else "slime_green")
+            color.a = 1 - age / 0.7
+            draw_arc(p, 12 + (0 if reduced_motion else age * 34), 0, TAU, 12, color, 2)
+            for index in range(5):
+                var offset := Vector2.from_angle(float(index) * TAU / 5) * 15
+                var rise := 8.0 if reduced_motion else sin(age / 0.7 * PI) * 26
+                draw_circle((p + offset - Vector2(0, rise)).round(), 3, color)
         elif type in ["damage", "heal"]:
             if age > 0.7:
                 continue
@@ -430,7 +487,7 @@ func _draw_effects() -> void:
         elif type == "defeat" and age < 0.5:
             var unit: Dictionary = effect.get("unit", {})
             var pose := {"state": "death", "alpha": 1.0 - age * 2.0}
-            UnitArt.draw_unit(self, p, str(unit.get("role", "range")), str(unit.get("element", "earth")), 2.0, false, 0.0, str(unit.get("card_id", "")), pose)
+            UnitArt.draw_unit(self, p, str(unit.get("role", "range")), str(unit.get("element", "earth")), 2.0 * float(unit.get("visual_scale", 1)), false, 0.0, str(unit.get("card_id", "")), pose)
         elif type == "attack" and effect.get("kind") == "melee" and age < 0.2:
             var unit: Dictionary = _known.get(str(effect.get("target_id", "")), {})
             var target := _body_point(unit) if not unit.is_empty() else _point(float(effect.get("target_x", 0)), float(effect.get("target_y", 0))) - Vector2(0, 22)
@@ -449,6 +506,14 @@ func _draw_effects() -> void:
                 draw_arc(p, 18 if reduced_motion else 12 + (strike_age - 0.35) * 60, 0, TAU, 12, Color(1.0, 0.65, 0.3, 1.0 - age), 3)
         elif type == "ability" and effect.get("kind") == "on_death":
             BattleEffects.impact(self, p + Vector2(0, -16), "dragonfire", age, reduced_motion)
+        elif type == "ability" and effect.get("kind") in ["death_area", "slow_splash"]:
+            var style := "slime_pink" if effect.get("kind") == "death_area" else "slime_green"
+            BattleEffects.impact(self, p + Vector2(0, -12), style, age, reduced_motion)
+            if age < 0.45:
+                var radius := float(effect.get("radius", 1)) / _field_width * _arena.size.x
+                var color := BattleEffects.slime_color(style)
+                color.a = 1 - age / 0.45
+                draw_arc(p, radius * clampf(age / 0.25, 0, 1), 0, TAU, 16, color, 2)
         elif type == "ability" and age < 0.5:
             var color := Color(str(UnitArt.palette(str(effect.get("element", "earth"))).get("l", "ffffff")))
             color.a = (1.0 - age * 2.0) * 0.6

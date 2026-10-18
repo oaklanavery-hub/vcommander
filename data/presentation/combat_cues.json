@@ -85,6 +85,22 @@
       "impact_sound": "arrow_hit",
       "rig": "bow"
     },
+    "card_slime_01": {
+      "projectile": "none", "motion": "bounce", "rig": "slime",
+      "attack_sound": "slime_bounce", "impact_sound": "slime_splat", "impact_style": "slime_green", "accent": "a5e97c"
+    },
+    "card_slime_02": {
+      "projectile": "slime_green", "motion": "shoot", "rig": "cannon",
+      "attack_sound": "slime_shot", "impact_sound": "slime_splat", "accent": "a5e97c"
+    },
+    "card_slime_03": {
+      "projectile": "none", "motion": "bounce", "rig": "slime",
+      "attack_sound": "slime_bounce", "impact_sound": "slime_splat", "impact_style": "slime_white", "accent": "f1f0ff"
+    },
+    "card_slime_04": {
+      "projectile": "none", "motion": "bounce", "rig": "barrel",
+      "attack_sound": "wood_hit", "impact_sound": "slime_splat", "impact_style": "slime_pink", "accent": "ffa5d2"
+    },
     "commander_plant": {
       "projectile": "seed",
       "motion": "shoot",

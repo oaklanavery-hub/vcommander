@@ -16,7 +16,7 @@ func set_content(content: Dictionary, is_commander: bool) -> void:
 
 func _draw() -> void:
     var element := str(definition.get("element", "earth"))
-    var palettes := {"fire": Color("563b30"), "water": Color("294952"), "earth": Color("354b36")}
+    var palettes := {"fire": Color("563b30"), "water": Color("294952"), "earth": Color("354b36"), "slime": Color("533b50")}
     var color: Color = palettes.get(element, Color("3d5135"))
     draw_style_box(ScreenStyle.frame(color, color.lightened(0.14), 7), Rect2(Vector2.ZERO, size))
     var horizon := floorf(size.y * 0.74)

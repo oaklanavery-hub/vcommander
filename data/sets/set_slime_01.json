@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "set_slime_01",
+  "display_name": "Slime Court",
+  "element": "slime",
+  "required_count": 4,
+  "activation": "all_equipped_cards_match_set",
+  "status": "playtest",
+  "bonus": {
+    "display_name": "A Fresh Beginning",
+    "trigger": "on_death_spawn",
+    "stat": "attack",
+    "percentage": 100,
+    "stacking": "multiplicative",
+    "summary": "+100% ATK on death spawns",
+    "description": "Allies created or revived after a death gain +100% attack. Round-start spawns do not count."
+  }
+}

@@ -11,14 +11,14 @@ static func pose(event: Dictionary, clock: float) -> Dictionary:
     var charge := smoothstep(0.0, 1.0, (elapsed + WINDUP) / WINDUP) if elapsed < 0 else 0.0
     var power := exp(-maxf(0, elapsed) * 7.0) * (1.0 - smoothstep(0.3, RECOVERY, elapsed)) if elapsed >= 0 else 0.0
     var direction := Vector2(float(event.get("target_x", 1)) - float(event.get("x", 0)), float(event.get("target_y", 0)) - float(event.get("y", 0)))
-    return {"state": "attack", "facing": posmod(int(round(direction.angle() / (PI / 2))) * 2, 8), "motion": profile.get("motion", "slash"), "rig": profile.get("rig", "claw"), "charge": charge, "power": power, "attack_age": elapsed, "phase": "windup" if elapsed < 0 else ("strike" if elapsed < 0.12 else "recovery")}
+    return {"state": "attack", "facing": posmod(int(round(direction.angle() / (PI / 2))) * 2, 8), "motion": profile.get("motion", "slash"), "rig": profile.get("rig", "claw"), "accent": profile.get("accent", ""), "charge": charge, "power": power, "attack_age": elapsed, "phase": "windup" if elapsed < 0 else ("strike" if elapsed < 0.12 else "recovery")}
 
 static func displacement(pose: Dictionary) -> Vector2:
     var charge := float(pose.get("charge", 0))
     var power := float(pose.get("power", 0))
     var direction := Vector2.from_angle(float(pose.get("facing", 0)) * PI / 4)
     var motion := str(pose.get("motion", "slash"))
-    var reach := 14.0 if motion in ["slam", "slash", "bite"] else 4.0
+    var reach := 14.0 if motion in ["slam", "slash", "bite", "bounce"] else 4.0
     var lift := -8.0 * charge + 3 * power if motion == "slam" else -3.0 * charge
     if pose.get("rig") in ["pitcher", "plant", "tree"]:
         reach = 3.0
@@ -85,6 +85,12 @@ static func deform(uv: Vector2, rig: String, charge: float, power: float) -> Vec
         "bow":
             offset.x += (-0.13 * charge + 0.08 * power) * sin(uv.x * PI) * sin(uv.y * PI)
             offset.y -= 0.06 * charge * arm
+        "slime":
+            offset = Vector2((uv.x - 0.5) * (0.3 * charge - 0.2 * power), (1 - uv.y) * (0.18 * charge - 0.16 * power))
+        "cannon":
+            offset = Vector2((0.03 * charge - 0.12 * power) * upper, 0.04 * charge * upper)
+        "barrel":
+            offset = Vector2((uv.y - 0.9) * (0.05 * charge - 0.09 * power), 0.03 * power * upper)
     return offset
 
 static func draw_action(canvas: CanvasItem, body: Vector2, pose: Dictionary, element: String, reduced: bool) -> void:
@@ -93,7 +99,8 @@ static func draw_action(canvas: CanvasItem, body: Vector2, pose: Dictionary, ele
     var direction := Vector2.from_angle(float(pose.get("facing", 0)) * PI / 4)
     var side := direction.orthogonal()
     var motion := str(pose.get("motion", "slash"))
-    var color := Color(str(PixelUnitArt.palette(element).get("l", "e4dba6")))
+    var accent := str(pose.get("accent", ""))
+    var color := Color(accent if not accent.is_empty() else str(PixelUnitArt.palette(element).get("l", "e4dba6")))
     var hand := body + direction * 16
     if motion == "shoot" and pose.get("rig") == "bow":
         var tip_a := hand + side * 15
@@ -124,3 +131,8 @@ static func draw_action(canvas: CanvasItem, body: Vector2, pose: Dictionary, ele
             canvas.draw_arc(hand + Vector2(0, 18), 10 + (1 - power) * 22, 0, PI, 8, color, 3)
         elif motion == "bite":
             canvas.draw_polyline(PackedVector2Array([hand - direction * 6 - side * 9, hand + direction * 10, hand - direction * 6 + side * 9]), color, 3)
+        elif motion == "bounce":
+            canvas.draw_arc(hand, 7 + (1 - power) * 10, 0, TAU, 8, color, 2)
+            for index in range(4):
+                var ray := Vector2.from_angle(float(index) * PI / 2 + 0.4)
+                canvas.draw_rect(Rect2((hand + ray * (5 + (1 - power) * 14)).round(), Vector2(3, 3)), color)
