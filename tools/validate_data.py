@@ -39,11 +39,8 @@ def main() -> int:
     buffs = read_group(ROOT / "data" / "buffs")
     balances = read_group(ROOT / "data" / "balance")
 
-    if (len(commanders), len(cards), len(sets), len(buffs), len(balances)) != (3, 12, 3, 5, 1):
-        raise ValueError(
-            "Starter slice expects 3 commanders, 12 cards, 3 sets, 5 buffs and 1 balance file; "
-            f"got {len(commanders)}, {len(cards)}, {len(sets)}, {len(buffs)}, {len(balances)}"
-        )
+    if not all((commanders, cards, sets, buffs)) or len(balances) != 1:
+        raise ValueError("Content groups must be nonempty with exactly one global balance file")
 
     for commander in commanders.values():
         set_id = commander.get("signature_set_id")
@@ -55,6 +52,11 @@ def main() -> int:
         require_positive_number(skill.get("uses_per_match"), f"{commander['id']} uses_per_match")
         require_positive_number(skill.get("uses_per_round"), f"{commander['id']} uses_per_round")
         require_positive_number(skill.get("selection_cost"), f"{commander['id']} selection_cost")
+        if skill.get("type") == "army_revival":
+            require_positive_number(skill.get("revives_per_unit"), "revives_per_unit")
+            require_positive_number(skill.get("revive_health_pct"), "revive_health_pct")
+            if skill["revive_health_pct"] > 100:
+                raise ValueError("revive_health_pct cannot exceed 100")
 
     cards_by_set: dict[str, list[dict]] = {set_id: [] for set_id in sets}
     required_stats = ("health", "attack", "defense", "attack_speed", "movement_speed", "range")
@@ -78,6 +80,21 @@ def main() -> int:
         ability = army_card.get("ability", {})
         if not ability.get("id") or not ability.get("type"):
             raise ValueError(f"{army_card['id']} must define an ability id and type")
+        if ability.get("type") == "death_split":
+            for key in ("spawn_count", "child_health_pct", "child_attack_pct", "child_visual_scale"):
+                require_positive_number(ability.get(key), f"{army_card['id']} {key}")
+            if ability.get("trigger") != "on_death":
+                raise ValueError("death_split must trigger on_death")
+        if ability.get("type") == "ranged_aoe_slow":
+            require_positive_number(ability.get("slow_seconds"), "slow_seconds")
+            for key in ("enemy_attack_speed_pct", "enemy_movement_speed_pct"):
+                if not isinstance(ability.get(key), (int, float)) or not -100 < ability[key] < 0:
+                    raise ValueError(f"{key} must be a negative percentage above -100")
+        if ability.get("type") == "death_damage_area":
+            for key in ("duration_seconds", "tick_seconds", "attack_pct", "damage_attack_pct_per_tick"):
+                require_positive_number(ability.get(key), f"{army_card['id']} {key}")
+            if ability.get("trigger") != "on_death":
+                raise ValueError("death_damage_area must trigger on_death")
 
     for set_id, signature_set in sets.items():
         if signature_set.get("required_count") != 4:
@@ -91,6 +108,10 @@ def main() -> int:
         require_positive_number(bonus.get("percentage"), f"{set_id} bonus.percentage")
         if bonus.get("stacking") != "multiplicative":
             raise ValueError(f"Set {set_id} bonus must stack multiplicatively")
+        if bonus.get("trigger", "") not in ("", "on_death_spawn"):
+            raise ValueError(f"Set {set_id} uses an unsupported bonus trigger")
+        if bonus.get("trigger") == "on_death_spawn" and bonus.get("stat") != "attack":
+            raise ValueError("Death-spawn bonuses currently modify attack only")
 
     for buff in buffs.values():
         require_positive_number(buff.get("percentage"), f"{buff['id']} percentage")

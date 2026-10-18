@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "id": "commander_slime_01",
+  "display_name": "Slime Princess",
+  "element": "slime",
+  "signature_set_id": "set_slime_01",
+  "status": "playtest",
+  "description": "A bright-hearted royal whose jelly court turns every farewell into a fresh beginning.",
+  "active_skill": {
+    "id": "royal_jelly",
+    "display_name": "Royal Jelly",
+    "type": "army_revival",
+    "uses_per_match": 2,
+    "uses_per_round": 1,
+    "selection_cost": 1,
+    "timing": "pre_battle",
+    "revives_per_unit": 1,
+    "revive_health_pct": 50,
+    "description": "Bless your starting army before battle. Each ally revives once at 50% HP. Revived allies trigger the theme bonus; newly created summons do not inherit this blessing."
+  }
+}

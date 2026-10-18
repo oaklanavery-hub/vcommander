@@ -41,6 +41,7 @@ Starter skill behavior types in v0.4 are:
 - `targeted_aoe_max_hp`
 - `round_debuff`
 - `summon_stationary_units`
+- `army_revival`: `revives_per_unit` and `revive_health_pct`; applies to starting drafted units before pre-battle damage.
 
 ## Army card
 
@@ -76,6 +77,8 @@ Required core fields:
 
 The simulator consumes generic `ability.type` behavior. Current starter types include aura damage/healing/debuffs, basic ranged attacks, ranged AoE/DoT/pushback, area healing, pull-then-melee, empowered attacks and on-death explosions.
 
+Slime adds generic `death_split` (`trigger: on_death`, `spawn_count`, `child_health_pct`, `child_attack_pct`, `child_visual_scale`), `ranged_aoe_slow` (`radius`, negative enemy speed percentages and `slow_seconds`) and `death_damage_area` (`trigger: on_death`, `radius`, burst `attack_pct`, `duration_seconds`, `tick_seconds`, `damage_attack_pct_per_tick`). Split children have basic attacks and no split/revival inheritance. On-death abilities remain content-driven.
+
 ## Commander themed set
 
 ```json
@@ -95,6 +98,8 @@ The simulator consumes generic `ability.type` behavior. Current starter types in
 ```
 
 Cards belong to a theme through `set_id`. A theme is allowed to contain more than four cards; activation checks the four equipped cards, not a permanently hardcoded list of four card IDs.
+
+A bonus may define `trigger: on_death_spawn` with `stat: attack`. Its percentage applies only to a newly created or revived body after a death; ordinary spawn stat calculation skips this trigger. Optional `description` and `summary` strings describe triggered bonuses accurately in the interface.
 
 ## Buff card
 
@@ -164,7 +169,7 @@ Pull events provide `source_x/y`, `from_x/y`, `to_x/y` and original target HP fo
 ## Validation expectations
 
 - IDs are unique within each content type.
-- Exactly 3 starter Commanders, 12 starter Army cards, 3 starter sets, 5 starter Buff Cards and 1 global balance file exist for the current vertical slice.
+- Content groups are nonempty and there is one global balance file. The roster currently contains 4 Commanders, 16 Army cards, 4 themes and 5 Buff Cards, including the Slime Court expansion.
 - Every Commander `signature_set_id` resolves.
 - Every Commander active skill defines an `id`, generic `type`, and positive use/cost limits.
 - Every Army card `set_id` resolves.
@@ -193,3 +198,5 @@ Projectile launches also emit `projectile_launch` with a copied projectile dicti
 Combat cue profiles also declare a presentation-only `rig`: `brute`, `claw`, `mage`, `dragon`, `serpent`, `healer`, `tree`, `pitcher`, `bow` or `plant`. This selects character articulation, never combat behavior. Area-heal cast events include source/card and source/target coordinates for the same attack-pose timeline.
 
 Spawn events and replay-unit snapshots carry a `summoned` boolean for temporary Commander summons. Their existing `side` is always the casting Commander’s team. Presentation uses this flag and side for ownership markers; field coordinates never determine allegiance.
+
+Death-created units use unique `side:card_id:spawnN` IDs and emit `spawn` with `source: death_split` or `revival`, the parent `source_unit_id`, and a read-only `unit` snapshot. Snapshots include `visual_scale`, `spawned_at`, `slowed`, `revival_ready` and attack for review; none is a source of game rules. Damaging area frames include `type: damage_area`, owner, center/radius, `created_at`, duration and remaining time.

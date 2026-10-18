@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "card_slime_03",
+  "display_name": "Slime Ball",
+  "element": "slime",
+  "set_id": "set_slime_01",
+  "status": "playtest",
+  "role": "melee",
+  "summon_amount": 2,
+  "unit_cap": 6,
+  "stats": {"health": 410, "attack": 75, "defense": 12, "attack_speed": 115, "movement_speed": 125, "range": 1},
+  "ability": {"id": "jelly_bop", "display_name": "Jelly Bop", "type": "basic_melee", "description": "Bounces into the nearest enemy with regular melee attacks."},
+  "tags": ["slime", "melee"]
+}

@@ -2,7 +2,21 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Remove battlefield text tags
+## Current task — Slime Princess and her army
+
+- User requests Slime Princess, a full-theme +100% attack bonus for allies spawned after a death, Giant Slime death splitting, slowing Slime Cannon shots, basic Slime Ball melee and a large ten-second Slime Barrel death area.
+- Confirmed product choices: bonus applies only to the newly spawned ally; Giant splits once on death into two half-HP/half-ATK children that cannot split; design the Commander active skill autonomously.
+- Recruit/cap values supplied by the user: Giant Slime 1/4, Slime Cannon 2/4, Slime Ball 2/6, Slime Barrel 2/6.
+- Branch `feat/slime-princess`, base verified v0.7.7 main `3a0fc122937974cc7d5a4647d9552bc895e8c641`. Previous release: [PR #18](https://github.com/oaklanavery-hub/vcommander/pull/18), [CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39091926835), [export/live verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39092017045).
+- Active design: Royal Jelly blesses starting drafted allies before battle; each revives once at 50% HP. Death-created children do not inherit revival. Death abilities still resolve; each Giant's split can occur only once across its revival. Revival and split children receive the active theme bonus, ordinary round-start spawns do not. Temporary units never enter persistent draft counts.
+- Checkpoint 1: data-driven death spawns, revival, temporary speed debuffs and damaging areas; Slime content, validators and meaningful focused mechanics tests. Stats/slow magnitudes/damage are provisional tuning.
+- Checkpoint 2: original pixel art, Slime palette/cards, accurate ability/bonus descriptions, bouncing attacks, goo projectiles/areas, revival/split feedback and SFX. Keep battlefield word labels removed.
+- Checkpoint 1 implemented. Passing: content validation (4 Commanders/16 cards/4 sets), clean Godot editor import, new Slime Commander suite, existing combat simulator and summon-allegiance suites.
+- Tests cover the supplied recruit/cap values, both-team split ownership, half stats and triggered double attack, no recursive splitting, once-only revival, no duplicated Giant split, round reset, simultaneous skill damage, refreshing slow expiry, exact ten-second pool duration and entering/leaving it, ally safety and determinism.
+- Presentation/asset validators and full CI are not run yet; new detailed artwork and accurate triggered-bonus interface are the next checkpoint. Save this mechanics checkpoint before starting them.
+- Gate: focused presentation suites and native Slime captures, save checkpoints, full PR CI/export/served-pack verification. Next: pixel art and roster/battle presentation.
+
+## Previous task — Remove battlefield text tags (released v0.7.7)
 
 - User requests removal of effect labels and ALLY/RIVAL labels on units.
 - Branch `fix/battle-labels`, based on verified v0.7.6 main `21db85512e3fdbbb1362e29c189b14726a5e0165`. Prior release and checks: [PR #17](https://github.com/oaklanavery-hub/vcommander/pull/17), [CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39090022215), [live verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39090124708).

@@ -14,7 +14,7 @@ A player's equipped Army contains exactly four Army cards. All four slots must b
 The same Army card cannot occupy more than one loadout slot.
 
 **R004 — Mixed elements**  
-The four Army cards may be mixed freely across Fire, Water and Earth regardless of the Commander's element.
+The four Army cards may be mixed freely across Fire, Water, Earth and Slime regardless of the Commander's element.
 
 **R005 — Commander theme activation**  
 A Commander references a themed set. The Commander bonus activates when all four equipped cards belong to that set theme.
@@ -193,7 +193,7 @@ Once a melee attack begins against a valid target in range, the attack is guaran
 The base combat system has no critical-hit, dodge, evasion or random miss mechanics.
 
 **R060 — No elemental counter triangle**  
-Fire, Water and Earth do not intrinsically deal bonus or reduced damage to each other. Elements define identity, themes and abilities.
+Elements do not intrinsically deal bonus or reduced damage to each other. Fire, Water, Earth and Slime define identity, themes and abilities.
 
 ## Stats and damage
 
@@ -244,7 +244,7 @@ The exact starter numeric stats and ability tuning in `data/` are approved as th
 A battle round lasts at most 120 seconds.
 
 **R075 — Immediate victory**  
-The round ends immediately when one side has no surviving units.
+The round ends immediately when one side has no surviving units, after resolving death abilities, death-created units and revival from that simulation step. Lingering areas do not count as surviving units.
 
 **R076 — Draw**  
 If both sides lose their last surviving unit simultaneously, or the timer expires while both still have surviving units, the round is a draw.
@@ -280,3 +280,23 @@ Each unit uses one neutral idle animation and one neutral death animation.
 The starter data files are the authoritative initial playtest values for HP, ATK, DEF, Attack Speed, Movement Speed, range, summon amount/cap and ability parameters.
 
 These values are deliberately provisional for balance tuning. A balance-only change should preserve the locked mechanics unless a gameplay rule is intentionally changed here.
+
+## Slime Court expansion
+
+**R085 — Slime Princess and army**
+Slime Princess adds the Slime theme. Giant Slime is 1/4 Tank, Slime Cannon 2/4 Range, Slime Ball 2/6 Melee and Slime Barrel 2/6 Melee. These fractions are recruit amount/unit cap.
+
+**R086 — Giant Slime split**
+On death, Giant Slime creates two smaller allied versions with half the parent's Max HP and attack, before applying a death-spawn set bonus. Children start at full child HP, cannot split and do not inherit revival. Each Giant splits only once across its original body and revived body. Children have the parent's other combat stats and round-wide modifiers and count toward round survival.
+
+**R087 — Slime Cannon and Slime Ball**
+Slime Cannon shoots a slime projectile that damages the enemy hit and reduces enemy Attack Speed and Movement Speed in a small impact radius. Repeated splashes refresh the same slow rather than stacking; the strongest temporary speed slow applies, multiplicatively with round-wide modifiers. Slime Ball has regular melee attacks. Cannon slow percentages and duration are provisional tuning in its definition.
+
+**R088 — Slime Barrel**
+On death, Slime Barrel immediately explodes against enemies in a large radius and leaves a damaging area at that location for ten seconds. Enemies take damage while inside the area; allies never take explosion or area damage. The source's death does not cancel the area. Normal DEF applies. A battle still ends under R075; lingering pools do not postpone elimination. Damage amounts and tick interval are provisional tuning.
+
+**R089 — Slime theme bonus**
+Equipping four unique Slime Court cards with Slime Princess activates A Fresh Beginning. Each ally created or revived after a death receives +100% of its spawn attack. This bonus affects that new body only, after inherited stats, child scaling and persistent Buffs; it does not increase surviving allies' attack or ordinary round-start spawns. Each qualifying birth applies the multiplier once.
+
+**R090 — Slime Princess: Royal Jelly**
+Selected before battle under normal Commander skill cost/use/timing rules, Royal Jelly blesses each starting drafted ally with one revival at 50% of its own Max HP. The blessing resolves simultaneously with opposing skills, before any pre-battle damage. Revival creates a new allied body, preserves its combat stats/ability and round-wide modifiers, clears temporary statuses and triggers the active death-spawn bonus. Death abilities resolve when the original body falls; the Giant's once-only split remains spent after revival. Newly created summons do not inherit the blessing. Revival and children are temporary to that round and never change drafted unit counts or caps.

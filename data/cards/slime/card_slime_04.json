@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "card_slime_04",
+  "display_name": "Slime Barrel",
+  "element": "slime",
+  "set_id": "set_slime_01",
+  "status": "playtest",
+  "role": "melee",
+  "summon_amount": 2,
+  "unit_cap": 6,
+  "stats": {"health": 470, "attack": 65, "defense": 18, "attack_speed": 85, "movement_speed": 100, "range": 1},
+  "ability": {
+    "id": "jelly_spill",
+    "display_name": "Jelly Spill",
+    "type": "death_damage_area",
+    "trigger": "on_death",
+    "radius": "large",
+    "attack_pct": 125,
+    "duration_seconds": 10,
+    "tick_seconds": 1,
+    "damage_attack_pct_per_tick": 35,
+    "description": "Explodes on death for 125% attack damage, leaving a large slime pool for 10 seconds. Enemies inside take 35% attack damage each second. Normal defense applies."
+  },
+  "tags": ["slime", "melee", "death_area"]
+}

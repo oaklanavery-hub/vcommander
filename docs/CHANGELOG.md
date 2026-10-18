@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.8.0 — Slime Princess (in development)
+
+- Added the Slime Court: Giant Slime 1/4, Slime Cannon 2/4, Slime Ball 2/6 and Slime Barrel 2/6.
+- Generic once-only death splits, Royal Jelly revival, +100% attack for qualifying death-created allies, refreshing area slows and ten-second enemy-only death pools.
+- Focused mechanics coverage for both teams, round reset, simultaneous pre-battle effects, speed recovery, pool duration/entry/exit and deterministic replay output.
+
 ## v0.7.7 — Cleaner battlefield
 
 - Removed ALLY/RIVAL word badges from summoned units and effect-name text tags from the battlefield.

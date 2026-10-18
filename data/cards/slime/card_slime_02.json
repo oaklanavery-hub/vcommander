@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "id": "card_slime_02",
+  "display_name": "Slime Cannon",
+  "element": "slime",
+  "set_id": "set_slime_01",
+  "status": "playtest",
+  "role": "range",
+  "summon_amount": 2,
+  "unit_cap": 4,
+  "stats": {"health": 390, "attack": 80, "defense": 16, "attack_speed": 75, "movement_speed": 75, "range": 5},
+  "ability": {
+    "id": "sticky_shot",
+    "display_name": "Sticky Shot",
+    "type": "ranged_aoe_slow",
+    "radius": "small",
+    "enemy_attack_speed_pct": -25,
+    "enemy_movement_speed_pct": -30,
+    "slow_seconds": 3,
+    "description": "Fires a slime that damages its target and slows enemy attack speed by 25% and movement by 30% in a small radius for 3 seconds. Repeated splashes refresh the slow."
+  },
+  "tags": ["slime", "range", "slow"]
+}
