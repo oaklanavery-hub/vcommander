@@ -146,3 +146,7 @@ The detailed battlefield renderer preserves directional lean, four-step movement
 `MatchHearts` shows both loss counters during drafting and battle. Combat displays the counters from before the current scored round until playback completes, including hiding a newly-triggered Sudden Death result. Persistent frost reads the selected round skill and covers the full arena, independently of transient opening effects; only affected units receive status markers. A new battle scene/configuration resets it.
 
 A short presentation tail after the simulation duration lets final impacts/deaths finish before result cleanup. Pull-then-bite cues can extend that tail; a lethally pulled actor is retained visually until the delayed bite, without resurrecting it in simulation. Damage flashes, corpse location and contact use the same displayed endpoint.
+
+## Summon allegiance
+
+Enemy ownership is checked when retaining a target lock, releasing an attack, advancing projectiles, queueing damage and applying damage. Projectile collision uses the firing side’s opposing team rather than trusting the locked target’s team. A dead shooter’s committed projectile can still hit a valid enemy. Summons keep their caster’s side when placed in the enemy half. Snapshot/spawn metadata marks summoned units so presentation can show ally/rival badges, pennants, counters and team seed trails without inferring ownership from position.

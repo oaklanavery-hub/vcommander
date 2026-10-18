@@ -2,7 +2,19 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Contact, persistent frost, hearts and attack readability
+## Current task — Summoned plant allegiance
+
+- User reports Earth Commander plants attacking allies; they must damage enemies only.
+- Branch `fix/plant-allies`, based on verified v0.7.5 main `f0565afbeca8d729aca9740a95ada760e932b48c`. Prior release: [PR #16](https://github.com/oaklanavery-hub/vcommander/pull/16), [passed CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39089075694), [passed export/live verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39089225227).
+- Current inspection: normal acquisition selects enemies, but locked targets and the attack/projectile/damage paths do not independently reject allied ownership. Both sides also use identical green summoned sprites, spawning on the opposite half.
+- Checkpoint: reproduce stale allied lock/seed damage in a focused regression, enforce enemy allegiance through attack and damage resolution, and visibly label summon ownership without changing skill placement, stats or rules. Include both sides casting together.
+- Confirmed the new regression fails on main for stale allied locks, allied attack release, invalid seed damage and direct friendly damage injection, on both teams. The normal simultaneous-summon audit already targeted enemies; the live report’s exact trigger was not captured.
+- Implemented enemy checks through target retention, attack release, source-side projectile collision and queued/applied damage. Summon metadata, ALLY/RIVAL badges, team pennants/trails and roster counts make ownership explicit.
+- Passing focused suites: summon allegiance, projectile collision, combat simulator, battle presentation and battle readability. Clean Godot import passed.
+- Next: save the checkpoint, inspect three simultaneous-summon native captures, then require CI/export/live verification. Final run links and deployed identity belong in this branch’s PR.
+- Release gate: focused tests and native ownership review, then full PR CI, Web export, exported-pack suites and served-pack verification. Record final run links/identity in the PR.
+
+## Previous task — Contact, persistent frost, hearts and attack readability (released v0.7.5)
 
 - User requests shots that visibly connect, full-field Frozen Field for the entire round, visible remaining match lives and much clearer attack animation.
 - Branch `feat/battle-contact`, based on verified v0.7.4 main `a30b9a38cf0deeaa67d0a0b63a483a0d00f8ca61` (PR #15).

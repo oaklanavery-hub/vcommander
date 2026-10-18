@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.6 — Summon allegiance
+
+- Revalidate enemy ownership for locked targets, attack release, projectile collision and damage application. Allied or invalid targets are rejected, including malformed in-flight seed locks.
+- Summoned plants retain the caster’s team regardless of which half they occupy; explicit ALLY/RIVAL badges, team pennants, seed trails and summon counters make opposing Earth summons distinct.
+- Regression coverage for both Earth Commanders casting together, stale allied locks, friendly damage rejection and valid enemy hits; native ownership captures.
+
 ## v0.7.5 — Combat readability
 
 - Complete projectile flight tracks through impact, including short shots between replay frames and enemy interceptions.
