@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.8.4 — Slime Ball: Jelly Burst
+
+- Slime Ball absorbs/stores 30% of incoming post-defense damage while retaining regular melee attacks.
+- Every ten seconds, release the stored amount in a medium enemy-only radius with outward pushback and reset; a lethal hit releases double the remaining charge.
+- Exact fractional storage, shared damage/death-chain handling, empty-cycle behavior and fresh revival/round timers. Stored damage is not reduced by DEF twice or multiplied by ATK bonuses.
+- White charge meter/countdown, timed white bursts, contact pushback and Slime burst SFX; formation AI recognizes the new area threat.
+- Focused mechanics/replay regressions and native charged/burst/pushback/death/reduced-motion captures.
+
 ## v0.8.3 — Centered campfire title scene
 
 - Center the title and Play/help/settings controls over a calm moonlit pixel forest clearing.

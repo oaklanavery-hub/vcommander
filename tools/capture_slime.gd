@@ -65,5 +65,54 @@ func run() -> void:
             push_error("Missing Slime capture: " + name)
             quit(1)
             return
+    if not await capture_ball_bursts():
+        quit(1)
+        return
     print("Slime captures saved: gallery/warband, Royal Jelly, Cannon flight/contact, white Ball poses, split children, revival and pink ten-second pools.")
     quit(0)
+
+func capture_ball_bursts() -> bool:
+    var state = root.get_node("GameState")
+    var db = root.get_node("ContentDatabase")
+    # Controlled native QA fixture: extra durability keeps the charge cycle on screen.
+    # The shipped definitions are never changed by this presentation script.
+    var ball: Dictionary = db.get_card("card_slime_03").duplicate(true)
+    ball["stats"]["health"] = 1400
+    var bear: Dictionary = db.get_card("card_earth_03").duplicate(true)
+    bear["stats"].merge({"health": 6000, "attack": 60, "attack_speed": 100}, true)
+    bear["ability"] = {"type": "basic_melee"}
+    var player := {"id": "player", "commander": db.get_commander("commander_slime_01"), "cards": [ball], "unit_counts": {str(ball["id"]): 1}}
+    var enemy := {"id": "opponent", "commander": db.get_commander("commander_earth_01"), "cards": [bear], "unit_counts": {str(bear["id"]): 1}}
+    state.opponent_combat_side = enemy
+    state.battle_result = CombatSimulator.new().simulate(player, enemy, 814, db.get_game_balance())
+    state.match_state.start()
+    state.match_state.begin_battle()
+    state.match_state.resolve_round(str(state.battle_result["winner"]), float(state.battle_result["duration"]))
+    change_scene_to_file("res://scenes/combat/combat.tscn")
+    await scene_changed
+    var scene = current_scene
+    scene.set_process(false)
+    for event in scene._events:
+        if event.get("kind") != "absorb_burst":
+            continue
+        var time := float(event["time"])
+        if not event.get("on_death", false) and not captured.has("slime_ball_burst"):
+            seek(scene, time - 0.12)
+            await save_image("slime_ball_charged")
+            seek(scene, time + 0.08)
+            await save_image("slime_ball_burst")
+            seek(scene, time + 0.20)
+            await save_image("slime_ball_pushback")
+            scene.battlefield.reduced_motion = true
+            seek(scene, time + 0.08)
+            await save_image("slime_ball_burst_reduced")
+            scene.battlefield.reduced_motion = false
+        elif event.get("on_death", false) and not captured.has("slime_ball_death_burst"):
+            seek(scene, time + 0.08)
+            await save_image("slime_ball_death_burst")
+    for name in ["slime_ball_charged", "slime_ball_burst", "slime_ball_pushback", "slime_ball_burst_reduced", "slime_ball_death_burst"]:
+        if not captured.has(name):
+            push_error("Missing Slime Ball capture: " + name)
+            return false
+    print("Slime Ball native views: charged, periodic burst/contact, pushback, doubled death burst and reduced motion.")
+    return true

@@ -4,19 +4,20 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.8.3 — Campfire title scene**
+**v0.8.4 — Slime Ball: Jelly Burst**
 
 The current playable prototype supports:
 
 - a centered title and menu over an original moonlit pixel forest, with all four Commanders seated around an animated campfire; idle poses, cloth/hair, embers, stars and elemental motes respect reduced motion
 
+- Slime Ball stores 30% of post-defense damage, bursts every 10s with medium-area enemy pushback, and releases double its stored amount on death
 - shared tactical formation AI: multi-rank deployment, Tank screens, melee wings, central healer coverage, range-aware placement and spacing against opposing area damage
 - Commander skill openings that finish before armies move and the battle clock begins
 - stretching/retracting Pitcher Plant vines, visible enemy pulls, distinct arrows/fireballs/flames/water/ice/seeds and impact/attack motion
 - every battle starts at 1×, with results shown after the battle completes
 - four distinct detailed Commander designs and seventeen detailed army sprites, shared by cards and battles
 - Slime Princess: pink royal artwork, Royal Jelly's once-per-ally revival and +100% attack for qualifying death spawns
-- Giant Slime 1/4 (green split Tank), Slime Cannon 2/4 (green slowing shots), Slime Ball 2/6 (white Melee), Slime Barrel 2/6 (pink ten-second death pools)
+- Giant Slime 1/4 (green split Tank), Slime Cannon 2/4 (green slowing shots), Slime Ball 2/6 (white damage-absorbing Melee), Slime Barrel 2/6 (pink ten-second death pools)
 - rounded pixel-edged card frames, gold selection borders, darker nameplates and refined panels/navigation
 - portrait Commander/army cards with element, class and recruit/cap badges
 - Commander gallery, full-body portrait and separate description, passive and active panels

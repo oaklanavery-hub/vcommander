@@ -125,8 +125,8 @@ static func _priority(a: Dictionary, b: Dictionary) -> bool:
     if a_healer != b_healer:
         return a_healer
     if int(a["tier"]) == 1:
-        var a_contact := str(a["ability_type"]) in ["explosion", "death_damage_area", "aura_damage", "aura_debuff"]
-        var b_contact := str(b["ability_type"]) in ["explosion", "death_damage_area", "aura_damage", "aura_debuff"]
+        var a_contact := str(a["ability_type"]) in ["explosion", "death_damage_area", "absorb_burst", "aura_damage", "aura_debuff"]
+        var b_contact := str(b["ability_type"]) in ["explosion", "death_damage_area", "absorb_burst", "aura_damage", "aura_debuff"]
         if a_contact != b_contact:
             return a_contact
     if int(a["tier"]) == 2 and not is_equal_approx(float(a["reach"]), float(b["reach"])):
@@ -201,7 +201,7 @@ static func _enemy_pressure(enemy: Dictionary) -> Dictionary:
         var count := float(enemy.get("unit_counts", {}).get(card.get("id"), 0))
         total += count
         var ability_type := str(card.get("ability", {}).get("type", ""))
-        if ability_type in ["ranged_aoe", "ranged_aoe_dot", "explosion", "death_damage_area", "aura_damage"]:
+        if ability_type in ["ranged_aoe", "ranged_aoe_dot", "explosion", "death_damage_area", "absorb_burst", "aura_damage"]:
             area += count
         if str(card.get("role", "")) in ["tank", "melee"] or ability_type == "pull_then_melee":
             melee += count
