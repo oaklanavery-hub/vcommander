@@ -46,7 +46,7 @@ func run() -> void:
     check(state.match_state.losses == scored_losses, "presentation controls never change results")
     combat._paused = false
     combat._process(BattlePrelude.DURATION)
-    combat._process(combat._duration + 1.0)
+    combat._process(combat._duration + combat._tail_length + 0.1)
     await process_frame
     check(combat.next_button.visible, "result enables next round")
     var main: Control = combat.get_node("Margin/Main")

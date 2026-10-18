@@ -93,6 +93,16 @@ func run() -> void:
     field.set_side_configs({"id": "player"}, {"id": "opponent"})
     field.configure_frost()
     check(field.frost_coverage() == 0.0 and field.frozen_sides.is_empty(), "a fresh uncast round has no stale frost")
+    var pulled := unit("target", "opponent", 6)
+    field.set_frame({"time": 2.0, "units": [unit("plant", "player", 2), pulled]})
+    field.consume_event({"type": "ability", "kind": "pull", "time": 2.0, "unit_id": "plant", "target_id": "target", "from_x": 6.0, "from_y": 2.0, "to_x": 2.9, "to_y": 2.0, "from_hp": 100})
+    field.consume_event({"type": "attack", "kind": "melee", "time": 2.0, "unit_id": "plant", "target_id": "target", "card_id": "card_earth_02"})
+    field.consume_event({"type": "damage", "source": "normal_attack", "time": 2.0, "source_unit_id": "plant", "target_id": "target", "amount": 120, "hp_after": -20})
+    field.consume_event({"type": "defeat", "time": 2.0, "unit_id": "target"})
+    field.set_playback({"units": []}, {}, 0, 2.3)
+    check(field.held_defeats().has("target"), "lethally pulled enemy stays visible until the bite reaches it")
+    field.set_playback({"units": []}, {}, 0, 2.55)
+    check(field.held_defeats().is_empty(), "pulled enemy dies after the displayed bite rather than disappearing before it")
     field.queue_free()
 
     var attack := {"type": "attack", "time": 2.0, "unit_id": "archer", "card_id": "card_earth_04", "x": 0, "y": 2, "target_x": 8, "target_y": 2}
@@ -100,6 +110,10 @@ func run() -> void:
     check(replay.attack_at("archer", 1.73).is_empty() and not replay.attack_at("archer", 1.8).is_empty(), "attack anticipation begins before the recorded release")
     check(UnitAttackMotion.pose(attack, 1.95)["phase"] == "windup" and UnitAttackMotion.pose(attack, 2)["power"] == 1.0, "strike peaks at the exact authoritative attack time")
     check(UnitAttackMotion.pose(attack, 2.2)["phase"] == "recovery" and replay.attack_at("archer", 2.5).is_empty(), "attacks recover and return to normal motion")
+    var bite := attack.duplicate()
+    bite["card_id"] = "card_earth_02"
+    replay.configure([], [{"type": "ability", "kind": "pull", "time": 2.0, "unit_id": "archer", "target_id": "target"}, bite.merged({"target_id": "target"}, true)])
+    check(replay.attack_at("archer", 2.1).is_empty() and replay.attack_at("archer", 2.54).get("time") == 2.54, "pulling unit bites after the visual drag reaches it")
     for profile in CombatCues.catalog()["units"].values():
         var rig := str(profile["rig"])
         for amount in [Vector2(1, 0), Vector2(0, 1), Vector2(0.5, 0)]:

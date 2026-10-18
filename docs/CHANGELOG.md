@@ -3,7 +3,8 @@
 ## v0.7.5 — Combat readability
 
 - Complete projectile flight tracks through impact, including short shots between replay frames and enemy interceptions.
-- Shared character/contact anchors, a short visible contact hold and event-timed health/death feedback.
+- Shared character/contact anchors, a short visible contact hold and event-timed health/death feedback; a final-hit tail lets killing blows finish before results.
+- Pitcher Plant bites land after the visual drag, including lethal pulls that keep the victim visible until contact.
 - Full-field ice, frost crystals, affected-unit markers and a persistent Frozen Field status throughout the round.
 - Shared pixel heart meters during draft, combat and results, with result-time loss reveals and Sudden Death support.
 - Articulated character meshes for ten roster rigs; visible wind-up, strike and recovery timed to attacks, bow draw/release, magic charging, claw arcs, slams, bites and hit recoil.

@@ -12,8 +12,11 @@ func configure(frames: Array, events: Array, event_start: int = 0) -> void:
     health.clear()
     attacks.clear()
     var by_id := {}
+    var pulls := {}
     for event in events.slice(event_start):
         var type := str(event.get("type", ""))
+        if event.get("kind") == "pull":
+            pulls[str(event.get("unit_id", ""))] = event
         if type == "projectile_launch":
             var shot: Dictionary = event["projectile"].duplicate(true)
             shot["samples"] = [{"time": float(event["time"]), "x": shot["start_x"], "y": shot["start_y"]}]
@@ -31,7 +34,12 @@ func configure(frames: Array, events: Array, event_start: int = 0) -> void:
             var id := str(event["unit_id"])
             if not attacks.has(id):
                 attacks[id] = []
-            attacks[id].append(event)
+            var cue: Dictionary = event.duplicate()
+            cue["resolved_at"] = event["time"]
+            var pull: Dictionary = pulls.get(id, {})
+            if not pull.is_empty() and pull.get("target_id") == event.get("target_id") and float(event["time"]) - float(pull["time"]) < 0.15:
+                cue["time"] = float(pull["time"]) + 0.54
+            attacks[id].append(cue)
     for frame in frames:
         for projectile in frame.get("projectiles", []):
             var id := int(projectile["id"])
@@ -47,6 +55,8 @@ func configure(frames: Array, events: Array, event_start: int = 0) -> void:
         shot["samples"].sort_custom(func(a, b): return float(a["time"]) < float(b["time"]))
         shots.append(shot)
     shots.sort_custom(func(a, b): return float(a.get("launched_at", 0)) < float(b.get("launched_at", 0)))
+    for records in attacks.values():
+        records.sort_custom(func(a, b): return float(a["time"]) < float(b["time"]))
 
 func health_at(id: String, clock: float, fallback: float) -> float:
     var records: Array = health.get(id, [])
@@ -59,6 +69,13 @@ func attack_at(id: String, clock: float) -> Dictionary:
     if index < 0 or clock - float(records[index]["time"]) > UnitAttackMotion.RECOVERY:
         return {}
     return records[index]
+
+func final_action_time() -> float:
+    var last := 0.0
+    for records in attacks.values():
+        for event in records:
+            last = maxf(last, float(event["time"]))
+    return last
 
 func projectiles_at(clock: float) -> Array[Dictionary]:
     var result: Array[Dictionary] = []

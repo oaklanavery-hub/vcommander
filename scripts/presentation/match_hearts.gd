@@ -6,7 +6,7 @@ var displayed_losses := {"player": 0, "opponent": 0}
 var sudden_death := false
 
 func _init() -> void:
-    custom_minimum_size = Vector2(420, 44)
+    custom_minimum_size = Vector2(480, 44)
     size_flags_horizontal = Control.SIZE_EXPAND_FILL
     mouse_filter = Control.MOUSE_FILTER_IGNORE
     tooltip_text = "Four hearts per Commander. A round loss costs one heart; a draw costs both sides a heart."

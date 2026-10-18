@@ -13,7 +13,10 @@ Verify this handoff against GitHub and the working tree before resuming.
 - Checkpoint 1 saved at `ce66ed89e67e508f9a0eee1c1fcea2f5392211d2`; all four focused suites passed.
 - Checkpoint 2 implemented: persistent full-field frost and affected-army status; shared pixel hearts that hide the scored result until playback ends; ten data-driven articulated rigs with anticipation before release, strike/recovery, bow draw, charging, melee strokes and hit recoil.
 - Passing checkpoint checks: presentation metadata/WAV validation; readability, battle-presentation, player-experience and scene-flow suites. An added draft HUD row initially exceeded the desktop height; placing the compact meter in its header fixed the measured bounds and scene-flow passed again. Native phase captures and full CI/export remain pending.
-- Next: save checkpoint 2, render/review the new phase captures, then open the PR and require all validation/deployment gates.
+- Checkpoint 2 saved at `aa08bd007dfac09e6c9560c14341dd875f71229c`. Native review completed for the standard screens and all contact/attack/frost sequences. Compact heart labels were spaced after visual review.
+- Final refinements: give the killing blow a short presentation tail before results; synchronize the first Pitcher Plant bite with completed drag, including keeping a lethally pulled target visible until that bite. Added phase/held-death coverage. Readability, battle-presentation and scene-flow suites pass after these changes.
+- Exact winners, durations and semantic event fingerprints match v0.7.4 across three seeded elemental battles. No balance or combat outcome change.
+- Next: save this final checkpoint, complete final native captures (including a deterministic lethal pull), then require PR CI, Web export and served-pack verification. Record the run links and deployed identity in the PR.
 
 ## Previous task — Battle animation, audio and pre-battle skill playback (released v0.7.4)
 
