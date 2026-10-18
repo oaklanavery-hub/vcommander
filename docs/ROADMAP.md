@@ -86,6 +86,13 @@
 - Persistent full-field Frozen Field, affected-army status and pixel match heart meters.
 - Articulated anticipation/strike/recovery poses, bow draw/release and distinct melee/magic action effects.
 
-## Next major phase — Game Director scope decision
+## v0.8.0 — Slime Court (explicitly requested expansion)
 
-The approved elemental PvAI vertical slice is implemented. A new major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved roadmap. Human playtesting should inform further balance values; the current tuning remains provisional.
+- Slime Princess with Royal Jelly and a death-spawn attack theme bonus.
+- Four Slime cards with the user-specified recruit/cap values: Giant 1/4, Cannon 2/4, Ball 2/6, Barrel 2/6.
+- Generic one-generation death splitting, once-only revival, refreshing small-area speed slows and ten-second damaging death areas.
+- Original pink/green/white pixel artwork, matching battle motion/VFX and five SFX, roster UI/tooltips, focused mechanics/presentation tests and native captures.
+
+## Further major phase — Game Director scope decision
+
+The elemental PvAI vertical slice and requested Slime Court roster expansion are implemented. A further major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved scope. Human playtesting should inform further balance values; the current tuning remains provisional.

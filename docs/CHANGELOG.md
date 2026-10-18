@@ -1,10 +1,13 @@
 # Changelog
 
-## v0.8.0 — Slime Princess (in development)
+## v0.8.0 — Slime Princess
 
 - Added the Slime Court: Giant Slime 1/4, Slime Cannon 2/4, Slime Ball 2/6 and Slime Barrel 2/6.
 - Generic once-only death splits, Royal Jelly revival, +100% attack for qualifying death-created allies, refreshing area slows and ten-second enemy-only death pools.
 - Focused mechanics coverage for both teams, round reset, simultaneous pre-battle effects, speed recovery, pool duration/entry/exit and deterministic replay output.
+- Pink Slime Princess, green Giant/Cannon, white Slime Ball and pink Barrel artwork; colour-matched slime shots, splashes, pools and Royal Jelly opening/revival effects.
+- Slime squash/bounce, Cannon recoil, Barrel motion, smaller split bodies and five original slime SFX. Event-timed births and pool expiry remain read-only replay presentation.
+- Expanded gallery/warband/draft/export coverage and eleven Slime-specific native captures. Triggered bonuses and unit abilities have accurate readable descriptions.
 
 ## v0.7.7 — Cleaner battlefield
 

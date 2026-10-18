@@ -1133,7 +1133,8 @@ func _queue_death_damage_area(source: Dictionary, ability: Dictionary, damage_ou
     _events.append(BattleEventScript.make("ability", _time, {
         "side": side_id, "unit_id": str(source["id"]), "card_id": str(source.get("card_id", "")),
         "ability": str(ability.get("display_name", "Spill")), "kind": "death_area",
-        "x": origin.x, "y": origin.y, "radius": radius, "duration": duration
+        "x": origin.x, "y": origin.y, "radius": radius, "duration": duration,
+        "area": _area_effects.back().duplicate(true)
     }))
 
 

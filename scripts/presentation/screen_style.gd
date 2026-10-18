@@ -50,7 +50,7 @@ static func primary(button: Button) -> void:
     button.add_theme_font_size_override("font_size", 20)
 
 static func card(button: Button, element: String) -> void:
-    var colors := {"fire": Color("594335"), "water": Color("304c56"), "earth": Color("40523c")}
+    var colors := {"fire": Color("594335"), "water": Color("304c56"), "earth": Color("40523c"), "slime": Color("593e56")}
     var style := frame(colors.get(element, Color("3a4b42")), Color("938460"), 10)
     style.shadow_color = Color(0.03, 0.06, 0.05, 0.45)
     style.shadow_size = 3
@@ -95,6 +95,8 @@ static func label(text: String, font_size: int = 18) -> Label:
 static func skill_description(commander: Dictionary) -> String:
     var skill: Dictionary = commander.get("active_skill", {})
     var description := str(skill.get("display_name", "Commander magic"))
+    if not str(skill.get("description", "")).is_empty():
+        return description + " — " + str(skill["description"])
     match str(skill.get("type", "")):
         "targeted_aoe_max_hp":
             description += " — %d meteors strike the rival army with splash damage." % int(skill.get("meteors", 0))
@@ -103,3 +105,9 @@ static func skill_description(commander: Dictionary) -> String:
         "summon_stationary_units":
             description += " — %d plants join your side on the rival's field for this battle." % int(skill.get("plant_count", 0))
     return description
+
+static func bonus_description(bonus: Dictionary, compact: bool = false) -> String:
+    var field := "summary" if compact else "description"
+    if not str(bonus.get(field, "")).is_empty():
+        return str(bonus[field])
+    return "+%d%% %s" % [int(bonus.get("percentage", 0)), str(bonus.get("stat", "strength")).replace("_", " ").capitalize()]

@@ -16,6 +16,6 @@
     "timing": "pre_battle",
     "revives_per_unit": 1,
     "revive_health_pct": 50,
-    "description": "Bless your starting army before battle. Each ally revives once at 50% HP. Revived allies trigger the theme bonus; newly created summons do not inherit this blessing."
+    "description": "Each starting ally revives once at 50% HP. Newly created summons do not inherit revival."
   }
 }

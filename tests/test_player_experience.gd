@@ -74,7 +74,7 @@ func run() -> void:
     for button in current_scene.available_card_buttons.values():
         if button.visible:
             visible_cards += 1
-    check(visible_cards == 12, "collection initially shows all available companions")
+    check(visible_cards == root.get_node("ContentDatabase").get_all_cards().size(), "collection initially shows all available companions")
     current_scene._toggle_filter()
     visible_cards = 0
     for button in current_scene.available_card_buttons.values():

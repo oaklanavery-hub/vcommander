@@ -13,6 +13,6 @@
     "percentage": 100,
     "stacking": "multiplicative",
     "summary": "+100% ATK on death spawns",
-    "description": "Whenever an ally is created or revived after a death, that spawned ally gains +100% attack. Ordinary round-start spawns do not count."
+    "description": "Allies created or revived after a death gain +100% attack. Round-start spawns do not count."
   }
 }

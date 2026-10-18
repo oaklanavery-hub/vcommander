@@ -14,7 +14,7 @@ func consume_event(event: Dictionary, clock: float = -1.0) -> String:
     if cue.is_empty():
         return ""
     var now := float(Time.get_ticks_msec()) * 0.001 if clock < 0 else clock
-    var cooldown := 0.07 if cue == "meteor" else (0.25 if cue in ["heal", "healing_water", "defeat", "plant_grow"] else 0.10)
+    var cooldown := 0.07 if cue == "meteor" else (0.25 if cue in ["heal", "healing_water", "defeat", "plant_grow", "slime_rebirth", "slime_burst"] else 0.10)
     if now - float(_last_cue.get(cue, -100.0)) < cooldown:
         return ""
     if now - _window_start >= 0.08:

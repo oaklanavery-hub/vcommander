@@ -152,3 +152,11 @@ A short presentation tail after the simulation duration lets final impacts/death
 Enemy ownership is checked when retaining a target lock, releasing an attack, advancing projectiles, queueing damage and applying damage. Projectile collision uses the firing side’s opposing team rather than trusting the locked target’s team. A dead shooter’s committed projectile can still hit a valid enemy. Summons keep their caster’s side when placed in the enemy half. Snapshot/spawn metadata marks summoned units so presentation can show team-coloured pennants, counters and seed trails without inferring ownership from position.
 
 Battlefield effect names and unit ownership word badges are omitted to reduce visual clutter. Pre-battle skill names appear in the combat scene’s existing status line outside the arena; the battlefield keeps the actual visual effects and colour markers.
+
+## Slime Court runtime extensions
+
+Content-driven `death_split`, `death_damage_area` and `army_revival` behaviors extend the existing death-resolution and pre-battle paths. Death-created units receive unique IDs, inherit their source's owner and already-modified stats, and apply a triggered set multiplier only to the new body. Split consumption and revival allowance are explicit per-body state. Starting-army blessing excludes temporary summons, and all spawned units remain outside persistent draft counts. No Commander/card IDs select these mechanics.
+
+Temporary speed debuffs store duration and percentages independently of base ratings. Refreshing a splash does not compound it; effective speeds combine the strongest temporary slow with existing round modifiers and aura behavior. Damaging areas share the existing area-effect clock, retain source ownership after death and check enemy presence/radius each pulse. Death abilities and revival finish before elimination is checked.
+
+Birth events include presentation snapshots so `BattleReplay` can display new bodies between periodic frames. Death-area events include a copied area so visible pools begin and expire at their recorded times. New Slime mesh rigs, green shots, white/pink impacts, pink pool/opening/revival effects and original sound cues consume metadata only. Lower-opacity overlapping pools preserve actor readability. Artwork/palette mappings remain separate from gameplay and retain previous atlas pixels.

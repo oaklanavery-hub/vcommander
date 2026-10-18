@@ -12,7 +12,9 @@ CUES = {'arrow_release': .16, 'arrow_hit': .16, 'fire_cast': .28,
         'flame_breath': .48, 'water_cast': .30, 'ice_cast': .28,
         'seed_cast': .15, 'wood_hit': .18, 'claw': .20, 'heavy_hit': .25,
         'magic_hit': .24, 'vine_pull': .65, 'meteor': .80, 'freeze': .70,
-        'plant_grow': .55, 'explosion': .50, 'healing_water': .55}
+        'plant_grow': .55, 'explosion': .50, 'healing_water': .55,
+        'slime_bounce': .22, 'slime_shot': .32, 'slime_splat': .25,
+        'slime_burst': .55, 'slime_rebirth': .65}
 
 def synthesize(name, duration, seed):
     rng = random.Random(seed)
@@ -45,6 +47,16 @@ def synthesize(name, duration, seed):
         elif name in ('ice_cast', 'freeze', 'magic_hit'):
             frequency = 1300 - 650 * u
             sample = high * .27 + math.sin(math.tau * 1670 * t) * .14 + math.sin(math.tau * 2310 * t) * .09
+        elif name.startswith('slime_'):
+            pitch = {'slime_bounce': 310, 'slime_shot': 480, 'slime_splat': 220,
+                     'slime_burst': 130, 'slime_rebirth': 620}[name]
+            if name == 'slime_rebirth':
+                frequency = pitch * (.55 + u * .9) + 45 * math.sin(t * 36)
+                sample = low * .2 + math.sin(math.tau * 1240 * t) * .18
+            else:
+                frequency = pitch * math.exp(-u * 3) + 45 + 65 * math.sin(u * 15)
+                sample = low * (.95 if name == 'slime_burst' else .5) + high * .06
+                sample += math.sin(math.tau * (pitch * .7) * t) * .22 * math.exp(-u * 7)
         elif name == 'vine_pull':
             frequency = 90 + 550 * (u / .32 if u < .32 else (1 - u) / .68)
             sample = low * .8 + high * .15 * (1 + math.sin(t * 91))

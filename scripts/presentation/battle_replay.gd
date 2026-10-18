@@ -6,15 +6,23 @@ extends RefCounted
 var shots: Array[Dictionary] = []
 var health: Dictionary = {}
 var attacks: Dictionary = {}
+var births: Dictionary = {}
+var death_areas: Array[Dictionary] = []
 
 func configure(frames: Array, events: Array, event_start: int = 0) -> void:
     shots.clear()
     health.clear()
     attacks.clear()
+    births.clear()
+    death_areas.clear()
     var by_id := {}
     var pulls := {}
     for event in events.slice(event_start):
         var type := str(event.get("type", ""))
+        if type == "spawn" and event.has("unit"):
+            births[str(event["unit_id"])] = {"time": float(event["time"]), "unit": event["unit"].duplicate(true)}
+        if event.get("kind") == "death_area" and event.has("area"):
+            death_areas.append(event["area"].duplicate(true))
         if event.get("kind") == "pull":
             pulls[str(event.get("unit_id", ""))] = event
         if type == "projectile_launch":
@@ -57,6 +65,27 @@ func configure(frames: Array, events: Array, event_start: int = 0) -> void:
     shots.sort_custom(func(a, b): return float(a.get("launched_at", 0)) < float(b.get("launched_at", 0)))
     for records in attacks.values():
         records.sort_custom(func(a, b): return float(a["time"]) < float(b["time"]))
+
+func births_since(frame_time: float, clock: float) -> Array[Dictionary]:
+    var result: Array[Dictionary] = []
+    for birth in births.values():
+        if float(birth["time"]) > frame_time + 0.00001 and float(birth["time"]) <= clock + 0.00001:
+            var unit: Dictionary = birth["unit"].duplicate()
+            if health_at(str(unit["id"]), clock, float(unit.get("hp", 0))) > 0:
+                result.append(unit)
+    return result
+
+func death_areas_at(clock: float) -> Array[Dictionary]:
+    var result: Array[Dictionary] = []
+    for original in death_areas:
+        var age := clock - float(original.get("created_at", 0))
+        var duration := float(original.get("duration", 10))
+        if age < 0 or age >= duration - 0.00001:
+            continue
+        var area := original.duplicate()
+        area["remaining"] = duration - age
+        result.append(area)
+    return result
 
 func health_at(id: String, clock: float, fallback: float) -> float:
     var records: Array = health.get(id, [])

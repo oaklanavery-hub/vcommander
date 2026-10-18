@@ -51,8 +51,8 @@ func _select_commander(commander_id: String) -> void:
     full_portrait.set_content(commander, true)
     var signature_set := GameState.get_selected_signature_set()
     var bonus: Dictionary = signature_set.get("bonus", {})
-    bonus_label.text = "+%d%% %s\n\nEquip four unique %s cards to activate this bonus. Mixed armies are welcome too." % [int(bonus.get("percentage", 0)), str(bonus.get("stat", "strength")).replace("_", " ").capitalize(), str(commander.get("element", "themed")).capitalize()]
-    skill_label.text = ScreenStyle.skill_description(commander) + "\n\nCosts one draft pick. Once per round, twice per match."
+    bonus_label.text = ScreenStyle.bonus_description(bonus) + "\n\nRequires four unique %s cards." % str(commander.get("element", "themed")).capitalize()
+    skill_label.text = ScreenStyle.skill_description(commander) + "\n\n1 draft pick · 1/round · 2/match"
     build_army_button.disabled = false
 
 func _open_army_builder() -> void:

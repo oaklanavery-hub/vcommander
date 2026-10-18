@@ -13,8 +13,11 @@ Verify this handoff against GitHub and the working tree before resuming.
 - Checkpoint 2: original pixel art, Slime palette/cards, accurate ability/bonus descriptions, bouncing attacks, goo projectiles/areas, revival/split feedback and SFX. Keep battlefield word labels removed.
 - Checkpoint 1 implemented. Passing: content validation (4 Commanders/16 cards/4 sets), clean Godot editor import, new Slime Commander suite, existing combat simulator and summon-allegiance suites.
 - Tests cover the supplied recruit/cap values, both-team split ownership, half stats and triggered double attack, no recursive splitting, once-only revival, no duplicated Giant split, round reset, simultaneous skill damage, refreshing slow expiry, exact ten-second pool duration and entering/leaving it, ally safety and determinism.
-- Presentation/asset validators and full CI are not run yet; new detailed artwork and accurate triggered-bonus interface are the next checkpoint. Save this mechanics checkpoint before starting them.
-- Gate: focused presentation suites and native Slime captures, save checkpoints, full PR CI/export/served-pack verification. Next: pixel art and roster/battle presentation.
+- Checkpoint 1 saved at `e53ff5fd175124a570ca31e9c626e28c3ac3d914`, with executable-mode preservation at `c831abafccc10518627c54689c59a752e143e5e3`.
+- Checkpoint 2 implemented: user-corrected pink Princess, green Giant/Cannon, white Ball and pink Barrel; original generated cutouts packed into expanded atlases without altering previous frames, matching fallback catalogs, accurate triggered-bonus/ability descriptions, Slime squash/bounce/recoil, event-timed births, pink pools/opening/revival, and five original SFX.
+- Passing: art and presentation/WAV validators; clean editor import after correcting two GDScript type inferences; Slime presentation, export content, battle readability, battle presentation and scene-flow suites. Native Slime capture (11 frames) and standard UI capture (10 frames) passed. Reviewed gallery, warband, Royal Jelly, Cannon contact, split and late pool views.
+- Visual review prompted more compact gallery rules text and softer overlapping pools. Slime presentation passed after those refinements. The refined native views, full remote CI, export and served-pack verification remain pending.
+- Next: save presentation checkpoint, inspect final refined native views and complete PR CI/export/served-pack verification. Final run links and deployed identity belong in the PR; do not report live before verification passes.
 
 ## Previous task — Remove battlefield text tags (released v0.7.7)
 

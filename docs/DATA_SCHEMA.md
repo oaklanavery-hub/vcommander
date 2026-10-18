@@ -34,7 +34,7 @@ Required core fields:
 
 The optional Commander `description` is player-facing flavor text. It does not grant abilities or modify stats.
 
-Detailed presentation atlases use `assets/pixel/art_manifest.json` schema 1. Each group provides a texture resource path, a two-number `cell_size`, and a `frames` map from stable presentation/content IDs to zero-based column/row coordinates. Frames are unique, within the RGBA texture bounds, and never define gameplay stats. The current atlases cover three Commander elements and all twelve Army cards plus the summoned Commander plant.
+Detailed presentation atlases use `assets/pixel/art_manifest.json` schema 1. Each group provides a texture resource path, a two-number `cell_size`, and a `frames` map from stable presentation/content IDs to zero-based column/row coordinates. Frames are unique, within the RGBA texture bounds, and never define gameplay stats. The current atlases cover four Commander themes and all sixteen Army cards plus the summoned Commander plant.
 
 Starter skill behavior types in v0.4 are:
 
@@ -195,7 +195,7 @@ The separate `assets/pixel/roster.json` catalog uses its own schema version 1: c
 
 Projectile launches also emit `projectile_launch` with a copied projectile dictionary. Both terminal event types carry `projectile_id` and final `x/y`; impact identifies the actual interceptor, while fizzle retains the dead locked target. Damage/heal events include exact `hp_after` (rendered clamped at zero). This playback metadata covers flights and health changes between periodic frames.
 
-Combat cue profiles also declare a presentation-only `rig`: `brute`, `claw`, `mage`, `dragon`, `serpent`, `healer`, `tree`, `pitcher`, `bow` or `plant`. This selects character articulation, never combat behavior. Area-heal cast events include source/card and source/target coordinates for the same attack-pose timeline.
+Combat cue profiles also declare a presentation-only `rig`: `brute`, `claw`, `mage`, `dragon`, `serpent`, `healer`, `tree`, `pitcher`, `bow`, `plant`, `slime`, `cannon` or `barrel`. This selects character articulation, never combat behavior. `slime_green` projectiles and optional `impact_style`/`accent` values preserve the requested green/white/pink unit identities; `bounce` is a presentation-only attack motion. Area-heal cast events include source/card and source/target coordinates for the same attack-pose timeline.
 
 Spawn events and replay-unit snapshots carry a `summoned` boolean for temporary Commander summons. Their existing `side` is always the casting Commander’s team. Presentation uses this flag and side for ownership markers; field coordinates never determine allegiance.
 

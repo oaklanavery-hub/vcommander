@@ -76,6 +76,16 @@ jobs:
           test -s build/qa/summon_ownership_opening.png
           test -s build/qa/summon_ownership_battle.png
           test -s build/qa/summon_ownership_hit.png
+          timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_slime.gd -- --output-dir=build/qa 2>&1 | tee /tmp/slime-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/slime-qa.log; then
+            exit 1
+          fi
+          test -s build/qa/slime_commander.png
+          test -s build/qa/slime_army.png
+          test -s build/qa/slime_royal_opening.png
+          test -s build/qa/slime_split.png
+          test -s build/qa/slime_cannon_hit.png
+          test -s build/qa/slime_pool_late.png
 
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4
