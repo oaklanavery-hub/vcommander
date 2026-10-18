@@ -2,6 +2,7 @@ class_name CombatSimulator
 extends RefCounted
 
 const BattleEventScript = preload("res://scripts/combat/battle_event.gd")
+const FormationPlannerScript = preload("res://scripts/ai/formation_planner.gd")
 
 const PLAYER_SIDE := "player"
 const OPPONENT_SIDE := "opponent"
@@ -20,6 +21,7 @@ var _pending_heal: Array[Dictionary] = []
 var _pre_battle: Dictionary = {}
 var _death_spawn_attack_pct: Dictionary = {}
 var _spawn_sequence := 0
+var _formations: Dictionary = {}
 
 var _time := 0.0
 var _step := 0.1
@@ -51,8 +53,8 @@ func simulate(
 ) -> Dictionary:
     _reset(battle_seed, balance)
 
-    _spawn_side(player_side, false)
-    _spawn_side(opponent_side, true)
+    _spawn_side(player_side, false, opponent_side)
+    _spawn_side(opponent_side, true, player_side)
     var before_skills := _snapshot()
     var skill_event_start := _events.size()
     _resolve_pre_battle_skills(player_side, opponent_side)
@@ -96,6 +98,7 @@ func _reset(battle_seed: int, balance: Dictionary) -> void:
     _pre_battle.clear()
     _death_spawn_attack_pct.clear()
     _spawn_sequence = 0
+    _formations.clear()
     _time = 0.0
     _next_frame_time = 0.0
 
@@ -132,57 +135,24 @@ func _reset(battle_seed: int, balance: Dictionary) -> void:
     _push_large = maxf(_push_moderate, float(pushback.get("large", 3.0)))
 
 
-func _spawn_side(side_config: Dictionary, on_right: bool) -> void:
+func _spawn_side(side_config: Dictionary, on_right: bool, enemy_config: Dictionary = {}) -> void:
     var side_id := str(side_config.get("id", OPPONENT_SIDE if on_right else PLAYER_SIDE))
     var bonus: Dictionary = side_config.get("set_bonus", {})
     if str(bonus.get("trigger", "")) == "on_death_spawn" and str(bonus.get("stat", "")) == "attack":
         _death_spawn_attack_pct[side_id] = float(bonus.get("percentage", 0))
-    var cards: Array = side_config.get("cards", [])
-    var counts: Dictionary = side_config.get("unit_counts", {})
-
-    var tanks: Array[Dictionary] = []
-    var melee: Array[Dictionary] = []
-    var backline: Array[Dictionary] = []
-
-    for raw_card in cards:
-        if typeof(raw_card) != TYPE_DICTIONARY:
-            continue
-        var card: Dictionary = raw_card
-        var card_id := str(card.get("id", ""))
-        var count := maxi(0, int(counts.get(card_id, 0)))
-        for unit_index in range(count):
-            var spec: Dictionary = {
-                "card": card,
-                "unit_index": unit_index,
-                "side_config": side_config,
-                "side_id": side_id,
-                "on_right": on_right
-            }
-            var role := str(card.get("role", "melee"))
-            if role == "tank":
-                tanks.append(spec)
-            elif role == "melee":
-                melee.append(spec)
-            else:
-                backline.append(spec)
-
-    var tank_x := _field_width * (0.62 if on_right else 0.38)
-    var melee_x := _field_width * (0.72 if on_right else 0.28)
-    var back_x := _field_width * (0.84 if on_right else 0.16)
-
-    _spawn_group(tanks, tank_x)
-    _spawn_group(melee, melee_x)
-    _spawn_group(backline, back_x)
-
-
-func _spawn_group(specs: Array[Dictionary], x_position: float) -> void:
-    if specs.is_empty():
-        return
-    var usable_height := maxf(1.0, _field_height - _field_margin * 2.0)
-    var spacing := usable_height / float(specs.size() + 1)
-    for index in range(specs.size()):
-        var y_position := _field_margin + spacing * float(index + 1)
-        _spawn_unit(specs[index], Vector2(x_position, y_position))
+    var config := side_config.duplicate()
+    config["id"] = side_id
+    var formation := FormationPlannerScript.plan(config, enemy_config, {
+        "width": _field_width, "height": _field_height, "margin": _field_margin,
+        "collision_radius": _collision_radius, "settings": _balance.get("formation", {})})
+    _formations[side_id] = formation
+    var cards_by_id := {}
+    for card in side_config.get("cards", []):
+        cards_by_id[str(card.get("id", ""))] = card
+    for placement in formation.get("placements", []):
+        _spawn_unit({"card": cards_by_id[str(placement["card_id"])], "unit_index": placement["unit_index"],
+            "side_config": side_config, "side_id": side_id, "on_right": on_right},
+            Vector2(float(placement["x"]), float(placement["y"])))
 
 
 func _spawn_unit(spec: Dictionary, position: Vector2) -> void:
@@ -1519,6 +1489,7 @@ func _finish_result(winner: String, reason: String) -> Dictionary:
         "events": _events.duplicate(true),
         "frames": _frames.duplicate(true),
         "pre_battle": _pre_battle.duplicate(true),
+        "formations": _formations.duplicate(true),
         "seed": int(_rng.seed),
         "battlefield": {
             "width": _field_width,

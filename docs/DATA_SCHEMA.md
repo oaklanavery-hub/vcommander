@@ -148,6 +148,8 @@ The v0.4 simulator reads:
 
 These are playtest tuning values, not new conceptual gameplay rules.
 
+`game_balance.formation` defines positive `spacing_units`, `area_spread_multiplier` (at least 1), and whole-number `maximum_rows`. The planner increases spacing according to the actually recruited opposing area's damage capability, then fits collision-safe ranks to the battlefield. It reads existing roles, stats and ability types; no per-card formation coordinates are stored.
+
 ## Combat-side runtime input
 
 `CombatSimulator` receives runtime dictionaries assembled by `GameState`, not stored JSON files. Each side includes:
@@ -161,6 +163,7 @@ These are playtest tuning values, not new conceptual gameplay rules.
 - active Commander-themed set bonus, if any
 
 The simulator returns a result with winner/reason/duration, a battle-event array and replay frames.
+Its `formations` dictionary records each side's strategy, spacing, rank count, enemy pressure and canonical unit placements (`card_id`, `unit_index`, role, rank, x/y). This is a read-only record of the authoritative initial layout. Spawn events and the first frame use those same positions before Commander skills; summoned/revived bodies retain their existing placement rules.
 When Commander skills are selected, the result also includes `pre_battle` with `before` and `after` snapshots, copied skill-resolution `events`, and `event_end` (the exclusive index in the main event array). This is playback metadata; skill damage and summons still resolve once at simulation time zero. Normal battle frames begin after resolution.
 Pull events provide `source_x/y`, `from_x/y`, `to_x/y` and original target HP for the visual grab/drag. These record the collision-resolved displacement, including a blocked pull with identical endpoints. Projectile frames include `card_id`, launch position/time and source/target IDs; `projectile_impact` events provide the projectile ID, source/card/target and impact coordinates. Attack events provide source/target coordinates. These fields do not drive combat outcomes.
 

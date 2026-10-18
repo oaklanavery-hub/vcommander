@@ -153,6 +153,8 @@ All allied and enemy units have physical collision and cannot pass through one a
 
 **R047 — Automatic formation**  
 Starting formation is automatic. Tanks occupy the front-most positions, then other melee units, with ranged/backline units behind.
+Both sides use the same deterministic tactical planner after drafting is complete and the battle rosters are revealed, before Commander skills resolve. It allocates multiple spaced ranks based on army size, places shorter-range attackers ahead of longer-range casters, and seeks central covered positions where healers can reach frontline allies. Melee wings and contact abilities receive positions suited to approaching combat. Enemy area damage encourages wider spacing; enemy melee pressure increases the value of protecting support and ranged units. Input card order does not determine top/bottom groups. Placement respects the field bounds and physical separation; units then follow the normal free movement and targeting rules.
+These are heuristic tactical choices, not a guarantee of the best possible formation or a battle win. Numeric spacing and scoring weights are provisional playtest tuning.
 
 **R048 — Ranged spacing**  
 Ranged units try to maintain distance from their target. They stop briefly to attack, then resume repositioning if necessary.

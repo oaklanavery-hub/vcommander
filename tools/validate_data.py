@@ -140,6 +140,14 @@ def main() -> int:
     ):
         require_positive_number(simulation.get(key), f"game_balance simulation.{key}")
 
+    formation = balance.get("formation", {})
+    for key in ("spacing_units", "area_spread_multiplier", "maximum_rows"):
+        require_positive_number(formation.get(key), f"game_balance formation.{key}")
+    if formation["area_spread_multiplier"] < 1:
+        raise ValueError("formation.area_spread_multiplier cannot reduce area-threat spacing")
+    if not isinstance(formation["maximum_rows"], int):
+        raise ValueError("formation.maximum_rows must be a whole number")
+
     print(
         f"Data OK: {len(commanders)} commanders, {len(cards)} cards, "
         f"{len(sets)} sets, {len(buffs)} buffs, {len(balances)} balance file"
