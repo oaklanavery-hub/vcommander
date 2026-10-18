@@ -2,7 +2,23 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Battle animation, audio and pre-battle skill playback
+## Current task — Contact, persistent frost, hearts and attack readability
+
+- User requests shots that visibly connect, full-field Frozen Field for the entire round, visible remaining match lives and much clearer attack animation.
+- Branch `feat/battle-contact`, based on verified v0.7.4 main `a30b9a38cf0deeaa67d0a0b63a483a0d00f8ca61` (PR #15).
+- Checkpoint 1: record launches/terminal events and exact event HP; reconstruct flight through between-frame impacts and align contact/health feedback. Preserve physical collisions, damage and seeded outcomes. Save after focused regressions.
+- Checkpoint 2: persistent full-field frost with affected-side status, shared pixel heart meters without revealing the already-scored outcome, and distinct anticipation/strike/recovery character poses and attack effects. Save before full validation.
+- Final gate: native phase captures, focused regressions, full PR CI, Web export and live served-pack verification.
+- Checkpoint 1 implemented. Clean Godot import and new readability tests pass for complete between-frame flights, moving interception, lethal contact/HP timing, visible contact hold and dead-target fizzle. Battle-presentation, physical-projectile and simulator regressions are the focused checkpoint gate.
+- Checkpoint 1 saved at `ce66ed89e67e508f9a0eee1c1fcea2f5392211d2`; all four focused suites passed.
+- Checkpoint 2 implemented: persistent full-field frost and affected-army status; shared pixel hearts that hide the scored result until playback ends; ten data-driven articulated rigs with anticipation before release, strike/recovery, bow draw, charging, melee strokes and hit recoil.
+- Passing checkpoint checks: presentation metadata/WAV validation; readability, battle-presentation, player-experience and scene-flow suites. An added draft HUD row initially exceeded the desktop height; placing the compact meter in its header fixed the measured bounds and scene-flow passed again. Native phase captures and full CI/export remain pending.
+- Checkpoint 2 saved at `aa08bd007dfac09e6c9560c14341dd875f71229c`. Native review completed for the standard screens and all contact/attack/frost sequences. Compact heart labels were spaced after visual review.
+- Final refinements: give the killing blow a short presentation tail before results; synchronize the first Pitcher Plant bite with completed drag, including keeping a lethally pulled target visible until that bite. Added phase/held-death coverage. Readability, battle-presentation and scene-flow suites pass after these changes.
+- Exact winners, durations and semantic event fingerprints match v0.7.4 across three seeded elemental battles. No balance or combat outcome change.
+- Next: save this final checkpoint, complete final native captures (including a deterministic lethal pull), then require PR CI, Web export and served-pack verification. Record the run links and deployed identity in the PR.
+
+## Previous task — Battle animation, audio and pre-battle skill playback (released v0.7.4)
 
 - User requests visible stretching/retracting Pitcher Plant vines, projectiles matched to unit roles, additional SFX, each battle starting at 1×, removal of result skipping, and complete Commander skill animations before combat begins.
 - Branch: `feat/battle-effects`, based on main `85acd3a4481dfdbf253ecab6a1495b7ffe0d2466` (v0.7.3 verified and live in PR #14).

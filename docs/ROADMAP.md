@@ -80,6 +80,12 @@
 - Seventeen additional original battle SFX and per-cue mixing.
 - Opening, vine, projectile, sound and export regression coverage.
 
+## v0.7.5 — Combat readability feedback
+
+- Projectiles visibly connect between replay frames; event-timed health and impact feedback.
+- Persistent full-field Frozen Field, affected-army status and pixel match heart meters.
+- Articulated anticipation/strike/recovery poses, bow draw/release and distinct melee/magic action effects.
+
 ## Next major phase — Game Director scope decision
 
 The approved elemental PvAI vertical slice is implemented. A new major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved roadmap. Human playtesting should inform further balance values; the current tuning remains provisional.

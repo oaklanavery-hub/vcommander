@@ -97,6 +97,8 @@ static func impact(canvas: CanvasItem, p: Vector2, style: String, age: float, re
     var colors := {"arrow": Color("e5c991"), "seed": Color("b8ce6f"), "water_orb": Color("9ae0e1"), "ice_shard": Color("d0f6f4"), "slam": Color("c9ad80"), "slash": Color("efdcb5"), "bite": Color("b8cb78")}
     var color: Color = colors.get(style, Color("ffb85e"))
     color.a = 1.0 - progress
+    if age < 0.1:
+        canvas.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -8), p + Vector2(8, 0), p + Vector2(0, 8), p + Vector2(-8, 0)]), Color("fff3d5"))
     if style == "water_orb":
         canvas.draw_arc(p, 7 + progress * 14, 0, TAU, 12, color, 2)
     elif style == "slash":

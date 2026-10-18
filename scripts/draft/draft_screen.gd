@@ -18,9 +18,17 @@ const SELECTION_SECONDS := 30.0
 
 var _time_left: float = SELECTION_SECONDS
 var _timer_bar := ProgressBar.new()
+var _hearts_meter := MatchHearts.new()
 
 func _ready() -> void:
     ScreenStyle.apply(self)
+    _hearts_meter.name = "MatchHearts"
+    var header := get_node("Margin/Main/Header")
+    header.add_child(_hearts_meter)
+    header.move_child(_hearts_meter, 2)
+    _hearts_meter.size_flags_horizontal = Control.SIZE_FILL
+    commander_label.hide()
+    get_node("Margin/Main/Header/Title").add_theme_font_size_override("font_size", 28)
     ScreenStyle.primary(battle_button)
     _timer_bar.max_value = SELECTION_SECONDS
     _timer_bar.show_percentage = false
@@ -56,6 +64,7 @@ func _process(delta: float) -> void:
             _refresh_all()
 
 func _refresh_all() -> void:
+    _hearts_meter.refresh(GameState.match_state)
     var commander: Dictionary = GameState.get_selected_commander()
     commander_label.text = str(commander.get("display_name", "Commander"))
     var round_number: int = GameState.match_state.round_number
