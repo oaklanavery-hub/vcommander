@@ -33,9 +33,15 @@ var _paused := false
 var _prelude := BattlePrelude.new()
 var _audio = AudioScript.new()
 var _log_lines: Array[String] = []
+var _hearts_meter := MatchHearts.new()
 
 func _ready() -> void:
     ScreenStyle.apply(self)
+    _hearts_meter.name = "MatchHearts"
+    var main := get_node("Margin/Main")
+    main.add_child(_hearts_meter)
+    main.move_child(_hearts_meter, 2)
+    _hearts_meter.refresh(GameState.match_state, false)
     GameAudio.set_context("battle")
     GameAudio.settings_changed.connect(_update_option_labels)
     ScreenStyle.primary(next_button)
@@ -78,6 +84,7 @@ func _ready() -> void:
         float(field.get("height", 14.0))
     )
     battlefield.set_side_configs(GameState.get_player_combat_side(), GameState.opponent_combat_side)
+    battlefield.configure_frost()
     if not _frames.is_empty():
         battlefield.set_frame(_frames[0])
 
@@ -225,6 +232,7 @@ func _finish_replay() -> void:
     if _finished:
         return
     _finished = true
+    _hearts_meter.refresh(GameState.match_state)
     battlefield.finish_replay()
     var result: Dictionary = GameState.battle_result
     var winner := str(result.get("winner", "draw"))

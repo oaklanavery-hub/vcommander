@@ -105,6 +105,10 @@ static func _draw_detailed_unit(canvas: CanvasItem, texture: Texture2D, position
     if state == "death":
         canvas.draw_texture_rect(texture, Rect2(origin + Vector2(0, side * 0.45), Vector2(side, side * 0.55)), false, tint)
         return
+    if state == "attack" and pose.has("rig"):
+        var attack_mesh := UnitAttackMotion.mesh(str(pose["rig"]), float(pose.get("charge", 0)), float(pose.get("power", 0)), mirror)
+        canvas.draw_mesh(attack_mesh, PixelAtlasArt.standalone(texture), Transform2D(Vector2(side, 0), Vector2(0, side), origin), tint)
+        return
     var source := texture.get_size()
     # Directional body lean and alternating lower-body strips retain the existing
     # eight-direction/four-step procedural animation without driving simulation.

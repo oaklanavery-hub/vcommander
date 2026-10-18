@@ -6,6 +6,16 @@ static var _manifest: Dictionary = {}
 static var _sheets: Dictionary = {}
 static var _frames: Dictionary = {}
 static var _mirrored: Dictionary = {}
+static var _standalone: Dictionary = {}
+
+static func standalone(texture: Texture2D) -> Texture2D:
+    if not texture is AtlasTexture:
+        return texture
+    var key := texture.get_instance_id()
+    if not _standalone.has(key):
+        var atlas := texture as AtlasTexture
+        _standalone[key] = ImageTexture.create_from_image(atlas.atlas.get_image().get_region(Rect2i(atlas.region)))
+    return _standalone[key]
 
 static func catalog() -> Dictionary:
     if _manifest.is_empty() and FileAccess.file_exists(MANIFEST):

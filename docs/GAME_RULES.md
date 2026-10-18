@@ -115,7 +115,7 @@ Fire summons six meteors. Each meteor directly targets an enemy unit. Meteors sp
 A direct meteor hit has base damage equal to 20% of that target's own Max HP. Enemies caught in the AoE take base damage equal to 10% of their own Max HP. Normal DEF then reduces the damage, with the normal minimum-damage floor.
 
 **R036 — Water: Frozen Field**  
-For that battle round only, the enemy army suffers -20% Attack Speed and -15% Movement Speed. Units entering later in that same battle are also affected.
+For that battle round only, the enemy army suffers -20% Attack Speed and -15% Movement Speed. Units entering later in that same battle are also affected. Frozen scenery covers the entire battlefield for the full round; status markers identify the affected enemy army.
 
 **R037 — Earth: Plant Summon**  
 Earth summons six stationary plants at random valid positions on the enemy field for that battle round only. Plants are normal allied combat units for targeting and round resolution.

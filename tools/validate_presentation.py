@@ -15,6 +15,7 @@ assert set(catalog['units']) == {card['id'] for card in cards} | {'commander_pla
 for profile in catalog['units'].values():
     assert profile['projectile'] in {'none', 'arrow', 'seed', 'fireball', 'dragonfire', 'water_orb', 'ice_shard'}
     assert profile['motion'] in {'slam', 'slash', 'cast', 'shoot', 'bite'}
+    assert profile['rig'] in {'brute', 'claw', 'mage', 'dragon', 'serpent', 'healer', 'tree', 'pitcher', 'bow', 'plant'}
     for key in ['attack_sound', 'impact_sound']:
         assert (ROOT / 'assets/audio' / (profile[key] + '.wav')).is_file(), profile
 sys.path.insert(0, str(ROOT / 'tools'))

@@ -662,7 +662,10 @@ func _try_cast_heal(unit: Dictionary, ability: Dictionary) -> bool:
         "unit_id": str(unit.get("id", "")),
         "target_id": str(target.get("id", "")),
         "ability": str(ability.get("display_name", "Heal")),
-        "kind": "area_heal"
+        "kind": "area_heal",
+        "card_id": str(unit.get("card_id", "")),
+        "x": float(unit.get("x", 0)), "y": float(unit.get("y", 0)),
+        "target_x": float(target.get("x", 0)), "target_y": float(target.get("y", 0))
     }))
     return true
 

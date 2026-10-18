@@ -48,8 +48,73 @@ func run() -> void:
     sim._tick_projectiles()
     replay.configure([], sim._events)
     check(replay.projectiles_at(0.15).size() == 1 and replay.projectiles_at(0.2).is_empty(), "dead locked target fizzles visually at its recorded time without a fake hit")
+
+    var match_info := MatchState.new()
+    match_info.start()
+    var meter = load("res://scripts/presentation/match_hearts.gd").new()
+    root.add_child(meter)
+    match_info.begin_battle()
+    match_info.resolve_round("opponent")
+    meter.refresh(match_info, false)
+    check(meter.remaining("player") == 4 and meter.remaining("opponent") == 4, "replay hearts do not leak a result already scored by the simulation")
+    meter.refresh(match_info)
+    check(meter.remaining("player") == 3 and meter.remaining("opponent") == 4, "completed loss removes one visible heart")
+    for index in range(3):
+        match_info.advance_round()
+        match_info.begin_battle()
+        match_info.resolve_round("draw")
+    meter.refresh(match_info, false)
+    check(meter.remaining("player") == 1 and not meter.sudden_death, "last-heart replay does not reveal the final loss early")
+    meter.refresh(match_info)
+    check(meter.remaining("player") == 0 and meter.remaining("opponent") == 1, "fourth loss displays an empty meter")
+    match_info.start()
+    for index in range(4):
+        match_info.begin_battle()
+        match_info.resolve_round("draw")
+        if index < 3:
+            match_info.advance_round()
+    meter.refresh(match_info, false)
+    check(meter.remaining("player") == 1 and meter.remaining("opponent") == 1 and not meter.sudden_death, "fourth draw is hidden until revealed")
+    meter.refresh(match_info)
+    check(meter.remaining("player") == 0 and meter.remaining("opponent") == 0 and meter.sudden_death, "simultaneous final hearts show Sudden Death")
+    meter.queue_free()
+
+    var field = load("res://scripts/combat/battlefield_view.gd").new()
+    root.add_child(field)
+    var water := {"id": "player", "commander_skill_active": true, "commander": {"active_skill": {"type": "round_debuff"}}}
+    field.set_side_configs(water, {"id": "opponent"})
+    field.configure_frost()
+    field.prelude_time = 1.7
+    check(field.frost_coverage() == 1.0 and field.frozen_sides == ["opponent"], "Frozen Field covers both halves while marking only the affected army")
+    field.replay_enabled = true
+    field.set_playback({}, {}, 0, 119)
+    field.finish_replay()
+    check(field.frost_coverage() == 1.0, "full-field ice persists through late combat and round result")
+    field.set_side_configs({"id": "player"}, {"id": "opponent"})
+    field.configure_frost()
+    check(field.frost_coverage() == 0.0 and field.frozen_sides.is_empty(), "a fresh uncast round has no stale frost")
+    field.queue_free()
+
+    var attack := {"type": "attack", "time": 2.0, "unit_id": "archer", "card_id": "card_earth_04", "x": 0, "y": 2, "target_x": 8, "target_y": 2}
+    replay.configure([], [attack])
+    check(replay.attack_at("archer", 1.73).is_empty() and not replay.attack_at("archer", 1.8).is_empty(), "attack anticipation begins before the recorded release")
+    check(UnitAttackMotion.pose(attack, 1.95)["phase"] == "windup" and UnitAttackMotion.pose(attack, 2)["power"] == 1.0, "strike peaks at the exact authoritative attack time")
+    check(UnitAttackMotion.pose(attack, 2.2)["phase"] == "recovery" and replay.attack_at("archer", 2.5).is_empty(), "attacks recover and return to normal motion")
+    for profile in CombatCues.catalog()["units"].values():
+        var rig := str(profile["rig"])
+        for amount in [Vector2(1, 0), Vector2(0, 1), Vector2(0.5, 0)]:
+            var mesh := UnitAttackMotion.mesh(rig, amount.x, amount.y, false)
+            var arrays := mesh.surface_get_arrays(0)
+            var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+            var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+            check(vertices.size() == 81 and not UnitAttackMotion.deform(Vector2(0.75, 0.4), rig, amount.x, amount.y).is_zero_approx(), "all roster rigs visibly articulate the existing character")
+            for index in range(0, indices.size(), 3):
+                var a := vertices[indices[index]]
+                var b := vertices[indices[index + 1]]
+                var c := vertices[indices[index + 2]]
+                check((b - a).cross(c - a).z > 0, "character mesh remains continuous without inverted parts")
     if not failed:
-        print("Battle readability tests passed: between-frame flight, moving interception, contact, exact lethal HP and fizzle.")
+        print("Battle readability tests passed: between-frame contact/HP, interception/fizzle, unspoiled hearts, Sudden Death, persistent full-field frost and articulated attack phases.")
     quit(1 if failed else 0)
 
 func check(condition: bool, message: String) -> void:

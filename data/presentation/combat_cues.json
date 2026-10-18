@@ -5,79 +5,92 @@
       "projectile": "none",
       "motion": "slam",
       "attack_sound": "heavy_hit",
-      "impact_sound": "heavy_hit"
+      "impact_sound": "heavy_hit",
+      "rig": "brute"
     },
     "card_fire_02": {
       "projectile": "none",
       "motion": "slash",
       "attack_sound": "claw",
-      "impact_sound": "claw"
+      "impact_sound": "claw",
+      "rig": "claw"
     },
     "card_fire_03": {
       "projectile": "fireball",
       "motion": "cast",
       "attack_sound": "fire_cast",
-      "impact_sound": "magic_hit"
+      "impact_sound": "magic_hit",
+      "rig": "mage"
     },
     "card_fire_04": {
       "projectile": "dragonfire",
       "motion": "cast",
       "attack_sound": "flame_breath",
-      "impact_sound": "explosion"
+      "impact_sound": "explosion",
+      "rig": "dragon"
     },
     "card_water_01": {
       "projectile": "none",
       "motion": "slam",
       "attack_sound": "heavy_hit",
-      "impact_sound": "ice_cast"
+      "impact_sound": "ice_cast",
+      "rig": "brute"
     },
     "card_water_02": {
       "projectile": "water_orb",
       "motion": "shoot",
       "attack_sound": "water_cast",
-      "impact_sound": "magic_hit"
+      "impact_sound": "magic_hit",
+      "rig": "serpent"
     },
     "card_water_03": {
       "projectile": "water_orb",
       "motion": "cast",
       "attack_sound": "water_cast",
-      "impact_sound": "healing_water"
+      "impact_sound": "healing_water",
+      "rig": "healer"
     },
     "card_water_04": {
       "projectile": "ice_shard",
       "motion": "cast",
       "attack_sound": "ice_cast",
-      "impact_sound": "magic_hit"
+      "impact_sound": "magic_hit",
+      "rig": "mage"
     },
     "card_earth_01": {
       "projectile": "none",
       "motion": "slam",
       "attack_sound": "wood_hit",
-      "impact_sound": "wood_hit"
+      "impact_sound": "wood_hit",
+      "rig": "tree"
     },
     "card_earth_02": {
       "projectile": "none",
       "motion": "bite",
       "attack_sound": "wood_hit",
-      "impact_sound": "claw"
+      "impact_sound": "claw",
+      "rig": "pitcher"
     },
     "card_earth_03": {
       "projectile": "none",
       "motion": "slash",
       "attack_sound": "claw",
-      "impact_sound": "heavy_hit"
+      "impact_sound": "heavy_hit",
+      "rig": "claw"
     },
     "card_earth_04": {
       "projectile": "arrow",
       "motion": "shoot",
       "attack_sound": "arrow_release",
-      "impact_sound": "arrow_hit"
+      "impact_sound": "arrow_hit",
+      "rig": "bow"
     },
     "commander_plant": {
       "projectile": "seed",
       "motion": "shoot",
       "attack_sound": "seed_cast",
-      "impact_sound": "wood_hit"
+      "impact_sound": "wood_hit",
+      "rig": "plant"
     }
   }
 }

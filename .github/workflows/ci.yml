@@ -60,6 +60,15 @@ jobs:
           test -s build/qa/prebattle_water.png
           test -s build/qa/prebattle_earth.png
           test -s build/qa/vine_drag.png
+          timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_battle_readability.gd -- --output-dir=build/qa 2>&1 | tee /tmp/battle-readability-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/battle-readability-qa.log; then
+            exit 1
+          fi
+          test -s build/qa/frozen_field_late.png
+          test -s build/qa/hearts_result.png
+          test -s build/qa/contact_earth_hit.png
+          test -s build/qa/attack_shoot_windup.png
+          test -s build/qa/attack_slam_strike.png
 
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4

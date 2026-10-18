@@ -10,7 +10,10 @@ Verify this handoff against GitHub and the working tree before resuming.
 - Checkpoint 2: persistent full-field frost with affected-side status, shared pixel heart meters without revealing the already-scored outcome, and distinct anticipation/strike/recovery character poses and attack effects. Save before full validation.
 - Final gate: native phase captures, focused regressions, full PR CI, Web export and live served-pack verification.
 - Checkpoint 1 implemented. Clean Godot import and new readability tests pass for complete between-frame flights, moving interception, lethal contact/HP timing, visible contact hold and dead-target fizzle. Battle-presentation, physical-projectile and simulator regressions are the focused checkpoint gate.
-- Next: save checkpoint 1, then add persistent frost, hearts and attack poses. Native review and full CI/export remain pending.
+- Checkpoint 1 saved at `ce66ed89e67e508f9a0eee1c1fcea2f5392211d2`; all four focused suites passed.
+- Checkpoint 2 implemented: persistent full-field frost and affected-army status; shared pixel hearts that hide the scored result until playback ends; ten data-driven articulated rigs with anticipation before release, strike/recovery, bow draw, charging, melee strokes and hit recoil.
+- Passing checkpoint checks: presentation metadata/WAV validation; readability, battle-presentation, player-experience and scene-flow suites. An added draft HUD row initially exceeded the desktop height; placing the compact meter in its header fixed the measured bounds and scene-flow passed again. Native phase captures and full CI/export remain pending.
+- Next: save checkpoint 2, render/review the new phase captures, then open the PR and require all validation/deployment gates.
 
 ## Previous task — Battle animation, audio and pre-battle skill playback (released v0.7.4)
 

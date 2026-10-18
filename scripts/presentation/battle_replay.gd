@@ -27,7 +27,7 @@ func configure(frames: Array, events: Array, event_start: int = 0) -> void:
             if not health.has(id):
                 health[id] = []
             health[id].append({"time": event["time"], "hp": event["hp_after"]})
-        elif type == "attack":
+        elif type == "attack" or (type == "ability" and event.get("kind") == "area_heal"):
             var id := str(event["unit_id"])
             if not attacks.has(id):
                 attacks[id] = []
@@ -52,6 +52,13 @@ func health_at(id: String, clock: float, fallback: float) -> float:
     var records: Array = health.get(id, [])
     var index := _last_at(records, clock)
     return maxf(0, float(records[index]["hp"])) if index >= 0 else fallback
+
+func attack_at(id: String, clock: float) -> Dictionary:
+    var records: Array = attacks.get(id, [])
+    var index := _last_at(records, clock + UnitAttackMotion.WINDUP)
+    if index < 0 or clock - float(records[index]["time"]) > UnitAttackMotion.RECOVERY:
+        return {}
+    return records[index]
 
 func projectiles_at(clock: float) -> Array[Dictionary]:
     var result: Array[Dictionary] = []
