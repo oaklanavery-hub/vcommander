@@ -97,6 +97,8 @@ The simulator also emits periodic position/HP frames for the temporary combat re
 
 At the start of drafting, `GameState` captures a deep public opponent snapshot before the AI spends points. The AI receives only the player's previous-round public composition. Neither side can inspect the other's current picks. The completed opponent draft is revealed only when combat begins. Presentation-only pixel silhouettes live in `scripts/presentation/` and consume replay metadata.
 
+`FormationPlanner` is a deterministic, headless tactical heuristic called by `CombatSimulator` after draft reveal, using both completed battle rosters. It has no access to draft choices while they are hidden and does not change the draft AI. It assigns legal rank slots by generic roles, attack/pull reach, durability, healing coverage, frontline screening and enemy area/melee pressure. The planner uses no card/Commander/element-specific behavior and runs a bounded slot-scoring pass rather than simulating candidate battles. Canonical content ID/index ordering is only a tie-break and keeps card order from assigning units to top/bottom blocks. Both armies use mirrored geometry and the same policy. The result records placement metadata for review; UI never calculates deployment.
+
 ## Multiplayer future-proofing
 
 The first target is local player vs AI. Match orchestration should avoid assuming the opponent is always local AI so a future online provider can be added without rewriting draft/combat rules. No multiplayer backend is built until explicitly approved.

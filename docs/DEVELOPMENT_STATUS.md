@@ -2,7 +2,18 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Slime Princess and her army
+## Current task — Strategic automatic formations
+
+- User reports a single backline column sorted into Serpents/Penguins/Mages, and requests an AI that determines battle-ready strategic placement.
+- Branch `feat/strategic-formation`, base verified v0.8.0 main `ffab11b977486270c1546b16896bfbd044e0ddf3`. Previous release: [PR #19](https://github.com/oaklanavery-hub/vcommander/pull/19), [CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39095018306), [export/served verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39095098422); all passed.
+- Confirmed from the supplied screenshot and simulator: every ranged/healer occupies one x-coordinate, with y assigned in input card order. Crowded backlines overlap visually and give healers poor coverage.
+- Scope: a deterministic headless formation planner for both sides, after draft reveal and before Commander skills. Score legal spaced rank slots by actual role, range, durability, frontline cover and healing reach. Recognize enemy area damage and melee pressure; keep IDs for stable ordering only. Preserve free movement and existing targeting/skills/stats.
+- Checkpoint 1: implement planner and meaningful regressions for Water/crowded/mixed/no-frontline armies, input ordering, mirrored sides, support cover, area-damage response, collision and determinism. Record R047/schema/architecture changes.
+- Checkpoint 1 implemented: shared role/ability-aware rank scoring, central support/healing coverage, range/death-contact placement, enemy area/melee pressure, canonical ordering, mirrored sides and recorded starting placements. Formation spacing tuning is data-driven.
+- Passing: content validation, clean Godot import and new formation suite (after correcting two test type annotations), combat simulator, Slime mechanics, summon allegiance, battle presentation, scene flow and capped-roster stress (eight battles, all Buffs/skills). Full PR/export/live gates have not run.
+- Checkpoint 2: native opening/engagement captures, save checkpoint, full PR CI/export/served-pack verification. Next: finish focused checks, save the mechanics checkpoint, then visually review the supplied Water/mixed scenario and every theme.
+
+## Previous task — Slime Princess and her army (released v0.8.0)
 
 - User requests Slime Princess, a full-theme +100% attack bonus for allies spawned after a death, Giant Slime death splitting, slowing Slime Cannon shots, basic Slime Ball melee and a large ten-second Slime Barrel death area.
 - Confirmed product choices: bonus applies only to the newly spawned ally; Giant splits once on death into two half-HP/half-ATK children that cannot split; design the Commander active skill autonomously.

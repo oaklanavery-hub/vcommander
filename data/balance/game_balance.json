@@ -28,6 +28,11 @@
     "height": 14.0,
     "edge_margin": 1.0
   },
+  "formation": {
+    "spacing_units": 1.65,
+    "area_spread_multiplier": 1.2,
+    "maximum_rows": 7
+  },
   "simulation": {
     "step_seconds": 0.1,
     "frame_interval_seconds": 0.2,

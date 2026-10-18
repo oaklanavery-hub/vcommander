@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.8.1 — Strategic automatic formations
+
+- Both armies now use a deterministic role/ability-aware tactical planner after draft reveal instead of placing each unit type in successive sections of one vertical column.
+- Spaced multi-rank deployment, Tank screens, melee wings, range-aware caster placement and central healer coverage, with wider spacing against recruited area-damage threats.
+- Stable placement independent of loadout card order, mirrored team rules, collision/bounds checks and recorded formation metadata. Free movement, targeting, skills, stats and recruitment remain unchanged.
+- Focused formation tests cover crowded Water, mixed/role-deficient/single/empty armies, future generic abilities, enemy pressure, custom field bounds and simulator/replay determinism.
 ## v0.8.0 — Slime Princess
 
 - Added the Slime Court: Giant Slime 1/4, Slime Cannon 2/4, Slime Ball 2/6 and Slime Barrel 2/6.
