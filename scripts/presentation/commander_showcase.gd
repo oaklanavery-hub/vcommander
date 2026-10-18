@@ -8,6 +8,7 @@ const SEATS := [Vector2(269, 625), Vector2(819, 677), Vector2(461, 677), Vector2
 const ACCENTS := {"fire": Color("efad60"), "water": Color("9bdcea"), "earth": Color("b7ce87"), "slime": Color("f2acd1")}
 var _commanders: Array[Dictionary] = []
 var _textures: Dictionary = {}
+var _fire_frames: Array[Texture2D] = []
 var _meshes: Dictionary = {}
 var _clock := 0.0
 var _refresh := 0.0
@@ -30,6 +31,8 @@ func _ready() -> void:
         if picture == null:
             picture = CommanderArt.icon(element)
         _textures[element] = PixelAtlasArt.standalone(picture)
+    for index in range(6):
+        _fire_frames.append(PixelAtlasArt.icon("menu_fire", str(index)))
     _was_reduced = GameAudio.reduced_motion
 
 func _process(delta: float) -> void:
@@ -89,17 +92,8 @@ func _draw_commander(commander: Dictionary, foot: Vector2, index: int, scene_sca
     _draw_motes(element, foot - Vector2(0, 103), 70, ACCENTS.get(element, Color("dfbd78")), TAU * phase / FRAMES, reduced)
 
 func _draw_fire(center: Vector2, angle: float) -> void:
-    var frame := 0 if GameAudio.reduced_motion else int(_clock * 10) % 8
-    var flicker: float = [0, 4, -4, 0, 8, 4, 0, -4][frame]
-    var outer := PackedVector2Array([Vector2(-28, 0), Vector2(-28, -12), Vector2(-24, -12), Vector2(-24, -28), Vector2(-16, -28), Vector2(-16, -40), Vector2(-8, -40), Vector2(-8, -56 - flicker), Vector2(0, -68 - flicker), Vector2(4, -48), Vector2(12, -40), Vector2(12, -48), Vector2(20, -36), Vector2(20, -28), Vector2(28, -20), Vector2(28, -8), Vector2(24, 0)])
-    var middle := PackedVector2Array([Vector2(-20, 0), Vector2(-20, -12), Vector2(-12, -12), Vector2(-12, -32), Vector2(-4, -48 - flicker), Vector2(4, -24), Vector2(12, -32), Vector2(16, -16), Vector2(20, -8), Vector2(16, 0)])
-    var core := PackedVector2Array([Vector2(-12, 0), Vector2(-12, -8), Vector2(-4, -24), Vector2(0, -36), Vector2(4, -16), Vector2(12, -8), Vector2(12, 0)])
-    var scene_scale := size / Vector2(1280, 720)
-    draw_set_transform(center * scene_scale, 0, scene_scale)
-    draw_colored_polygon(outer, Color("e6662d"))
-    draw_colored_polygon(middle, Color("ffc154"))
-    draw_colored_polygon(core, Color("fff1b2"))
-    draw_set_transform(Vector2.ZERO, 0, scene_scale)
+    var frame := 0 if GameAudio.reduced_motion else int(_clock * 7.5) % _fire_frames.size()
+    draw_texture_rect(_fire_frames[frame], Rect2(center - Vector2(80, 136), Vector2(160, 160)), false)
     for index in range(7):
         var travel := index / 7.0 if GameAudio.reduced_motion else fposmod(index / 7.0 + angle / TAU * 3, 1.0)
         var point := center + Vector2(sin(index * 2.7 + travel * 3) * (10 + travel * 22), -24 - travel * 92)
