@@ -204,7 +204,6 @@ func _draw() -> void:
             _poses[str(effect.get("unit_id", ""))] = {"state": "death"}
     _draw_projectiles()
     _draw_effects()
-    _draw_prelude()
 
 func held_defeats() -> Dictionary:
     var result := {}
@@ -216,16 +215,6 @@ func held_defeats() -> Dictionary:
         unit["y"] = effect.get("y", unit.get("y", 0))
         result[str(effect.get("unit_id", ""))] = unit
     return result
-
-func _draw_prelude() -> void:
-    if prelude_skills.is_empty():
-        return
-    var names: Array[String] = []
-    for skill in prelude_skills:
-        names.append(("You: " if skill.get("side") == "player" else "Rival: ") + str(skill.get("name", "Commander skill")))
-    var banner := Rect2(_arena.position + Vector2(12, 12), Vector2(_arena.size.x - 24, 48))
-    draw_style_box(ScreenStyle.frame(Color(0.07, 0.15, 0.13, 0.96), Color("d9bf7f"), 8), banner)
-    draw_string(ThemeDB.fallback_font, banner.position + Vector2(10, 30), "   •   ".join(names), HORIZONTAL_ALIGNMENT_CENTER, banner.size.x - 20, 18, Color("f5dda3"))
 
 func _draw_frost() -> void:
     var coverage := frost_coverage()
@@ -247,11 +236,6 @@ func _draw_frost() -> void:
         if index % 3 == 0:
             var crack := PackedVector2Array([p + Vector2(-12, 7), p + Vector2(-4, 3), p + Vector2(1, 7), p + Vector2(11, -2)])
             draw_polyline(crack, Color(0.76, 0.93, 0.97, 0.3), 1)
-    if replay_enabled:
-        var name := "Both armies slowed" if frozen_sides.size() == 2 else ("Rival army slowed" if frozen_sides.has("opponent") else "Your army slowed")
-        var badge := Rect2(_arena.position + Vector2(10, 9), Vector2(minf(420, _arena.size.x - 20), 30))
-        draw_style_box(ScreenStyle.frame(Color("294955"), Color("a7dfeb"), 5), badge)
-        draw_string(ThemeDB.fallback_font, badge.position + Vector2(10, 20), "FROZEN FIELD • %s • Full round" % name, HORIZONTAL_ALIGNMENT_LEFT, badge.size.x - 20, 13, Color("def7f1"))
 
 func _draw_ground() -> void:
     draw_rect(_arena.grow(4), Color("b4a272"))
@@ -343,10 +327,6 @@ func _draw_unit(unit: Dictionary) -> void:
         draw_arc(p, 15, 0, TAU, 8, team, 2)
         draw_line(p + Vector2(17, 0), p + Vector2(17, -13), Color("27382f"), 2)
         draw_colored_polygon(PackedVector2Array([p + Vector2(17, -13), p + Vector2(26, -10), p + Vector2(17, -6)]), team)
-        var badge := Rect2(bar + Vector2(-4, -17), Vector2(38, 13))
-        draw_rect(badge, Color("192f2a"))
-        draw_rect(badge, team, false, 1)
-        draw_string(ThemeDB.fallback_font, badge.position + Vector2(4, 10), "RIVAL" if side == "opponent" else "ALLY", HORIZONTAL_ALIGNMENT_CENTER, 30, 9, team)
     draw_rect(Rect2(bar - Vector2.ONE, Vector2(30, 6)), Color("292b38"))
     draw_rect(Rect2(bar, Vector2(floorf(28 * ratio), 4)), Color("91d7a0") if side == "player" else Color("edaa8c"))
     if bool(unit.get("burning", false)):
@@ -473,9 +453,5 @@ func _draw_effects() -> void:
             var color := Color(str(UnitArt.palette(str(effect.get("element", "earth"))).get("l", "ffffff")))
             color.a = (1.0 - age * 2.0) * 0.6
             draw_arc(p, 16.0 if reduced_motion else 12.0 + age * 40, 0, TAU, 12, color, 2)
-        elif type == "commander_skill" and age < 1.0 and prelude_skills.is_empty():
-            var color := Color(str(UnitArt.palette(str(effect.get("element", "earth"))).get("l", "e9d291")))
-            if effect.get("skill_type") == "round_debuff":
-                draw_rect(_arena, Color(0.45, 0.8, 0.95, (1.0 - age) * 0.12))
-            color.a = 1.0 - age
-            draw_string(ThemeDB.fallback_font, _arena.position + Vector2(12, 32), str(effect.get("name", "Commander skill")), HORIZONTAL_ALIGNMENT_CENTER, _arena.size.x - 24, 22, color)
+        elif type == "commander_skill" and age < 1.0 and prelude_skills.is_empty() and effect.get("skill_type") == "round_debuff":
+            draw_rect(_arena, Color(0.45, 0.8, 0.95, (1.0 - age) * 0.12))

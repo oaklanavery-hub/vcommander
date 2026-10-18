@@ -96,8 +96,12 @@ func _ready() -> void:
     _refresh_summaries()
     _update_speed_label()
     _update_timer_label()
-    result_label.text = "Commander skills • Armies hold position" if _prelude.active() else "Battle in progress…"
+    result_label.text = "Battle in progress…"
     if _prelude.active():
+        var names: Array[String] = []
+        for skill in _prelude.skills:
+            names.append(("You: " if skill.get("side") == "player" else "Rival: ") + str(skill.get("name", "Commander skill")))
+        result_label.text = "   •   ".join(names) + " • Armies hold position"
         _advance_prelude(0.0)
 
 func _process(delta: float) -> void:
