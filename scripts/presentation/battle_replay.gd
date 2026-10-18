@@ -8,6 +8,8 @@ var health: Dictionary = {}
 var attacks: Dictionary = {}
 var births: Dictionary = {}
 var death_areas: Array[Dictionary] = []
+var absorption: Dictionary = {}
+var pushbacks: Dictionary = {}
 
 func configure(frames: Array, events: Array, event_start: int = 0) -> void:
     shots.clear()
@@ -15,10 +17,22 @@ func configure(frames: Array, events: Array, event_start: int = 0) -> void:
     attacks.clear()
     births.clear()
     death_areas.clear()
+    absorption.clear()
+    pushbacks.clear()
     var by_id := {}
     var pulls := {}
     for event in events.slice(event_start):
         var type := str(event.get("type", ""))
+        if event.has("absorbed_total") or event.get("kind") == "absorb_burst":
+            var id := str(event.get("target_id", event.get("unit_id", "")))
+            if not absorption.has(id):
+                absorption[id] = []
+            absorption[id].append({"time": event["time"], "amount": event.get("absorbed_total", 0)})
+        if type == "pushback":
+            var id := str(event["target_id"])
+            if not pushbacks.has(id):
+                pushbacks[id] = []
+            pushbacks[id].append(event.duplicate())
         if type == "spawn" and event.has("unit"):
             births[str(event["unit_id"])] = {"time": float(event["time"]), "unit": event["unit"].duplicate(true)}
         if event.get("kind") == "death_area" and event.has("area"):
@@ -91,6 +105,16 @@ func health_at(id: String, clock: float, fallback: float) -> float:
     var records: Array = health.get(id, [])
     var index := _last_at(records, clock)
     return maxf(0, float(records[index]["hp"])) if index >= 0 else fallback
+
+func absorbed_at(id: String, clock: float, fallback: float) -> float:
+    var records: Array = absorption.get(id, [])
+    var index := _last_at(records, clock)
+    return float(records[index]["amount"]) if index >= 0 else fallback
+
+func pushback_at(id: String, clock: float) -> Dictionary:
+    var records: Array = pushbacks.get(id, [])
+    var index := _last_at(records, clock)
+    return records[index] if index >= 0 and clock - float(records[index]["time"]) < 0.22 else {}
 
 func attack_at(id: String, clock: float) -> Dictionary:
     var records: Array = attacks.get(id, [])

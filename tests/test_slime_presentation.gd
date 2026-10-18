@@ -63,6 +63,7 @@ func run() -> void:
     check(CombatCues.profile("card_slime_04")["impact_style"] == "slime_pink", "pink Barrel has pink feedback")
     check(CombatCues.sound({"type": "spawn", "source": "revival"}) == "slime_rebirth", "revival has a distinct sound")
     test_between_frame_births()
+    test_absorb_replay()
     if not failed:
         print("Slime presentation tests passed: gallery, descriptions, legal warband/draft, pre-battle clock, persistent counts, unit colours, birth timing and ten-second pool visuals.")
     quit(1 if failed else 0)
@@ -81,6 +82,23 @@ func test_between_frame_births() -> void:
     check(replay.births_since(0, 0.16).is_empty(), "short-lived child disappears at actual damage/death time")
     check(replay.death_areas_at(0.09).is_empty() and replay.death_areas_at(0.12).size() == 1, "pool appears at its event time between frames")
     check(replay.death_areas_at(10.09).size() == 1 and replay.death_areas_at(10.1).is_empty(), "pool stays visible for exactly ten seconds")
+
+func test_absorb_replay() -> void:
+    var replay := BattleReplay.new()
+    var events := [
+        {"type": "damage", "time": 9.9, "target_id": "ball", "hp_after": 100.7, "absorbed_total": 30.3},
+        {"type": "ability", "kind": "absorb_burst", "unit_id": "ball", "time": 10.0},
+        {"type": "pushback", "target_id": "enemy", "time": 10.0, "from_x": 8, "from_y": 7, "to_x": 10, "to_y": 7},
+        {"type": "damage", "time": 10.1, "target_id": "ball", "hp_after": 100, "absorbed_total": 0.3}
+    ]
+    replay.configure([], events)
+    check(replay.absorbed_at("ball", 9.8, 0) == 0 and is_equal_approx(replay.absorbed_at("ball", 9.95, 0), 30.3), "charge changes at hit time between snapshots without showing future charge")
+    check(replay.absorbed_at("ball", 10, 99) == 0 and is_equal_approx(replay.absorbed_at("ball", 10.1, 0), 0.3), "charge resets at the burst and later hits refill from zero")
+    check(replay.health_at("ball", 9.95, 0) == 100.7, "fractional actual health remains exact in replay")
+    check(replay.pushback_at("enemy", 9.99).is_empty() and not replay.pushback_at("enemy", 10.1).is_empty() and replay.pushback_at("enemy", 10.23).is_empty(), "pushback animation only occupies its recorded contact window")
+    check(CombatCues.sound(events[1]) == "slime_burst", "stored-damage explosions use the Slime burst sound")
+    replay.configure([], [])
+    check(replay.absorbed_at("ball", 20, 0) == 0 and replay.pushback_at("enemy", 10.1).is_empty(), "reconfiguring replay clears previous battle charge and pushback")
 
 func check(condition: bool, message: String) -> void:
     if not condition:

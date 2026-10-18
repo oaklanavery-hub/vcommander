@@ -74,6 +74,9 @@ func simulate(
         _tick_units()
         _tick_projectiles()
         _resolve_pending_effects()
+        # Lethal hits own the stored charge, including hits on a burst deadline.
+        _tick_absorbed_bursts()
+        _resolve_pending_effects()
         _capture_frame(false)
 
         var elimination: String = _elimination_result()
@@ -199,6 +202,8 @@ func _spawn_unit(spec: Dictionary, position: Vector2) -> void:
         "movement_speed": movement_speed,
         "range": maxf(0.5, float(stats.get("range", 1))),
         "ability": ability_definition.duplicate(true),
+        "absorbed_damage": 0.0,
+        "next_burst_at": _time + float(ability_definition.get("burst_seconds", 10)),
         "alive": true,
         "stationary": false,
         "target_id": "",
@@ -929,20 +934,7 @@ func _resolve_pending_effects() -> void:
     _pending_heal.clear()
 
     for damage_info in damage_events:
-        var target_id := str(damage_info.get("target_id", ""))
-        var target := _unit_by_id(target_id)
-        if target.is_empty() or not bool(target.get("alive", false)) or not _are_enemies(str(damage_info.get("source_side", "")), str(target.get("side", ""))):
-            continue
-        var amount := int(damage_info.get("amount", _minimum_damage))
-        target["hp"] = float(target.get("hp", 0.0)) - float(amount)
-        _events.append(BattleEventScript.make("damage", _time, {
-            "target_id": target_id,
-            "amount": amount,
-            "hp_after": float(target["hp"]),
-            "source_side": str(damage_info.get("source_side", "")),
-            "source_unit_id": str(damage_info.get("source_unit_id", "")),
-            "source": str(damage_info.get("source", "damage"))
-        }))
+        _apply_damage_event(damage_info)
 
     for heal_info in heal_events:
         var target_id := str(heal_info.get("target_id", ""))
@@ -968,6 +960,8 @@ func _resolve_pending_effects() -> void:
         var chained_damage: Array[Dictionary] = []
         for dead_unit in newly_dead:
             var ability: Dictionary = dead_unit.get("ability", {})
+            if str(ability.get("type", "")) == "absorb_burst":
+                _queue_absorbed_burst(dead_unit, chained_damage, true)
             if str(ability.get("trigger", "")) == "on_death":
                 match str(ability.get("type", "")):
                     "explosion":
@@ -983,21 +977,79 @@ func _resolve_pending_effects() -> void:
             break
 
         for damage_info in chained_damage:
-            var target_id := str(damage_info.get("target_id", ""))
-            var target := _unit_by_id(target_id)
-            if target.is_empty() or not bool(target.get("alive", false)) or not _are_enemies(str(damage_info.get("source_side", "")), str(target.get("side", ""))):
-                continue
-            var amount := int(damage_info.get("amount", _minimum_damage))
-            target["hp"] = float(target.get("hp", 0.0)) - float(amount)
-            _events.append(BattleEventScript.make("damage", _time, {
-                "target_id": target_id,
-                "amount": amount,
-                "hp_after": float(target["hp"]),
-                "source_side": str(damage_info.get("source_side", "")),
-                "source_unit_id": str(damage_info.get("source_unit_id", "")),
-                "source": "death_explosion"
-            }))
+            _apply_damage_event(damage_info, "death_explosion")
         newly_dead = _mark_newly_dead()
+
+
+func _apply_damage_event(damage_info: Dictionary, fallback_source: String = "damage") -> void:
+    var target_id := str(damage_info.get("target_id", ""))
+    var target := _unit_by_id(target_id)
+    if target.is_empty() or not bool(target.get("alive", false)) or not _are_enemies(str(damage_info.get("source_side", "")), str(target.get("side", ""))):
+        return
+    var amount := maxf(0, float(damage_info.get("amount", _minimum_damage)))
+    var absorbed := 0.0
+    var ability: Dictionary = target.get("ability", {})
+    if str(ability.get("type", "")) == "absorb_burst":
+        absorbed = amount * clampf(float(ability.get("absorb_pct", 0)), 0, 100) / 100.0
+        target["absorbed_damage"] = float(target.get("absorbed_damage", 0)) + absorbed
+    amount -= absorbed
+    target["hp"] = float(target.get("hp", 0)) - amount
+    var event := BattleEventScript.make("damage", _time, {
+        "target_id": target_id, "amount": amount, "hp_after": float(target["hp"]),
+        "source_side": str(damage_info.get("source_side", "")),
+        "source_unit_id": str(damage_info.get("source_unit_id", "")),
+        "source": str(damage_info.get("source", fallback_source))
+    })
+    if absorbed > 0:
+        event["absorbed"] = absorbed
+        event["absorbed_total"] = float(target["absorbed_damage"])
+    _events.append(event)
+
+
+func _tick_absorbed_bursts() -> void:
+    for unit in _units:
+        var ability: Dictionary = unit.get("ability", {})
+        if not bool(unit.get("alive", false)) or str(ability.get("type", "")) != "absorb_burst":
+            continue
+        if _time + EPSILON < float(unit.get("next_burst_at", 10)):
+            continue
+        var interval := maxf(_step, float(ability.get("burst_seconds", 10)))
+        unit["next_burst_at"] = float(unit.get("next_burst_at", _time)) + interval
+        _queue_absorbed_burst(unit, _pending_damage)
+
+
+func _queue_absorbed_burst(source: Dictionary, damage_output: Array[Dictionary], on_death: bool = false) -> void:
+    var stored := float(source.get("absorbed_damage", 0))
+    if stored <= 0:
+        return
+    source["absorbed_damage"] = 0.0
+    var ability: Dictionary = source.get("ability", {})
+    var amount := stored * (float(ability.get("death_multiplier", 2)) if on_death else 1.0)
+    var radius := _radius_from_value(str(ability.get("radius", "medium")))
+    var origin := _unit_position(source)
+    var side_id := str(source["side"])
+    _events.append(BattleEventScript.make("ability", _time, {
+        "kind": "absorb_burst", "ability": str(ability.get("display_name", "Burst")),
+        "unit_id": str(source["id"]), "card_id": str(source.get("card_id", "")), "side": side_id,
+        "x": origin.x, "y": origin.y, "radius": radius, "stored_damage": stored,
+        "amount": amount, "on_death": on_death, "next_burst_at": float(source.get("next_burst_at", 0))
+    }))
+    # Capture every target before displacement so iteration order cannot change membership.
+    var targets: Array[Dictionary] = []
+    for enemy in _alive_units(_other_side(side_id)):
+        if origin.distance_to(_unit_position(enemy)) <= radius + EPSILON:
+            targets.append(enemy)
+    for enemy in targets:
+        damage_output.append({
+            "target_id": str(enemy["id"]), "amount": amount,
+            "source_side": side_id, "source_unit_id": str(source["id"]), "source": "absorb_burst"
+        })
+        var before := _unit_position(enemy)
+        _push_from_position(enemy, origin, _push_from_value(str(ability.get("pushback", "moderate"))))
+        _events.append(BattleEventScript.make("pushback", _time, {
+            "unit_id": str(source["id"]), "target_id": str(enemy["id"]),
+            "from_x": before.x, "from_y": before.y, "to_x": float(enemy["x"]), "to_y": float(enemy["y"])
+        }))
 
 
 func _mark_newly_dead() -> Array[Dictionary]:
@@ -1055,6 +1107,8 @@ func _add_death_spawn(unit: Dictionary, source: Dictionary, cause: String) -> vo
     unit["attack_timer"] = 0.0
     unit["ability_timer"] = float(unit.get("ability", {}).get("tick_seconds", 0))
     unit["ability_cooldown"] = 0.0
+    unit["absorbed_damage"] = 0.0
+    unit["next_burst_at"] = _time + float(unit.get("ability", {}).get("burst_seconds", 10))
     unit["attack_count"] = 0
     unit["blocked_steps"] = 0
     unit["spawned_at"] = _time
@@ -1464,11 +1518,14 @@ func _unit_snapshot(unit: Dictionary) -> Dictionary:
             "visual_scale": float(unit.get("visual_scale", 1)),
             "spawned_at": float(unit.get("spawned_at", 0)),
             "attack": int(unit.get("attack", 0)),
+            "absorbed_damage": float(unit.get("absorbed_damage", 0)),
+            "next_burst_at": float(unit.get("next_burst_at", 0)),
+            "burst_seconds": float(unit.get("ability", {}).get("burst_seconds", 10)),
             "slowed": not unit.get("speed_debuffs", []).is_empty(),
             "revival_ready": int(unit.get("revives_remaining", 0)) > 0,
             "x": float(unit.get("x", 0.0)),
             "y": float(unit.get("y", 0.0)),
-            "hp": maxi(0, int(round(float(unit.get("hp", 0.0))))),
+            "hp": maxf(0, float(unit.get("hp", 0.0))),
             "max_hp": int(unit.get("max_hp", 1)),
             "burning": not unit.get("dots", []).is_empty(),
             "ability_type": str(unit.get("ability", {}).get("type", "")),

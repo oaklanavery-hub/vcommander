@@ -33,7 +33,7 @@ static func sound(event: Dictionary) -> String:
     if type == "commander_skill":
         return {"targeted_aoe_max_hp": "fire_cast", "round_debuff": "freeze", "summon_stationary_units": "plant_grow", "army_revival": "slime_rebirth"}.get(str(event.get("skill_type", "")), "commander_skill")
     if type == "ability":
-        return {"pull": "vine_pull", "meteor": "meteor", "on_death": "explosion", "area_heal": "healing_water", "death_area": "slime_burst", "slow_splash": "slime_splat"}.get(str(event.get("kind", "")), "")
+        return {"pull": "vine_pull", "meteor": "meteor", "on_death": "explosion", "area_heal": "healing_water", "death_area": "slime_burst", "slow_splash": "slime_splat", "absorb_burst": "slime_burst"}.get(str(event.get("kind", "")), "")
     if type == "projectile_impact":
         return str(profile.get("impact_sound", "magic_hit"))
     if type == "attack":

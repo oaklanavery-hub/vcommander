@@ -1,6 +1,25 @@
 class_name BattleEffects
 extends RefCounted
 
+static func absorbed_burst(canvas: CanvasItem, center: Vector2, radius: float, age: float, on_death: bool, reduced: bool) -> void:
+    if age < 0 or age >= 0.65:
+        return
+    var progress := clampf(age / 0.30, 0, 1)
+    var fade := 1 - age / 0.65
+    var color := Color(0.88, 0.97, 1, fade)
+    var extent := radius if reduced else radius * (1 - pow(1 - progress, 2))
+    canvas.draw_arc(center, extent, 0, TAU, 24, color, 3 if on_death else 2)
+    if age < 0.30:
+        canvas.draw_arc(center + Vector2(0, -10), maxf(6, extent * 0.72), 0, TAU, 16, Color(0.70, 0.88, 0.95, fade * 0.65), 2)
+    for index in range(12 if on_death else 8):
+        var angle := float(index) * TAU / (12 if on_death else 8)
+        var point := center + Vector2.from_angle(angle) * extent
+        if not reduced:
+            point.y -= sin(progress * PI) * 12
+        var size := 4.0 if on_death else 3.0
+        canvas.draw_rect(Rect2(point.round() - Vector2.ONE * size * 0.5, Vector2.ONE * size), color)
+    impact(canvas, center + Vector2(0, -14), "slime_white", age, reduced)
+
 const PULL_SECONDS := 0.72
 
 static func pull_chain(effects: Array, target_id: String, clock: float) -> Dictionary:

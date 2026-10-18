@@ -89,6 +89,11 @@ jobs:
           test -s build/qa/slime_split.png
           test -s build/qa/slime_cannon_hit.png
           test -s build/qa/slime_pool_late.png
+          test -s build/qa/slime_ball_charged.png
+          test -s build/qa/slime_ball_burst.png
+          test -s build/qa/slime_ball_pushback.png
+          test -s build/qa/slime_ball_death_burst.png
+          test -s build/qa/slime_ball_burst_reduced.png
           timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_formations.gd -- --output-dir=build/qa 2>&1 | tee /tmp/formation-qa.log
           if grep -E "SCRIPT ERROR:|ERROR:" /tmp/formation-qa.log; then
             exit 1

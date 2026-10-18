@@ -111,6 +111,11 @@
 - Separate seated Commander artwork, including pink Slime Princess, with idle/fire/sky animation.
 - Reduced motion, modal pause, native phase review and exported texture coverage.
 
+## v0.8.4 — Slime Ball feedback
+
+- Requested 30% damage absorption and repeating ten-second stored-damage bursts with medium enemy-only radius/pushback.
+- Doubled death discharge, fresh revival/reset state, white charge/burst feedback, focused mechanics/replay coverage and native review.
+
 ## Further major phase — Game Director scope decision
 
 The elemental PvAI vertical slice and requested Slime Court roster expansion are implemented. A further major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved scope. Human playtesting should inform further balance values; the current tuning remains provisional.

@@ -95,6 +95,15 @@ def main() -> int:
                 require_positive_number(ability.get(key), f"{army_card['id']} {key}")
             if ability.get("trigger") != "on_death":
                 raise ValueError("death_damage_area must trigger on_death")
+        if ability.get("type") == "absorb_burst":
+            for key in ("absorb_pct", "burst_seconds", "death_multiplier"):
+                require_positive_number(ability.get(key), f"{army_card['id']} {key}")
+            if ability["absorb_pct"] >= 100:
+                raise ValueError("absorb_pct must be below 100")
+            if ability.get("radius") not in ("small", "medium", "large"):
+                raise ValueError("absorb_burst must define a supported radius")
+            if ability.get("pushback") not in ("small", "moderate", "large"):
+                raise ValueError("absorb_burst must define a supported pushback")
 
     for set_id, signature_set in sets.items():
         if signature_set.get("required_count") != 4:

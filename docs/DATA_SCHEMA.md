@@ -79,6 +79,8 @@ The simulator consumes generic `ability.type` behavior. Current starter types in
 
 Slime adds generic `death_split` (`trigger: on_death`, `spawn_count`, `child_health_pct`, `child_attack_pct`, `child_visual_scale`), `ranged_aoe_slow` (`radius`, negative enemy speed percentages and `slow_seconds`) and `death_damage_area` (`trigger: on_death`, `radius`, burst `attack_pct`, `duration_seconds`, `tick_seconds`, `damage_attack_pct_per_tick`). Split children have basic attacks and no split/revival inheritance. On-death abilities remain content-driven.
 
+`absorb_burst` uses `absorb_pct` (greater than 0 and below 100), positive `burst_seconds` and `death_multiplier`, a named `radius` and named `pushback`. It retains normal melee attacks. Runtime `absorbed_damage` stores fractional post-defense prevention and `next_burst_at` schedules each body independently; both reset on birth/revival. The shared damage application path covers ordinary and chained damage. Discharges queue the stored amount directly without a second DEF calculation.
+
 ## Commander themed set
 
 ```json
@@ -203,3 +205,5 @@ Combat cue profiles also declare a presentation-only `rig`: `brute`, `claw`, `ma
 Spawn events and replay-unit snapshots carry a `summoned` boolean for temporary Commander summons. Their existing `side` is always the casting Commander’s team. Presentation uses this flag and side for ownership markers; field coordinates never determine allegiance.
 
 Death-created units use unique `side:card_id:spawnN` IDs and emit `spawn` with `source: death_split` or `revival`, the parent `source_unit_id`, and a read-only `unit` snapshot. Snapshots include `visual_scale`, `spawned_at`, `slowed`, `revival_ready` and attack for review; none is a source of game rules. Damaging area frames include `type: damage_area`, owner, center/radius, `created_at`, duration and remaining time.
+
+Absorbing-unit snapshots include `absorbed_damage`, `burst_seconds` and `next_burst_at`. Actual damage events include fractional `amount`/`hp_after` and, for prevention, `absorbed`/`absorbed_total`. `ability` events with `kind: absorb_burst` record stored/released damage, radius, center and `on_death`; `pushback` events record target/from/to endpoints. These are read-only replay tracks, including exact charge reset between frames; they never feed back into simulation.

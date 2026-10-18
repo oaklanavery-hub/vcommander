@@ -70,6 +70,8 @@ func test_threat_response(own: Dictionary, baseline: Dictionary) -> void:
     var blast := {"id": "future_area", "role": "range", "stats": {"health": 300, "range": 6}, "ability": {"type": "ranged_aoe_dot"}}
     var future_enemy := {"cards": [blast], "unit_counts": {"future_area": 8}}
     check(FormationPlanner.plan(own, future_enemy, field)["strategy"] == "spread", "future cards work through generic ability behavior rather than known IDs")
+    blast["ability"]["type"] = "absorb_burst"
+    check(FormationPlanner.plan(own, future_enemy, field)["strategy"] == "spread", "formation AI recognizes stored-damage bursts as an area threat")
     check_safe(spread, field)
 
 func test_mixed_and_edge_cases() -> void:

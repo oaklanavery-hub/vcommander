@@ -221,7 +221,7 @@ Attack Speed and Movement Speed are each capped at 200.
 HP, ATK and DEF have no hard cap beyond content/buff rules.
 
 **R068 — Minimum damage**  
-DEF may reduce a valid damaging hit to 1 damage but never to zero or below.
+DEF may reduce a valid damaging hit to 1 damage but never to zero or below. R091 absorption then reduces the damage reaching HP and can produce fractional damage below 1.
 
 ## Unit abilities and starter roster
 
@@ -291,8 +291,8 @@ Slime Princess adds the Slime theme. Giant Slime is 1/4 Tank, Slime Cannon 2/4 R
 **R086 — Giant Slime split**
 On death, Giant Slime creates two smaller allied versions with half the parent's Max HP and attack, before applying a death-spawn set bonus. Children start at full child HP, cannot split and do not inherit revival. Each Giant splits only once across its original body and revived body. Children have the parent's other combat stats and round-wide modifiers and count toward round survival.
 
-**R087 — Slime Cannon and Slime Ball**
-Slime Cannon shoots a slime projectile that damages the enemy hit and reduces enemy Attack Speed and Movement Speed in a small impact radius. Repeated splashes refresh the same slow rather than stacking; the strongest temporary speed slow applies, multiplicatively with round-wide modifiers. Slime Ball has regular melee attacks. Cannon slow percentages and duration are provisional tuning in its definition.
+**R087 — Slime Cannon**
+Slime Cannon shoots a slime projectile that damages the enemy hit and reduces enemy Attack Speed and Movement Speed in a small impact radius. Repeated splashes refresh the same slow rather than stacking; the strongest temporary speed slow applies, multiplicatively with round-wide modifiers. Cannon slow percentages and duration are provisional tuning in its definition.
 
 **R088 — Slime Barrel**
 On death, Slime Barrel immediately explodes against enemies in a large radius and leaves a damaging area at that location for ten seconds. Enemies take damage while inside the area; allies never take explosion or area damage. The source's death does not cancel the area. Normal DEF applies. A battle still ends under R075; lingering pools do not postpone elimination. Damage amounts and tick interval are provisional tuning.
@@ -302,3 +302,10 @@ Equipping four unique Slime Court cards with Slime Princess activates A Fresh Be
 
 **R090 — Slime Princess: Royal Jelly**
 Selected before battle under normal Commander skill cost/use/timing rules, Royal Jelly blesses each starting drafted ally with one revival at 50% of its own Max HP. The blessing resolves simultaneously with opposing skills, before any pre-battle damage. Revival creates a new allied body, preserves its combat stats/ability and round-wide modifiers, clears temporary statuses and triggers the active death-spawn bonus. Death abilities resolve when the original body falls; the Giant's once-only split remains spent after revival. Newly created summons do not inherit the blessing. Revival and children are temporary to that round and never change drafted unit counts or caps.
+
+**R091 — Slime Ball: Jelly Burst**
+Slime Ball keeps regular melee attacks and absorbs 30% of every valid incoming damaging hit after normal DEF/minimum damage calculation, including projectiles, Commander skills, auras, pools, damage over time and death explosions. The prevented damage is stored separately from HP; fractional amounts accumulate without per-hit rounding. Healing does not consume the stored amount. Allies cannot damage it or grant charge.
+
+Every ten seconds of its current body's lifetime, it releases the entire stored amount against each living enemy in a medium radius, gives those enemies outward pushback, and resets its stored amount. The periodic burst does not kill or replace the Slime Ball. An empty cycle advances the timer without damage or pushback. Bursts expend their charge even if no enemy is in range. Stored damage is already post-defense: releasing it does not deduct DEF again, apply an attack multiplier or impose another minimum-damage floor; a target's own absorption can still reduce/store it. Radius and pushback distance use the existing balance definitions and collision/field limits.
+
+If Slime Ball dies with stored damage, it releases double the stored amount at its death position with the same radius and enemy-only pushback, once, as part of death resolution before round elimination. The lethal hit contributes its absorbed portion. All hits in the same damage batch resolve before deaths; lethal damage on a periodic deadline produces the doubled death burst instead of a periodic burst from that body. Royal Jelly revives it with empty storage and a new ten-second timer, retaining the normal death-spawn attack bonus for regular attacks. A new round always starts empty.

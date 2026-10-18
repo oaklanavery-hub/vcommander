@@ -173,8 +173,17 @@ func _draw() -> void:
         unit["y"] = lerpf(float(original.get("y", 0)), float(next.get("y", 0)), unit_blend)
         if replay_enabled:
             unit["hp"] = replay.health_at(id_value, _visual_time, float(unit.get("hp", 0)))
+            unit["absorbed_damage"] = replay.absorbed_at(id_value, _visual_time, float(unit.get("absorbed_damage", 0)))
             if float(unit["hp"]) <= 0 and not held.has(id_value):
                 continue
+            var push := replay.pushback_at(id_value, _visual_time)
+            if not push.is_empty():
+                var progress := 1.0 if reduced_motion else clampf((_visual_time - float(push["time"])) / 0.22, 0, 1)
+                var start := Vector2(float(push["from_x"]), float(push["from_y"]))
+                var end := Vector2(float(push["to_x"]), float(push["to_y"]))
+                var point := start.lerp(end, 1 - pow(1 - progress, 3))
+                unit["x"] = point.x
+                unit["y"] = point.y
         var pull := BattleEffects.pull_chain(_effects, id_value, _visual_time)
         if not pull.is_empty():
             var age := _visual_time - float(pull.get("time", 0))
@@ -355,6 +364,17 @@ func _draw_unit(unit: Dictionary) -> void:
         draw_colored_polygon(PackedVector2Array([p + Vector2(17, -13), p + Vector2(26, -10), p + Vector2(17, -6)]), team)
     draw_rect(Rect2(bar - Vector2.ONE, Vector2(30, 6)), Color("292b38"))
     draw_rect(Rect2(bar, Vector2(floorf(28 * ratio), 4)), Color("91d7a0") if side == "player" else Color("edaa8c"))
+    if unit.get("ability_type") == "absorb_burst":
+        var stored := float(unit.get("absorbed_damage", 0))
+        var charge := clampf(stored / maxf(1, float(unit.get("max_hp", 1))), 0, 1)
+        draw_rect(Rect2(bar + Vector2(0, 6), Vector2(28, 3)), Color("344954"))
+        draw_rect(Rect2(bar + Vector2(0, 6), Vector2(ceilf(28 * charge), 3)), Color("effaff"))
+        if stored > 0:
+            var interval := maxf(0.1, float(unit.get("burst_seconds", 10)))
+            var progress := fposmod(_visual_time - float(unit.get("spawned_at", 0)), interval) / interval
+            draw_arc(p + Vector2(0, -1), 19, -PI / 2, -PI / 2 + TAU * progress, 20, Color(0.86, 0.96, 1, 0.7), 2)
+            var glow := 0.65 if reduced_motion else 0.65 + sin(_visual_time * (4 + progress * 8)) * 0.15
+            draw_arc(_body_point(unit), 15, PI, TAU, 8, Color(0.88, 0.98, 1, glow), 2)
     if bool(unit.get("burning", false)):
         draw_rect(Rect2(bar + Vector2(29, -1), Vector2(3, 6)), Color("ffb966"))
     if frozen_sides.has(side) and frost_coverage() >= 1.0:
@@ -506,6 +526,9 @@ func _draw_effects() -> void:
                 draw_arc(p, 18 if reduced_motion else 12 + (strike_age - 0.35) * 60, 0, TAU, 12, Color(1.0, 0.65, 0.3, 1.0 - age), 3)
         elif type == "ability" and effect.get("kind") == "on_death":
             BattleEffects.impact(self, p + Vector2(0, -16), "dragonfire", age, reduced_motion)
+        elif type == "ability" and effect.get("kind") == "absorb_burst":
+            var radius := float(effect.get("radius", 2.5)) / _field_width * _arena.size.x
+            BattleEffects.absorbed_burst(self, p, radius, age, bool(effect.get("on_death", false)), reduced_motion)
         elif type == "ability" and effect.get("kind") in ["death_area", "slow_splash"]:
             var style := "slime_pink" if effect.get("kind") == "death_area" else "slime_green"
             BattleEffects.impact(self, p + Vector2(0, -12), style, age, reduced_motion)
