@@ -38,6 +38,7 @@ print(f"Commander art OK: {len(commanders['sprites'])} original 32x48 portraits 
 atlas_manifest = json.loads((root / 'assets/pixel/art_manifest.json').read_text())
 assert atlas_manifest['schema_version'] == 1
 for group, expected in [('units', {card['id'] for card in cards} | {'commander_plant'}),
+                        ('menu_commanders', {json.loads(path.read_text())['element'] for path in (root / 'data/commanders').glob('*.json')}),
                         ('commanders', {json.loads(path.read_text())['element'] for path in (root / 'data/commanders').glob('*.json')})]:
     atlas = atlas_manifest[group]
     assert set(atlas['frames']) == expected, group
@@ -54,3 +55,11 @@ for group, expected in [('units', {card['id'] for card in cards} | {'commander_p
         seen.add((x, y))
         assert x >= 0 and y >= 0 and (x + 1) * atlas['cell_size'][0] <= width and (y + 1) * atlas['cell_size'][1] <= height, name
 print(f"Detailed art OK: {len(atlas_manifest['commanders']['frames'])} Commander frames, {len(atlas_manifest['units']['frames'])} roster frames, RGBA textures and unique regions")
+
+scene = atlas_manifest['menu_scene']
+with (root / scene['texture'].removeprefix('res://')).open('rb') as stream:
+    header = stream.read(26)
+assert header[:8] == b'\x89PNG\r\n\x1a\n' and header[25] == 6
+assert list(struct.unpack('>II', header[16:24])) == scene['size'] == [640, 360]
+assert atlas_manifest['menu_commanders']['cell_size'] == [128, 128]
+print('Menu art OK: 640x360 scenery, four seated Commander frames and valid texture regions')

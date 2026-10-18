@@ -2,7 +2,19 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Animated Commander title menu
+## Current task — Centered campfire title scene
+
+- User supplied three pixel campfire scene/pose references and requests title and selection buttons in the center. Preserve the prior requirement that every Commander is animated.
+- Branch `feat/campfire-menu`, base verified v0.8.2 main `8501aaaf1f3e516ad580f12ca37a366672f5f707`. Previous release: [PR #21](https://github.com/oaklanavery-hub/vcommander/pull/21), [CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39099683180), [export/live verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39099779507); all passed.
+- Inspected all three attached files directly at their supplied scratch paths. Direction: original moonlit pixel forest camp, Commanders seated together around a warm fire, clear central title and vertically centered selection buttons. Preserve Fire/Water/Earth/Slime identities and the pink Princess.
+- Checkpoint 1: built-in image generation for a scenery layer and separate seated Commander sprites; integrate a centered menu with cosmetic idle/fire/particle motion and reduced motion/modal pause. Retain existing navigation; no gameplay changes.
+- Acceptance: validate packaged art and source/export references, clean import, existing player-experience/scene-flow suites, native phase/reduced-motion/modal captures reviewed before merge; full CI, Web export and served-game verification.
+- Implemented: original generated scenery and seated cutouts inspected/packed into 640×360 background and four transparent 128×128 frames, centered title and 320px buttons, lower campfire seating, cached idle/fire/ember/star/mote animation, reduced motion and modal pause. Version v0.8.3; prompts/provenance and packing recipe recorded. No gameplay changes.
+- Passing: initial clean Godot import (no logged errors), updated art validation, export-content suite including all new menu textures and transparent gutters, and scene-flow suite. The first concurrent player-experience run logged shutdown resource cleanup errors despite passing assertions; an isolated verbose rerun passed cleanly with no errors or leaked-object reports. CI runs the suites serially and remains required. Headless layout measurement confirms title/text centered at x=640 and button rectangles x=480,width=320; Settings ends at y=462 above the seated figures.
+- Local native capture was blocked in the previous run by denied AF_UNIX sockets. Native review, full CI, Web export and served-pack verification have not yet run for this change; use CI captures before merge.
+- Next: save/push the coherent checkpoint, review native title/motion/reduced-motion/modal captures, refine if needed, then require final PR checks and complete export/live verification. Final run links and release identity belong in the PR.
+
+## Previous task — Animated Commander title menu (released v0.8.2)
 
 - User requests that the main menu feature Commanders instead of army units, with all Commanders animated.
 - Branch `feat/commander-menu`, base verified v0.8.1 main `6148e53ca956bbd8941801a7e343a62ba09fef31`. Previous release: [PR #20](https://github.com/oaklanavery-hub/vcommander/pull/20), [CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39097553409), [export/live verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39097650761); all passed.

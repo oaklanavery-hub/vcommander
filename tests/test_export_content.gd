@@ -24,6 +24,11 @@ func run() -> void:
         check(portrait.get_width() == 128 and portrait.get_height() == 192, "all detailed full-body Commander portraits available in export")
         check(portrait is AtlasTexture, "Commanders use the detailed atlas instead of a fallback")
         check_frame(portrait, false)
+        var seated := PixelAtlasArt.icon("menu_commanders", str(commander["element"]))
+        check(seated is AtlasTexture and seated.get_size() == Vector2(128, 128), "export retains each seated Commander")
+        check_frame(seated, true)
+    var scenery := load("res://assets/pixel/menu-camp-v1.png") as Texture2D
+    check(scenery != null and scenery.get_size() == Vector2(640, 360), "export retains campfire scenery")
     if not failed:
         print("Export content tests passed: roster, buffs, balance and portraits.")
     quit(1 if failed else 0)
