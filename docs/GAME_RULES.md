@@ -118,7 +118,7 @@ A direct meteor hit has base damage equal to 20% of that target's own Max HP. En
 For that battle round only, the enemy army suffers -20% Attack Speed and -15% Movement Speed. Units entering later in that same battle are also affected. Frozen scenery covers the entire battlefield for the full round; status markers identify the affected enemy army.
 
 **R037 — Earth: Plant Summon**  
-Earth summons six stationary plants at random valid positions on the enemy field for that battle round only. Plants are normal allied combat units for targeting and round resolution.
+Earth summons six stationary plants at random valid positions on the enemy field for that battle round only. Plants stay on their casting Commander’s team regardless of where they spawn. They target and damage enemies only, never the caster’s army or other allied plants, and count as normal allied units for round resolution.
 
 **R038 — Earth plant attack**  
 Plants target the nearest enemy in range and fire one seed every 1.5 seconds. Each seed has base damage equal to 8% of the target's Max HP, then normal DEF applies.

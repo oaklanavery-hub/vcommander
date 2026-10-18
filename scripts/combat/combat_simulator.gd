@@ -347,6 +347,7 @@ func _spawn_summon_skill_if_active(side_config: Dictionary) -> void:
             },
             "alive": true,
             "stationary": true,
+            "summoned": true,
             "target_id": "",
             "attack_timer": 0.0,
             "ability_timer": 0.0,
@@ -363,7 +364,8 @@ func _spawn_summon_skill_if_active(side_config: Dictionary) -> void:
             "role": "range",
             "x": position.x,
             "y": position.y,
-            "source": "commander_skill"
+            "source": "commander_skill",
+            "summoned": true
         }))
 
 
@@ -672,6 +674,8 @@ func _try_cast_heal(unit: Dictionary, ability: Dictionary) -> bool:
 
 func _perform_attack(attacker: Dictionary, target: Dictionary) -> void:
     var side_id := str(attacker.get("side", ""))
+    if not bool(attacker.get("alive", false)) or not bool(target.get("alive", false)) or not _are_enemies(side_id, str(target.get("side", ""))):
+        return
     var attacker_id := str(attacker.get("id", ""))
     var target_id := str(target.get("id", ""))
     var ability: Dictionary = attacker.get("ability", {})
@@ -740,7 +744,8 @@ func _tick_projectiles() -> void:
 
         var target_id := str(projectile.get("target_id", ""))
         var target := _unit_by_id(target_id)
-        if target.is_empty() or not bool(target.get("alive", false)):
+        var source_side := str(projectile.get("source_side", ""))
+        if target.is_empty() or not bool(target.get("alive", false)) or not _are_enemies(source_side, str(target.get("side", ""))):
             _events.append(BattleEventScript.make("projectile_fizzle", _time, {
                 "projectile_id": int(projectile.get("id", 0)),
                 "source_unit_id": str(projectile.get("source_id", "")),
@@ -752,7 +757,7 @@ func _tick_projectiles() -> void:
         var start := Vector2(float(projectile.get("x", 0)), float(projectile.get("y", 0)))
         var destination := _unit_position(target)
         var end := start.move_toward(destination, _projectile_units_per_second * _step)
-        var hit := _first_projectile_hit(start, end, str(target.get("side", "")))
+        var hit := _first_projectile_hit(start, end, _other_side(source_side))
         projectile["x"] = end.x
         projectile["y"] = end.y
         if hit.is_empty():
@@ -762,7 +767,6 @@ func _tick_projectiles() -> void:
         target_id = str(hit.get("id", ""))
 
         var source_id := str(projectile.get("source_id", ""))
-        var source_side := str(projectile.get("source_side", ""))
         var raw_damage := float(projectile.get("raw_damage", 0))
         var ability: Dictionary = projectile.get("ability", {})
         var ability_type := str(ability.get("type", ""))
@@ -896,7 +900,7 @@ func _resolve_pending_effects() -> void:
     for damage_info in damage_events:
         var target_id := str(damage_info.get("target_id", ""))
         var target := _unit_by_id(target_id)
-        if target.is_empty() or not bool(target.get("alive", false)):
+        if target.is_empty() or not bool(target.get("alive", false)) or not _are_enemies(str(damage_info.get("source_side", "")), str(target.get("side", ""))):
             continue
         var amount := int(damage_info.get("amount", _minimum_damage))
         target["hp"] = float(target.get("hp", 0.0)) - float(amount)
@@ -942,7 +946,7 @@ func _resolve_pending_effects() -> void:
         for damage_info in chained_damage:
             var target_id := str(damage_info.get("target_id", ""))
             var target := _unit_by_id(target_id)
-            if target.is_empty() or not bool(target.get("alive", false)):
+            if target.is_empty() or not bool(target.get("alive", false)) or not _are_enemies(str(damage_info.get("source_side", "")), str(target.get("side", ""))):
                 continue
             var amount := int(damage_info.get("amount", _minimum_damage))
             target["hp"] = float(target.get("hp", 0.0)) - float(amount)
@@ -1015,7 +1019,7 @@ func _queue_raw_damage(
     source: String
 ) -> void:
     var target := _unit_by_id(target_id)
-    if target.is_empty() or not bool(target.get("alive", false)):
+    if target.is_empty() or not bool(target.get("alive", false)) or not _are_enemies(source_side, str(target.get("side", ""))):
         return
     _pending_damage.append({
         "target_id": target_id,
@@ -1036,7 +1040,7 @@ func _locked_or_new_target(unit: Dictionary) -> Dictionary:
     var target_id := str(unit.get("target_id", ""))
     if not target_id.is_empty():
         var current := _unit_by_id(target_id)
-        if not current.is_empty() and bool(current.get("alive", false)):
+        if not current.is_empty() and bool(current.get("alive", false)) and _are_enemies(str(unit.get("side", "")), str(current.get("side", ""))):
             return current
 
     var selected := _select_target(unit)
@@ -1269,6 +1273,9 @@ func _unit_position(unit: Dictionary) -> Vector2:
 func _other_side(side_id: String) -> String:
     return OPPONENT_SIDE if side_id == PLAYER_SIDE else PLAYER_SIDE
 
+func _are_enemies(source_side: String, target_side: String) -> bool:
+    return source_side in [PLAYER_SIDE, OPPONENT_SIDE] and target_side == _other_side(source_side)
+
 
 func _shuffle_strings(values: Array[String]) -> void:
     for index in range(values.size() - 1, 0, -1):
@@ -1306,6 +1313,7 @@ func _snapshot() -> Dictionary:
             "card_id": str(unit.get("card_id", "")),
             "side": str(unit.get("side", "")),
             "role": str(unit.get("role", "")),
+            "summoned": bool(unit.get("summoned", false)),
             "x": float(unit.get("x", 0.0)),
             "y": float(unit.get("y", 0.0)),
             "hp": maxi(0, int(round(float(unit.get("hp", 0.0))))),

@@ -71,6 +71,7 @@ func consume_event(event: Dictionary) -> void:
         var pieces := unit_id.split(":")
         var info: Dictionary = _known.get(unit_id, {}).duplicate()
         info.merge({"id": unit_id, "x": info.get("x", event.get("x", 0)), "y": info.get("y", event.get("y", 0)), "side": event.get("side", "player"), "role": event.get("role", "range"), "card_id": pieces[1] if pieces.size() > 1 else ""}, true)
+        info["summoned"] = bool(event.get("summoned", info.get("summoned", false)))
         _known[unit_id] = info
         if event.get("source") == "commander_skill":
             var sprout := event.duplicate(true)
@@ -292,6 +293,13 @@ func _draw_rosters() -> void:
         var bonus: Dictionary = config.get("set_bonus", {})
         var bonus_text := "Theme inactive" if bonus.is_empty() else "+%d%% %s" % [int(bonus.get("percentage", 0)), str(bonus.get("stat", "")).replace("_", " ")]
         draw_string(ThemeDB.fallback_font, Vector2(x, y + 8), bonus_text, HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 24, 13, color)
+        var skill: Dictionary = config.get("commander", {}).get("active_skill", {})
+        if bool(config.get("commander_skill_active", false)) and skill.get("type") == "summon_stationary_units":
+            var count := 0
+            for unit in _frame.get("units", []):
+                if bool(unit.get("summoned", false)) and unit.get("side") == config.get("id"):
+                    count += 1
+            draw_string(ThemeDB.fallback_font, Vector2(x, y + 32), ("Rival summons: " if index == 1 else "Allied summons: ") + str(count), HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 24, 13, color)
 
 func _draw_aura(unit: Dictionary) -> void:
     var radius := float(unit.get("aura_radius", 0)) / _field_width * _arena.size.x
@@ -330,6 +338,15 @@ func _draw_unit(unit: Dictionary) -> void:
         UnitAttackMotion.draw_action(self, _body_point(unit), pose, str(unit.get("element", "earth")), reduced_motion)
     var ratio := clampf(float(unit.get("hp", 0)) / maxf(1.0, float(unit.get("max_hp", 1))), 0.0, 1.0)
     var bar := p + Vector2(-14, -22 * pixel - 4)
+    if bool(unit.get("summoned", false)):
+        var team := Color("eda086") if side == "opponent" else Color("8bd9ce")
+        draw_arc(p, 15, 0, TAU, 8, team, 2)
+        draw_line(p + Vector2(17, 0), p + Vector2(17, -13), Color("27382f"), 2)
+        draw_colored_polygon(PackedVector2Array([p + Vector2(17, -13), p + Vector2(26, -10), p + Vector2(17, -6)]), team)
+        var badge := Rect2(bar + Vector2(-4, -17), Vector2(38, 13))
+        draw_rect(badge, Color("192f2a"))
+        draw_rect(badge, team, false, 1)
+        draw_string(ThemeDB.fallback_font, badge.position + Vector2(4, 10), "RIVAL" if side == "opponent" else "ALLY", HORIZONTAL_ALIGNMENT_CENTER, 30, 9, team)
     draw_rect(Rect2(bar - Vector2.ONE, Vector2(30, 6)), Color("292b38"))
     draw_rect(Rect2(bar, Vector2(floorf(28 * ratio), 4)), Color("91d7a0") if side == "player" else Color("edaa8c"))
     if bool(unit.get("burning", false)):
@@ -391,6 +408,9 @@ func _draw_projectiles() -> void:
             p -= direction * 5
         elif style == "ice_shard":
             p -= direction * 8
+        if style == "seed":
+            var team := Color("eda086") if projectile.get("source_side") == "opponent" else Color("8bd9ce")
+            draw_line((p - direction * 12).round(), (p - direction * 18).round(), team, 2)
         BattleEffects.projectile(self, p.round(), direction, style, _visual_time, reduced_motion)
 
 func _draw_effects() -> void:
