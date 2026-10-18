@@ -2,7 +2,16 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Summoned plant allegiance
+## Current task — Remove battlefield text tags
+
+- User requests removal of effect labels and ALLY/RIVAL labels on units.
+- Branch `fix/battle-labels`, based on verified v0.7.6 main `21db85512e3fdbbb1362e29c189b14726a5e0165`. Prior release and checks: [PR #17](https://github.com/oaklanavery-hub/vcommander/pull/17), [CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39090022215), [live verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39090124708).
+- Scope: remove unit ownership word badges and battlefield effect-name overlays. Keep team colours, pennants, visual effects, health UI and enemy-only summon checks. Move the pre-battle skill announcement into the existing status line outside the arena.
+- No gameplay/data changes or new low-impact UI tests. Gate with existing presentation/scene-flow suites and native summon/frost views; save before full PR/export/live checks.
+- Implemented the focused renderer cleanup and moved the pre-battle announcement below the arena. Clean Godot import, battle-presentation and scene-flow suites passed.
+- Next: save the checkpoint, inspect native summon and frost views, then require PR CI, Web export and served-pack verification. Final run links and identity belong in this branch’s PR.
+
+## Previous task — Summoned plant allegiance (released v0.7.6)
 
 - User reports Earth Commander plants attacking allies; they must damage enemies only.
 - Branch `fix/plant-allies`, based on verified v0.7.5 main `f0565afbeca8d729aca9740a95ada760e932b48c`. Prior release: [PR #16](https://github.com/oaklanavery-hub/vcommander/pull/16), [passed CI](https://github.com/oaklanavery-hub/vcommander/actions/runs/39089075694), [passed export/live verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39089225227).

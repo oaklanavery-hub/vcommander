@@ -149,4 +149,6 @@ A short presentation tail after the simulation duration lets final impacts/death
 
 ## Summon allegiance
 
-Enemy ownership is checked when retaining a target lock, releasing an attack, advancing projectiles, queueing damage and applying damage. Projectile collision uses the firing side’s opposing team rather than trusting the locked target’s team. A dead shooter’s committed projectile can still hit a valid enemy. Summons keep their caster’s side when placed in the enemy half. Snapshot/spawn metadata marks summoned units so presentation can show ally/rival badges, pennants, counters and team seed trails without inferring ownership from position.
+Enemy ownership is checked when retaining a target lock, releasing an attack, advancing projectiles, queueing damage and applying damage. Projectile collision uses the firing side’s opposing team rather than trusting the locked target’s team. A dead shooter’s committed projectile can still hit a valid enemy. Summons keep their caster’s side when placed in the enemy half. Snapshot/spawn metadata marks summoned units so presentation can show team-coloured pennants, counters and seed trails without inferring ownership from position.
+
+Battlefield effect names and unit ownership word badges are omitted to reduce visual clutter. Pre-battle skill names appear in the combat scene’s existing status line outside the arena; the battlefield keeps the actual visual effects and colour markers.

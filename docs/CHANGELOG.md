@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.7.7 — Cleaner battlefield
+
+- Removed ALLY/RIVAL word badges from summoned units and effect-name text tags from the battlefield.
+- Pre-battle skill names now appear in the existing status line below the arena. Team colours, pennants, health UI, animations and full-round frost remain visual.
+
 ## v0.7.6 — Summon allegiance
 
 - Revalidate enemy ownership for locked targets, attack release, projectile collision and damage application. Allied or invalid targets are rejected, including malformed in-flight seed locks.
