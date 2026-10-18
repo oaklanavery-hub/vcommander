@@ -31,6 +31,22 @@ func run() -> void:
     var db = root.get_node("ContentDatabase")
     var menu = root.get_node("GameMenu")
     await capture("res://scenes/main_menu/main_menu.tscn", "menu")
+    var audio = root.get_node("GameAudio")
+    var reduced: bool = audio.reduced_motion
+    var showcase = current_scene.get_node("Margin/Main/Commanders/Showcase")
+    showcase.set_process(false)
+    audio.reduced_motion = false
+    showcase._clock = 1.2
+    showcase.queue_redraw()
+    await save_image("menu_motion_1")
+    showcase._clock = 2.4
+    showcase.queue_redraw()
+    await save_image("menu_motion_2")
+    audio.reduced_motion = true
+    showcase.queue_redraw()
+    await save_image("menu_reduced_motion")
+    audio.reduced_motion = reduced
+    showcase.set_process(true)
     menu.open_help()
     await save_image("help")
     menu.close()

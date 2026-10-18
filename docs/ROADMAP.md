@@ -99,6 +99,12 @@
 - Spaced multiple ranks, frontline screening, melee wings, central healer coverage and range-aware backline placement.
 - Enemy area/melee pressure, input-order invariance, mirrored policy, collision/bounds regressions and seven native formation views.
 
+## v0.8.2 — Commander title-menu feedback
+
+- Full-body Commander showcase replaces army-unit camp decorations.
+- Looping pixel-filtered idle poses and elemental particles for every displayed Commander, with reduced motion and modal pause.
+- Animation-phase and still-pose native visual review; menu navigation remains unchanged.
+
 ## Further major phase — Game Director scope decision
 
 The elemental PvAI vertical slice and requested Slime Court roster expansion are implemented. A further major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved scope. Human playtesting should inform further balance values; the current tuning remains provisional.

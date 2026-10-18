@@ -111,7 +111,7 @@ The first target is local player vs AI. Match orchestration should avoid assumin
 
 Projectiles advance through fixed simulation steps with swept collision against enemies, passing through allies. The original locked target remains the commitment/fizzle condition; the earliest enemy along the path can intercept. Position snapshots make the projectile visible without giving presentation authority over hit resolution.
 
-`tools/run_checks.py` discovers all headless test suites and treats logged Godot errors as failures. `tools/capture_ui.gd` renders ten desktop screens in CI. Deployment depends on successful validation, tests the exported PCK, and writes a public commit/version manifest. `tools/verify_deployment.py` checks the served manifest, loader, JavaScript, WebAssembly and game pack, checks the exported game-pack SHA-256, then runs the downloaded pack's tests in a post-deployment CI job. Generated build and QA directories are ignored by Godot and excluded from Web exports.
+`tools/run_checks.py` discovers all headless test suites and treats logged Godot errors as failures. `tools/capture_ui.gd` renders thirteen desktop views in CI, including title animation phases and reduced motion. Deployment depends on successful validation, tests the exported PCK, and writes a public commit/version manifest. `tools/verify_deployment.py` checks the served manifest, loader, JavaScript, WebAssembly and game pack, checks the exported game-pack SHA-256, then runs the downloaded pack's tests in a post-deployment CI job. Generated build and QA directories are ignored by Godot and excluded from Web exports.
 
 ## Player menus and audio
 
@@ -162,3 +162,7 @@ Content-driven `death_split`, `death_damage_area` and `army_revival` behaviors e
 Temporary speed debuffs store duration and percentages independently of base ratings. Refreshing a splash does not compound it; effective speeds combine the strongest temporary slow with existing round modifiers and aura behavior. Damaging areas share the existing area-effect clock, retain source ownership after death and check enemy presence/radius each pulse. Death abilities and revival finish before elimination is checked.
 
 Birth events include presentation snapshots so `BattleReplay` can display new bodies between periodic frames. Death-area events include a copied area so visible pools begin and expire at their recorded times. New Slime mesh rigs, green shots, white/pink impacts, pink pool/opening/revival effects and original sound cues consume metadata only. Lower-opacity overlapping pools preserve actor readability. Artwork/palette mappings remain separate from gameplay and retain previous atlas pixels.
+
+## Title Commander showcase
+
+`commander_showcase.gd` loads the current Commander definitions and reuses their existing atlas portraits in a two-column illustration on the main menu. A bounded 32-pose mesh cache supplies gentle idle movement, with per-element cosmetic accents and particles. The drawing uses nearest-neighbor texture sampling. Reduced motion freezes both poses and particles; normal scene pause stops its clock. This illustration creates no army/combat actors, does not select a Commander and does not write game state. The forest camp no longer draws army-unit decorations.

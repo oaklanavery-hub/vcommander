@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.8.2 — Animated Commander title menu
+
+- Replace the title camp army units with a larger full-body showcase of Fire, Water, Earth and Slime Princess.
+- Reuse the existing detailed pixel portraits with bounded cached idle meshes, breathing/sway, drifting cloth/hair, a gentle Princess bob and elemental embers, ice, leaves and bubbles.
+- Respect reduced motion with stable poses and still effects; local modals pause the animation. Play/help/settings keep their existing flow.
+- Add two animation-phase captures and a reduced-motion view to native CI review (76 desktop views total).
+
 ## v0.8.1 — Strategic automatic formations
 
 - Both armies now use a deterministic role/ability-aware tactical planner after draft reveal instead of placing each unit type in successive sections of one vertical column.

@@ -44,6 +44,9 @@ jobs:
           fi
           test -s build/qa/commander.png
           test -s build/qa/menu.png
+          test -s build/qa/menu_motion_1.png
+          test -s build/qa/menu_motion_2.png
+          test -s build/qa/menu_reduced_motion.png
           test -s build/qa/help.png
           test -s build/qa/settings.png
           test -s build/qa/pause.png

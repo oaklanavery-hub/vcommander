@@ -1,6 +1,7 @@
 extends Control
 
 const Backdrop = preload("res://scripts/presentation/pixel_backdrop.gd")
+const Showcase = preload("res://scripts/presentation/commander_showcase.gd")
 var play_button: Button
 
 func _ready() -> void:
@@ -24,10 +25,10 @@ func _ready() -> void:
     margin.offset_bottom = -42
     var main := HBoxContainer.new()
     main.name = "Main"
-    main.add_theme_constant_override("separation", 70)
+    main.add_theme_constant_override("separation", 48)
     margin.add_child(main)
     var left := VBoxContainer.new()
-    left.custom_minimum_size.x = 470
+    left.custom_minimum_size.x = 448
     left.alignment = BoxContainer.ALIGNMENT_CENTER
     left.add_theme_constant_override("separation", 16)
     main.add_child(left)
@@ -59,14 +60,20 @@ func _ready() -> void:
     left.add_child(settings)
     left.add_child(ScreenStyle.label("FIRE  ·  WATER  ·  EARTH  ·  SLIME", 15))
     var right := VBoxContainer.new()
+    right.name = "Commanders"
     right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    right.alignment = BoxContainer.ALIGNMENT_END
+    right.add_theme_constant_override("separation", 4)
     main.add_child(right)
-    var caption := ScreenStyle.label("THE VERDANT CROSSING", 16)
-    caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+    var caption := ScreenStyle.label("COMMANDERS OF THE CROSSING", 16)
+    caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    caption.add_theme_color_override("font_color", Color("dfbd78"))
     right.add_child(caption)
-    var note := ScreenStyle.label("A cozy strategy showdown\nagainst a rival Commander", 17)
-    note.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+    var showcase := Showcase.new()
+    showcase.name = "Showcase"
+    showcase.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    right.add_child(showcase)
+    var note := ScreenStyle.label("Four commanders. Your warband. Your strategy.", 15)
+    note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     right.add_child(note)
     play_button.grab_focus()
 

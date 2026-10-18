@@ -1,6 +1,5 @@
 extends Control
 
-const Art = preload("res://scripts/presentation/pixel_unit_art.gd")
 var camp := false
 var _clock := 0.0
 var _refresh := 0.0
@@ -65,12 +64,6 @@ func _draw_camp() -> void:
     var flicker := 0.0 if GameAudio.reduced_motion else sin(_clock * 6) * 1.5
     draw_colored_polygon(PackedVector2Array([Vector2(221, 146), Vector2(226, 134 + flicker), Vector2(231, 146)]), Color("df814a"))
     draw_colored_polygon(PackedVector2Array([Vector2(224, 146), Vector2(227, 139 - flicker), Vector2(229, 146)]), Color("f7d589"))
-    var cards := ContentDatabase.get_all_cards()
-    for index in range(mini(3, cards.size())):
-        var card: Dictionary = cards[index * 4 % cards.size()]
-        var point: Vector2 = [Vector2(207, 137), Vector2(242, 155), Vector2(275, 146)][index]
-        draw_circle(point + Vector2(0, 1), 6, Color(0.07, 0.13, 0.10, 0.4))
-        Art.draw_unit(self, point, str(card.get("role", "range")), str(card.get("element", "earth")), 1.15, index == 2, 0, str(card.get("id", "")))
     for index in range(9):
         var point := Vector2(173 + index * 16, 57 + (index * 19) % 77)
         var glow := 0.45 + sin(_clock * 1.2 + index) * 0.25
