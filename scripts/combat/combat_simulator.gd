@@ -715,6 +715,9 @@ func _perform_attack(attacker: Dictionary, target: Dictionary) -> void:
             "raw_damage": raw_damage,
             "ability": ability.duplicate(true)
         })
+        _events.append(BattleEventScript.make("projectile_launch", _time, {
+            "projectile": _projectiles.back().duplicate(true)
+        }))
     else:
         _queue_raw_damage(
             target_id,
@@ -736,8 +739,10 @@ func _tick_projectiles() -> void:
         var target := _unit_by_id(target_id)
         if target.is_empty() or not bool(target.get("alive", false)):
             _events.append(BattleEventScript.make("projectile_fizzle", _time, {
+                "projectile_id": int(projectile.get("id", 0)),
                 "source_unit_id": str(projectile.get("source_id", "")),
-                "target_id": target_id
+                "target_id": target_id,
+                "x": float(projectile.get("x", 0)), "y": float(projectile.get("y", 0))
             }))
             continue
 
@@ -895,6 +900,7 @@ func _resolve_pending_effects() -> void:
         _events.append(BattleEventScript.make("damage", _time, {
             "target_id": target_id,
             "amount": amount,
+            "hp_after": float(target["hp"]),
             "source_side": str(damage_info.get("source_side", "")),
             "source_unit_id": str(damage_info.get("source_unit_id", "")),
             "source": str(damage_info.get("source", "damage"))
@@ -914,6 +920,7 @@ func _resolve_pending_effects() -> void:
             _events.append(BattleEventScript.make("heal", _time, {
                 "target_id": target_id,
                 "amount": actual_heal,
+                "hp_after": float(target["hp"]),
                 "source_unit_id": str(heal_info.get("source_unit_id", "")),
                 "source": str(heal_info.get("source", "heal"))
             }))
@@ -939,6 +946,7 @@ func _resolve_pending_effects() -> void:
             _events.append(BattleEventScript.make("damage", _time, {
                 "target_id": target_id,
                 "amount": amount,
+                "hp_after": float(target["hp"]),
                 "source_side": str(damage_info.get("source_side", "")),
                 "source_unit_id": str(damage_info.get("source_unit_id", "")),
                 "source": "death_explosion"

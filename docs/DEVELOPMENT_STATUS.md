@@ -2,7 +2,17 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Battle animation, audio and pre-battle skill playback
+## Current task — Contact, persistent frost, hearts and attack readability
+
+- User requests shots that visibly connect, full-field Frozen Field for the entire round, visible remaining match lives and much clearer attack animation.
+- Branch `feat/battle-contact`, based on verified v0.7.4 main `a30b9a38cf0deeaa67d0a0b63a483a0d00f8ca61` (PR #15).
+- Checkpoint 1: record launches/terminal events and exact event HP; reconstruct flight through between-frame impacts and align contact/health feedback. Preserve physical collisions, damage and seeded outcomes. Save after focused regressions.
+- Checkpoint 2: persistent full-field frost with affected-side status, shared pixel heart meters without revealing the already-scored outcome, and distinct anticipation/strike/recovery character poses and attack effects. Save before full validation.
+- Final gate: native phase captures, focused regressions, full PR CI, Web export and live served-pack verification.
+- Checkpoint 1 implemented. Clean Godot import and new readability tests pass for complete between-frame flights, moving interception, lethal contact/HP timing, visible contact hold and dead-target fizzle. Battle-presentation, physical-projectile and simulator regressions are the focused checkpoint gate.
+- Next: save checkpoint 1, then add persistent frost, hearts and attack poses. Native review and full CI/export remain pending.
+
+## Previous task — Battle animation, audio and pre-battle skill playback (released v0.7.4)
 
 - User requests visible stretching/retracting Pitcher Plant vines, projectiles matched to unit roles, additional SFX, each battle starting at 1×, removal of result skipping, and complete Commander skill animations before combat begins.
 - Branch: `feat/battle-effects`, based on main `85acd3a4481dfdbf253ecab6a1495b7ffe0d2466` (v0.7.3 verified and live in PR #14).

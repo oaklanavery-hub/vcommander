@@ -18,6 +18,8 @@ var _sides: Array[Dictionary] = []
 var prelude_skills: Array = []
 var prelude_time := 0.0
 var _impacts: Dictionary = {}
+var replay := BattleReplay.new()
+var replay_enabled := false
 
 func set_side_configs(player: Dictionary, opponent: Dictionary) -> void:
     _sides.assign([player, opponent])
@@ -113,6 +115,10 @@ func _draw() -> void:
         var direction := Vector2(float(next.get("x", 0)) - float(original.get("x", 0)), float(next.get("y", 0)) - float(original.get("y", 0)))
         unit["x"] = lerpf(float(original.get("x", 0)), float(next.get("x", 0)), _blend)
         unit["y"] = lerpf(float(original.get("y", 0)), float(next.get("y", 0)), _blend)
+        if replay_enabled:
+            unit["hp"] = replay.health_at(id_value, _visual_time, float(unit.get("hp", 0)))
+            if float(unit["hp"]) <= 0:
+                continue
         var pull := BattleEffects.pull_chain(_effects, id_value, _visual_time)
         if not pull.is_empty():
             var age := _visual_time - float(pull.get("time", 0))
@@ -237,16 +243,7 @@ func _draw_unit(unit: Dictionary) -> void:
     var shadow := PackedVector2Array([p + Vector2(-16, -1), p + Vector2(-11, -5), p + Vector2(10, -5), p + Vector2(16, -1), p + Vector2(11, 3), p + Vector2(-11, 3)])
     draw_colored_polygon(shadow, Color(0.08, 0.13, 0.10, 0.55))
     draw_rect(Rect2(p + Vector2(-10, 3), Vector2(20, 2)), Color("e8a087") if side == "opponent" else Color("8bd9ce"))
-    var sprite_position := p
-    if not reduced_motion and pose.get("state") == "attack":
-        var progress := clampf((_visual_time - float(pose.get("attack_started", 0))) / maxf(0.01, float(pose.get("attack_duration", 0.32))), 0, 1)
-        var direction := Vector2.from_angle(float(pose.get("facing", 0)) * PI / 4.0)
-        var motion := str(pose.get("motion", "slash"))
-        var weight := 5.0 if motion in ["slam", "slash", "bite"] else 2.0
-        var lunge := -2.0 * sin(progress * PI / 0.2) if progress < 0.2 else sin((progress - 0.2) / 0.8 * PI) * weight
-        sprite_position += (direction * lunge).round()
-        if motion == "slam":
-            sprite_position.y += roundf(sin(progress * PI) * 3.0)
+    var sprite_position := _sprite_position(unit, pose)
     UnitArt.draw_unit(self, sprite_position, str(unit.get("role", "range")), str(unit.get("element", "earth")), pixel, side == "opponent", bob, str(unit.get("card_id", "")), pose)
     var ratio := clampf(float(unit.get("hp", 0)) / maxf(1.0, float(unit.get("max_hp", 1))), 0.0, 1.0)
     var bar := p + Vector2(-14, -22 * pixel - 4)
@@ -257,36 +254,45 @@ func _draw_unit(unit: Dictionary) -> void:
     if show_hp_numbers:
         draw_string(ThemeDB.fallback_font, bar + Vector2(-4, -3), "%d/%d" % [int(unit.get("hp", 0)), int(unit.get("max_hp", 1))], HORIZONTAL_ALIGNMENT_CENTER, 40, 10, Color("fff3d5"))
 
+func _sprite_position(unit: Dictionary, pose: Dictionary) -> Vector2:
+    var sprite_position := _point(float(unit.get("x", 0)), float(unit.get("y", 0)))
+    if not reduced_motion and pose.get("state") == "attack":
+        var progress := clampf((_visual_time - float(pose.get("attack_started", 0))) / maxf(0.01, float(pose.get("attack_duration", 0.32))), 0, 1)
+        var direction := Vector2.from_angle(float(pose.get("facing", 0)) * PI / 4.0)
+        var motion := str(pose.get("motion", "slash"))
+        var weight := 5.0 if motion in ["slam", "slash", "bite"] else 2.0
+        var lunge := -2.0 * sin(progress * PI / 0.2) if progress < 0.2 else sin((progress - 0.2) / 0.8 * PI) * weight
+        sprite_position += (direction * lunge).round()
+        if motion == "slam":
+            sprite_position.y += roundf(sin(progress * PI) * 3.0)
+    return sprite_position
+
+func _body_point(unit: Dictionary) -> Vector2:
+    var pixel := 2.0 if _arena.size.y >= 300 else 1.0
+    var bob := 0.0 if reduced_motion else floorf(sin(_visual_time * 4.0 + float(unit.get("y", 0))) + 1.0)
+    return _sprite_position(unit, _poses.get(str(unit.get("id", "")), {})) - Vector2(0, pixel * 11 + bob)
+
 func _draw_projectiles() -> void:
-    var upcoming := {}
-    for projectile in _next_frame.get("projectiles", []):
-        upcoming[int(projectile.get("id", 0))] = projectile
-    var visible: Array = _frame.get("projectiles", []).duplicate()
-    var current_ids := {}
-    for projectile in visible:
-        current_ids[int(projectile.get("id", 0))] = true
-    for projectile in upcoming.values():
-        if not current_ids.has(int(projectile.get("id", 0))) and _visual_time >= float(projectile.get("launched_at", 0)):
-            var birth: Dictionary = projectile.duplicate()
-            birth["x"] = birth.get("start_x", birth.get("x", 0))
-            birth["y"] = birth.get("start_y", birth.get("y", 0))
-            birth["_birth"] = true
-            visible.append(birth)
-    for projectile in visible:
-        var id := int(projectile.get("id", 0))
-        if _impacts.has(id) and _visual_time >= float(_impacts[id]):
-            continue
-        var next: Dictionary = upcoming.get(id, projectile)
-        var blend := _blend
-        if bool(projectile.get("_birth", false)):
-            var launched := float(projectile.get("launched_at", 0))
-            blend = clampf((_visual_time - launched) / maxf(0.001, float(_next_frame.get("time", 0)) - launched), 0, 1)
-        var point := Vector2(lerpf(float(projectile.get("x", 0)), float(next.get("x", 0)), blend), lerpf(float(projectile.get("y", 0)), float(next.get("y", 0)), blend))
-        var p := _point(point.x, point.y) + Vector2(0, -22)
-        var target: Dictionary = _known.get(str(projectile.get("target_id", "")), {})
-        var destination := _point(float(target.get("x", point.x + 1)), float(target.get("y", point.y))) + Vector2(0, -22)
-        var profile := CombatCues.profile(str(projectile.get("card_id", projectile.get("source_id", ""))))
-        BattleEffects.projectile(self, p, (destination - p).normalized(), str(profile.get("projectile", "magic")), _visual_time, reduced_motion)
+    if not replay_enabled:
+        return
+    for projectile in replay.projectiles_at(_visual_time):
+        var point: Vector2 = projectile["position"]
+        var pixel := 2.0 if _arena.size.y >= 300 else 1.0
+        var p := _point(point.x, point.y) - Vector2(0, pixel * 11)
+        var terminal: Dictionary = projectile.get("terminal", {})
+        var target: Dictionary = _known.get(str(terminal.get("target_id", projectile.get("target_id", ""))), {})
+        if not target.is_empty() and terminal.get("type") == "projectile_impact":
+            var destination := _point(float(terminal["x"]), float(terminal["y"])) - Vector2(0, pixel * 11)
+            p += (_body_point(target) - destination) * float(projectile["contact_blend"])
+        var profile := CombatCues.profile(str(projectile.get("card_id", "")))
+        var direction: Vector2 = projectile["direction"]
+        var style := str(profile.get("projectile", "magic"))
+        # The arrow tip, rather than its shaft center, reaches the body anchor.
+        if style == "arrow":
+            p -= direction * 5
+        elif style == "ice_shard":
+            p -= direction * 8
+        BattleEffects.projectile(self, p.round(), direction, style, _visual_time, reduced_motion)
 
 func _draw_effects() -> void:
     for effect in _effects:
@@ -302,7 +308,9 @@ func _draw_effects() -> void:
             var current := _point(float(target.get("x", effect.get("to_x", 0))), float(target.get("y", effect.get("to_y", 0)))) + Vector2(0, -20)
             BattleEffects.vine(self, source, current, age, reduced_motion)
         elif type == "projectile_impact":
-            BattleEffects.impact(self, p + Vector2(0, -22), str(effect.get("style", "magic")), age, reduced_motion)
+            var target: Dictionary = _known.get(str(effect.get("target_id", "")), {})
+            var contact := _body_point(target) if not target.is_empty() else p + Vector2(0, -22)
+            BattleEffects.impact(self, contact, str(effect.get("style", "magic")), age, reduced_motion)
         elif type == "summon" and age < 0.8:
             for index in range(5):
                 var offset := Vector2.from_angle(float(index) * TAU / 5.0) * 13

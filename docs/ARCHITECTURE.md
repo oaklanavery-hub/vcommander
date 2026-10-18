@@ -136,3 +136,7 @@ The detailed battlefield renderer preserves directional lean, four-step movement
 `CombatCues` reads role-appropriate projectile, motion and sound assignments from `data/presentation/combat_cues.json`. `BattleEffects` draws pixel arrows, flames, water/ice/seed shots, impact particles and the two-strand leafy vine. Pull animation consumes recorded before/after endpoints and temporarily overrides only displayed positions/HP; it settles at the current authoritative frame. Attack anticipation, strikes and recovery remain cosmetic.
 
 `BattleAudio` maps events to distinct cues with independent real-time cooldowns and a burst budget. Commander cues retain priority; the shared twelve-voice audio pool favors idle voices. The seventeen additional original effects are reproducible from `tools/compose_battle_sfx.py`. CI validates profiles/WAV integrity, all suites and dedicated native opening/projectile/vine captures.
+
+## Contact reconstruction
+
+`BattleReplay` indexes immutable launch, terminal, health and attack events alongside snapshots. It interpolates each shot through its recorded impact on the enemy actually hit, including shots whose complete lifetime falls between snapshots. The renderer shares its animated body anchor with projectile contact and hit effects; a brief contact hold keeps fast hits readable. Exact recorded health changes and deaths appear at event time, rather than waiting for the next frame. None of these tracks writes simulator or match state.

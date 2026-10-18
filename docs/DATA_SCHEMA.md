@@ -187,3 +187,5 @@ The separate `assets/pixel/roster.json` catalog uses its own schema version 1: c
 ## Local warband preset data
 
 `user://warband_presets.cfg` contains Commander-ID sections with `preset_0`, `preset_1` and `preset_2` arrays of four stable Army card IDs. Saved order is preserved. Loading validates the Commander, all card IDs, uniqueness and completeness against current content; invalid data yields an empty result and does not alter the active loadout. This local data is never exported as content or used to grant units.
+
+Projectile launches also emit `projectile_launch` with a copied projectile dictionary. Both terminal event types carry `projectile_id` and final `x/y`; impact identifies the actual interceptor, while fizzle retains the dead locked target. Damage/heal events include exact `hp_after` (rendered clamped at zero). This playback metadata covers flights and health changes between periodic frames.

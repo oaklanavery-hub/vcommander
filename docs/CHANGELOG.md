@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.7.5 — Combat readability
+
+- Complete projectile flight tracks through impact, including short shots between replay frames and enemy interceptions.
+- Shared character/contact anchors, a short visible contact hold and event-timed health/death feedback.
+
 ## v0.7.4 — Battle presentation
 
 - Each battle starts at 1×; removed result skipping.

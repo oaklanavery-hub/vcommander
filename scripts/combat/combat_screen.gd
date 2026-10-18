@@ -65,6 +65,8 @@ func _ready() -> void:
     _events = result.get("events", [])
     _duration = float(result.get("duration", 0.0))
     _prelude = BattlePrelude.new(result.get("pre_battle", {}))
+    battlefield.replay.configure(_frames, _events, _prelude.event_end)
+    battlefield.replay_enabled = not _prelude.active()
     if _prelude.active():
         _event_index = _prelude.event_end
         speed_button.disabled = true
@@ -122,6 +124,7 @@ func _advance_prelude(delta: float) -> void:
     battle_timer.text = "Pre-battle • Commander skills"
     if not _prelude.active():
         battlefield.finish_replay()
+        battlefield.replay_enabled = true
         battlefield.prelude_skills = []
         battlefield.set_frame(_frames[0] if not _frames.is_empty() else frame)
         speed_button.disabled = false
