@@ -8,6 +8,7 @@ const BURST_MESSAGES := 24.0
 
 var service: PrivateRoomService
 var port := 0
+var time_source: Callable
 var _listener := TCPServer.new()
 var _peers: Dictionary = {}
 var _next_peer := 1
@@ -25,7 +26,7 @@ func start(content: Object, requested_port: int = 8080, address: String = "127.0
 func poll() -> void:
     if not _listener.is_listening():
         return
-    var now := Time.get_ticks_msec() / 1000.0
+    var now: float = time_source.call() if time_source.is_valid() else Time.get_ticks_msec() / 1000.0
     while _listener.is_connection_available():
         var stream := _listener.take_connection()
         if _peers.size() >= MAX_PEERS:

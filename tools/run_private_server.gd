@@ -6,6 +6,7 @@ func _init() -> void:
     call_deferred("start_server")
 
 func start_server() -> void:
+    Engine.max_fps = 30
     var port := 8080
     var address := "127.0.0.1"
     if not OS.get_environment("PORT").is_empty():

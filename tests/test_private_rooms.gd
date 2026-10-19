@@ -13,6 +13,7 @@ func run() -> void:
     test_privacy_and_sessions()
     test_deadlines_and_rules()
     test_full_match()
+    test_disconnect_policy()
     if not failed:
         print("Private room authority tests passed: protocol, trusted setup, hidden picks, retries, seat ownership, reconnect, expiry, deadlines, simultaneous skills, whole game and exact-once results.")
     quit(1 if failed else 0)
@@ -22,7 +23,7 @@ func setup_command(kind: String, theme_index: int = 0) -> Dictionary:
     var cards: Array = []
     for card in db.get_cards_by_set(commander["signature_set_id"]):
         cards.append(card["id"])
-    return {"v": 1, "type": kind, "commander": commander["id"], "cards": cards, "content": PrivateProtocol.content_hash(db)}
+    return {"v": PrivateProtocol.VERSION, "type": kind, "commander": commander["id"], "cards": cards, "content": PrivateProtocol.content_hash(db)}
 
 func pair(service: PrivateRoomService) -> String:
     service.handle(1, setup_command("create"), clock)
@@ -33,12 +34,12 @@ func pair(service: PrivateRoomService) -> String:
     return code
 
 func action(kind: String, view: Dictionary, index: int = 0) -> Dictionary:
-    return {"v": 1, "type": kind, "round": view["round"], "revision": view["revision"], "index": index}
+    return {"v": PrivateProtocol.VERSION, "type": kind, "round": view["round"], "revision": view["revision"], "index": index}
 
 func test_protocol() -> void:
     var command := setup_command("create")
     check(PrivateProtocol.valid_command(command), "current content setup is valid")
-    for replacement in [null, [], "pick", {"v": true, "type": "sync"}, {"v": 2, "type": "sync"}, {"v": 1, "type": "result", "winner": "player"}, {"v": 1, "type": "pick", "round": 1, "revision": 1, "index": 0.5}]:
+    for replacement in [null, [], "pick", {"v": true, "type": "sync"}, {"v": PrivateProtocol.VERSION + 1, "type": "sync"}, {"v": PrivateProtocol.VERSION, "type": "result", "winner": "player"}, {"v": PrivateProtocol.VERSION, "type": "pick", "round": 1, "revision": 1, "index": 0.5}]:
         var bytes := JSON.stringify(replacement).to_utf8_buffer()
         check(not PrivateProtocol.valid_command(PrivateProtocol.read_json(bytes)), "reject malformed/version/forged/fractional commands")
     check(PrivateProtocol.read_json("{".to_utf8_buffer()).is_empty(), "malformed JSON returns an error without logging a parser failure")
@@ -93,7 +94,7 @@ func test_privacy_and_sessions() -> void:
     view["self"]["unit_counts"]["forged"] = 999
     view["offer"].clear()
     check(not game.drafts["player"].unit_counts.has("forged") and not game.drafts["player"].current_offer.is_empty(), "views cannot mutate authoritative drafts")
-    var resume := {"v": 1, "type": "resume", "room": code, "content": service.fingerprint, "token": token}
+    var resume := {"v": PrivateProtocol.VERSION, "type": "resume", "room": code, "content": service.fingerprint, "token": token}
     check(service.handle(3, resume, clock)[0]["message"]["code"] == "session_unavailable", "live seat cannot be taken over")
     service.disconnect_peer(1, clock + 2)
     var stolen := resume.duplicate()
@@ -119,22 +120,36 @@ func test_deadlines_and_rules() -> void:
     var requests := service.pending_battles(clock + 90)
     check(requests.size() == 1 and service.pending_battles(clock + 90).is_empty(), "ready round is claimed exactly once")
     var draw := {"winner": "draw", "duration": 120.0, "events": [], "frames": []}
+    var at := clock + 90
     for round_number in range(1, 6):
         if round_number > 1:
-            game.tick(clock + round_number * 150)
-            service.pending_battles(clock + round_number * 150)
-        service.finish_battle(code, round_number, draw, clock + round_number * 150 + 1)
+            at += 120
+            game.tick(at)
+            service.pending_battles(at)
+        service.finish_battle(code, round_number, draw, at + 1)
         var losses := game.match_state.losses.duplicate()
-        check(service.finish_battle(code, round_number, draw, clock).is_empty() and game.match_state.losses == losses, "duplicate completion cannot cost another heart")
+        check(game.phase == "loading" and game.match_state.losses == losses, "download does not score or start playback")
+        check(not game.act("player", action("continue", game.view_for("player", at)), at + 1), "early continue cannot skip a battle")
+        for side in PrivateMatch.SIDES:
+            check(game.act(side, action("ready", game.view_for(side, at)), at + 2), "download readiness accepted once per seat")
+        check(game.phase == "playing" and game.play_at == at + 3, "both ready schedule shared future start")
+        game.tick(game.play_until - 0.001)
+        check(game.match_state.losses == losses, "heart result is hidden through the shared tail")
+        at = game.play_until
+        game.tick(at)
+        var scored := game.match_state.losses.duplicate()
+        game.tick(at + 1)
+        check(service.finish_battle(code, round_number, draw, at).is_empty() and game.match_state.losses == scored, "duplicate completion/tick cannot cost another heart")
         for side in PrivateMatch.SIDES:
             var peer := 1 if side == "player" else 2
-            var messages := service.handle(peer, action("continue", game.view_for(side, clock)), clock + round_number * 150 + 2)
-            check(messages[0]["message"]["type"] == "state", "both harness acknowledgments advance")
+            var messages := service.handle(peer, action("continue", game.view_for(side, at)), at + 2)
+            check(messages[0]["message"]["type"] == "state", "both result acknowledgments advance")
+        at += 2
         if round_number >= 4:
             check(game.match_state.sudden_death and game.drafts["player"].selection_points == 3, "repeated Sudden Death draws preserve approved allowance")
-        elif round_number >= 1:
+        else:
             check(game.drafts["player"].selection_points == 4 and game.drafts["opponent"].selection_points == 4, "both drawn sides receive normal comeback picks")
-        check(service.handle(1, {"v": 1, "type": "replay", "round": game.match_state.round_number}, clock)[0]["message"]["code"] == "replay_unavailable", "new draft cannot retrieve prior battle as current round")
+        check(service.handle(1, {"v": PrivateProtocol.VERSION, "type": "replay", "round": game.match_state.round_number}, at)[0]["message"]["code"] == "replay_unavailable", "new draft cannot retrieve prior battle as current round")
 
 func test_full_match() -> void:
     var service := PrivateRoomService.new(db, func(): return 3187)
@@ -162,23 +177,61 @@ func test_full_match() -> void:
                     skills += 1
             check(skills == 2, "existing simultaneous pre-battle rules preserved")
         service.finish_battle(code, rounds, battle, round_now + 4)
-        var replay_messages := service.handle(1, {"v": 1, "type": "replay", "round": rounds}, round_now + 4)
+        var replay_messages := service.handle(1, {"v": PrivateProtocol.VERSION, "type": "replay", "round": rounds}, round_now + 4)
         var packet: PackedByteArray = replay_messages[0]["packet"]
         var decoded := PrivateProtocol.read_replay(packet)
         check(decoded.get("replay", {}).get("winner") == battle["winner"] and decoded.get("replay", {}).get("frames", []).size() == battle["frames"].size(), "compressed wire replay retains events, frames and authoritative winner")
         var track := BattleReplay.new()
         track.configure(decoded["replay"]["frames"], decoded["replay"]["events"])
-        check(packet == service.handle(2, {"v": 1, "type": "replay", "round": rounds}, round_now + 4)[0]["packet"], "both seats receive identical canonical replay")
+        check(packet == service.handle(2, {"v": PrivateProtocol.VERSION, "type": "replay", "round": rounds}, round_now + 4)[0]["packet"], "both seats receive identical canonical replay")
+        for side in PrivateMatch.SIDES:
+            game.act(side, action("ready", game.view_for(side, round_now)), round_now + 5)
+        var result_at: float = game.play_until
+        game.tick(result_at)
         if game.phase == "complete":
             break
         var units: Dictionary = game.drafts["player"].unit_counts.duplicate()
         var buffs: Dictionary = game.drafts["player"].buff_stacks.duplicate()
         for side in PrivateMatch.SIDES:
-            game.act(side, action("continue", game.view_for(side, round_now)), round_now + 5)
+            game.act(side, action("continue", game.view_for(side, round_now)), result_at + 1)
         check(game.drafts["player"].unit_counts == units and game.drafts["player"].buff_stacks == buffs, "army and buffs persist into next round")
-        round_now += 10
+        round_now = result_at + 2
     check(game.phase == "complete" and not game.match_state.winner.is_empty(), "two human seats complete a real multi-round game")
     check(game.match_state.history.size() == rounds, "one score entry per round")
+
+func test_disconnect_policy() -> void:
+    for late_battle in [false, true]:
+        var service := PrivateRoomService.new(db)
+        var code := pair(service)
+        var game: PrivateMatch = service.rooms[code]["game"]
+        game.match_state.start(1)
+        game.tick(clock + 90)
+        service.pending_battles(clock + 90)
+        var battle := {"winner": "opponent", "duration": 100.0 if late_battle else 10.0, "events": [], "frames": []}
+        service.finish_battle(code, 1, battle, clock + 91)
+        for side in PrivateMatch.SIDES:
+            game.act(side, action("ready", game.view_for(side, clock)), clock + 92)
+        service.disconnect_peer(2, clock + 94)
+        service.tick(clock + 153.999)
+        if late_battle:
+            check(game.phase == "playing", "disconnect has the full sixty-second grace")
+        service.tick(clock + 300)
+        check(game.match_state.winner == ("player" if late_battle else "opponent"), "earlier battle completion or disconnect deadline wins temporal ordering")
+        check(game.end_reason == ("disconnect_forfeit" if late_battle else "battle"), "forfeit never overwrites an earlier final battle")
+        var winner := game.match_state.winner
+        service.tick(clock + 301)
+        check(game.match_state.winner == winner, "forfeit is idempotent")
+    var service := PrivateRoomService.new(db)
+    var code := pair(service)
+    var token: String = service.rooms[code]["tokens"]["opponent"]
+    service.disconnect_peer(2, clock + 1)
+    service.handle(3, {"v": PrivateProtocol.VERSION, "type": "resume", "room": code, "content": service.fingerprint, "token": token}, clock + 60)
+    service.tick(clock + 61)
+    check(service.rooms[code]["game"].phase != "complete", "reconnect just inside grace cancels its deadline")
+    service.disconnect_peer(1, clock + 62)
+    service.disconnect_peer(3, clock + 62)
+    service.tick(clock + 122)
+    check(service.rooms[code]["game"].end_reason == "both_disconnected" and service.rooms[code]["game"].match_state.winner.is_empty(), "simultaneous abandoned seats cancel without fabricated winner")
 
 func check(condition: bool, message: String) -> void:
     if not condition:

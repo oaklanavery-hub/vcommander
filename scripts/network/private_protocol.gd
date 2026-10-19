@@ -1,7 +1,7 @@
 class_name PrivateProtocol
 extends RefCounted
 
-const VERSION := 1
+const VERSION := 2
 const MAX_COMMAND_BYTES := 8192
 const MAX_REPLAY_BYTES := 64 * 1024 * 1024
 const MAX_WIRE_BYTES := 8 * 1024 * 1024
@@ -39,13 +39,15 @@ static func valid_command(command: Dictionary) -> bool:
         return false
     if kind == "resume" and (not command.get("content") is String or not command.get("token") is String or command["token"].length() != 64):
         return false
-    if kind in ["pick", "skill", "continue", "replay"] and not _whole(command.get("round"), 1, 1000000):
+    if kind in ["pick", "skill", "continue", "replay", "ready"] and not _whole(command.get("round"), 1, 1000000):
         return false
     if kind in ["pick", "skill"] and not _whole(command.get("revision"), 1, 10000000):
         return false
     if kind == "pick" and not _whole(command.get("index"), 0, 2):
         return false
-    return kind in ["create", "join", "resume", "pick", "skill", "continue", "replay", "sync"]
+    if kind == "clock" and not _whole(command.get("at"), 0, 9007199254740991):
+        return false
+    return kind in ["create", "join", "resume", "pick", "skill", "continue", "replay", "ready", "sync", "clock"]
 
 static func replay_packet(round_number: int, result: Dictionary) -> PackedByteArray:
     var raw := JSON.stringify({"v": VERSION, "type": "battle", "round": round_number, "replay": result}).to_utf8_buffer()

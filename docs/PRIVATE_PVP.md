@@ -17,9 +17,9 @@ The integration test starts an ephemeral loopback server and actual WebSocket cl
 
 The standalone development server listens only on `127.0.0.1:8080`. `PORT` or `--port=8080` overrides its port. An explicitly requested `--listen=0.0.0.0` allows binding behind a future TLS proxy. The app client permits `ws://` only on loopback and requires `wss://` for remote hosts. Do not publish this process as a ranked service. It has in-memory rooms and no production disconnect/forfeit or restart recovery policy.
 
-## Protocol version 1
+## Protocol version 2
 
-Text messages are JSON objects. Every command includes `v: 1`; the server validates type, size and integer ranges before dispatch. Create/join/resume also include a hash of the server-compatible Commanders, cards, sets, Buffs and balance. Different content is rejected before a seat is assigned. Transport assigns a seat; a client cannot submit stats, seed, damage, remaining hearts or winner.
+Text messages are JSON objects. Every command includes `v: 2`; the server validates type, size and integer ranges before dispatch. Create/join/resume also include a hash of the server-compatible Commanders, cards, sets, Buffs and balance. Different content is rejected before a seat is assigned. Transport assigns a seat; a client cannot submit stats, seed, damage, remaining hearts or winner.
 
 | Command | Required fields beyond `v`, `type` | Meaning |
 | --- | --- | --- |
@@ -30,7 +30,9 @@ Text messages are JSON objects. Every command includes `v: 1`; the server valida
 | `skill` | `round`, `revision` | Spend a legal point on the server-defined Commander skill. |
 | `sync` | — | Request the current seat-filtered state/countdown. |
 | `replay` | `round` | Request the current completed battle. |
-| `continue` | `round` | Acknowledge a nonfinal replay through the development integration seam. |
+| `ready` | `round` | Confirm receipt of a replay; both seats schedule shared playback. |
+| `continue` | `round` | Acknowledge a scored nonfinal result; both seats begin the next draft. |
+| `clock` | `at` | Echo a local millisecond timestamp with monotonic server time for clock estimation. |
 
 `session` responses contain `room` and a 256-bit reconnect token, sent only to the owning connection. Keep tokens private; clients retain them in memory, not URLs or logs. A room code cannot recover a reserved seat. Live seats reject takeover. Process restart loses rooms/sessions; persistent accounts and cloud records are separate work.
 
@@ -44,6 +46,8 @@ The process permits four rooms, sixteen connections, an 8 KiB command, eight que
 
 Idle rooms expire after ten minutes and all development rooms after one hour, releasing seats/replays. These are resource bounds, not competitive forfeits. Disconnected seats remain reserved while the existing thirty-second selection deadlines continue, including legal auto-picks. Local pause cannot stop the authority clock. Both seats must acknowledge a nonfinal replay to begin a new draft; no acknowledgment can select cards or submit a winner.
 
-Before public play the Game Director must decide hosting/budget, online replay controls/pause synchronization and disconnect grace/forfeit policy. Then integrate room creation/joining, waiting/reconnect/error screens, shared draft state, pre-battle skill openings, 1× default/no-skip playback and result display. Add real browser-to-WSS tests and choose measured replay limits/capacity for the selected host. PvAI pause/mastery rules remain unchanged. Ranked matchmaking, persistence, cloud mastery, moderation and ratings require their own approved milestone.
+The user chose free hosting, shared 1× playback without local pause/speed controls and a sixty-second disconnect forfeit (ADR-013, R095–R097). Protocol v2 waits for both replay downloads, then schedules a start one second ahead. Shared duration includes BattlePrelude, simulation and the existing contact tail. Round scoring happens at the server's shared end; early continue/readiness retries cannot advance or charge another heart. Reconnect restores the current phase/timeline. Grace expiry and final battle completion are ordered by their actual deadlines even if a poll catches up both at once; an earlier final result is preserved. Simultaneous disconnect expiry cancels an abandoned match without a winner. Free-host restarts still lose in-memory sessions.
+
+Next: integrate room creation/joining, waiting/reconnect/error screens, shared draft state, pre-battle skill openings and result display. Add browser-to-WSS tests and measure replay limits/capacity on the chosen free host. PvAI pause/mastery rules remain unchanged. Ranked matchmaking, persistence, cloud mastery, moderation and ratings require their own approved milestone.
 
 Official networking references: [Godot WebSocketPeer](https://docs.godotengine.org/en/stable/classes/class_websocketpeer.html) and [Godot WebSocket tutorial](https://docs.godotengine.org/en/stable/tutorials/networking/websocket.html).

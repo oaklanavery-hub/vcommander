@@ -9,6 +9,7 @@ var errors: Array = []
 var first_replays: Dictionary = {}
 var second_replays: Dictionary = {}
 var db: Node
+var virtual_now := 100.0
 
 func _init() -> void:
     call_deferred("run")
@@ -24,6 +25,7 @@ func run() -> void:
     if error != OK:
         finish()
         return
+    server.time_source = func(): return virtual_now
     server.service = PrivateRoomService.new(db, func(): return 3187)
     for client in [first, second, observer]:
         root.add_child(client)
@@ -87,7 +89,16 @@ func run() -> void:
             return
         check(JSON.stringify(first_replays[rounds]) == JSON.stringify(second_replays[rounds]), "both clients receive identical battle events/frames")
         check(first.state["losses"] == second.state["losses"], "hearts agree after authoritative scoring")
-        # Acknowledge through the development seam; public replay policy pending.
+        first.act("ready")
+        second.act("ready")
+        if not await until(func(): return first.state.get("phase") == "playing" and second.state.get("phase") == "playing", "both downloads schedule shared playback"):
+            finish()
+            return
+        check(first.state["play_at"] == second.state["play_at"] and first.state["play_until"] == second.state["play_until"], "clients share one clock without individual speed controls")
+        virtual_now = float(first.state["play_until"]) + 0.01
+        if not await until(func(): return first.state.get("phase") in ["replay", "complete"] and second.state.get("phase") in ["replay", "complete"], "server timeline scores the round"):
+            finish()
+            return
         if first.state.get("phase") == "complete":
             break
         first.act("continue")

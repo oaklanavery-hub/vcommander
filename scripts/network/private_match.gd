@@ -15,6 +15,10 @@ var deadlines := {"player": 0.0, "opponent": 0.0}
 var acknowledged := {"player": false, "opponent": false}
 var result: Dictionary = {}
 var losses_before := {"player": 0, "opponent": 0}
+var loaded := {"player": false, "opponent": false}
+var play_at := 0.0
+var play_until := 0.0
+var end_reason := ""
 
 var _content: Object
 var _rng := RandomNumberGenerator.new()
@@ -48,6 +52,15 @@ func act(side: String, command: Dictionary, now: float) -> bool:
         return false
     if int(command.get("round", -1)) != match_state.round_number:
         return false
+    if command.get("type") == "ready":
+        if phase != "loading" or loaded[side]:
+            return false
+        loaded[side] = true
+        if loaded["player"] and loaded["opponent"]:
+            play_at = now + SharedBattleClock.START_DELAY
+            play_until = play_at + SharedBattleClock.duration_seconds(result)
+            phase = "playing"
+        return true
     if command.get("type") == "continue":
         if phase != "replay" or acknowledged[side]:
             return false
@@ -73,6 +86,11 @@ func act(side: String, command: Dictionary, now: float) -> bool:
 
 func tick(now: float) -> bool:
     var changed := false
+    if phase == "playing" and now >= play_until:
+        if match_state.resolve_round(str(result["winner"]), float(result.get("duration", 0))):
+            phase = "complete" if match_state.is_complete() else "replay"
+            end_reason = "battle" if phase == "complete" else ""
+            return true
     if phase == "draft":
         for side in SIDES:
             var draft: DraftSystem = drafts[side]
@@ -102,10 +120,19 @@ func battle_request() -> Dictionary:
 func accept_battle(round_number: int, battle: Dictionary) -> bool:
     if phase != "simulating" or round_number != match_state.round_number:
         return false
-    if not match_state.resolve_round(str(battle.get("winner", "")), float(battle.get("duration", 0))):
+    if str(battle.get("winner", "")) not in ["player", "opponent", "draw"]:
         return false
     result = battle.duplicate(true)
-    phase = "complete" if match_state.is_complete() else "replay"
+    phase = "loading"
+    return true
+
+func forfeit(side: String) -> bool:
+    if side not in SIDES or phase in ["waiting", "complete"]:
+        return false
+    match_state.winner = "opponent" if side == "player" else "player"
+    match_state.phase = "complete"
+    phase = "complete"
+    end_reason = "disconnect_forfeit"
     return true
 
 func view_for(side: String, now: float) -> Dictionary:
@@ -122,7 +149,10 @@ func view_for(side: String, now: float) -> Dictionary:
         "rival": public_sides.get(other, {}).duplicate(true),
         "offer": draft.current_offer.duplicate(true), "points": draft.selection_points,
         "revision": revisions[side], "selection_seconds": maxf(0, float(deadlines[side]) - now) if phase == "draft" and not draft.is_phase_complete() else 0.0,
-        "acknowledged": acknowledged[side], "replay_available": not result.is_empty()}
+        "acknowledged": acknowledged[side], "replay_available": not result.is_empty(),
+        "loaded": loaded[side], "play_at": play_at, "play_until": play_until,
+        "server_time": now, "end_reason": end_reason,
+        "history": match_state.history.duplicate(true)}
 
 func _picked(side: String, picked_at: float) -> void:
     revisions[side] += 1
@@ -132,6 +162,9 @@ func _begin_draft(now: float) -> void:
     for side in SIDES:
         public_sides[side] = _combat_side(side, false)
     result.clear()
+    loaded = {"player": false, "opponent": false}
+    play_at = 0.0
+    play_until = 0.0
     acknowledged = {"player": false, "opponent": false}
     phase = "draft"
     for side in SIDES:

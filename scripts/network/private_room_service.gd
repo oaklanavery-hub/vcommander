@@ -4,6 +4,7 @@ extends RefCounted
 const MAX_ROOMS := 4
 const IDLE_SECONDS := 600.0
 const LIFETIME_SECONDS := 3600.0
+const RECONNECT_SECONDS := 60.0
 const CODE_ALPHABET := "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 var rooms: Dictionary = {}
@@ -22,6 +23,8 @@ func handle(peer_id: int, command: Dictionary, now: float) -> Array:
     if not PrivateProtocol.valid_command(command):
         return _error(peer_id, "invalid_command")
     var kind: String = command["type"]
+    if kind == "clock":
+        return [{"peer": peer_id, "message": {"v": PrivateProtocol.VERSION, "type": "clock", "at": command["at"], "server_time": now}}]
     if kind in ["create", "join", "resume"]:
         if seats.has(peer_id):
             return _error(peer_id, "already_seated")
@@ -52,6 +55,7 @@ func disconnect_peer(peer_id: int, now: float) -> Array:
         return []
     var seat: Dictionary = seats[peer_id]
     rooms[seat["room"]]["peers"][seat["side"]] = 0
+    rooms[seat["room"]]["disconnected_at"][seat["side"]] = now
     seats.erase(peer_id)
     return _states(seat["room"], now)
 
@@ -65,9 +69,13 @@ func tick(now: float) -> Array:
                     messages.append_array(_error(peer_id, "room_expired"))
                     seats.erase(peer_id)
             rooms.erase(code)
-        elif room["game"].tick(now):
-            room["active_at"] = now
-            messages.append_array(_states(code, now))
+        else:
+            var changed := _settle_disconnects(room, now)
+            if room["game"].tick(now):
+                changed = true
+            if changed:
+                room["active_at"] = now
+                messages.append_array(_states(code, now))
     return messages
 
 func pending_battles(now: float) -> Array:
@@ -112,7 +120,8 @@ func _enter(peer_id: int, command: Dictionary, now: float) -> Array:
         var game := PrivateMatch.new(_content, seed_value)
         if not game.add_side(side, command["commander"], command["cards"], now):
             return _error(peer_id, "invalid_loadout")
-        rooms[code] = {"game": game, "peers": {}, "tokens": {}, "packet": PackedByteArray(), "created_at": now, "active_at": now}
+        rooms[code] = {"game": game, "peers": {}, "tokens": {}, "packet": PackedByteArray(), "created_at": now, "active_at": now,
+            "disconnected_at": {"player": -1.0, "opponent": -1.0}}
     elif not rooms.has(code):
         return _error(peer_id, "room_unavailable")
     var room: Dictionary = rooms[code]
@@ -122,6 +131,7 @@ func _enter(peer_id: int, command: Dictionary, now: float) -> Array:
         if not room["game"].add_side(side, command["commander"], command["cards"], now):
             return _error(peer_id, "invalid_loadout")
     elif kind == "resume":
+        _settle_disconnects(room, now)
         side = ""
         for candidate in room["tokens"]:
             if room["tokens"][candidate] == command["token"]:
@@ -134,6 +144,7 @@ func _enter(peer_id: int, command: Dictionary, now: float) -> Array:
         room["tokens"][side] = token
         messages.append({"peer": peer_id, "message": {"v": PrivateProtocol.VERSION, "type": "session", "room": code, "token": token}})
     room["peers"][side] = peer_id
+    room["disconnected_at"][side] = -1.0
     room["active_at"] = now
     seats[peer_id] = {"room": code, "side": side}
     messages.append_array(_states(code, now))
@@ -143,9 +154,42 @@ func _state(peer_id: int, now: float) -> Dictionary:
     var seat: Dictionary = seats[peer_id]
     var room: Dictionary = rooms[seat["room"]]
     var state: Dictionary = room["game"].view_for(seat["side"], now)
-    state.merge({"v": PrivateProtocol.VERSION, "type": "state", "room": seat["room"], "content": fingerprint,
+    var reconnect := {}
+    for side in PrivateMatch.SIDES:
+        var disconnected_at: float = room["disconnected_at"][side]
+        reconnect[side] = maxf(0.0, disconnected_at + RECONNECT_SECONDS - now) if disconnected_at >= 0 else 0.0
+    state.merge({"v": PrivateProtocol.VERSION, "type": "state", "room": seat["room"], "content": fingerprint, "reconnect_seconds": reconnect,
         "connected": {"player": int(room["peers"].get("player", 0)) > 0, "opponent": int(room["peers"].get("opponent", 0)) > 0}})
     return {"peer": peer_id, "message": state}
+
+func _settle_disconnects(room: Dictionary, now: float) -> bool:
+    var game: PrivateMatch = room["game"]
+    if game.phase in ["waiting", "complete"]:
+        return false
+    var due := {}
+    for side in PrivateMatch.SIDES:
+        var disconnected_at: float = room["disconnected_at"][side]
+        if disconnected_at >= 0 and now >= disconnected_at + RECONNECT_SECONDS:
+            due[side] = disconnected_at + RECONNECT_SECONDS
+    if due.is_empty():
+        return false
+    var first_side := str(due.keys()[0])
+    for side in due:
+        if float(due[side]) < float(due[first_side]):
+            first_side = side
+    var deadline: float = due[first_side]
+    # Settle earlier battle events before the disconnect deadline, even when a
+    # stalled process catches up multiple boundaries in one poll.
+    if game.phase == "playing" and game.play_until <= deadline:
+        game.tick(game.play_until)
+        if game.phase == "complete":
+            return true
+    if due.size() == 2 and is_equal_approx(float(due["player"]), float(due["opponent"])):
+        game.phase = "complete"
+        game.match_state.phase = "complete"
+        game.end_reason = "both_disconnected"
+        return true
+    return game.forfeit(first_side)
 
 func _states(code: String, now: float) -> Array:
     var messages: Array = []

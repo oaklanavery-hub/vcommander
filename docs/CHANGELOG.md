@@ -2,6 +2,9 @@
 
 ## Unreleased — Private-room development foundation
 
+- User-selected shared 1× clock: wait for both replay downloads, schedule one start, finish Commander openings/contact tails before scoring, and reject early continue/duplicate readiness.
+- Sixty-second reserved reconnect grace and authoritative forfeits, with chronological ordering against final battles and no PvAI/mastery writes. Protocol v2 adds clock synchronization/readiness; standalone server polling is capped at 30 FPS.
+
 - Isolated server-authoritative two-player rooms reusing existing draft, skill, combat, heart/comeback and Sudden Death rules.
 - Hidden current picks, per-seat input revisions, absolute selection deadlines, validated server-owned content and exact-once battle scoring.
 - Browser-compatible WebSocket client/server, cryptographic room/session credentials, reconnect, protocol/content checks, resource limits and compressed identical replays. Simulations run on independent workers.

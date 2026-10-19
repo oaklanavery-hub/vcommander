@@ -74,3 +74,11 @@ This adds personal device-local progression, without replacing the accepted PvAI
 First checkpoint: an isolated room service, version/content negotiation, bearer reconnect sessions, bounded WebSocket transport, and a two-client full-match integration harness. Keep the existing PvAI menus, local mastery and public build behavior unchanged. No shared ranking, account/database service, provider subscription or public endpoint is authorized by this foundation.
 
 The development harness requires both seats to acknowledge a battle before advancing; this is an integration seam, not a final replay/pause or disconnect-forfeit rule. Disconnected seats retain a session and the draft clock continues. Development room expiry discards a room without recording a result. Before public play, decide hosting/budget, synchronized playback/pause behavior and disconnect grace/forfeit policy, then implement the player-facing flow and document those approved rules. Unranked PvP must never award trusted competitive rank from local PvAI profile data.
+
+## ADR-013 — Free friend playtest with shared playback
+
+**Status:** accepted by the user on 2026-10-19
+
+The user selected free hosting, shared 1× playback (no individual pause/speed controls), and a forfeit after sixty seconds disconnected. Retain separate unranked friend matches with no account-backed rating, permanent PvP records or local PvAI mastery rewards. Prepare a single free Render service; provision only a confirmed free plan and no paid add-ons.
+
+The authority waits for both clients to receive/acknowledge the replay, then publishes a shared future start time covering Commander opening, combat and contact tail. It settles the round once at that timeline's end; local menus cannot pause it or the selection deadline. Reconnect restores the current authoritative phase/time instead of replaying an old round. Both players continue from a scored nonfinal result before the next draft. Disconnect grace is server-timed and applies to a started two-seat match; resolving a final battle before grace expires preserves that result. Simultaneous expiry for both seats cancels the abandoned match without a reward. Process restart/room expiry cancels sessions without inventing wins. Browser client needs cold-start retry/reconnect guidance; no perpetual keep-awake process is added.

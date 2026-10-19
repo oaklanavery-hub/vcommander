@@ -322,3 +322,14 @@ A completed match win grants 100 mastery XP; a completed match loss grants 25 XP
 Leaving or replacing an unfinished match after its first battle begins records one forfeit loss for the Commander who began it. A persisted unfinished match recovered after restarting the game also settles once as a forfeit. An already completed match retains its resolved win/loss and reward, including when leaving its final battle replay. Rewards are settled by authoritative match state, with presentation revealing them only after the final replay finishes. Reopening/replaying a result never grants XP again.
 
 Records persist on the current device/browser through a versioned local profile and backup. Save/load failures are visible and preserve session play; unreadable profile files are not overwritten with empty defaults. Automated test/capture scripts use isolated or in-memory profiles. Account sync, online competitive ratings and shared leaderboards are outside this personal PvAI system.
+
+## Unranked friend-room playtest
+
+**R095 — Private online matches**
+Two players use a room invitation code and their own Commander/four-card loadout. The server validates content, legal hidden selections, timers, skill budgets, combat and scoring. Existing draft/combat/heart/comeback/Sudden Death rules apply. Current rival picks remain hidden until both drafts finish. Friend playtest outcomes do not alter personal PvAI records, mastery or competitive rank.
+
+**R096 — Shared battle clock**
+Both players watch shared 1× playback without individual pause, speed or result-skip controls. After both have received the replay, the server schedules its start. Commander skill animations finish before combat time advances; results are scored/revealed after the full shared battle and contact tail. Opening settings/help does not pause an online draft or battle. After a nonfinal result, both players continue before a new draft starts. The local PvAI pause/playback rules are unchanged.
+
+**R097 — Online reconnect and forfeit**
+In a started two-player match, a disconnected player has sixty seconds to reconnect to their reserved seat using their private session. The server clock and legal timeout selections continue. At expiry that player forfeits and the other side wins; if both seats expire at exactly the same time, the abandoned match cancels without a winner/reward. A completed final battle retains its result when it finishes before a disconnect deadline. Reconnect restores the current phase and shared playback time. A free-host restart or room resource expiry cancels the session without awarding a fabricated match result. These unranked outcomes never grant local mastery or rating.

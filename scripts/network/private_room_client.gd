@@ -13,6 +13,9 @@ var _token := ""
 var _socket: WebSocketPeer
 var _was_open := false
 var _last_sync := 0.0
+var _last_clock := -10.0
+var _server_offset := 0.0
+var _clock_ready := false
 
 func _init() -> void:
     process_mode = Node.PROCESS_MODE_ALWAYS
@@ -32,6 +35,8 @@ func open(url: String, content: Object) -> Error:
     if error == OK:
         _socket = socket
         _last_sync = Time.get_ticks_msec() / 1000.0
+        _last_clock = -10.0
+        _clock_ready = false
     return error
 
 func create_room(commander_id: String, cards: Array) -> bool:
@@ -60,6 +65,12 @@ func send(command: Dictionary) -> bool:
 
 func connected() -> bool:
     return _socket != null and _socket.get_ready_state() == WebSocketPeer.STATE_OPEN
+
+func server_time() -> float:
+    return Time.get_ticks_msec() / 1000.0 + _server_offset
+
+func has_session() -> bool:
+    return not room.is_empty() and not _token.is_empty()
 
 func close(forget_session: bool = false) -> void:
     if _socket != null:
@@ -98,6 +109,11 @@ func poll() -> void:
             failed.emit("invalid_response")
             return
         match message.get("type"):
+            "clock":
+                var received := Time.get_ticks_msec() / 1000.0
+                var sent := float(message.get("at", 0)) / 1000.0
+                _server_offset = float(message["server_time"]) - (sent + received) * 0.5
+                _clock_ready = true
             "session":
                 room = str(message["room"])
                 _token = str(message["token"])
@@ -107,6 +123,8 @@ func poll() -> void:
                     failed.emit("content_mismatch")
                     return
                 state = message.duplicate(true)
+                if not _clock_ready:
+                    _server_offset = float(state["server_time"]) - Time.get_ticks_msec() / 1000.0
                 state_changed.emit(state.duplicate(true))
             "battle":
                 battle_received.emit(int(message["round"]), message["replay"].duplicate(true))
@@ -115,6 +133,9 @@ func poll() -> void:
                     close(true)
                 failed.emit(str(message["code"]))
     var now := Time.get_ticks_msec() / 1000.0
+    if now - _last_clock >= 1.0:
+        _last_clock = now
+        send({"type": "clock", "at": Time.get_ticks_msec()})
     if now - _last_sync >= 5.0:
         _last_sync = now
         if not state.is_empty():
