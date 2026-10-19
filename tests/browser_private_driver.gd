@@ -1,6 +1,6 @@
-extends SceneTree
+extends Node
 
-# Export-only QA entry point, selected explicitly by the CI HTML test server.
+# Export-only QA scene, selected explicitly by the CI HTML test server.
 # Normal game startup never loads or executes this driver.
 var session: Node
 var ui: Control
@@ -11,11 +11,13 @@ var prepared_skill := false
 var initial_records: Dictionary = {}
 var _published_at := -1000
 
-func _init() -> void:
+func _ready() -> void:
     call_deferred("run")
 
 func run() -> void:
     print("Browser PvP driver starting: ", OS.get_cmdline_user_args())
+    var tree := get_tree()
+    var root := tree.root
     for argument in OS.get_cmdline_user_args():
         if argument.begins_with("--role="):
             role = argument.trim_prefix("--role=")
@@ -32,10 +34,11 @@ func run() -> void:
     state.clear_army()
     for card in db.get_cards_by_set(commander["signature_set_id"]):
         state.equip_card(card["id"])
-    change_scene_to_file("res://scenes/online/private_room.tscn")
-    await scene_changed
-    await process_frame
-    ui = current_scene
+    # Keep this QA controller alive beside the actual game scene.
+    ui = load("res://scenes/online/private_room.tscn").instantiate()
+    root.add_child(ui)
+    tree.current_scene = ui
+    await tree.process_frame
     if role == "host":
         ui.create_button.pressed.emit()
     else:
@@ -44,9 +47,9 @@ func run() -> void:
     started = true
     print("Browser PvP UI ready: ", role)
 
-func _process(_delta: float) -> bool:
+func _process(_delta: float) -> void:
     if not started:
-        return false
+        return
     var state: Dictionary = session.client.state
     if state.get("phase") == "draft" and session.can_act() and int(state.get("points", 0)) > 0:
         if not prepared_skill and not ui.skill_button.disabled:
@@ -55,7 +58,7 @@ func _process(_delta: float) -> bool:
         elif ui.offers.get_child_count() > 0:
             ui.offers.get_child(0).pressed.emit()
     if Time.get_ticks_msec() - _published_at < 100:
-        return false
+        return
     _published_at = Time.get_ticks_msec()
     var data := {"role": role, "room": session.client.room, "phase": state.get("phase", "connecting"),
         "side": state.get("you", ""), "play_at": state.get("play_at", 0), "play_until": state.get("play_until", 0),
@@ -77,10 +80,9 @@ func _process(_delta: float) -> bool:
             elif unit["side"] == "opponent" and float(unit["x"]) > 12:
                 right += 1
         data["local_left"] = left > 0 and right > 0
-    var db := root.get_node("ContentDatabase")
-    var local := root.get_node("GameState")
+    var db := get_tree().root.get_node("ContentDatabase")
+    var local := get_tree().root.get_node("GameState")
     for commander in db.get_all_commanders():
         if local.commander_progress.record(commander["id"]) != initial_records[commander["id"]]:
             data["records_unchanged"] = false
     JavaScriptBridge.eval("window.vcommanderPvpQa = " + JSON.stringify(data) + ";", true)
-    return false

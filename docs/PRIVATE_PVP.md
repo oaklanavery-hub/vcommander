@@ -15,7 +15,7 @@ godot --headless --path . --script tools/run_private_server.gd
 
 The integration test starts an ephemeral loopback server and actual WebSocket clients. It creates/joins a room, rejects a third seat, checks hidden picks, disconnects/resumes the guest, drafts, receives worker-generated identical compressed replays and finishes a multi-round match. It asserts that local Commander records are unchanged. The harness acknowledges completed simulation output directly; it does not claim to test a player watching synchronized animations or a browser deployment.
 
-The standalone development server listens only on `127.0.0.1:8080`. `PORT` or `--port=8080` overrides its port. An explicitly requested `--listen=0.0.0.0` allows binding behind a future TLS proxy. The app client permits `ws://` only on loopback and requires `wss://` for remote hosts. Do not publish this process as a ranked service. It has in-memory rooms and no production disconnect/forfeit or restart recovery policy.
+The standalone development server listens only on `127.0.0.1:8080`. `PORT` or `--port=8080` overrides its port. An explicitly requested `--listen=0.0.0.0` allows binding behind a TLS proxy. The app client permits `ws://` only on loopback and requires `wss://` for remote hosts. Do not publish this process as a ranked service. Its sixty-second disconnect policy is described below; rooms remain in memory and cannot recover after a process restart.
 
 ## Free deployment and player flow
 
@@ -50,7 +50,7 @@ Text messages are JSON objects. Every command includes `v: 2`; the server valida
 
 `state` responses contain the assigned `you` side, current `phase`/`round`, own offer/points/revision/countdown, own current army/skill, frozen public rival army/skill budget, connection flags, hearts and replay availability. Drafting never reveals the opponent's current counts, picks, offer, points, skill, revision or random stream. The public rival snapshot refreshes only when both sides finish. Deep copies prevent returned views from editing authority.
 
-Battle data is one bounded binary gzip JSON message with `v`, `type: battle`, `round` and `replay`. It preserves the existing numeric event/frame/pre-battle format consumed by BattleReplay. Host is canonical `player`/left and guest `opponent`/right in this transport; the eventual player-facing adapter must explicitly implement the approved viewpoint. Both clients receive identical bytes; clients do not rerun combat or submit its outcome. Repeated completions cannot charge another heart.
+Battle data is one bounded binary gzip JSON message with `v`, `type: battle`, `round` and `replay`. It preserves the existing numeric event/frame/pre-battle format consumed by BattleReplay. Host is canonical `player`/left and guest `opponent`/right in this transport; the presentation adapter mirrors the guest to their own left-side viewpoint. Both clients receive identical bytes; clients do not rerun combat or submit its outcome. Repeated completions cannot charge another heart.
 
 ## Development limits and pending policy
 

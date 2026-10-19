@@ -19,9 +19,16 @@ class Handler(SimpleHTTPRequestHandler):
                 self.send_error(500, "Export configuration not found")
                 return
             config = json.loads(match.group(1))
-            config["args"] = ["--script", "res://tests/browser_private_driver.gd", "--",
+            config["args"] = ["--",
                               "--role=" + query["qa_role"][0], "--room=" + query.get("room", [""])[0]]
             content = content[:match.start(1)] + json.dumps(config) + content[match.end(1):]
+            # Release Web templates disable --script/--scene overrides. Preload
+            # Godot's standard project override into this QA browser's memory;
+            # the exported pack and normal game's startup remain identical.
+            override = '[application]\nrun/main_scene="res://tests/browser_private_driver.tscn"\n'
+            content = content.replace("const engine = new Engine(GODOT_CONFIG);",
+                                      "const engine = new Engine(GODOT_CONFIG);\n"
+                                      "engine.preloadFile(new TextEncoder().encode(" + json.dumps(override) + "), 'override.cfg');")
             data = content.encode()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
