@@ -101,7 +101,13 @@ At the start of drafting, `GameState` captures a deep public opponent snapshot b
 
 ## Multiplayer future-proofing
 
-The first target is local player vs AI. Match orchestration should avoid assuming the opponent is always local AI so a future online provider can be added without rewriting draft/combat rules. No multiplayer backend is built until explicitly approved.
+The first target is local player vs AI. The user has now approved a private 1v1 room milestone (ADR-012). Its isolated development foundation lives in `scripts/network/`; it does not replace GameState or expose a public endpoint. See `docs/PRIVATE_PVP.md` for the protocol, runnable server and pending public-launch decisions.
+
+`PrivateMatch` owns two independent DraftSystems, a MatchState and deep-copied public snapshots. Each seat's revision plus the round number rejects stale/retried input. Absolute monotonic selection deadlines catch up bounded missed picks; client clocks, menus and timestamps cannot alter them. Combat inputs are assembled from the server's content; each draft has an independent seeded random stream and future seeds are never sent with hidden picks.
+
+`PrivateRoomService` owns capacity, cryptographic invitation codes, per-seat 256-bit bearer credentials, reserved reconnect seats and filtered projections. A code permits joining an empty guest seat; it cannot recover an occupied/disconnected seat. Credentials are sent only to their owner and kept in client memory, never URLs/logs. No CommanderProgress service is read or written. Development idle/lifetime expiry discards a room without a win/loss or XP reward.
+
+`PrivateRoomServer` polls bounded WebSocket connections/commands and launches isolated Thread jobs for pending battles. Workers receive copied inputs and their own CombatSimulator; they never access rooms or the scene tree. The poll loop alone scores completed jobs and caches a size-bounded gzip JSON replay. Both seats receive that identical canonical replay. State messages contain no opposing current draft, RNG state or credentials. `PrivateRoomClient` is a browser-compatible intent/state transport with explicit reconnect and WSS validation; it continues polling through future local menus. Player-facing scene integration, replay/pause policy, ranked persistence and public deployment remain pending.
 
 ## v0.7 presentation and verification
 

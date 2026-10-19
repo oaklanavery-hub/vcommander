@@ -81,6 +81,8 @@ Pull requests run CI. On `main`, Deploy Web calls that same validation workflow 
 
 ## Local start
 
+Private-room PvP development is underway in an isolated server/client foundation. It is not enabled on the public site. See [the local two-client harness and protocol](docs/PRIVATE_PVP.md); hosting, public UI and online disconnect/replay policy are still pending.
+
 Open `project.godot` using Godot 4.7 stable and run the project. Choose **Play**, select a Commander card and choose **Next**. Keep their prefilled starter warband or select cards to add/remove companions, choose **Battle**, spend all opening picks, then start the battle. Continue through the results until the match ends. **How to play** is available from the title menu and **Menu / Esc** throughout the game. Local menus pause the draft clock; leaving an active match asks for confirmation.
 
 ## Controls

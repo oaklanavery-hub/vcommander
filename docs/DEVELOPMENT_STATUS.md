@@ -2,6 +2,16 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
+## Current task — Private 1v1 room foundation
+
+- User accepted private friend-room PvP as the next milestone. Branch `feat/private-rooms`, base verified main `353dcd6b552c8ae5a89633722d05ac67403debed` (v0.9.0). Mastery PR #25 and deployment #39201327967 are complete; older pending mastery notes below are superseded.
+- Scope: headless server authority using existing rules, private draft projections, server deadlines and exact-once rounds; version/content checks and secure reconnect credentials; bounded WebSocket server/client and a real two-client full-match harness. No changes to PvAI menus or personal records. ADR-012 records the approved scope and migration boundary.
+- Acceptance: clean Godot import, focused authority/protocol/privacy/deadline/reconnect/full-match tests and real loopback WebSocket round trip; existing draft/match regressions; remote full CI. Save a coherent checkpoint before lengthy gates.
+- Public hosting/budget, online replay/pause synchronization and disconnect-forfeit rules require a product decision before public launch. Foundation readiness acknowledgments/room expiry are development seams, not approved competitive rules. No provider/account/billing changes.
+- Implemented: isolated room/match authority, version/content checks, private projections, stale input guards, server deadlines, cryptographic seats/reconnect credentials and capacity/expiry limits. WebSocket client/server carry identical size-bounded compressed replays; independent workers keep simulations outside the connection loop. The standalone loopback runner is documented in `docs/PRIVATE_PVP.md`.
+- Passing locally: clean Godot import, authority/protocol/privacy/session/deadline/repeated-draw/Sudden Death/full-match suite, real three-connection WebSocket suite (two seats, rejected observer, reconnect, six-round match and identical replay bytes), existing DraftSystem and MatchState suites, standalone startup/shutdown smoke, whitespace check. The new suites also assert no PvAI profile changes and stale prior-round replay rejection. Parser-name conflicts and a fixture that allowed only three of four comeback timeouts were corrected before these passing runs.
+- Next: save this coherent source checkpoint and require the exact-head full CI gate. Player-facing UI/browser-to-host checks and public hosting remain not run; this is not a public PvP launch.
+
 ## Current task — Permanent Commander mastery and records
 
 - User accepted the proposed per-Commander personal PvAI records and permanent mastery: win +100 XP, completed loss +25 XP, forfeit +0 XP/counts as a loss. No level loss. Implement 250 XP per level as initial data-driven tuning; no combat stat bonuses or online ranking.
