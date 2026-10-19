@@ -13,7 +13,7 @@
 - Isolated server-authoritative two-player rooms reusing existing draft, skill, combat, heart/comeback and Sudden Death rules.
 - Hidden current picks, per-seat input revisions, absolute selection deadlines, validated server-owned content and exact-once battle scoring.
 - Browser-compatible WebSocket client/server, cryptographic room/session credentials, reconnect, protocol/content checks, resource limits and compressed identical replays. Simulations run on independent workers.
-- Focused authority and real loopback two-client full-match regressions. No public PvP menus, endpoint, accounts/ranking or changes to personal PvAI records. Hosting, online replay/pause and disconnect policy remain product decisions.
+- Focused authority and real loopback two-client full-match regressions. Friend entry is conditional on a verified server endpoint; accounts/ranking remain outside this playtest. No changes to personal PvAI records.
 
 ## v0.9.0 — Commander mastery
 

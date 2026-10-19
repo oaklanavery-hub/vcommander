@@ -1,6 +1,6 @@
-# Private-room PvP development foundation
+# Private friend playtest
 
-The approved unranked friend playtest includes create/join codes, hidden drafting, shared 1× battles and sixty-second reconnect forfeits. It does not grant local mastery or competitive rank. The free-hosting package is prepared; no Render service or public endpoint has been provisioned yet. Live browser-to-WSS acceptance remains pending the Render connection. The local harness needs no provider account or database.
+The approved unranked friend playtest includes create/join codes, hidden drafting, shared 1× battles and sixty-second reconnect forfeits. It does not grant local mastery or competitive rank. The free-hosting package is prepared; no Render service or public endpoint has been provisioned yet. Render is connected; billing verification, deployment and live browser-to-WSS acceptance remain pending. The local harness needs no provider account or database.
 
 ## Run and verify
 
@@ -27,7 +27,7 @@ After the free service is deployed, obtain its actual public WSS URL and validat
 
 The screen reuses existing pixel portraits/cards and battle art/audio. A read-only adapter mirrors guest coordinates/ownership/entity references so both players see their own army on the left. Shared playback has no local pause/speed/skip input; menus explain the continuing clock. Online counters and results come from the authority, and the UI cannot grant mastery.
 
-CI adds two isolated Chromium WebGL2 sessions against the real headless authority and tests the exact exported game pack. It checks invite/join/draft, the Commander opening, shared clock/locked controls, guest viewpoint, result agreement and unchanged local records. A separate job builds the actual Docker image under a 512 MiB runtime cap and verifies its WebSocket protocol. Native UI integration produces ten additional captures (99 total). Passing local/CI checks do not replace the final live Render/WSS acceptance.
+The CI-only HTML server preloads an in-memory startup-scene override; it leaves the exported pack and ordinary HTML unchanged. CI runs two isolated Chromium WebGL2 sessions against the real headless authority and tests the exact exported game pack. It checks invite/join/draft, the Commander opening, shared clock/locked controls, guest viewpoint, result agreement and unchanged local records. A separate job builds the actual Docker image under a 512 MiB runtime cap and verifies its WebSocket protocol. Native UI integration produces ten additional captures (99 total). Passing local/CI checks do not replace the final live Render/WSS acceptance.
 
 ## Protocol version 2
 
@@ -52,7 +52,7 @@ Text messages are JSON objects. Every command includes `v: 2`; the server valida
 
 Battle data is one bounded binary gzip JSON message with `v`, `type: battle`, `round` and `replay`. It preserves the existing numeric event/frame/pre-battle format consumed by BattleReplay. Host is canonical `player`/left and guest `opponent`/right in this transport; the presentation adapter mirrors the guest to their own left-side viewpoint. Both clients receive identical bytes; clients do not rerun combat or submit its outcome. Repeated completions cannot charge another heart.
 
-## Development limits and pending policy
+## Resource limits and approved policies
 
 The process permits four rooms, sixteen connections, an 8 KiB command, eight queued incoming commands and a token-bucket command budget. Unseated/handshaking connections have ten seconds to establish a session. Binary replays are capped at 8 MiB compressed/64 MiB expanded. Duplicate replay requests are throttled per round; output backpressure disconnects rather than growing an unbounded queue. An oversized generated replay abandons the room visibly without writing a player record.
 
@@ -60,7 +60,7 @@ Idle rooms expire after ten minutes and all development rooms after one hour, re
 
 The user chose free hosting, shared 1× playback without local pause/speed controls and a sixty-second disconnect forfeit (ADR-013, R095–R097). Protocol v2 waits for both replay downloads, then schedules a start one second ahead. Shared duration includes BattlePrelude, simulation and the existing contact tail. Round scoring happens at the server's shared end; early continue/readiness retries cannot advance or charge another heart. Reconnect restores the current phase/timeline. Grace expiry and final battle completion are ordered by their actual deadlines even if a poll catches up both at once; an earlier final result is preserved. Simultaneous disconnect expiry cancels an abandoned match without a winner. Free-host restarts still lose in-memory sessions.
 
-Next: complete package/browser CI, confirm the free Render connection and zero-charge settings, deploy the prepared service and verify real browsers over WSS before enabling the default endpoint. PvAI pause/mastery rules remain unchanged. Ranked matchmaking, persistence, cloud mastery, moderation and ratings require their own approved milestone.
+Next: complete package/browser CI, verify zero-charge settings in the selected Render workspace, deploy the prepared service and verify real browsers over WSS before enabling the default endpoint. PvAI pause/mastery rules remain unchanged. Ranked matchmaking, persistence, cloud mastery, moderation and ratings require their own approved milestone.
 
 Official networking references: [Godot WebSocketPeer](https://docs.godotengine.org/en/stable/classes/class_websocketpeer.html) and [Godot WebSocket tutorial](https://docs.godotengine.org/en/stable/tutorials/networking/websocket.html).
 
