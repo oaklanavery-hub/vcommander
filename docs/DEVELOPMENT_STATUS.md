@@ -2,6 +2,15 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
+## Current task — Measure free-server room capacity
+
+- User asks to test simultaneous room limits. Branch `test/room-capacity`, base verified main `9fe98879ed03cb4d6e28455783a8b8ff3c0ae597`. Preserve the live service, free plan, gameplay and one-room live setting during the experiment.
+- Build a repeatable isolated load test using actual WebSocket clients and PrivateRoomServer, with synchronized battle starts, identical replay checks, shared results, reconnect and overflow rejection. Cover ordinary drafted armies and capped late-game armies/skills, including Earth summons/healing and Slime revival/splits.
+- Acceptance: report two/four-room outcomes, peak cgroup memory, actual CPU quota, battle preparation/replay times and clock RTT while busy. CI runs the real production image under the observed Render limits (512 MiB, 0.15 CPU); local smoke checks validate the harness only. Test-only state seeding/timeline acceleration must remain isolated from the published server and use unchanged combat/network code.
+- Save the harness before the lengthy bounded CI measurements. Record both capacity failures and passes honestly; do not infer four-room safety from idle memory or raise the live cap without evidence. No paid resources, keep-awake jobs, public stress load or account/ranking work.
+- Implemented isolated fixture, dependency-free real WebSocket load driver and a one/two/four-room Actions matrix. Native smoke passed ordinary one/two-room full matches, capped Earth at one/two rooms, and two successive capped Slime/mixed rounds at four rooms/eight clients. Replays, shared results, overflow rejection and reserved-seat reconnect agree; observed worker counts confirm concurrency. Initial fixture type inference and next-round exhaustion seeding bugs were fixed before constrained measurements. These smoke runs use the larger development host, so they do not establish free-server capacity.
+- Pending: save the harness checkpoint, run the isolated 512 MiB/0.15 CPU matrix, review raw measurements and record a safe recommendation in `docs/ROOM_CAPACITY.md`. No constrained capacity result or live limit increase is claimed yet.
+
 ## Current task — Free friend playtest launch
 
 - User approved private friend PvP, strictly free hosting, shared 1× playback and a sixty-second reconnect forfeit. No accounts/rating/cloud mastery or paid add-ons. Preserve existing PvAI records, gameplay and pixel presentation.
