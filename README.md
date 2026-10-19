@@ -4,11 +4,11 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.10.0 — Friend playtest prepared (hosting pending)**
+**v0.10.1 — Free friend matches**
 
 The current playable prototype supports:
 
-- private friend-room PvP when a server is configured: invitation codes, hidden drafting, shared 1× battles and sixty-second reconnect grace; public hosting is pending the free deployment check
+- private friend-room PvP: invitation codes, hidden drafting, shared 1× battles and sixty-second reconnect grace, hosted on a free one-room server
 
 - separate personal PvAI records for every Commander: matches, wins/losses/forfeits, win rate, permanent mastery levels and XP progress
 - full-match win +100 XP, completed loss +25 XP, forfeit +0 XP; every 250 XP earns a level, with no combat stat advantages
@@ -83,7 +83,7 @@ Pull requests run CI. On `main`, Deploy Web calls that same validation workflow 
 
 ## Local start
 
-The private friend playtest has create/join codes, hidden drafting, shared 1× battles and sixty-second reconnect forfeits. It grants no mastery or ranked rewards. Friend entry appears for a configured server; public hosting is pending zero-charge billing verification and deployment. See [the playtest and free-hosting guide](docs/PRIVATE_PVP.md).
+The private friend playtest has create/join codes, hidden drafting, shared 1× battles and sixty-second reconnect forfeits. It grants no mastery or ranked rewards. Choose **Friend match** after building four cards, then create/share a room code or join a friend. The free Singapore server hosts one room at a time and may take about a minute to wake. See [the playtest and free-hosting guide](docs/PRIVATE_PVP.md).
 
 Open `project.godot` using Godot 4.7 stable and run the project. Choose **Play**, select a Commander card and choose **Next**. Keep their prefilled starter warband or select cards to add/remove companions, choose **Battle**, spend all opening picks, then start the battle. Continue through the results until the match ends. **How to play** is available from the title menu and **Menu / Esc** throughout the game. Local menus pause the draft clock; leaving an active match asks for confirmation.
 

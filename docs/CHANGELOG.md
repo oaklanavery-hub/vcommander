@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.10.1 — Free hosted friend matches
+
+- Enable **Friend match** in the warband builder using the verified public Render WSS endpoint. Create a room and share its six-character code, or join a friend with your own Commander and four cards.
+- Hosted two-browser acceptance passed through Render: hidden drafting, complete Commander opening, shared 1× clock, guest viewpoint, matching results and unchanged personal mastery.
+- Free Singapore service, Hobby workspace with no card, one room at a time and automatic redeploys off. Cold-start retry and sixty-second reconnect/capacity cleanup remain in effect.
+- Restore ordinary loopback CI after hosted acceptance; live WSS checks remain available through the existing explicit workflow input.
+
 ## v0.10.0 — Private friend playtest (hosting pending)
 
 - Reclaim vacant finished/abandoned rooms after every seat's full reconnect window, allowing the one-room free server to host another session without waiting ten minutes. Connected results and reconnecting seats stay protected.

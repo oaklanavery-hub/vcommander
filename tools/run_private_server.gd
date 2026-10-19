@@ -30,9 +30,9 @@ func start_server() -> void:
         printerr("Private server could not listen: ", error_string(error))
         quit(1)
         return
-    print("Private room development server listening on ", address, ":", port,
+    print("Private room server listening on ", address, ":", port,
         "; protocol ", PrivateProtocol.VERSION, "; content ", server.service.fingerprint)
-    print("Unranked development service. No account persistence or production disconnect policy.")
+    print("Unranked friend playtest. Reserved reconnect seats; no account persistence or ranked rewards.")
 
 func _process(_delta: float) -> bool:
     server.poll()
