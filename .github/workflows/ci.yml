@@ -167,7 +167,7 @@ jobs:
           build/browser/node_modules/.bin/playwright install --with-deps chromium
       - name: Run two isolated WebGL2 game sessions against the authority
         env:
-          PVP_SERVER_URL: ${{ inputs.private_server_url || '' }}
+          PVP_SERVER_URL: "wss://vcommander-friend-playtest.onrender.com"
         run: |
           godot --headless --path . --script tools/run_private_server.gd -- --port=10000 > /tmp/pvp-server.log 2>&1 &
           server_pid=$!
