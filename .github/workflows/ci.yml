@@ -3,6 +3,13 @@ name: CI
 on:
   workflow_call:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      private_server_url:
+        description: "Optional verified public WSS endpoint for live friend acceptance; no credentials"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -159,6 +166,8 @@ jobs:
           npm install --prefix build/browser --no-save playwright@1.64.1
           build/browser/node_modules/.bin/playwright install --with-deps chromium
       - name: Run two isolated WebGL2 game sessions against the authority
+        env:
+          PVP_SERVER_URL: ${{ inputs.private_server_url || '' }}
         run: |
           godot --headless --path . --script tools/run_private_server.gd -- --port=10000 > /tmp/pvp-server.log 2>&1 &
           server_pid=$!
@@ -166,7 +175,7 @@ jobs:
           web_pid=$!
           trap 'kill "$server_pid" "$web_pid" 2>/dev/null || true' EXIT
           python3 tools/check_private_container.py
-          PVP_PLAYWRIGHT_MODULE="$PWD/build/browser/node_modules/playwright" timeout 240s node tools/check_private_browser.cjs
+          PVP_PLAYWRIGHT_MODULE="$PWD/build/browser/node_modules/playwright" timeout 360s node tools/check_private_browser.cjs
           if grep -E "SCRIPT ERROR:|ERROR:" /tmp/pvp-server.log; then exit 1; fi
       - uses: actions/upload-artifact@v4
         if: always()

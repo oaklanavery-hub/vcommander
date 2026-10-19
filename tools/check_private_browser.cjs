@@ -1,4 +1,14 @@
 // Two isolated browser sessions exercise the real exported Godot UI and server.
+const serverUrl = (() => {
+  let value;
+  try { value = new URL(process.env.PVP_SERVER_URL || 'ws://127.0.0.1:10000'); }
+  catch { throw Error('PVP_SERVER_URL must be a public WSS endpoint or loopback WS URL'); }
+  const loopback = value.protocol === 'ws:' && ['127.0.0.1', 'localhost'].includes(value.hostname);
+  if ((!loopback && value.protocol !== 'wss:') || value.username || value.password || value.search || value.hash) {
+    throw Error('PVP_SERVER_URL requires WSS remotely and must not contain credentials, a query or a fragment');
+  }
+  return value;
+})();
 const { chromium } = require(process.env.PVP_PLAYWRIGHT_MODULE || 'playwright');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -29,9 +39,12 @@ const path = require('node:path');
       return tab;
     }
     const host = await page();
-    const base = 'http://127.0.0.1:8765/index.html?pvp_server=ws://127.0.0.1:10000';
+    const address = new URL('http://127.0.0.1:8765/index.html');
+    address.searchParams.set('pvp_server', serverUrl.href);
+    const base = address.href;
     await host.goto(base + '&qa_role=host');
-    await host.waitForFunction(() => window.vcommanderPvpQa?.room?.length === 6, null, { timeout: 60000 });
+    await host.waitForFunction(() => window.vcommanderPvpQa?.room?.length === 6, null,
+      { timeout: process.env.PVP_SERVER_URL ? 120000 : 60000 });
     const room = (await host.evaluate(() => window.vcommanderPvpQa)).room;
     await host.screenshot({ path: path.join(output, 'browser_host_waiting.png') });
     const guest = await page();
@@ -58,7 +71,7 @@ const path = require('node:path');
     if (errors.length) throw Error(errors.join('\n'));
     await host.screenshot({ path: path.join(output, 'browser_host_result.png') });
     await guest.screenshot({ path: path.join(output, 'browser_guest_result.png') });
-    console.log('Exported-browser PvP passed: two isolated WebGL2 sessions, invite/join/draft, Commander opening, shared 1x clock, mirrored guest, common result and untouched mastery.');
+    console.log('Exported-browser PvP passed against ' + serverUrl.host + ': two isolated WebGL2 sessions, invite/join/draft, Commander opening, shared 1x clock, mirrored guest, common result and untouched mastery.');
   } catch (error) {
     console.error(consoleLog.slice(-60).join('\n'));
     fs.writeFileSync(path.join(output, 'browser-console.txt'), consoleLog.join('\n'));
