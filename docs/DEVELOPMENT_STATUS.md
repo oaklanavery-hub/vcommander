@@ -2,7 +2,17 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Slime Ball absorption and burst rework
+## Current task — Permanent Commander mastery and records
+
+- User accepted the proposed per-Commander personal PvAI records and permanent mastery: win +100 XP, completed loss +25 XP, forfeit +0 XP/counts as a loss. No level loss. Implement 250 XP per level as initial data-driven tuning; no combat stat bonuses or online ranking.
+- Branch `feat/commander-mastery`, base verified main `ade7c127d75dee5297f137a5f6c25db382cdd78d`. Slime Ball v0.8.4 is released: [PR #24](https://github.com/oaklanavery-hub/vcommander/pull/24), [successful export/live verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39112698982). The pending Slime handoff below is superseded.
+- Checkpoint 1: add a generic Commander profile keyed by stable content ID, versioned local persistence/backup, exact-once match receipts, full-match rewards, and a persisted pending match for interrupted-game forfeits. No count before the first battle starts. Isolate tests/capture scripts from player storage. Add service and real match lifecycle regressions.
+- Checkpoint 2: gallery mastery/record panels and card-level badges, completed-match XP progress animation, clear local-save/forfeit guidance. Keep the existing battle replay/result timing and desktop bounds. Add native populated/new/level-up/loss/forfeit views.
+- Acceptance: clean import, data/export validation, focused profile/lifecycle/UI tests, existing match/scene/player-experience regressions; full CI, native review, exported-pack tests and live served-pack verification. Save coherent checkpoints before lengthy gates.
+- Checkpoint 1 implemented: stable-ID profile/rule service, permanent levels/records, current backup/atomic primary writes, corruption protection, pending interruption recovery and GameState full-match/forfeit hooks. Data validation and new profile/lifecycle suites pass, including real decisive final outcomes, per-round/replay idempotency and first-draft exclusions. Existing PvAI preview and match-state suites also pass. Import has no parser errors. The first corruption test exposed logged JSON.parse_string errors; switched to error-returning JSON.parse and reran cleanly.
+- UI, native review and full CI/export/live gates are not yet complete. Next: save checkpoint 1, then add gallery/result presentation and focused UI coverage.
+
+## Previous task — Slime Ball absorption and burst rework
 
 - User requests 30% damage absorption, a repeating ten-second medium-radius burst for the stored damage with enemy pushback, and a double stored-damage burst on death.
 - Branch `feat/slime-ball-rework`, base verified main `ad235e8f50380638c6edcbe25718e28c955071bf`. v0.8.3 is live: [deployment and served-pack verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39109622290) succeeded after [PR #23](https://github.com/oaklanavery-hub/vcommander/pull/23); the older pending release notes below are superseded.

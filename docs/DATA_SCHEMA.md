@@ -209,3 +209,11 @@ Death-created units use unique `side:card_id:spawnN` IDs and emit `spawn` with `
 Absorbing-unit snapshots include `absorbed_damage`, `burst_seconds` and `next_burst_at`. Actual damage events include fractional `amount`/`hp_after` and, for prevention, `absorbed`/`absorbed_total`. `ability` events with `kind: absorb_burst` record stored/released damage, radius, center and `on_death`; `pushback` events record target/from/to endpoints. These are read-only replay tracks, including exact charge reset between frames; they never feed back into simulation.
 
 Defeat events include the exact final `x/y` and `unit` snapshot so a corpse remains aligned with its death burst even when the actor disappears between periodic frames. Pending pushback holds the recorded pre-hit endpoint until the event time instead of interpolating toward a future displacement.
+
+## Commander mastery rules and local profile
+
+`data/progression/commander_mastery.json` defines schema 1, `id: commander_mastery`, positive whole-number `xp_per_level` (initially 250), and `match_xp` with approved `win: 100`, `loss: 25`, `forfeit: 0`. ContentDatabase loads progression independently from global combat balance. These numbers never modify combat stats.
+
+`user://commander_profile.json` stores schema 1, monotonic `match_serial`, `commanders` keyed by stable Commander ID, and one `active_match` containing its generated ID/Commander ID. Each Commander record contains nonnegative whole-number `wins`, `losses`, `forfeits`, and `xp`; forfeits cannot exceed losses. Played count, win rate, permanent level and XP progress are derived. Unknown historical Commander IDs remain preserved, while beginning a match requires a current Commander definition.
+
+Profile writes use a completed temporary file/rename and a current `.bak` copy. A valid backup can recover an unreadable primary; if neither stored file is valid, original bytes are retained and new play uses temporary session data. A pending match is written before the first battle simulation and settled/cleared in one saved update. GameState exposes a copied reward receipt (`match_id`, owner, outcome, XP award, before/after summaries) for UI animation; receipts are not a second source of rewards. Script-mode tests and captures default to in-memory profiles.

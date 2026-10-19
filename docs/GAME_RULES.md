@@ -309,3 +309,16 @@ Slime Ball keeps regular melee attacks and absorbs 30% of every valid incoming d
 Every ten seconds of its current body's lifetime, it releases the entire stored amount against each living enemy in a medium radius, gives those enemies outward pushback, and resets its stored amount. The periodic burst does not kill or replace the Slime Ball. An empty cycle advances the timer without damage or pushback. Bursts expend their charge even if no enemy is in range. Stored damage is already post-defense: releasing it does not deduct DEF again, apply an attack multiplier or impose another minimum-damage floor; a target's own absorption can still reduce/store it. Radius and pushback distance use the existing balance definitions and collision/field limits.
 
 If Slime Ball dies with stored damage, it releases double the stored amount at its death position with the same radius and enemy-only pushback, once, as part of death resolution before round elimination. The lethal hit contributes its absorbed portion. All hits in the same damage batch resolve before deaths; lethal damage on a periodic deadline produces the doubled death burst instead of a periodic burst from that body. Royal Jelly revives it with empty storage and a new ten-second timer, retaining the normal death-spawn attack bonus for regular attacks. A new round always starts empty.
+
+## Personal Commander mastery
+
+**R092 — Per-Commander personal record**
+Each Commander has a separate local PvAI record keyed by stable Commander ID: full matches played, wins, losses, forfeits and mastery XP. A match is tracked when its first battle begins; leaving the opening draft before that point has no record or reward. Every full match settles once. Individual round wins, draws and Sudden Death rounds never grant separate mastery rewards. Match win rate is wins / (wins + losses); forfeits are included in losses. An empty record has no established win rate.
+
+**R093 — Permanent mastery**
+A completed match win grants 100 mastery XP; a completed match loss grants 25 XP. A forfeit grants 0 XP. Commanders start at Level 1 with 0 XP and gain one level per 250 XP. Levels and XP never decrease. A better win ratio earns more XP at equal match count. The initial level interval is content-defined playtest tuning. Mastery is a personal progress display and grants no combat stats, unit caps, draft advantages or unlock restrictions.
+
+**R094 — Forfeit and persistence**
+Leaving or replacing an unfinished match after its first battle begins records one forfeit loss for the Commander who began it. A persisted unfinished match recovered after restarting the game also settles once as a forfeit. An already completed match retains its resolved win/loss and reward, including when leaving its final battle replay. Rewards are settled by authoritative match state, with presentation revealing them only after the final replay finishes. Reopening/replaying a result never grants XP again.
+
+Records persist on the current device/browser through a versioned local profile and backup. Save/load failures are visible and preserve session play; unreadable profile files are not overwritten with empty defaults. Automated test/capture scripts use isolated or in-memory profiles. Account sync, online competitive ratings and shared leaderboards are outside this personal PvAI system.

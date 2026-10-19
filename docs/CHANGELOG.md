@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.9.0 — Commander mastery
+
+- Personal per-Commander PvAI match records, wins/losses/forfeits, win rate and permanent mastery.
+- Full-match win +100 XP, completed loss +25 XP, forfeit +0 XP; 250 XP per level. Mastery grants no combat stats.
+- Versioned local profile/backup, exact-once rewards, interrupted-match forfeits and visible save/load failure handling. Automated scripts use isolated profiles.
+
 ## v0.8.4 — Slime Ball: Jelly Burst
 
 - Slime Ball absorbs/stores 30% of incoming post-defense damage while retaining regular melee attacks.
