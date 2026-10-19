@@ -354,6 +354,8 @@ func _update_option_labels() -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
     if playback_driver != null:
+        if GameMenu.overlay.visible:
+            return
         if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ENTER and next_button.visible:
             _next_round()
             get_viewport().set_input_as_handled()

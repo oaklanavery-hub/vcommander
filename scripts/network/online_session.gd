@@ -37,6 +37,8 @@ func _ready() -> void:
     client.failed.connect(_failed)
 
 func start(intent: String, code: String = "") -> bool:
+    if active:
+        return false
     if endpoint.is_empty():
         status = "The friend playtest server is not online yet."
         changed.emit()

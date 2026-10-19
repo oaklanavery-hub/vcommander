@@ -15,12 +15,14 @@ func _init() -> void:
     call_deferred("run")
 
 func run() -> void:
+    print("Browser PvP driver starting: ", OS.get_cmdline_user_args())
     for argument in OS.get_cmdline_user_args():
         if argument.begins_with("--role="):
             role = argument.trim_prefix("--role=")
         elif argument.begins_with("--room="):
             code = argument.trim_prefix("--room=")
     session = root.get_node("OnlineSession")
+    print("Browser PvP endpoint: ", session.endpoint)
     var db := root.get_node("ContentDatabase")
     var state := root.get_node("GameState")
     for commander in db.get_all_commanders():
@@ -40,6 +42,7 @@ func run() -> void:
         ui.code_input.text = code
         ui.join_button.pressed.emit()
     started = true
+    print("Browser PvP UI ready: ", role)
 
 func _process(_delta: float) -> bool:
     if not started:

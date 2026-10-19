@@ -311,6 +311,8 @@ func _summary(height: float) -> RichTextLabel:
     return label
 
 func _unhandled_key_input(event: InputEvent) -> void:
+    if GameMenu.overlay.visible:
+        return
     if not event is InputEventKey or not event.pressed or event.echo or battle_screen != null:
         return
     if event.keycode in [KEY_1, KEY_2, KEY_3] and draft_page.visible:

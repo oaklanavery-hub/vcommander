@@ -79,6 +79,16 @@ func run() -> void:
     var menu := root.get_node("GameMenu")
     menu.open_pause()
     check(menu._body.get_child(1).text.contains("online match continues"), "menu explains online clock")
+    var before_menu: int = session.client.state["revision"]
+    var menu_key := InputEventKey.new()
+    menu_key.pressed = true
+    menu_key.keycode = KEY_1
+    ui._unhandled_key_input(menu_key)
+    server.poll()
+    await process_frame
+    server.poll()
+    await process_frame
+    check(int(session.client.state["revision"]) == before_menu, "modal menu blocks draft hotkeys while networking continues")
     await capture("pvp_menu")
     virtual_now += 30.01
     server.poll()

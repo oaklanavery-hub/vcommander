@@ -11,22 +11,27 @@ const path = require('node:path');
   ] });
   const errors = [];
   const contexts = [];
+  const pages = [];
+  const consoleLog = [];
   try {
     async function page() {
       const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
       contexts.push(context);
       const tab = await context.newPage();
+      pages.push(tab);
       tab.on('pageerror', error => { errors.push(String(error)); console.error('Browser:', error); });
       tab.on('console', message => {
+        consoleLog.push(message.type() + ': ' + message.text());
         if (/SCRIPT ERROR:|\bERROR:/.test(message.text())) { errors.push(message.text()); console.error('Godot browser:', message.text()); }
       });
+      tab.on('requestfailed', request => consoleLog.push('Request failed: ' + request.url() + ' ' + request.failure()?.errorText));
       tab.setDefaultTimeout(180000);
       return tab;
     }
     const host = await page();
     const base = 'http://127.0.0.1:8765/index.html?pvp_server=ws://127.0.0.1:10000';
     await host.goto(base + '&qa_role=host');
-    await host.waitForFunction(() => window.vcommanderPvpQa?.room?.length === 6);
+    await host.waitForFunction(() => window.vcommanderPvpQa?.room?.length === 6, null, { timeout: 60000 });
     const room = (await host.evaluate(() => window.vcommanderPvpQa)).room;
     await host.screenshot({ path: path.join(output, 'browser_host_waiting.png') });
     const guest = await page();
@@ -54,6 +59,18 @@ const path = require('node:path');
     await host.screenshot({ path: path.join(output, 'browser_host_result.png') });
     await guest.screenshot({ path: path.join(output, 'browser_guest_result.png') });
     console.log('Exported-browser PvP passed: two isolated WebGL2 sessions, invite/join/draft, Commander opening, shared 1x clock, mirrored guest, common result and untouched mastery.');
+  } catch (error) {
+    console.error(consoleLog.slice(-60).join('\n'));
+    fs.writeFileSync(path.join(output, 'browser-console.txt'), consoleLog.join('\n'));
+    for (let index = 0; index < pages.length; index++) {
+      const tab = pages[index];
+      await tab.screenshot({ path: path.join(output, 'failure_' + index + '.png') }).catch(() => {});
+      const state = await tab.evaluate(() => ({ qa: window.vcommanderPvpQa, body: document.body.innerText,
+        config: typeof GODOT_CONFIG === 'undefined' ? null : GODOT_CONFIG })).catch(() => null);
+      console.error('Browser state:', JSON.stringify(state));
+      fs.writeFileSync(path.join(output, 'failure_' + index + '.json'), JSON.stringify(state, null, 2));
+    }
+    throw error;
   } finally {
     for (const context of contexts) await context.close();
     await browser.close();
