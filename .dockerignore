@@ -1,0 +1,11 @@
+.git
+.godot
+build
+builds
+dist
+docs
+tests
+.env
+.env.*
+**/*.log
+**/__pycache__

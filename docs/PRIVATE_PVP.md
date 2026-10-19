@@ -1,6 +1,6 @@
 # Private-room PvP development foundation
 
-This is the first checkpoint of the approved friend-room milestone, not a public multiplayer release. The playable site remains PvAI v0.9.0. Hosting, the player-facing flow, browser-to-host verification, replay/pause synchronization and disconnect forfeits remain pending. No provider has been provisioned and no subscription/account/database is required to run the local harness.
+The approved unranked friend playtest includes create/join codes, hidden drafting, shared 1× battles and sixty-second reconnect forfeits. It does not grant local mastery or competitive rank. The free-hosting package is prepared; no Render service or public endpoint has been provisioned yet. Live browser-to-WSS acceptance remains pending the Render connection. The local harness needs no provider account or database.
 
 ## Run and verify
 
@@ -16,6 +16,18 @@ godot --headless --path . --script tools/run_private_server.gd
 The integration test starts an ephemeral loopback server and actual WebSocket clients. It creates/joins a room, rejects a third seat, checks hidden picks, disconnects/resumes the guest, drafts, receives worker-generated identical compressed replays and finishes a multi-round match. It asserts that local Commander records are unchanged. The harness acknowledges completed simulation output directly; it does not claim to test a player watching synchronized animations or a browser deployment.
 
 The standalone development server listens only on `127.0.0.1:8080`. `PORT` or `--port=8080` overrides its port. An explicitly requested `--listen=0.0.0.0` allows binding behind a future TLS proxy. The app client permits `ws://` only on loopback and requires `wss://` for remote hosts. Do not publish this process as a ranked service. It has in-memory rooms and no production disconnect/forfeit or restart recovery policy.
+
+## Free deployment and player flow
+
+`render.yaml` defines one Docker web service on the **Free** plan in Singapore, no databases/disks/add-ons and no automatic redeploys. `Dockerfile` pins the official Godot 4.7 archive/checksum, imports content at build time, runs as an unprivileged user and defaults to one room with `PVP_MAX_ROOMS=1`. Native development can use up to four rooms; the configured limit returns a visible busy response without changing an existing match. There is no keep-awake automation. Free-host restarts cancel in-memory rooms.
+
+The user's budget is strictly zero. Before provisioning, use a confirmed Render connection and verify a free workspace/service with no payment method or settings that block chargeable overages. The Free service plan alone does not prevent bandwidth/build overages on a workspace with billing enabled. Do not add payment details, upgrade a workspace/service or create a paid database/disk. Render documents free-service sleep after fifteen idle minutes and roughly one minute to wake; the game provides bounded retry/status rather than claiming immediate availability.
+
+After the free service is deployed, obtain its actual public WSS URL and validate it against this source/content version. Configure `network/private_room_url` in project.godot, or use the explicit `?pvp_server=wss://ACTUAL_HOST` playtest query before changing the default. A native development argument `--pvp-url=ws://127.0.0.1:8080` enables the same flow. Never guess the service URL or enable an unverified default. With an endpoint configured: choose a Commander, build four cards, select **Friend match**, create/share a room code or join a friend. Reconnect credentials stay in memory within the open game; refreshing/closing the page loses that credential and the sixty-second server grace still applies.
+
+The screen reuses existing pixel portraits/cards and battle art/audio. A read-only adapter mirrors guest coordinates/ownership/entity references so both players see their own army on the left. Shared playback has no local pause/speed/skip input; menus explain the continuing clock. Online counters and results come from the authority, and the UI cannot grant mastery.
+
+CI adds two isolated Chromium WebGL2 sessions against the real headless authority and tests the exact exported game pack. It checks invite/join/draft, the Commander opening, shared clock/locked controls, guest viewpoint, result agreement and unchanged local records. A separate job builds the actual Docker image under a 512 MiB runtime cap and verifies its WebSocket protocol. Native UI integration produces ten additional captures (99 total). Passing local/CI checks do not replace the final live Render/WSS acceptance.
 
 ## Protocol version 2
 
@@ -48,6 +60,8 @@ Idle rooms expire after ten minutes and all development rooms after one hour, re
 
 The user chose free hosting, shared 1× playback without local pause/speed controls and a sixty-second disconnect forfeit (ADR-013, R095–R097). Protocol v2 waits for both replay downloads, then schedules a start one second ahead. Shared duration includes BattlePrelude, simulation and the existing contact tail. Round scoring happens at the server's shared end; early continue/readiness retries cannot advance or charge another heart. Reconnect restores the current phase/timeline. Grace expiry and final battle completion are ordered by their actual deadlines even if a poll catches up both at once; an earlier final result is preserved. Simultaneous disconnect expiry cancels an abandoned match without a winner. Free-host restarts still lose in-memory sessions.
 
-Next: integrate room creation/joining, waiting/reconnect/error screens, shared draft state, pre-battle skill openings and result display. Add browser-to-WSS tests and measure replay limits/capacity on the chosen free host. PvAI pause/mastery rules remain unchanged. Ranked matchmaking, persistence, cloud mastery, moderation and ratings require their own approved milestone.
+Next: complete package/browser CI, confirm the free Render connection and zero-charge settings, deploy the prepared service and verify real browsers over WSS before enabling the default endpoint. PvAI pause/mastery rules remain unchanged. Ranked matchmaking, persistence, cloud mastery, moderation and ratings require their own approved milestone.
 
 Official networking references: [Godot WebSocketPeer](https://docs.godotengine.org/en/stable/classes/class_websocketpeer.html) and [Godot WebSocket tutorial](https://docs.godotengine.org/en/stable/tutorials/networking/websocket.html).
+
+Hosting references: [Render free limits](https://render.com/docs/free), [Blueprint schema](https://render.com/docs/blueprint-spec), [Docker services](https://render.com/docs/docker).

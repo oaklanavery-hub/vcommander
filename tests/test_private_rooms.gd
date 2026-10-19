@@ -75,6 +75,8 @@ func test_privacy_and_sessions() -> void:
     join["room"] = code
     service.handle(2, join, clock)
     check(service.handle(3, join, clock)[0]["message"]["code"] == "room_unavailable", "third seat cannot replace a player")
+    service.room_limit = 1
+    check(service.handle(4, setup_command("create"), clock)[0]["message"]["code"] == "server_full" and service.rooms.size() == 1, "free-host capacity rejects another room without altering the current match")
     var game: PrivateMatch = service.rooms[code]["game"]
     var rival_before: Dictionary = game.view_for("opponent", clock)["rival"]
     var stale := action("skill", game.view_for("player", clock))

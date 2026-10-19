@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased — Private-room development foundation
+## v0.10.0 — Private friend playtest (hosting pending)
+
+- Free-only Render blueprint and checksum-pinned, unprivileged Godot server image, initially limited to one room. No database, disk, paid add-ons or automatic redeploys.
+- CI builds/tests the container under a 512 MiB limit and exercises the exported WebGL2 game in two isolated browser sessions, including shared opening/time, guest mirroring, result agreement and unchanged mastery.
 
 - User-selected shared 1× clock: wait for both replay downloads, schedule one start, finish Commander openings/contact tails before scoring, and reject early continue/duplicate readiness.
 - Friend-room create/join/code-copy/wait, live hidden drafting, shared battle/result and reconnect/forfeit screens, using the existing pixel portraits, cards, heart meters, attack/VFX and audio. Guest presentation mirrors all ownership/entity/position references to keep the local army on the left.

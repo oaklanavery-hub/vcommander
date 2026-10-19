@@ -51,6 +51,8 @@ func _build() -> void:
     header.name = "Header"
     main.add_child(header)
     var back := _button("Warband", _back)
+    back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+    back.custom_minimum_size.x = 132
     header.add_child(back)
     var title := ScreenStyle.label("FRIEND SHOWDOWN", 28)
     title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -114,9 +116,13 @@ func _build() -> void:
     points_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     counters.add_child(points_label)
     timer_label = _label("", 24)
+    timer_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+    timer_label.custom_minimum_size.x = 80
+    timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
     counters.add_child(timer_label)
     offers = HBoxContainer.new()
     offers.name = "Offers"
+    offers.alignment = BoxContainer.ALIGNMENT_CENTER
     offers.add_theme_constant_override("separation", 12)
     draft_page.add_child(offers)
     skill_button = _button("Commander skill", func(): _act("skill"))
@@ -176,6 +182,7 @@ func _refresh() -> void:
     commander_portrait.set_content(own.get("commander", {}), true)
     own_summary.text = _army_text("Your army", own)
     rival_summary.text = _army_text("Rival • " + str(view.get("rival", {}).get("commander", {}).get("display_name", "Waiting for a friend")), view.get("rival", {}))
+    rival_summary.visible = not view.get("rival", {}).is_empty()
     hearts.displayed_losses = view.get("losses", {"player": 0, "opponent": 0}).duplicate()
     hearts.sudden_death = view.get("sudden_death", false)
     hearts.queue_redraw()
@@ -223,8 +230,8 @@ func _render_offers(view: Dictionary) -> void:
             button = Button.new()
             button.text = "%s\n\n+%d%% %s\n\nArmy-wide blessing" % [buff["display_name"], int(buff["percentage"]), str(buff["stat"]).replace("_", " ")]
             button.add_theme_font_size_override("font_size", 18)
-        button.custom_minimum_size = Vector2(170, 180)
-        button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        button.custom_minimum_size = Vector2(200, 216)
+        button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
         button.pressed.connect(_act.bind("pick", index))
         offers.add_child(button)
         index += 1
@@ -275,7 +282,7 @@ func _army_text(title: String, side: Dictionary) -> String:
 func _panel(parent: Node, minimum: Vector2 = Vector2.ZERO) -> VBoxContainer:
     var panel := PanelContainer.new()
     panel.custom_minimum_size = minimum
-    panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    panel.size_flags_horizontal = Control.SIZE_FILL if minimum.x > 0 else Control.SIZE_EXPAND_FILL
     parent.add_child(panel)
     var box := VBoxContainer.new()
     box.add_theme_constant_override("separation", 8)

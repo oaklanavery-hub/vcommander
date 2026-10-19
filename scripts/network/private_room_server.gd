@@ -20,6 +20,8 @@ func start(content: Object, requested_port: int = 8080, address: String = "127.0
     var error := _listener.listen(requested_port, address)
     if error == OK:
         service = PrivateRoomService.new(content)
+        if not OS.get_environment("PVP_MAX_ROOMS").is_empty():
+            service.room_limit = clampi(OS.get_environment("PVP_MAX_ROOMS").to_int(), 1, PrivateRoomService.MAX_ROOMS)
         port = _listener.get_local_port()
     return error
 

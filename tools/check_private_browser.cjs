@@ -1,0 +1,61 @@
+// Two isolated browser sessions exercise the real exported Godot UI and server.
+const { chromium } = require(process.env.PVP_PLAYWRIGHT_MODULE || 'playwright');
+const fs = require('node:fs');
+const path = require('node:path');
+
+(async () => {
+  const output = 'build/qa-browser';
+  fs.mkdirSync(output, { recursive: true });
+  const browser = await chromium.launch({ headless: true, args: [
+    '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--enable-webgl',
+  ] });
+  const errors = [];
+  const contexts = [];
+  try {
+    async function page() {
+      const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+      contexts.push(context);
+      const tab = await context.newPage();
+      tab.on('pageerror', error => { errors.push(String(error)); console.error('Browser:', error); });
+      tab.on('console', message => {
+        if (/SCRIPT ERROR:|\bERROR:/.test(message.text())) { errors.push(message.text()); console.error('Godot browser:', message.text()); }
+      });
+      tab.setDefaultTimeout(180000);
+      return tab;
+    }
+    const host = await page();
+    const base = 'http://127.0.0.1:8765/index.html?pvp_server=ws://127.0.0.1:10000';
+    await host.goto(base + '&qa_role=host');
+    await host.waitForFunction(() => window.vcommanderPvpQa?.room?.length === 6);
+    const room = (await host.evaluate(() => window.vcommanderPvpQa)).room;
+    await host.screenshot({ path: path.join(output, 'browser_host_waiting.png') });
+    const guest = await page();
+    await guest.goto(base + '&qa_role=guest&room=' + room);
+    await host.waitForFunction(() => window.vcommanderPvpQa?.opening_time >= 0.7 && window.vcommanderPvpQa?.battle_time === 0);
+    await host.screenshot({ path: path.join(output, 'browser_host_opening.png') });
+    await guest.waitForFunction(() => window.vcommanderPvpQa?.phase === 'playing');
+    await host.waitForFunction(() => window.vcommanderPvpQa?.battle_time >= 0.7);
+    const first = await host.evaluate(() => window.vcommanderPvpQa);
+    const second = await guest.evaluate(() => window.vcommanderPvpQa);
+    if (first.room !== second.room || first.side !== 'player' || second.side !== 'opponent') throw Error('Incorrect private seats');
+    if (first.play_at !== second.play_at || first.play_until !== second.play_until) throw Error('Different server timelines');
+    if (Math.abs(first.battle_time - second.battle_time) > 0.5) throw Error('Browser playback clocks diverged');
+    if (!first.controls_locked || !second.controls_locked || !first.local_left || !second.local_left) throw Error('Shared controls or local-left viewpoint failed');
+    await host.screenshot({ path: path.join(output, 'browser_host_battle.png') });
+    await guest.screenshot({ path: path.join(output, 'browser_guest_battle.png') });
+    await host.waitForFunction(() => window.vcommanderPvpQa?.finished);
+    await guest.waitForFunction(() => window.vcommanderPvpQa?.finished);
+    const result = await host.evaluate(() => window.vcommanderPvpQa);
+    const rival = await guest.evaluate(() => window.vcommanderPvpQa);
+    if (JSON.stringify(result.losses) !== JSON.stringify(rival.losses) || result.winner !== rival.winner || result.round_winner !== rival.round_winner) throw Error('Browser results disagree');
+    if ((result.losses.player || 0) + (result.losses.opponent || 0) < 1) throw Error('Round did not score a heart');
+    if (!result.records_unchanged || !rival.records_unchanged) throw Error('Friend playtest changed local records');
+    if (errors.length) throw Error(errors.join('\n'));
+    await host.screenshot({ path: path.join(output, 'browser_host_result.png') });
+    await guest.screenshot({ path: path.join(output, 'browser_guest_result.png') });
+    console.log('Exported-browser PvP passed: two isolated WebGL2 sessions, invite/join/draft, Commander opening, shared 1x clock, mirrored guest, common result and untouched mastery.');
+  } finally {
+    for (const context of contexts) await context.close();
+    await browser.close();
+  }
+})().catch(error => { console.error(error); process.exitCode = 1; });

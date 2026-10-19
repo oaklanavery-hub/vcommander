@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: vcommander-friend-playtest
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./Dockerfile
+    autoDeployTrigger: "off"
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: PVP_MAX_ROOMS
+        value: "1"

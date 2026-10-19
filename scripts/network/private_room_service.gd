@@ -10,6 +10,7 @@ const CODE_ALPHABET := "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 var rooms: Dictionary = {}
 var seats: Dictionary = {}
 var fingerprint: String
+var room_limit := MAX_ROOMS
 var _content: Object
 var _crypto := Crypto.new()
 var _seed_source: Callable
@@ -112,7 +113,7 @@ func _enter(peer_id: int, command: Dictionary, now: float) -> Array:
     var code: String = str(command.get("room", ""))
     var side := "opponent"
     if kind == "create":
-        if rooms.size() >= MAX_ROOMS:
+        if rooms.size() >= room_limit:
             return _error(peer_id, "server_full")
         code = _new_code()
         side = "player"

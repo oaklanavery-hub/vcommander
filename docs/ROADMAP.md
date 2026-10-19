@@ -127,7 +127,8 @@
 
 - First checkpoint: server-authoritative two-seat room service, hidden simultaneous drafting, selection deadlines, immutable shared replays and reconnect credentials.
 - Browser-compatible WebSocket transport and a two-client full-match integration harness; retain PvAI/local mastery behavior.
-- Pending before public play: hosting/budget, online replay/pause and disconnect-forfeit policy; player-facing room/draft/replay flow and browser-to-host verification.
+- User approved free hosting, shared 1× playback and sixty-second disconnect forfeits. Server timeline, player-facing room/draft/replay/reconnect/result flow and guest viewpoint adapter are implemented.
+- Free-only Render/Docker package, bounded cold-start retry and native/browser/export/container checks. Pending before public launch: confirmed Render connection, zero-charge workspace settings, service deployment and live browser-to-WSS acceptance.
 - Later separate milestones: account-backed PvP records, cloud mastery, matchmaking and competitive ranking. No local PvAI results enter trusted competitive ratings.
 
 ## Further major phase — Game Director scope decision

@@ -70,6 +70,7 @@ func run() -> void:
         finish()
         return
     check(ui.offers.get_child_count() == 3, "real server offers become three selectable cards")
+    check(ui.timer_label.get_line_count() == 1, "online countdown stays on one readable line")
     check_bounds(ui.main, "online draft")
     await capture("pvp_draft")
     var revision: int = session.client.state["revision"]
@@ -144,6 +145,7 @@ func run() -> void:
     session.client.state["phase"] = "complete"
     session.client.state["end_reason"] = "disconnect_forfeit"
     session.client.state["winner"] = "player"
+    session.status = "Friend match complete. No mastery or ranked rewards."
     session.changed.emit()
     await process_frame
     check(ui.wait_label.text.contains("did not reconnect"), "forfeit result clearly explains the outcome")
