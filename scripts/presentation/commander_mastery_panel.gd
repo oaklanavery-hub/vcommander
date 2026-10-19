@@ -93,10 +93,12 @@ func show_reward(receipt: Dictionary) -> void:
 
 func _show_stats(stats: Dictionary) -> void:
     var rate := "%0.0f%% win rate" % float(stats["win_rate"]) if int(stats["played"]) > 0 else "Win rate —"
-    record_label.text = "%d matches · %dW / %dL" % [int(stats["played"]), int(stats["wins"]), int(stats["losses"])]
+    var played := int(stats["played"])
+    record_label.text = "%d %s · %dW / %dL" % [played, "match" if played == 1 else "matches", int(stats["wins"]), int(stats["losses"])]
     record_label.text += ("\n" if _record_mode else " · ") + rate
     if int(stats["forfeits"]) > 0:
-        record_label.text += " · %d forfeits" % int(stats["forfeits"])
+        var forfeits := int(stats["forfeits"])
+        record_label.text += " · %d %s" % [forfeits, "forfeit" if forfeits == 1 else "forfeits"]
 
 func _show_progress(xp: int) -> void:
     var progress: Dictionary = _profile.progress_at(xp)

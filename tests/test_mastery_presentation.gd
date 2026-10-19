@@ -70,6 +70,12 @@ func run() -> void:
     await process_frame
     check_bounds(combat.get_node("Margin/Main"), "final result screen")
     check_bounds(combat.mastery_panel, "reward panel")
+    for height in [180, 237, 320]:
+        var original_size: Vector2 = combat.battlefield.size
+        combat.battlefield.size.y = height
+        var layout: Dictionary = combat.battlefield.roster_layout(4)
+        check(float(layout["first_y"]) + 4 * float(layout["spacing"]) + 32 <= height, "compact roster rows, theme and summon footer stay inside a short reward battlefield")
+        combat.battlefield.size = original_size
     combat._finish_replay()
     combat.mastery_panel.show_reward(state.mastery_reward)
     combat.mastery_panel.finish_animation()

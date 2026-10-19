@@ -87,7 +87,9 @@ func final_scene(player_strong: bool):
     state.begin_match(3187)
     while not state.draft.is_phase_complete():
         state.draft.auto_select()
-    state.match_state.start(1)
+    # Show an actual fourth-heart finish in the normal match rules.
+    state.match_state.round_number = 4
+    state.match_state.losses["opponent" if player_strong else "player"] = 3
     set_strength(state.draft, db.get_cards_by_set("set_fire_01"), player_strong)
     set_strength(state.opponent.draft, state.opponent.get_side()["cards"], not player_strong)
     state.run_battle()

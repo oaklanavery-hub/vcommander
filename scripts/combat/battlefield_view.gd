@@ -302,22 +302,34 @@ func _draw_ground() -> void:
         draw_rect(Rect2(flag, Vector2(3, 35)), Color("302c3c"))
         draw_rect(Rect2(flag + Vector2(3, 0), Vector2(12, 16)), Color("d98c78") if right else Color("89d8ce"))
 
+func roster_layout(card_count: int) -> Dictionary:
+    var compact := size.y < 330
+    var spacing := minf(40, (size.y - 100) / maxf(1, card_count)) if compact else 48.0
+    return {"compact": compact, "first_y": 54.0 if compact else 77.0,
+        "spacing": spacing, "icon_size": minf(24, spacing - 2) if compact else 30.0}
+
 func _draw_rosters() -> void:
     if _arena.position.x < 160 or _sides.size() != 2:
         return
     for index in range(2):
         var x := _arena.end.x + 20 if index == 1 else 16.0
         var color := Color("e8a48c") if index == 1 else Color("9dd9cc")
-        draw_string(ThemeDB.fallback_font, Vector2(x, 34), "RIVAL WARBAND" if index == 1 else "YOUR WARBAND", HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 24, 14, color)
-        var y := 77.0
         var config: Dictionary = _sides[index]
+        var layout := roster_layout(config.get("cards", []).size())
+        var compact: bool = layout["compact"]
+        draw_string(ThemeDB.fallback_font, Vector2(x, 26 if compact else 34), "RIVAL WARBAND" if index == 1 else "YOUR WARBAND", HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 24, 14, color)
+        var y := float(layout["first_y"])
         for card in config.get("cards", []):
             var id_value := str(card.get("id", ""))
             var count := int(config.get("unit_counts", {}).get(id_value, 0))
-            draw_texture_rect(UnitArt.icon(id_value, str(card.get("role", "range")), str(card.get("element", "earth"))), Rect2(Vector2(x, y - 27), Vector2(30, 30)), false)
-            draw_string(ThemeDB.fallback_font, Vector2(x + 34, y - 10), str(card.get("display_name", "Unit")), HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 60, 12, Color("eee2c3"))
-            draw_string(ThemeDB.fallback_font, Vector2(x + 34, y + 8), "Recruited: %d" % count, HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 60, 11, Color("a8b9a5"))
-            y += 48
+            var icon_size := float(layout["icon_size"])
+            draw_texture_rect(UnitArt.icon(id_value, str(card.get("role", "range")), str(card.get("element", "earth"))), Rect2(Vector2(x, y - icon_size + 3), Vector2.ONE * icon_size), false)
+            if compact:
+                draw_string(ThemeDB.fallback_font, Vector2(x + 30, y - 4), "%s ×%d" % [str(card.get("display_name", "Unit")), count], HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 60, 12, Color("eee2c3"))
+            else:
+                draw_string(ThemeDB.fallback_font, Vector2(x + 34, y - 10), str(card.get("display_name", "Unit")), HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 60, 12, Color("eee2c3"))
+                draw_string(ThemeDB.fallback_font, Vector2(x + 34, y + 8), "Recruited: %d" % count, HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 60, 11, Color("a8b9a5"))
+            y += float(layout["spacing"])
         var bonus: Dictionary = config.get("set_bonus", {})
         var bonus_text := "Theme inactive" if bonus.is_empty() else ScreenStyle.bonus_description(bonus, true)
         draw_string(ThemeDB.fallback_font, Vector2(x, y + 8), bonus_text, HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 24, 13, color)
