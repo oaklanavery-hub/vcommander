@@ -20,6 +20,11 @@ const AudioScript = preload("res://scripts/presentation/battle_audio.gd")
 @onready var next_button: Button = $Margin/Main/NextRound
 @onready var result_label: Label = $Margin/Main/Result
 
+var playback_driver: RefCounted
+var battle_context: Object
+var initial_hearts_revealed := false
+var _source: Object
+
 var _frames: Array = []
 var _events: Array = []
 var _playback_time := 0.0
@@ -40,17 +45,18 @@ var _hearts_meter := MatchHearts.new()
 var mastery_panel := CommanderMasteryPanel.new()
 
 func _ready() -> void:
+    _source = battle_context if battle_context != null else get_node("/root/GameState")
     ScreenStyle.apply(self)
     _hearts_meter.name = "MatchHearts"
     var main := get_node("Margin/Main")
-    mastery_panel.configure(GameState.commander_progress, ContentDatabase, GameAudio)
+    mastery_panel.configure(_source.commander_progress, ContentDatabase, GameAudio)
     mastery_panel.name = "MasteryReward"
     main.add_child(mastery_panel)
     main.move_child(mastery_panel, main.get_child_count() - 2)
     mastery_panel.hide()
     main.add_child(_hearts_meter)
     main.move_child(_hearts_meter, 2)
-    _hearts_meter.refresh(GameState.match_state, false)
+    _hearts_meter.refresh(_source.match_state, initial_hearts_revealed)
     GameAudio.set_context("battle")
     GameAudio.settings_changed.connect(_update_option_labels)
     ScreenStyle.primary(next_button)
@@ -69,7 +75,7 @@ func _ready() -> void:
     back_button.text = "Leave match"
     speed_button.pressed.connect(_cycle_speed)
 
-    var result: Dictionary = GameState.battle_result
+    var result: Dictionary = _source.battle_result
     if result.is_empty():
         title_label.text = "No battle available"
         result_label.text = "Return to the Army Builder to start a match."
@@ -86,19 +92,22 @@ func _ready() -> void:
     if _prelude.active():
         _event_index = _prelude.event_end
         speed_button.disabled = true
-    seed_label.text = "Seed %d" % int(result.get("seed", GameState.match_seed))
+    seed_label.text = "Seed %d" % int(result.get("seed", _source.match_seed))
 
     var field: Dictionary = result.get("battlefield", {})
     battlefield.set_battlefield_size(
         float(field.get("width", 24.0)),
         float(field.get("height", 14.0))
     )
-    battlefield.set_side_configs(GameState.get_player_combat_side(), GameState.opponent_combat_side)
+    battlefield.set_side_configs(_source.get_player_combat_side(), _source.opponent_combat_side)
     battlefield.configure_frost()
     if not _frames.is_empty():
         battlefield.set_frame(_frames[0])
 
-    title_label.text = "Battle %d • %s" % [GameState.match_state.round_number, "SUDDEN DEATH" if bool(GameState.match_state.history.back().get("sudden_death", false)) else "The Verdant Crossing"]
+    var round_sudden: bool = _source.match_state.sudden_death
+    if not _source.match_state.history.is_empty():
+        round_sudden = bool(_source.match_state.history.back().get("sudden_death", false))
+    title_label.text = "Battle %d • %s" % [_source.match_state.round_number, "SUDDEN DEATH" if round_sudden else "The Verdant Crossing"]
     _refresh_summaries()
     _update_speed_label()
     _update_timer_label()
@@ -109,8 +118,13 @@ func _ready() -> void:
             names.append(("You: " if skill.get("side") == "player" else "Rival: ") + str(skill.get("name", "Commander skill")))
         result_label.text = "   •   ".join(names) + " • Armies hold position"
         _advance_prelude(0.0)
+    if playback_driver != null:
+        playback_driver.attach(self)
 
 func _process(delta: float) -> void:
+    if playback_driver != null:
+        playback_driver.advance(self, delta)
+        return
     if _finished or _paused:
         return
 
@@ -203,11 +217,11 @@ func _format_event(event: Dictionary) -> String:
 func _refresh_summaries() -> void:
     player_summary.text = _side_summary(
         "[b]Your Army[/b]",
-        GameState.get_player_combat_side()
+        _source.get_player_combat_side()
     )
     opponent_summary.text = _side_summary(
         "[b]Rival Commander[/b]",
-        GameState.opponent_combat_side
+        _source.opponent_combat_side
     )
 
 func _side_summary(title: String, side_config: Dictionary) -> String:
@@ -237,19 +251,24 @@ func _update_speed_label() -> void:
     speed_button.text = "Battle speed: %dx" % int(_speed_options[_speed_index])
 
 func _cycle_speed() -> void:
+    if playback_driver != null:
+        return
     if _prelude.active() or _finished:
         return
     _speed_index = (_speed_index + 1) % _speed_options.size()
     _update_speed_label()
 
 func _finish_replay() -> void:
+    if playback_driver != null:
+        playback_driver.finish(self)
+        return
     if _finished:
         return
     _finished = true
     battlefield.replay_complete = true
-    _hearts_meter.refresh(GameState.match_state)
+    _hearts_meter.refresh(_source.match_state)
     battlefield.finish_replay()
-    var result: Dictionary = GameState.battle_result
+    var result: Dictionary = _source.battle_result
     var winner := str(result.get("winner", "draw"))
     GameAudio.play_effect("victory" if winner == "player" else "loss")
     if winner == "player":
@@ -260,7 +279,7 @@ func _finish_replay() -> void:
         result_label.text = "A draw. Both Commanders lose a heart."
     pause_button.disabled = true
     speed_button.disabled = true
-    var match_info = GameState.match_state
+    var match_info = _source.match_state
     if winner == "draw" and match_info.sudden_death:
         result_label.text = "Sudden Death! Win the next battle outright."
     result_label.text += "\nYou  %s   •   Rival  %s" % [_hearts(int(match_info.losses["player"])), _hearts(int(match_info.losses["opponent"]))]
@@ -268,7 +287,7 @@ func _finish_replay() -> void:
         result_label.text = "Adventure won! The crossing is yours." if match_info.winner == "player" else "Your warband will rise again. Try a new strategy."
         summary_row.hide()
         details_button.disabled = true
-        mastery_panel.show_reward(GameState.mastery_reward)
+        mastery_panel.show_reward(_source.mastery_reward)
         next_button.text = "Play again"
     else:
         next_button.text = "Continue to %sRound %d" % ["Sudden Death • " if match_info.sudden_death else "", match_info.round_number + 1]
@@ -283,16 +302,21 @@ func _go_back() -> void:
     GameMenu.confirm_leave("res://scenes/main_menu/main_menu.tscn")
 
 func _next_round() -> void:
+    if playback_driver != null:
+        playback_driver.next_round(self)
+        return
     next_button.disabled = true
-    if GameState.match_state.is_complete():
-        GameState.leave_match()
+    if _source.match_state.is_complete():
+        _source.leave_match()
         get_tree().change_scene_to_file("res://scenes/commander_select/commander_select.tscn")
-    elif GameState.begin_next_round():
+    elif _source.begin_next_round():
         get_tree().change_scene_to_file("res://scenes/draft/draft.tscn")
     else:
         next_button.disabled = false
 
 func _toggle_pause() -> void:
+    if playback_driver != null:
+        return
     if _finished:
         return
     _paused = not _paused
@@ -329,6 +353,13 @@ func _update_option_labels() -> void:
     hp_button.text = "HP numbers: On" if BattlefieldView.show_hp_numbers else "HP numbers: Off"
 
 func _unhandled_key_input(event: InputEvent) -> void:
+    if playback_driver != null:
+        if GameMenu.overlay.visible:
+            return
+        if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ENTER and next_button.visible:
+            _next_round()
+            get_viewport().set_input_as_handled()
+        return
     if not event is InputEventKey or not event.pressed or event.echo:
         return
     if event.keycode == KEY_SPACE:

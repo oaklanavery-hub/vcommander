@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.10.0 — Private friend playtest (hosting pending)
+
+- Reclaim vacant finished/abandoned rooms after every seat's full reconnect window, allowing the one-room free server to host another session without waiting ten minutes. Connected results and reconnecting seats stay protected.
+- Free-only Render blueprint and checksum-pinned, unprivileged Godot server image, initially limited to one room. No database, disk, paid add-ons or automatic redeploys.
+- CI builds/tests the container under a 512 MiB limit and exercises the exported WebGL2 game in two isolated browser sessions, including shared opening/time, guest mirroring, result agreement and unchanged mastery.
+
+- User-selected shared 1× clock: wait for both replay downloads, schedule one start, finish Commander openings/contact tails before scoring, and reject early continue/duplicate readiness.
+- Friend-room create/join/code-copy/wait, live hidden drafting, shared battle/result and reconnect/forfeit screens, using the existing pixel portraits, cards, heart meters, attack/VFX and audio. Guest presentation mirrors all ownership/entity/position references to keep the local army on the left.
+- In-memory session/cold-start retries, server-clock countdowns, online menu guidance and ten native friend-playtest captures. Entry appears only for a configured endpoint; free hosting is not yet provisioned.
+- Sixty-second reserved reconnect grace and authoritative forfeits, with chronological ordering against final battles and no PvAI/mastery writes. Protocol v2 adds clock synchronization/readiness; standalone server polling is capped at 30 FPS.
+
+- Isolated server-authoritative two-player rooms reusing existing draft, skill, combat, heart/comeback and Sudden Death rules.
+- Hidden current picks, per-seat input revisions, absolute selection deadlines, validated server-owned content and exact-once battle scoring.
+- Browser-compatible WebSocket client/server, cryptographic room/session credentials, reconnect, protocol/content checks, resource limits and compressed identical replays. Simulations run on independent workers.
+- Focused authority and real loopback two-client full-match regressions. Friend entry is conditional on a verified server endpoint; accounts/ranking remain outside this playtest. No changes to personal PvAI records.
+
 ## v0.9.0 — Commander mastery
 
 - Personal per-Commander PvAI match records, wins/losses/forfeits, win rate and permanent mastery.
