@@ -32,6 +32,12 @@ continued connections. The fixture accelerates only the already-computed replay
 wait. The production combat simulation, snapshots, event recording, room service,
 background workers, serialization and WebSocket transport are unchanged.
 
+Two additional legal mixed-army profiles cover 66 starting bodies (the four
+highest-cap cards with both Earth summon skills) and full 120-second rounds
+(healing/tank/absorption units, Water skills, capped HP/DEF without attack buffs).
+The endurance profile asserts the full round duration, rather than assuming a
+maxed army necessarily produces the longest replay.
+
 Reports include cgroup peak memory/CPU counters, largest preparation/download
 wait, clock p95/maximum RTT, reconnect time, replay sizes and battle/frame/event
 counts. OOMs, disconnects, mismatched results and timeouts remain explicit failed
@@ -67,6 +73,14 @@ but capped Earth and the second mixed round were killed by the 512 MiB memory
 limit and disconnected all clients. Four Slime rooms completed but preparation
 reached 14.80 seconds and clock p95 5.05 seconds.
 
-The boundary matrix now adds three rooms and repeats the controls, with unchanged
-production code, to determine the largest functional setting and assess response
-time. The live cap remains one; no increased setting is claimed safe yet.
+The [boundary matrix #39275427085](https://github.com/oaklanavery-hub/vcommander/actions/runs/39275427085)
+at head `ab7f9ca301a71fb81eff2c3140eba38b82cc690e` added three rooms and repeated
+the controls. Three ordinary rooms and mixed/Slime cases completed, but all six
+clients disconnected during capped Earth preparation while the container remained
+running (no Docker OOM flag). This distinguishes connection responsiveness from
+the separate four-room memory-exhaustion failures.
+
+Final constrained crowded/endurance coverage is pending. Native one/two-room
+checks passed two rounds of both new profiles, including the asserted 120-second
+duration and 66 starting units. The live cap remains one; no increased setting is
+claimed safe yet.

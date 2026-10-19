@@ -32,7 +32,7 @@ func start() -> void:
             port = int(argument.trim_prefix("--port="))
         elif argument == "--listen=0.0.0.0":
             listen_address = "0.0.0.0"
-    if output_dir.is_empty() or profile not in ["normal", "earth", "slime", "mixed"] or expected_rooms < 1 or expected_rooms > 4:
+    if output_dir.is_empty() or profile not in ["normal", "earth", "slime", "mixed", "crowded", "endurance"] or expected_rooms < 1 or expected_rooms > 4:
         push_error("Invalid isolated capacity fixture arguments")
         quit(1)
         return
@@ -47,9 +47,27 @@ func start() -> void:
         return 7000 + seed_index
     var setups: Array = []
     for commander in db.get_all_commanders():
+        if profile == "crowded" and commander["element"] != "earth":
+            continue
+        if profile == "endurance" and commander["element"] != "water":
+            continue
         var cards: Array = []
         var counts := {}
-        for card in db.get_cards_by_set(commander["signature_set_id"]):
+        var definitions: Array = db.get_cards_by_set(commander["signature_set_id"])
+        if profile == "crowded":
+            definitions = db.get_all_cards()
+            definitions.sort_custom(func(a, b): return int(a["unit_cap"]) > int(b["unit_cap"]) if a["unit_cap"] != b["unit_cap"] else str(a["id"]) < str(b["id"]))
+            definitions = definitions.slice(0, 4)
+        elif profile == "endurance":
+            definitions = []
+            for card in db.get_all_cards():
+                if card.get("ability", {}).get("type") in ["aura_heal", "area_heal", "aura_debuff", "absorb_burst"]:
+                    definitions.append(card)
+        if definitions.size() != 4:
+            push_error("Capacity profile requires four unique current cards")
+            quit(1)
+            return
+        for card in definitions:
             cards.append(card["id"])
             counts[card["id"]] = card["unit_cap"]
         setups.append({"commander": commander["id"], "element": commander["element"], "cards": cards, "caps": counts})
@@ -77,6 +95,8 @@ func _process(_delta: float) -> bool:
                     draft.unit_counts[card["id"]] = int(card["unit_cap"])
                 for buff in draft.buff_definitions.values():
                     draft.buff_stacks[buff["id"]] = int(buff.get("max_stacks", 3))
+                    if profile == "endurance" and buff["stat"] not in ["health", "defense"]:
+                        draft.buff_stacks[buff["id"]] = 0
                 draft.selection_points = 1
                 draft.commander_skill_uses = mini(game.match_state.round_number - 1, 1)
                 draft.commander_skill_used_this_round = false

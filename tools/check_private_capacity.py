@@ -167,7 +167,7 @@ async def until(predicate, peers, label, timeout=90):
         await asyncio.sleep(0.01)
 
 
-async def exercise(port, manifest, rooms, profile, cycles):
+async def exercise(port, manifest, rooms, profile, cycles, progress):
     peers = []
     pairs = []
     batches = []
@@ -231,6 +231,8 @@ async def exercise(port, manifest, rooms, profile, cycles):
                     continue
                 a, b = (p.replays[cycle] for p in pair)
                 assert a["hash"] == b["hash"], "Players received different replays"
+                if profile == "endurance":
+                    assert a["duration"] >= 119.99, "Endurance fixture must exercise the full 120-second round"
                 batches.append({"round": cycle, "room": pairs.index(pair), **{k: v for k, v in a.items() if k not in ("hash", "received_at")}})
             await asyncio.gather(*(p.act("ready") for p in active))
             await until(lambda: all(p.state.get("phase") == "playing" for p in active), peers, "shared playback", 15)
@@ -246,6 +248,11 @@ async def exercise(port, manifest, rooms, profile, cycles):
                 if row["round"] == cycle:
                     row.update(prepare_seconds=prepared - preparation_start, download_seconds=downloaded - prepared,
                                draft_to_download_seconds=downloaded - start)
+            # Preserve completed rounds even if a later round drops connections
+            # or the kernel kills the isolated container.
+            progress.update(battles=len(batches), observations=list(batches),
+                prepare_max_seconds=max(b["prepare_seconds"] for b in batches),
+                download_max_seconds=max(b["download_seconds"] for b in batches))
             continuing = [p for p in active if p.state.get("phase") == "replay"]
             if cycle < cycles:
                 await asyncio.gather(*(p.act("continue") for p in continuing))
@@ -312,7 +319,7 @@ def run_case(args, rooms, profile):
                 time.sleep(0.1)
             assert manifest and manifest["room_limit"] == rooms, "Server did not initialize requested room limit"
             initialized = True
-            result.update(asyncio.run(asyncio.wait_for(exercise(port, manifest, rooms, profile, 16 if profile == "normal" else args.cycles), timeout=540)))
+            result.update(asyncio.run(asyncio.wait_for(exercise(port, manifest, rooms, profile, 16 if profile == "normal" else args.cycles, result), timeout=540)))
         except Exception as error:
             result.update(functional_pass=False, failure=type(error).__name__ + ": " + str(error))
         finally:
@@ -363,13 +370,13 @@ def main():
     mode.add_argument("--image", help="Already-built production Docker image")
     mode.add_argument("--godot", help="Unconstrained native harness smoke check only")
     parser.add_argument("--rooms", default="1,2,3,4")
-    parser.add_argument("--profiles", default="normal,earth,slime,mixed")
+    parser.add_argument("--profiles", default="normal,earth,slime,mixed,crowded,endurance")
     parser.add_argument("--cycles", type=int, default=2)
     parser.add_argument("--output", type=Path, default=ROOT / "build/capacity/report.json")
     args = parser.parse_args()
     rooms = [int(v) for v in args.rooms.split(",")]
     profiles = args.profiles.split(",")
-    assert rooms and all(1 <= r <= 4 for r in rooms) and profiles and all(p in ("normal", "earth", "slime", "mixed") for p in profiles)
+    assert rooms and all(1 <= r <= 4 for r in rooms) and profiles and all(p in ("normal", "earth", "slime", "mixed", "crowded", "endurance") for p in profiles)
     assert 1 <= args.cycles <= 2, "Capped fixture preserves the two-use skill budget"
     report = {"source": os.environ.get("GITHUB_SHA", "local"), "limits": {"memory_mib": 512, "cpu": 0.15},
         "budgets": {"memory_headroom_percent": 15, "prepare_seconds": 10, "clock_p95_ms": 1000, "clock_max_ms": 5000},
