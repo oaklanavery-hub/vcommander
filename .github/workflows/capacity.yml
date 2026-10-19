@@ -1,0 +1,41 @@
+name: Private room capacity
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/capacity.yml'
+      - 'tools/check_private_capacity.py'
+      - 'tools/private_capacity_server.gd'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: capacity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  measure:
+    strategy:
+      fail-fast: false
+      matrix:
+        rooms: [1, 2, 3, 4]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build the unchanged production server image
+        run: docker build -t vcommander-capacity .
+      - name: Measure rooms under the observed free-server CPU and memory quotas
+        run: |
+          mkdir -p build/capacity
+          touch build/.gdignore
+          python3 tools/check_private_capacity.py --image vcommander-capacity --rooms ${{ matrix.rooms }} --output build/capacity/report.json
+      - name: Upload raw measurements and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capacity-${{ matrix.rooms }}-rooms
+          path: build/capacity
+          retention-days: 14

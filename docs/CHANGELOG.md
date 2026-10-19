@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Server capacity diagnostics
+
+- Add isolated real-WebSocket capacity measurements for one to four rooms using the production image with 512 MiB RAM and 0.15 CPU. Include full matches, capped armies/skills, 66-body mixed armies and full 120-second healing battles.
+- Record replay/result agreement, reconnect and overflow behavior, preparation time, response latency and memory exhaustion. These tests leave the live server and gameplay settings unchanged.
+- Measured 24 resource-limited scenarios: one room completed all profiles; two or more failed heavy workloads. Preserve the one-room live cap and record the full results and memory/response optimization targets.
+
 ## v0.10.1 — Free hosted friend matches
 
 - Enable **Friend match** in the warband builder using the verified public Render WSS endpoint. Create a room and share its six-character code, or join a friend with your own Commander and four cards.
