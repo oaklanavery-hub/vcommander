@@ -14,6 +14,7 @@ func run() -> void:
     test_deadlines_and_rules()
     test_full_match()
     test_disconnect_policy()
+    test_room_capacity_reuse()
     if not failed:
         print("Private room authority tests passed: protocol, trusted setup, hidden picks, retries, seat ownership, reconnect, expiry, deadlines, simultaneous skills, whole game and exact-once results.")
     quit(1 if failed else 0)
@@ -234,6 +235,31 @@ func test_disconnect_policy() -> void:
     service.disconnect_peer(3, clock + 62)
     service.tick(clock + 122)
     check(service.rooms[code]["game"].end_reason == "both_disconnected" and service.rooms[code]["game"].match_state.winner.is_empty(), "simultaneous abandoned seats cancel without fabricated winner")
+
+func test_room_capacity_reuse() -> void:
+    for completed in [false, true]:
+        var service := PrivateRoomService.new(db)
+        service.room_limit = 1
+        service.handle(1, setup_command("create"), clock)
+        var code: String = service.seats[1]["room"]
+        if completed:
+            service.rooms[code]["game"].phase = "complete"
+        check(service.handle(3, setup_command("create"), clock + 100)[0]["message"].get("code") == "server_full", "connected lobby/result keeps its room")
+        service.disconnect_peer(1, clock + 100)
+        check(service.handle(3, setup_command("create"), clock + 159.999)[0]["message"].get("code") == "server_full", "vacant lobby/result retains full reconnect grace")
+        var response := service.handle(3, setup_command("create"), clock + 160)
+        check(response[0]["message"]["type"] == "session" and service.rooms.size() == 1 and not service.rooms.has(code), "expired vacant lobby/result releases free-host capacity")
+        check(service.seats.size() == 1 and service.seats.has(3), "reclaimed room leaves no stale connection authority")
+    var service := PrivateRoomService.new(db)
+    service.room_limit = 1
+    var code := pair(service)
+    var game: PrivateMatch = service.rooms[code]["game"]
+    service.disconnect_peer(1, clock + 1)
+    service.disconnect_peer(2, clock + 10)
+    check(service.handle(3, setup_command("create"), clock + 69.999)[0]["message"].get("code") == "server_full", "abandoned two-seat room protects the last seat's grace")
+    var response := service.handle(3, setup_command("create"), clock + 70)
+    check(response[0]["message"]["type"] == "session" and service.rooms.size() == 1 and not service.rooms.has(code), "abandoned ended match releases the sole room")
+    check(game.end_reason == "disconnect_forfeit" and game.match_state.winner == "opponent", "capacity reclamation preserves chronological forfeit policy")
 
 func check(condition: bool, message: String) -> void:
     if not condition:

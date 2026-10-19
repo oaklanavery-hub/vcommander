@@ -113,6 +113,7 @@ func _enter(peer_id: int, command: Dictionary, now: float) -> Array:
     var code: String = str(command.get("room", ""))
     var side := "opponent"
     if kind == "create":
+        _release_vacant_rooms(now)
         if rooms.size() >= room_limit:
             return _error(peer_id, "server_full")
         code = _new_code()
@@ -150,6 +151,24 @@ func _enter(peer_id: int, command: Dictionary, now: float) -> Array:
     seats[peer_id] = {"room": code, "side": side}
     messages.append_array(_states(code, now))
     return messages
+
+func _release_vacant_rooms(now: float) -> void:
+    for code in rooms.keys():
+        var room: Dictionary = rooms[code]
+        var occupied := false
+        for peer_id in room["peers"].values():
+            occupied = occupied or int(peer_id) > 0
+        if occupied:
+            continue
+        var last_disconnect := -1.0
+        for disconnected_at in room["disconnected_at"].values():
+            last_disconnect = maxf(last_disconnect, float(disconnected_at))
+        # Preserve every seat's full reconnect window, including a result view.
+        if last_disconnect < 0 or now < last_disconnect + RECONNECT_SECONDS:
+            continue
+        _settle_disconnects(room, now)
+        if room["game"].phase in ["waiting", "complete"]:
+            rooms.erase(code)
 
 func _state(peer_id: int, now: float) -> Dictionary:
     var seat: Dictionary = seats[peer_id]

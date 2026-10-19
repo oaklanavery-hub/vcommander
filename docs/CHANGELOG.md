@@ -2,6 +2,7 @@
 
 ## v0.10.0 — Private friend playtest (hosting pending)
 
+- Reclaim vacant finished/abandoned rooms after every seat's full reconnect window, allowing the one-room free server to host another session without waiting ten minutes. Connected results and reconnecting seats stay protected.
 - Free-only Render blueprint and checksum-pinned, unprivileged Godot server image, initially limited to one room. No database, disk, paid add-ons or automatic redeploys.
 - CI builds/tests the container under a 512 MiB limit and exercises the exported WebGL2 game in two isolated browser sessions, including shared opening/time, guest mirroring, result agreement and unchanged mastery.
 
