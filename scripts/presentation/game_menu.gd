@@ -122,6 +122,7 @@ func _apply_accessibility() -> void:
 
 func open_help() -> void:
     _page("Your first adventure", "Build a little warband. Make a few choices. Let your army do the fighting.")
+    _body.add_theme_constant_override("separation", 8)
     var steps := [
         ["1   Choose a Commander", "Fire, Water, Earth or Slime. Start with their four-card warband, or mix your own."],
         ["2   Grow your army", "Choose from three cards each pick. Spend all your picks, then start the battle. Armies and buffs stay with you."],
@@ -133,6 +134,9 @@ func open_help() -> void:
         var detail := ScreenStyle.label(step[1], 16)
         detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
         _body.add_child(detail)
+    var mastery := ScreenStyle.label("Mastery: full-match win +100 XP · loss +25 XP · 250 XP per level. Leaving after battle begins counts as a loss with no XP.", 14)
+    mastery.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    _body.add_child(mastery)
     _body.add_child(ScreenStyle.label("30 seconds per pick • Esc: menu • Space: pause battle • 1 / 2 / 4: speed", 14))
     _button("Got it", _back_from_page, true).grab_focus()
 
@@ -148,7 +152,10 @@ func confirm_leave(target: String = "res://scenes/main_menu/main_menu.tscn") -> 
     if not GameState.match_started or GameState.match_state.is_complete():
         _leave()
         return
-    _page("Leave this match?", "Your current match will end. Your sound and display settings will be kept.")
+    var message := "Your current match will end. No match record is counted before your first battle."
+    if not GameState.commander_progress.active_match().is_empty():
+        message = "Leaving now counts as a loss for this Commander and grants no mastery XP. Earned mastery levels will be kept."
+    _page("Leave this match?", message)
     _button("Keep playing", close, true).grab_focus()
     _button("Leave match", _leave)
 

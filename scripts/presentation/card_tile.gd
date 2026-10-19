@@ -7,6 +7,7 @@ var portrait := CardPortrait.new()
 var caption := Label.new()
 var empty_caption := "Empty slot"
 var detail_text := ""
+var mastery_level := 1
 var _hovered := false
 
 func _ready() -> void:
@@ -86,7 +87,7 @@ func _draw_badges(canvas: Control) -> void:
         return
     _element_badge(Vector2(19, 18), str(definition.get("element", "earth")), canvas)
     if commander:
-        canvas.draw_string(ThemeDB.fallback_font, Vector2(38, 23), "COMMANDER", HORIZONTAL_ALIGNMENT_LEFT, size.x - 42, 9, Color("f0ddb0"))
+        canvas.draw_string(ThemeDB.fallback_font, Vector2(38, 23), "MASTERY %d" % mastery_level, HORIZONTAL_ALIGNMENT_LEFT, size.x - 42, 10, Color("f0ddb0"))
     else:
         var count := "%d/%d" % [int(definition.get("summon_amount", 0)), int(definition.get("unit_cap", 0))]
         var center := Vector2(size.x - 20, 17)

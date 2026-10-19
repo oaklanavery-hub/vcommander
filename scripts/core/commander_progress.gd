@@ -26,11 +26,14 @@ func _init(content: Object, storage_path: String = DEFAULT_PATH) -> void:
 func record(commander_id: String) -> Dictionary:
     var stats: Dictionary = _data["commanders"].get(commander_id, {"wins": 0, "losses": 0, "forfeits": 0, "xp": 0}).duplicate(true)
     var played := int(stats["wins"]) + int(stats["losses"])
-    var step := maxi(1, int(_rules.get("xp_per_level", 250)))
-    var xp := int(stats["xp"])
-    stats.merge({"played": played, "win_rate": 100.0 * float(stats["wins"]) / played if played > 0 else 0.0,
-        "level": 1 + int(xp / step), "xp_in_level": xp % step, "xp_per_level": step})
+    stats.merge({"played": played, "win_rate": 100.0 * float(stats["wins"]) / played if played > 0 else 0.0})
+    stats.merge(progress_at(int(stats["xp"])))
     return stats
+
+func progress_at(total_xp: int) -> Dictionary:
+    var step := maxi(1, int(_rules.get("xp_per_level", 250)))
+    var xp := maxi(0, total_xp)
+    return {"level": 1 + int(xp / step), "xp_in_level": xp % step, "xp_per_level": step}
 
 func active_match() -> Dictionary:
     return _data["active_match"].duplicate(true)
@@ -118,6 +121,8 @@ func _read_profile(file_path: String) -> Dictionary:
             return {}
     var pending: Dictionary = parsed["active_match"]
     if not pending.is_empty():
+        if int(parsed["match_serial"]) < 1:
+            return {}
         if not pending.get("id") is String or not pending.get("commander_id") is String or str(pending["commander_id"]).is_empty():
             return {}
         if pending["id"] != "match:%d" % int(parsed["match_serial"]):

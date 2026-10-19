@@ -5,6 +5,8 @@
 - Personal per-Commander PvAI match records, wins/losses/forfeits, win rate and permanent mastery.
 - Full-match win +100 XP, completed loss +25 XP, forfeit +0 XP; 250 XP per level. Mastery grants no combat stats.
 - Versioned local profile/backup, exact-once rewards, interrupted-match forfeits and visible save/load failure handling. Automated scripts use isolated profiles.
+- Gallery mastery panels/card levels, final-match XP progress/level-up animation, reduced motion and explicit forfeit guidance.
+- Focused profile/lifecycle/UI/export regressions and eight native mastery views (89 desktop captures total).
 
 ## v0.8.4 — Slime Ball: Jelly Burst
 

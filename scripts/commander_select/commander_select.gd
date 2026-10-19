@@ -5,15 +5,18 @@ extends Control
 @onready var description_label: Label = $Margin/Main/Body/Details/Description/Padding/Content/Body
 @onready var bonus_label: Label = $Margin/Main/Body/Details/Passive/Padding/Content/Body
 @onready var skill_label: Label = $Margin/Main/Body/Details/Active/Padding/Content/Body
-@onready var full_portrait: CardPortrait = $Margin/Main/Body/Portrait/FullPortrait
+@onready var full_portrait: CardPortrait = $Margin/Main/Body/Portrait/Content/FullPortrait
 @onready var build_army_button: Button = $Margin/Main/Header/Next
 
 var commander_buttons: Dictionary = {}
 var selected_commander_id := ""
+var mastery_panel := CommanderMasteryPanel.new()
 
 func _ready() -> void:
     ScreenStyle.apply(self)
     ScreenStyle.primary(build_army_button)
+    mastery_panel.configure(GameState.commander_progress, ContentDatabase, GameAudio)
+    $Margin/Main/Body/Portrait/Content.add_child(mastery_panel)
     build_army_button.pressed.connect(_open_army_builder)
     $Margin/Main/Header/Back.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/main_menu/main_menu.tscn"))
     if not ContentDatabase.load_errors.is_empty():
@@ -26,6 +29,9 @@ func _ready() -> void:
         var tile := CardTile.new()
         tile.custom_minimum_size = Vector2(132, 232)
         tile.set_content(commander, true)
+        var stats: Dictionary = GameState.commander_progress.record(id)
+        tile.mastery_level = int(stats["level"])
+        tile.tooltip_text += "\nMastery Level %d · %d matches · %dW / %dL" % [int(stats["level"]), int(stats["played"]), int(stats["wins"]), int(stats["losses"])]
         tile.toggle_mode = true
         tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         tile.pressed.connect(_select_commander.bind(id))
@@ -49,6 +55,7 @@ func _select_commander(commander_id: String) -> void:
     commander_name.text = str(commander.get("display_name", "Commander"))
     description_label.text = str(commander.get("description", "Choose companions to lead into the crossing."))
     full_portrait.set_content(commander, true)
+    mastery_panel.show_record(commander_id)
     var signature_set := GameState.get_selected_signature_set()
     var bonus: Dictionary = signature_set.get("bonus", {})
     bonus_label.text = ScreenStyle.bonus_description(bonus) + "\n\nRequires four unique %s cards." % str(commander.get("element", "themed")).capitalize()

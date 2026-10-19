@@ -10,6 +10,7 @@ func run() -> void:
     check(db.load_errors.is_empty(), "content loads without errors")
     check(db.get_all_commanders().size() >= 4 and db.get_all_cards().size() >= 16, "export retains the starter roster and Slime expansion JSON")
     check(db.get_all_buffs().size() == 5 and not db.get_game_balance().is_empty(), "export retains Buffs and balance")
+    check(db.get_mastery_rules().get("xp_per_level") == 250 and db.get_mastery_rules().get("match_xp", {}).get("win") == 100, "export retains the approved mastery progression data")
     check(Art.catalog().get("sprites", {}).size() == db.get_all_cards().size() + 1, "export retains every roster sprite and Commander plant")
     for card in db.get_all_cards():
         var picture := Art.icon(str(card["id"]), str(card["role"]), str(card["element"]))
