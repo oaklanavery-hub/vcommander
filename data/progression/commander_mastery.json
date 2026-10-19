@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "id": "commander_mastery",
+  "status": "playtest",
+  "xp_per_level": 250,
+  "match_xp": {"win": 100, "loss": 25, "forfeit": 0}
+}

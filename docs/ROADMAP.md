@@ -116,6 +116,13 @@
 - Requested 30% damage absorption and repeating ten-second stored-damage bursts with medium enemy-only radius/pushback.
 - Doubled death discharge, fresh revival/reset state, white charge/burst feedback, focused mechanics/replay coverage and native review.
 
+## v0.9.0 — Personal Commander mastery (approved)
+
+- Per-Commander whole-match records, wins/losses/forfeits, win rate and permanent XP levels.
+- Win +100 XP, completed loss +25 XP, forfeit +0 XP; 250 XP per level, without combat advantages.
+- Local profile/backup, interrupted-game recovery, idempotent match rewards and isolated automated profiles.
+- Gallery mastery/card badges, completed-match XP/level-up feedback, reduced motion, forfeit/save guidance and native review.
+
 ## Further major phase — Game Director scope decision
 
-The elemental PvAI vertical slice and requested Slime Court roster expansion are implemented. A further major roadmap phase needs an explicit direction before implementation: campaign/progression, online PvP, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved scope. Human playtesting should inform further balance values; the current tuning remains provisional.
+The elemental PvAI vertical slice, requested Slime Court roster expansion and personal Commander mastery are implemented. A further major roadmap phase needs an explicit direction before implementation: campaign/run progression, account-backed online PvP/rankings, or VTuber/mascot roster integration. These introduce major gameplay systems, infrastructure or roster changes beyond the current approved scope. Human playtesting should inform further balance values; the current tuning remains provisional.

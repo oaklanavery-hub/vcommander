@@ -4,9 +4,13 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.8.4 — Slime Ball: Jelly Burst**
+**v0.9.0 — Commander mastery**
 
 The current playable prototype supports:
+
+- separate personal PvAI records for every Commander: matches, wins/losses/forfeits, win rate, permanent mastery levels and XP progress
+- full-match win +100 XP, completed loss +25 XP, forfeit +0 XP; every 250 XP earns a level, with no combat stat advantages
+- gallery mastery displays/card levels and an animated completed-match XP reward, with reduced motion and device-local profile/backup saving
 
 - a centered title and menu over an original moonlit pixel forest, with all four Commanders seated around an animated campfire; idle poses, cloth/hair, embers, stars and elemental motes respect reduced motion
 
@@ -106,4 +110,12 @@ Choose Preset 1, 2 or 3, then **Save** a complete four-card warband. Clicking a 
 
 Run `python3 tools/run_checks.py --godot /path/to/godot` for all content/art validation and headless suites. Run `godot --headless --path . --script tools/run_balance.gd -- --seeds=8 --seed-start=1000 --output=/tmp/balance.json` for a reproducible AI sample. See `docs/PLAYTEST_REPORT.md` for methods, tuning and limitations.
 
-CI renders 76 desktop captures, including title animation phases/reduced motion, help/settings/pause, projectile contact, attack phases, frost, summon ownership, the Slime Court and tactical formations, and tests the exported game pack. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.
+CI renders 89 desktop captures, including title animation phases/reduced motion, help/settings/pause, projectile contact, attack phases, frost, summon ownership, the Slime Court and tactical formations, and tests the exported game pack. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.
+
+## Commander mastery
+
+Each Commander starts at Level 1 and keeps a separate personal PvAI match record on this device/browser. Win a complete match for 100 XP, finish a lost match for 25 XP, and earn one permanent level every 250 XP. A better win ratio earns mastery faster at the same match count. Individual battle rounds never grant separate XP; mastery provides no combat stats or drafting advantages.
+
+Leaving before the first battle has no record. Leaving or closing an unfinished game after battle begins counts as one loss/forfeit with zero XP; interrupted stored matches settle when the game next opens. An already resolved final match keeps its actual outcome. Replaying a result never awards XP again. The gallery shows each Commander's level, record, win rate and next-level progress; the final match result animates the XP gain after battle playback.
+
+Records use local browser/device storage and a backup. Clearing site data or using a different browser/device does not retain the same record; private browsing or blocked storage may prevent saving. Visible notices explain save/load failures, and an unreadable profile is preserved instead of silently overwritten. This release does not provide account sync, online competitive ratings or a shared leaderboard. Automated test/capture scripts use isolated profiles.

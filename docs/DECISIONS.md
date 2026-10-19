@@ -56,3 +56,11 @@ Before changing an accepted architectural decision, append a new ADR describing 
 **Status:** accepted
 
 **Reason:** The approved wireframes use the same card language in Commander selection and army building. Presentation components render content-driven badges and replaceable portrait catalogs. A separate warband-preset service validates four unique current content IDs before storing three local slots per Commander. UI invokes existing loadout methods; preset persistence does not own combat or change army/draft legality.
+
+## ADR-011 — Local Commander records and permanent mastery
+
+**Status:** accepted for the user-approved personal PvAI mastery scope
+
+**Reason:** Completed match outcomes already belong to GameState/MatchState. A separate headless CommanderProgress service owns stable-ID records, data-driven XP/level calculation, versioned atomic local persistence and one pending match/last receipt. GameState starts tracking at the first battle, settles whole matches once and records forfeits on reset; loading an interrupted pending match settles one forfeit. Replay/UI consume a copied reward receipt and never grant XP. Automated script runs use in-memory profiles and explicit isolated paths so tests/captures cannot alter player records.
+
+This adds personal device-local progression, without replacing the accepted PvAI, combat or presentation boundaries. Permanent mastery has no combat stat effects. Account sync, competitive ratings and shared leaderboards remain separate future product decisions.

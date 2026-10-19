@@ -6,6 +6,7 @@ const DraftSystemScript = preload("res://scripts/draft/draft_system.gd")
 const MatchScript = preload("res://scripts/core/match_state.gd")
 const AiScript = preload("res://scripts/ai/ai_controller.gd")
 const CombatSimulatorScript = preload("res://scripts/combat/combat_simulator.gd")
+const CommanderProgressScript = preload("res://scripts/core/commander_progress.gd")
 
 var selected_commander_id := ""
 var army = ArmyLoadoutScript.new(4)
@@ -18,6 +19,16 @@ var battle_result: Dictionary = {}
 var opponent = AiScript.new()
 var opponent_public_side: Dictionary = {}
 var opponent_combat_side: Dictionary = {}
+var commander_progress: CommanderProgress
+var mastery_reward: Dictionary = {}
+var _progress_match_id := ""
+
+func _ready() -> void:
+    # Tool scripts receive an in-memory profile and cannot touch a player's records.
+    var arguments := OS.get_cmdline_args()
+    var scripted := arguments.has("--script") or arguments.has("-s") or DisplayServer.get_name() == "headless"
+    commander_progress = CommanderProgressScript.new(ContentDatabase, "" if scripted else CommanderProgressScript.DEFAULT_PATH)
+    commander_progress.recover_interrupted_match()
 
 func select_commander(commander_id: String) -> bool:
     if ContentDatabase.get_commander(commander_id).is_empty():
@@ -104,6 +115,8 @@ func run_battle() -> bool:
 
     if not match_state.begin_battle():
         return false
+    if _progress_match_id.is_empty():
+        _progress_match_id = commander_progress.begin_match(selected_commander_id)
     var player_side := _build_combat_side(
         "player",
         draft,
@@ -118,7 +131,10 @@ func run_battle() -> bool:
         match_seed + match_state.round_number * 104729,
         ContentDatabase.get_game_balance()
     )
-    return match_state.resolve_round(str(battle_result.get("winner", "draw")), float(battle_result.get("duration", 0.0)))
+    var resolved: bool = match_state.resolve_round(str(battle_result.get("winner", "draw")), float(battle_result.get("duration", 0.0)))
+    if resolved and match_state.is_complete():
+        mastery_reward = commander_progress.finish_match(_progress_match_id, "win" if match_state.winner == "player" else "loss")
+    return resolved
 
 func begin_next_round() -> bool:
     if not match_started or not match_state.advance_round():
@@ -175,6 +191,11 @@ func _build_combat_side(side_id: String, draft_state, skill_active: bool) -> Dic
     }
 
 func _reset_match_runtime() -> void:
+    if commander_progress != null and not _progress_match_id.is_empty():
+        # A completed match is already settled; repeat calls cannot change its result.
+        commander_progress.finish_match(_progress_match_id, "forfeit")
+    _progress_match_id = ""
+    mastery_reward.clear()
     match_started = false
     match_state.start()
     battle_result.clear()

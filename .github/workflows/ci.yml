@@ -105,6 +105,18 @@ jobs:
           test -s build/qa/formation_earth_start.png
           test -s build/qa/formation_slime_start.png
           test -s build/qa/formation_ranged_start.png
+          timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_mastery.gd -- --output-dir=build/qa 2>&1 | tee /tmp/mastery-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/mastery-qa.log; then
+            exit 1
+          fi
+          test -s build/qa/mastery_new.png
+          test -s build/qa/mastery_gallery.png
+          test -s build/qa/mastery_reward_start.png
+          test -s build/qa/mastery_level_up.png
+          test -s build/qa/mastery_reduced_motion.png
+          test -s build/qa/mastery_loss.png
+          test -s build/qa/mastery_forfeit.png
+          test -s build/qa/mastery_save_warning.png
 
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4

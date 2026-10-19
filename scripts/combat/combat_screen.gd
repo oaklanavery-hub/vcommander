@@ -37,11 +37,17 @@ var _prelude := BattlePrelude.new()
 var _audio = AudioScript.new()
 var _log_lines: Array[String] = []
 var _hearts_meter := MatchHearts.new()
+var mastery_panel := CommanderMasteryPanel.new()
 
 func _ready() -> void:
     ScreenStyle.apply(self)
     _hearts_meter.name = "MatchHearts"
     var main := get_node("Margin/Main")
+    mastery_panel.configure(GameState.commander_progress, ContentDatabase, GameAudio)
+    mastery_panel.name = "MasteryReward"
+    main.add_child(mastery_panel)
+    main.move_child(mastery_panel, main.get_child_count() - 2)
+    mastery_panel.hide()
     main.add_child(_hearts_meter)
     main.move_child(_hearts_meter, 2)
     _hearts_meter.refresh(GameState.match_state, false)
@@ -260,6 +266,9 @@ func _finish_replay() -> void:
     result_label.text += "\nYou  %s   •   Rival  %s" % [_hearts(int(match_info.losses["player"])), _hearts(int(match_info.losses["opponent"]))]
     if match_info.is_complete():
         result_label.text = "Adventure won! The crossing is yours." if match_info.winner == "player" else "Your warband will rise again. Try a new strategy."
+        summary_row.hide()
+        details_button.disabled = true
+        mastery_panel.show_reward(GameState.mastery_reward)
         next_button.text = "Play again"
     else:
         next_button.text = "Continue to %sRound %d" % ["Sudden Death • " if match_info.sudden_death else "", match_info.round_number + 1]

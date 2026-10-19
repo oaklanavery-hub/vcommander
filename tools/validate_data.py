@@ -157,6 +157,13 @@ def main() -> int:
     if not isinstance(formation["maximum_rows"], int):
         raise ValueError("formation.maximum_rows must be a whole number")
 
+    mastery = read_group(ROOT / "data" / "progression").get("commander_mastery", {})
+    if not isinstance(mastery.get("xp_per_level"), int) or isinstance(mastery.get("xp_per_level"), bool) or mastery["xp_per_level"] <= 0:
+        raise ValueError("Mastery xp_per_level must be a positive whole number")
+    for outcome, expected in {"win": 100, "loss": 25, "forfeit": 0}.items():
+        if mastery.get("match_xp", {}).get(outcome) != expected:
+            raise ValueError(f"Approved mastery {outcome} reward must be {expected}")
+
     print(
         f"Data OK: {len(commanders)} commanders, {len(cards)} cards, "
         f"{len(sets)} sets, {len(buffs)} buffs, {len(balances)} balance file"
