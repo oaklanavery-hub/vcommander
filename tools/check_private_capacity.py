@@ -349,6 +349,7 @@ def run_case(args, rooms, profile):
             (args.output.parent / f"capacity-{rooms}-{profile}.log").write_text(logs)
     peak = result.get("server", {}).get("memory.peak")
     result["peak_memory_mib"] = int(peak) / 1024**2 if args.image and str(peak).isdigit() else None
+    result["memory_peak_is_lower_bound"] = result.get("oom_killed", False)
     result["within_test_budgets"] = bool(args.image and result.get("functional_pass") and result["peak_memory_mib"] is not None
         and result["peak_memory_mib"] <= 435.2 and result.get("prepare_max_seconds", 1e9) <= 10
         and result.get("clock_p95_ms", 1e9) <= 1000 and result.get("clock_max_ms", 1e9) <= 5000
@@ -361,14 +362,14 @@ def main():
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--image", help="Already-built production Docker image")
     mode.add_argument("--godot", help="Unconstrained native harness smoke check only")
-    parser.add_argument("--rooms", default="1,2,4")
+    parser.add_argument("--rooms", default="1,2,3,4")
     parser.add_argument("--profiles", default="normal,earth,slime,mixed")
     parser.add_argument("--cycles", type=int, default=2)
     parser.add_argument("--output", type=Path, default=ROOT / "build/capacity/report.json")
     args = parser.parse_args()
     rooms = [int(v) for v in args.rooms.split(",")]
     profiles = args.profiles.split(",")
-    assert rooms and all(r in (1, 2, 4) for r in rooms) and profiles and all(p in ("normal", "earth", "slime", "mixed") for p in profiles)
+    assert rooms and all(1 <= r <= 4 for r in rooms) and profiles and all(p in ("normal", "earth", "slime", "mixed") for p in profiles)
     assert 1 <= args.cycles <= 2, "Capped fixture preserves the two-use skill budget"
     report = {"source": os.environ.get("GITHUB_SHA", "local"), "limits": {"memory_mib": 512, "cpu": 0.15},
         "budgets": {"memory_headroom_percent": 15, "prepare_seconds": 10, "clock_p95_ms": 1000, "clock_max_ms": 5000},

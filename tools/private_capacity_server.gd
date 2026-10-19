@@ -32,7 +32,7 @@ func start() -> void:
             port = int(argument.trim_prefix("--port="))
         elif argument == "--listen=0.0.0.0":
             listen_address = "0.0.0.0"
-    if output_dir.is_empty() or profile not in ["normal", "earth", "slime", "mixed"] or expected_rooms not in [1, 2, 4]:
+    if output_dir.is_empty() or profile not in ["normal", "earth", "slime", "mixed"] or expected_rooms < 1 or expected_rooms > 4:
         push_error("Invalid isolated capacity fixture arguments")
         quit(1)
         return
