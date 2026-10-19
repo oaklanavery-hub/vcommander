@@ -128,7 +128,7 @@
 - First checkpoint: server-authoritative two-seat room service, hidden simultaneous drafting, selection deadlines, immutable shared replays and reconnect credentials.
 - Browser-compatible WebSocket transport and a two-client full-match integration harness; retain PvAI/local mastery behavior.
 - User approved free hosting, shared 1× playback and sixty-second disconnect forfeits. Server timeline, player-facing room/draft/replay/reconnect/result flow and guest viewpoint adapter are implemented.
-- Free-only Render/Docker package, bounded cold-start retry and native/browser/export/container checks. Pending before public launch: zero-charge settings in the connected Render workspace, service deployment and live browser-to-WSS acceptance.
+- Free-only Render/Docker package, bounded cold-start retry and native/browser/export/container checks. Free Singapore service is deployed on a Hobby workspace with no card; two-browser public WSS acceptance passed. The verified endpoint is configured for the v0.10.1 release.
 - Later separate milestones: account-backed PvP records, cloud mastery, matchmaking and competitive ranking. No local PvAI results enter trusted competitive ratings.
 
 ## Further major phase — Game Director scope decision
