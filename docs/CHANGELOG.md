@@ -3,6 +3,8 @@
 ## Unreleased — Private-room development foundation
 
 - User-selected shared 1× clock: wait for both replay downloads, schedule one start, finish Commander openings/contact tails before scoring, and reject early continue/duplicate readiness.
+- Friend-room create/join/code-copy/wait, live hidden drafting, shared battle/result and reconnect/forfeit screens, using the existing pixel portraits, cards, heart meters, attack/VFX and audio. Guest presentation mirrors all ownership/entity/position references to keep the local army on the left.
+- In-memory session/cold-start retries, server-clock countdowns, online menu guidance and ten native friend-playtest captures. Entry appears only for a configured endpoint; free hosting is not yet provisioned.
 - Sixty-second reserved reconnect grace and authoritative forfeits, with chronological ordering against final battles and no PvAI/mastery writes. Protocol v2 adds clock synchronization/readiness; standalone server polling is capped at 30 FPS.
 
 - Isolated server-authoritative two-player rooms reusing existing draft, skill, combat, heart/comeback and Sudden Death rules.

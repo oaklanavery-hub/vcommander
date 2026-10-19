@@ -184,7 +184,7 @@ func _settle_disconnects(room: Dictionary, now: float) -> bool:
         game.tick(game.play_until)
         if game.phase == "complete":
             return true
-    if due.size() == 2 and is_equal_approx(float(due["player"]), float(due["opponent"])):
+    if due.size() == 2 and float(due["player"]) == float(due["opponent"]):
         game.phase = "complete"
         game.match_state.phase = "complete"
         game.end_reason = "both_disconnected"

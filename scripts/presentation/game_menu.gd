@@ -66,7 +66,7 @@ func _button(text: String, callback: Callable, primary := false) -> Button:
     return button
 
 func open_pause() -> void:
-    _page("A moment by the campfire", "Your adventure can wait a moment. Take your time.")
+    _page("A moment by the campfire", "The online match continues while this menu is open. Shared battles stay at 1×." if OnlineSession.active else "Your adventure can wait a moment. Take your time.")
     _button("Resume game", close, true).grab_focus()
     _button("Settings", open_settings)
     _button("How to play", open_help)
@@ -149,6 +149,11 @@ func _back_from_page() -> void:
 
 func confirm_leave(target: String = "res://scenes/main_menu/main_menu.tscn") -> void:
     _leave_target = target
+    if OnlineSession.active and OnlineSession.client.state.get("phase") != "complete":
+        _page("Leave this friend match?", "Your seat is held for 60 seconds after disconnecting. If you do not return, you forfeit. Friend playtests do not affect mastery or rank.")
+        _button("Keep playing", close, true).grab_focus()
+        _button("Leave match", _leave)
+        return
     if not GameState.match_started or GameState.match_state.is_complete():
         _leave()
         return
@@ -161,6 +166,8 @@ func confirm_leave(target: String = "res://scenes/main_menu/main_menu.tscn") -> 
 
 func _leave() -> void:
     close()
+    if OnlineSession.active:
+        OnlineSession.leave()
     GameState.leave_match()
     get_tree().change_scene_to_file(_leave_target)
 
