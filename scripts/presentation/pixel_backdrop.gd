@@ -15,6 +15,6 @@ func _draw() -> void:
     var source := SCENERY.get_size()
     var scale_factor := maxf(size.x / source.x, size.y / source.y)
     var visible_source := size / scale_factor
-    draw_texture_rect_region(Rect2(Vector2.ZERO, size), SCENERY, Rect2((source - visible_source) * 0.5, visible_source))
+    draw_texture_rect_region(SCENERY, Rect2(Vector2.ZERO, size), Rect2((source - visible_source) * 0.5, visible_source))
     # Preserve the illustrated setting while keeping all text legible.
     draw_rect(Rect2(Vector2.ZERO, size), Color(0.025, 0.04, 0.035, 0.37))

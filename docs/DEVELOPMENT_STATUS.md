@@ -14,3 +14,5 @@ Verify this handoff against GitHub and the working tree before resuming.
 - Next concrete action: implement the shared presentation checkpoint and a bounded CI screenshot review stream, then open a draft PR for remote validation.
 
 - Checkpoint 1 implemented: shared FantasyFrame resource and global theme; original lodge/clearing assets; arched portraits and rounded elemental cards; warm title/navigation/mastery/hearts/rewards; two-column Commander gallery; styled controls and CI review stream. Parser/regression/render checks are not yet run. Next: remote exact-head CI, inspect actual screens, then finish the battlefield and hierarchy refinements.
+
+- First checkpoint CI #39465510047 failed on clean import: new eager theme/scenery assets lacked tracked importer metadata; backdrop draw call also had the texture/rectangle arguments reversed. Added explicit lossless/nearest import settings for both scenery PNGs and three control SVGs and corrected the call. No passing new validation is claimed yet.
