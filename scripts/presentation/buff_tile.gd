@@ -27,10 +27,14 @@ func _ready() -> void:
     emblem.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
     body.add_child(emblem)
     var heading := ScreenStyle.label(str(definition.get("display_name", "Warband blessing")), 20)
+    heading.custom_minimum_size.y = 44
+    heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     body.add_child(heading)
     var value := ScreenStyle.label("+%d%% %s" % [int(definition.get("percentage", 0)), str(definition.get("stat", "")).replace("_", " ")], 14)
+    value.custom_minimum_size.y = 36
+    value.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     value.add_theme_color_override("font_color", Color("eed299"))

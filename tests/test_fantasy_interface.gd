@@ -11,6 +11,7 @@ func run() -> void:
     root.size = Vector2i(1280, 720)
     var state := root.get_node("GameState")
     var db := root.get_node("ContentDatabase")
+    state.commander_progress = CommanderProgress.new(db, "")
     var theme := load("res://assets/ui/fantasy_theme.tres") as Theme
     check(theme != null, "shared theme loads on source and exported-pack boots")
     for control_type in ["Button", "OptionButton", "LineEdit"]:
@@ -55,8 +56,19 @@ func run() -> void:
     room._render_offers({"round": 2, "revision": 1, "offer": [{"type": "buff", "id": buff["id"]}], "self": {"buffs": [{"definition": buff, "stacks": 2}]}})
     check(room.offers.get_child(0).stacks == 2, "private blessing uses the supplied public self projection, without reading authoritative draft state")
     room.queue_free()
+    change_scene_to_file("res://scenes/progression/progress_journal.tscn")
+    await scene_changed
+    current_scene._select_tab(1)
+    for i in range(4):
+        await process_frame
+    var statuses := 0
+    for label in current_scene.grid.find_children("*", "Label", true, false):
+        if label.text.begins_with("★") or label.text.begins_with("◇"):
+            statuses += 1
+            check(label.get_line_count() == 1, "achievement status remains a readable horizontal label")
+    check(statuses == 18, "all achievement status labels are covered")
     if not failed:
-        print("Fantasy interface tests passed: compact material controls, source/pack scenery and font, all five blessing layouts and keyboard focus, no progression writes.")
+        print("Fantasy interface tests passed: compact material controls, source/pack scenery and font, all five blessing layouts and keyboard focus, horizontal achievement labels, no progression writes.")
     quit(1 if failed else 0)
 
 func check(condition: bool, message: String) -> void:

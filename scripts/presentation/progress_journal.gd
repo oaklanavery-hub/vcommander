@@ -194,6 +194,7 @@ func _achievement_card(entry: Dictionary) -> void:
     emblem.custom_minimum_size = Vector2(32, 32)
     emblem.accent = Color("d5b578") if entry["earned"] else Color("8f8864")
     heading.add_child(emblem)
+    eyebrow.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     heading.add_child(eyebrow)
     body.add_child(heading)
     body.add_child(_text(str(entry["display_name"]), 21))
