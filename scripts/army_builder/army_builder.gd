@@ -22,6 +22,11 @@ func _ready() -> void:
     preset_store = WarbandPresets.new(ContentDatabase, WarbandPresets.DEFAULT_PATH, 4, GameState.commander_progress)
     ScreenStyle.apply(self)
     ScreenStyle.primary(begin_draft_button)
+    var rewards := Button.new()
+    rewards.text = "Rewards"
+    rewards.custom_minimum_size = Vector2(110, 42)
+    rewards.pressed.connect(func(): ProgressJournal.open(get_tree(), scene_file_path, GameState.selected_commander_id))
+    $Margin/Main/Header.add_child(rewards)
     back_button.pressed.connect(_go_back)
     begin_draft_button.pressed.connect(_begin_draft)
     friend_button = Button.new()
@@ -69,6 +74,10 @@ func _populate_available_cards() -> void:
         var id := str(card.get("id", ""))
         var tile := CardTile.new()
         tile.set_content(card)
+        tile.locked = not GameState.commander_progress.is_card_unlocked(id)
+        if card.has("mastery_unlock"):
+            tile.tooltip_text += "\n\n" + GameState.commander_progress.unlock_description(id)
+            tile.tooltip_text += "\nOpen Rewards to see your progress." if tile.locked else "\nMastery reward unlocked."
         tile.toggle_mode = true
         tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         tile.pressed.connect(_card_pressed.bind(id))
@@ -76,6 +85,10 @@ func _populate_available_cards() -> void:
         cards_grid.add_child(tile)
 
 func _card_pressed(card_id: String) -> void:
+    if not GameState.commander_progress.is_card_unlocked(card_id):
+        var reward := GameState.commander_progress.card_reward(card_id)
+        ProgressJournal.open(get_tree(), scene_file_path, str(reward.get("commander_id", "")))
+        return
     if GameState.army.contains(card_id):
         _unequip_slot(GameState.army.get_cards().find(card_id))
     else:
@@ -87,7 +100,7 @@ func _equip_card(card_id: String) -> void:
         _refresh()
     else:
         _refresh_available_cards()
-        army_status_label.text = "Your warband is full. Remove a card before adding another."
+        army_status_label.text = "Locked · " + GameState.commander_progress.unlock_description(card_id) if not GameState.commander_progress.is_card_unlocked(card_id) else "Your warband is full. Remove a card before adding another."
 
 func _unequip_slot(index: int) -> void:
     if GameState.unequip_card_at(index):
@@ -149,7 +162,7 @@ func _load_preset(index: int) -> void:
     var cards := preset_store.load_slot(GameState.selected_commander_id, index)
     if cards.is_empty():
         _refresh_presets()
-        army_status_label.text = "Preset %d is empty. Build a warband, then Save." % (index + 1)
+        army_status_label.text = "Preset %d is empty or includes a locked card. Build a warband, then Save." % (index + 1)
         return
     GameState.clear_army()
     for id in cards:

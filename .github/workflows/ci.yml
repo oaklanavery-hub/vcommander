@@ -124,6 +124,13 @@ jobs:
           test -s build/qa/mastery_loss.png
           test -s build/qa/mastery_forfeit.png
           test -s build/qa/mastery_save_warning.png
+          timeout 75s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_progression.gd -- --output-dir=build/qa 2>&1 | tee /tmp/progression-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/progression-qa.log; then
+            exit 1
+          fi
+          for view in new achievements_new collection_locked partial unlocked achievements_earned collection_unlocked units_battle units_action reward_result; do
+            test -s "build/qa/progression_${view}.png"
+          done
           timeout 90s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tests/test_private_presentation.gd -- --output-dir=build/qa 2>&1 | tee /tmp/private-qa.log
           if grep -E "SCRIPT ERROR:|ERROR:" /tmp/private-qa.log; then
             exit 1

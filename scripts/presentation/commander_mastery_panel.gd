@@ -7,6 +7,7 @@ var record_label := Label.new()
 var progress_bar := ProgressBar.new()
 var xp_label := Label.new()
 var notice_label := Label.new()
+var reward_label := Label.new()
 var _reward: Dictionary = {}
 var _elapsed := 0.0
 var _record_mode := true
@@ -52,6 +53,11 @@ func _init() -> void:
     xp_label.add_theme_font_size_override("font_size", 12)
     xp_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     body.add_child(xp_label)
+    reward_label.add_theme_font_size_override("font_size", 14)
+    reward_label.add_theme_color_override("font_color", Color("f2d58a"))
+    reward_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+    reward_label.hide()
+    body.add_child(reward_label)
     notice_label.add_theme_font_size_override("font_size", 11)
     notice_label.add_theme_color_override("font_color", Color("a8bcae"))
     notice_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -70,6 +76,13 @@ func show_record(commander_id: String) -> void:
     _show_stats(stats)
     _show_progress(int(stats["xp"]))
     xp_label.text += "\nPermanent levels · Win +100 / Loss +25 XP"
+    for card in _content.get_all_cards():
+        var reward: Dictionary = _profile.card_reward(str(card["id"]))
+        if not reward.is_empty() and reward["commander_id"] == commander_id:
+            xp_label.text += "\n" + ("Unlocked: " if reward["unlocked"] else "Next: ") + str(card["display_name"])
+            if not reward["unlocked"]:
+                xp_label.text += " · Lv. %d + %d wins" % [int(reward["required_level"]), int(reward["required_wins"])]
+    reward_label.hide()
     notice_label.text = _profile.storage_notice()
     show()
 
@@ -86,6 +99,15 @@ func show_reward(receipt: Dictionary) -> void:
     _show_stats(receipt["after"])
     notice_label.text = _profile.storage_notice()
     _show_progress(int(receipt["before"]["xp"]))
+    var rewards: Array[String] = []
+    for card_id in receipt.get("unlocked_cards", []):
+        rewards.append("Unlocked: " + str(_content.get_card(str(card_id)).get("display_name", card_id)))
+    var badges: Array = receipt.get("achievements", [])
+    if not badges.is_empty():
+        rewards.append("%d achievement%s earned" % [badges.size(), "" if badges.size() == 1 else "s"])
+    reward_label.text = "  ·  ".join(rewards)
+    reward_label.tooltip_text = reward_label.text + "\nSee Achievements & rewards from the title or Commander gallery."
+    reward_label.visible = not rewards.is_empty()
     show()
     set_process(true)
     if _audio.reduced_motion:

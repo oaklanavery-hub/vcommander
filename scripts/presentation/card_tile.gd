@@ -8,6 +8,7 @@ var caption := Label.new()
 var empty_caption := "Empty slot"
 var detail_text := ""
 var mastery_level := 1
+var locked := false
 var _hovered := false
 
 func _ready() -> void:
@@ -69,7 +70,7 @@ func set_content(content: Dictionary, is_commander := false) -> void:
 
 func _draw() -> void:
     caption.modulate = Color("f5dfa7") if button_pressed else Color("f1e8d3")
-    portrait.modulate = Color(1.07, 1.07, 1.04) if _hovered else Color.WHITE
+    portrait.modulate = Color("798b85") if locked else (Color(1.07, 1.07, 1.04) if _hovered else Color.WHITE)
     var footer := ScreenStyle.frame(Color(0.06, 0.1, 0.08, 0.42), Color.TRANSPARENT, 7)
     footer.set_border_width_all(0)
     footer.corner_radius_top_left = 0
@@ -86,6 +87,12 @@ func _draw_badges(canvas: Control) -> void:
     if definition.is_empty():
         return
     _element_badge(Vector2(19, 18), str(definition.get("element", "earth")), canvas)
+    if locked:
+        var banner := ScreenStyle.frame(Color("182a29"), Color("9d8c60"), 4)
+        banner.set_content_margin_all(0)
+        banner.set_border_width_all(1)
+        canvas.draw_style_box(banner, Rect2(10, size.y - 70, size.x - 20, 22))
+        canvas.draw_string(ThemeDB.fallback_font, Vector2(10, size.y - 54), "LOCKED · MASTERY", HORIZONTAL_ALIGNMENT_CENTER, size.x - 20, 10, Color("e4c995"))
     if commander:
         canvas.draw_string(ThemeDB.fallback_font, Vector2(38, 23), "MASTERY %d" % mastery_level, HORIZONTAL_ALIGNMENT_LEFT, size.x - 42, 10, Color("f0ddb0"))
     else:

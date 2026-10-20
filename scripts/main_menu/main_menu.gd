@@ -46,6 +46,10 @@ func _ready() -> void:
     ScreenStyle.primary(play_button)
     play_button.pressed.connect(start_game)
     main.add_child(play_button)
+    var rewards := _menu_button("Achievements & rewards", 44)
+    rewards.name = "Achievements"
+    rewards.pressed.connect(func(): ProgressJournal.open(get_tree(), scene_file_path))
+    main.add_child(rewards)
     var how := _menu_button("How to play", 44)
     how.pressed.connect(GameMenu.open_help)
     main.add_child(how)
