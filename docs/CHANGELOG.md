@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.11.0 — Achievements and Commander rewards
+
+- Pause friend PvP behind a visible Coming Soon gate.
+- Add permanent local achievements and automatic mastery unit unlocks, preserving existing XP and starter cards.
+- Add Ash Phoenix, Tidal Guard, Spore Sage and Jelly Medic at Level 3 + three Commander wins, with original pixel portraits and locked collection previews.
+- Add an eighteen-achievement journal, Commander filters, result reward notifications and safe old-profile migration/backfill.
+
 ## v0.10.1 — Free hosted friend matches
 
 - Enable **Friend match** in the warband builder using the verified public Render WSS endpoint. Create a room and share its six-character code, or join a friend with your own Commander and four cards.

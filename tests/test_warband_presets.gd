@@ -13,7 +13,7 @@ func run() -> void:
     var state = root.get_node("GameState")
     var store := WarbandPresets.new(db, STORAGE)
     var fire: Array[String] = []
-    for card in db.get_cards_by_set("set_fire_01"):
+    for card in db.get_cards_by_set("set_fire_01").slice(0, 4):
         fire.append(str(card["id"]))
     var mixed: Array[String] = [fire[0], fire[1], "card_water_01", "card_earth_01"]
     check(store.save_slot("commander_fire_01", 0, mixed) == OK, "mixed-element warband can be saved")
@@ -68,7 +68,7 @@ func run() -> void:
         if button.visible:
             visible += 1
             check(button.definition.get("element") == "water", "element filter matches visible cards")
-    check(visible == 4, "element filter reveals all four matching cards")
+    check(visible == db.get_cards_by_set("set_water_01").size(), "element filter reveals the complete matching collection, including reward previews")
     await process_frame
     await process_frame
     var bounds: Rect2 = builder.get_node("Margin/Main").get_global_rect()

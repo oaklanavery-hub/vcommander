@@ -24,6 +24,7 @@ func run() -> void:
         elif argument.begins_with("--room="):
             code = argument.trim_prefix("--room=")
     session = root.get_node("OnlineSession")
+    session.available = true # Explicit isolated QA seam; ordinary entry remains Coming Soon.
     print("Browser PvP endpoint: ", session.endpoint)
     var db := root.get_node("ContentDatabase")
     var state := root.get_node("GameState")

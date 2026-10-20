@@ -134,7 +134,7 @@ func open_help() -> void:
         var detail := ScreenStyle.label(step[1], 16)
         detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
         _body.add_child(detail)
-    var mastery := ScreenStyle.label("Mastery: full-match win +100 XP · loss +25 XP · 250 XP per level. Leaving after battle begins counts as a loss with no XP.", 14)
+    var mastery := ScreenStyle.label("Mastery: full-match win +100 XP · loss +25 XP · 250 XP per level. Level 3 + 3 wins unlocks a new unit. Leaving a played match: loss, no XP.", 14)
     mastery.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     _body.add_child(mastery)
     _body.add_child(ScreenStyle.label("30 seconds per pick • Esc: menu • Space: pause battle • 1 / 2 / 4: speed", 14))

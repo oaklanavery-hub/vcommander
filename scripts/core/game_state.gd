@@ -49,7 +49,7 @@ func get_selected_signature_set() -> Dictionary:
     return ContentDatabase.get_signature_set(str(commander.get("signature_set_id", "")))
 
 func equip_card(card_id: String) -> bool:
-    if ContentDatabase.get_card(card_id).is_empty():
+    if not commander_progress.is_card_unlocked(card_id):
         return false
     _reset_match_runtime()
     return army.equip(card_id)
@@ -88,6 +88,9 @@ func is_full_set_active() -> bool:
 func begin_match(seed_value: int) -> bool:
     if selected_commander_id.is_empty() or not army.is_full():
         return false
+    for card_id in army.get_cards():
+        if not commander_progress.is_card_unlocked(card_id):
+            return false
     _reset_match_runtime()
     match_seed = seed_value
     match_state.start(int(ContentDatabase.get_game_balance().get("match", {}).get("losses_to_lose_match", 4)))
@@ -101,7 +104,7 @@ func begin_match(seed_value: int) -> bool:
     match_started = true
     battle_result.clear()
     opponent = AiScript.new()
-    if not opponent.configure(ContentDatabase.get_all_commanders(), ContentDatabase.get_all_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571):
+    if not opponent.configure(ContentDatabase.get_all_commanders(), commander_progress.available_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571):
         match_started = false
         return false
     opponent_public_side = opponent.get_side()

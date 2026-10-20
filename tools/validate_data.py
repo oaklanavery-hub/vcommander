@@ -157,12 +157,53 @@ def main() -> int:
     if not isinstance(formation["maximum_rows"], int):
         raise ValueError("formation.maximum_rows must be a whole number")
 
-    mastery = read_group(ROOT / "data" / "progression").get("commander_mastery", {})
+    progression = read_group(ROOT / "data" / "progression")
+    mastery = progression.get("commander_mastery", {})
     if not isinstance(mastery.get("xp_per_level"), int) or isinstance(mastery.get("xp_per_level"), bool) or mastery["xp_per_level"] <= 0:
         raise ValueError("Mastery xp_per_level must be a positive whole number")
     for outcome, expected in {"win": 100, "loss": 25, "forfeit": 0}.items():
         if mastery.get("match_xp", {}).get(outcome) != expected:
             raise ValueError(f"Approved mastery {outcome} reward must be {expected}")
+
+    def positive_integer(value, label):
+        if type(value) is not int or value < 1:
+            raise ValueError(f"{label} must be a positive whole number")
+
+    achievements = progression.get("achievements", {}).get("achievements", [])
+    if not isinstance(achievements, list) or not achievements:
+        raise ValueError("An achievement catalog is required")
+    seen = set()
+    for entry in achievements:
+        ident = entry.get("id")
+        if not ident or ident in seen or not entry.get("display_name") or not entry.get("description"):
+            raise ValueError("Achievements need unique IDs, names and descriptions")
+        seen.add(ident)
+        commander = entry.get("commander_id", "")
+        if commander and commander not in commanders:
+            raise ValueError(f"Unknown achievement Commander: {commander}")
+        conditions = entry.get("conditions")
+        if not isinstance(conditions, list) or not conditions:
+            raise ValueError(f"{ident} needs conditions")
+        for condition in conditions:
+            if condition.get("metric") not in {"wins", "completed", "level", "commanders_won"}:
+                raise ValueError(f"Unsupported achievement metric in {ident}")
+            if commander and condition["metric"] == "commanders_won":
+                raise ValueError("Commander coverage is a global metric")
+            positive_integer(condition.get("target"), f"{ident} target")
+    for card in cards.values():
+        requirement = card.get("mastery_unlock")
+        if requirement is None:
+            continue
+        if not isinstance(requirement, dict) or requirement.get("commander_id") not in commanders:
+            raise ValueError(f"{card['id']} needs a valid reward Commander")
+        owner = commanders[requirement["commander_id"]]
+        if card["set_id"] != owner["signature_set_id"]:
+            raise ValueError("Mastery units must belong to their reward Commander's theme")
+        positive_integer(requirement.get("level"), "mastery unlock level")
+        positive_integer(requirement.get("wins"), "mastery unlock wins")
+    for set_id, members in cards_by_set.items():
+        if sum("mastery_unlock" not in card for card in members) < 4:
+            raise ValueError(f"{set_id} needs four unlocked starter cards")
 
     print(
         f"Data OK: {len(commanders)} commanders, {len(cards)} cards, "

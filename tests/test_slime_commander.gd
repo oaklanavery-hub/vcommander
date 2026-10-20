@@ -7,7 +7,7 @@ func _init() -> void:
     call_deferred("run")
 
 func side(id: String, skill: bool = false, theme: bool = true) -> Dictionary:
-    var cards: Array = db.get_cards_by_set("set_slime_01")
+    var cards: Array = db.get_cards_by_set("set_slime_01").slice(0, 4)
     var counts := {}
     for card in cards:
         counts[str(card["id"])] = 1
@@ -37,8 +37,8 @@ func spawns(sim: CombatSimulator, cause: String) -> Array[Dictionary]:
 func run() -> void:
     db = root.get_node("ContentDatabase")
     var expected := [[1, 4], [2, 4], [2, 6], [2, 6]]
-    var cards: Array = db.get_cards_by_set("set_slime_01")
-    check(cards.size() == 4, "Slime Court contains four unique cards")
+    var cards: Array = db.get_cards_by_set("set_slime_01").slice(0, 4)
+    check(cards.size() == 4, "Slime Court keeps its four original starter cards")
     for i in range(cards.size()):
         check([int(cards[i]["summon_amount"]), int(cards[i]["unit_cap"])] == expected[i], "user-specified Slime recruit amounts/caps")
     check(SetBonusChecker.is_complete(cards, "set_slime_01", 4), "four Slime cards activate the theme")

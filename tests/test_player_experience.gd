@@ -80,7 +80,7 @@ func run() -> void:
     for button in current_scene.available_card_buttons.values():
         if button.visible:
             visible_cards += 1
-    check(visible_cards == 4, "Commander theme filter narrows the collection")
+    check(visible_cards == root.get_node("ContentDatabase").get_cards_by_set(state.get_selected_commander()["signature_set_id"]).size(), "Commander theme filter includes its starters and reward preview")
     current_scene._toggle_filter()
     check(state.begin_match(1729), "starter match can begin")
     var draft = await open_scene("res://scenes/draft/draft.tscn")

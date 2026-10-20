@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "id": "card_water_05",
+  "display_name": "Tidal Guard",
+  "element": "water",
+  "set_id": "set_water_01",
+  "status": "playtest",
+  "role": "melee",
+  "summon_amount": 2,
+  "unit_cap": 4,
+  "stats": {
+    "health": 620,
+    "attack": 95,
+    "defense": 34,
+    "attack_speed": 85,
+    "movement_speed": 90,
+    "range": 1
+  },
+  "ability": {
+    "id": "shell_cleave",
+    "display_name": "Shell Cleave",
+    "type": "empowered_attack",
+    "every_n_attacks": 3,
+    "attack_pct": 160,
+    "description": "Every third attack deals 160% of attack before normal defense."
+  },
+  "mastery_unlock": {
+    "commander_id": "commander_water_01",
+    "level": 3,
+    "wins": 3
+  },
+  "tags": [
+    "water",
+    "melee",
+    "mastery_reward"
+  ]
+}

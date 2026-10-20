@@ -424,6 +424,98 @@
         "......c.........",
         "................"
       ]
+    },
+    "card_fire_05": {
+      "name": "Ash Phoenix",
+      "element": "fire",
+      "role": "healer",
+      "pixels": [
+        "................",
+        "................",
+        ".......g........",
+        ".......a.l......",
+        "...a..aoaaa.....",
+        "..gbao.aagca....",
+        "...aboa.alao....",
+        "...aaagg.ll.l...",
+        "...laooa.geloa..",
+        "....gaooaageaa..",
+        "...ga.aooaglag..",
+        "..aaaaoaaaa.ga..",
+        "..gaoaa.o.......",
+        "....l..ogo.g....",
+        "................",
+        "................"
+      ]
+    },
+    "card_water_05": {
+      "name": "Tidal Guard",
+      "element": "water",
+      "role": "melee",
+      "pixels": [
+        "................",
+        "................",
+        "................",
+        ".......w..ol....",
+        "......alwaola...",
+        ".....aldclwwa...",
+        "......aoalwca...",
+        "......pwwdooaa..",
+        ".wllooboodbopp..",
+        "..wlapbobocobco.",
+        ".....adwpdopdd..",
+        "...oadawodcdc...",
+        "...daoda..poo...",
+        "....owl.........",
+        "................",
+        "................"
+      ]
+    },
+    "card_earth_05": {
+      "name": "Spore Sage",
+      "element": "earth",
+      "role": "range",
+      "pixels": [
+        "................",
+        "................",
+        ".....a..........",
+        "....oggo........",
+        "...b.baao.......",
+        ".....gbgacec....",
+        "....bagbbbgg.b..",
+        "....cbolcbl..w..",
+        "...obbblc...bo..",
+        "...ogoabbo.bo...",
+        "....obobgool....",
+        "....oboocgo.....",
+        "...bbgglabo.....",
+        "....b....b......",
+        "................",
+        "................"
+      ]
+    },
+    "card_slime_05": {
+      "name": "Jelly Medic",
+      "element": "slime",
+      "role": "healer",
+      "pixels": [
+        "................",
+        "................",
+        "................",
+        "....WGG.........",
+        ".....oooe.......",
+        ".....SoeWwo.....",
+        "......SeeeS.....",
+        ".....cSSoSWS....",
+        ".....SSSSSSoo...",
+        ".....SSSSSwwdb..",
+        ".....eoSSSoWG...",
+        "....obeoSSSSS...",
+        "....bSeSSSWp....",
+        ".....SSS.oSS....",
+        "................",
+        "................"
+      ]
     }
   }
 }

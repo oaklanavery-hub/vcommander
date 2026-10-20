@@ -131,6 +131,14 @@
 - Free-only Render/Docker package, bounded cold-start retry and native/browser/export/container checks. Free Singapore service is deployed on a Hobby workspace with no card; two-browser public WSS acceptance passed. The verified endpoint is configured for the v0.10.1 release.
 - Later separate milestones: account-backed PvP records, cloud mastery, matchmaking and competitive ranking. No local PvAI results enter trusted competitive ratings.
 
+## v0.11.0 — Achievements and mastery unit rewards
+
+- Friend PvP is paused behind Coming Soon while the private-room foundation is retained.
+- Eighteen local achievements with progress, permanent earned status and Commander filters.
+- One new reward unit per theme at Level 3 and three wins; retain all sixteen starter cards and existing XP rules.
+- Original pixel reward artwork, locked collection previews, result feedback and an Achievements & Rewards journal.
+- Version-1 save migration/backfill, permanent entitlements and headless equipment/preset validation; equal available PvAI collection.
+
 ## Further major phase — Game Director scope decision
 
 The elemental PvAI vertical slice, requested Slime Court roster expansion and personal Commander mastery are implemented. Private friend-room PvP development is approved above. Campaign/run progression, account-backed competitive rankings and VTuber/mascot roster integration still need explicit direction. Human playtesting should inform further balance values; current tuning remains provisional.

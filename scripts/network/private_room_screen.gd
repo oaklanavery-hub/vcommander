@@ -154,11 +154,11 @@ func _refresh() -> void:
         return
     _clear_battle()
     main.get_parent().show()
-    status_label.text = session.status
+    status_label.text = session.status if session.available else "PvP · Coming Soon"
     entry.visible = phase.is_empty()
-    create_button.disabled = session.endpoint.is_empty() or session.active
-    join_button.disabled = session.endpoint.is_empty() or session.active
-    resume_button.disabled = session.active
+    create_button.disabled = not session.available or session.endpoint.is_empty() or session.active
+    join_button.disabled = not session.available or session.endpoint.is_empty() or session.active
+    resume_button.disabled = not session.available or session.active
     resume_button.visible = session.client.has_session()
     copy_button.visible = phase == "waiting"
     room_label.text = "Room " + session.client.room if not phase.is_empty() else "Private room"

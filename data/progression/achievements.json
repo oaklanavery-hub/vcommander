@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "id": "achievements",
+  "status": "playtest",
+  "achievements": [
+    {
+      "id": "first_steps",
+      "display_name": "First Steps",
+      "description": "Complete a match.",
+      "conditions": [
+        {
+          "metric": "completed",
+          "target": 1
+        }
+      ]
+    },
+    {
+      "id": "first_victory",
+      "display_name": "First Victory",
+      "description": "Win your first match.",
+      "conditions": [
+        {
+          "metric": "wins",
+          "target": 1
+        }
+      ]
+    },
+    {
+      "id": "seasoned",
+      "display_name": "Seasoned Adventurer",
+      "description": "Complete 10 matches.",
+      "conditions": [
+        {
+          "metric": "completed",
+          "target": 10
+        }
+      ]
+    },
+    {
+      "id": "veteran",
+      "display_name": "Crossing Veteran",
+      "description": "Complete 25 matches.",
+      "conditions": [
+        {
+          "metric": "completed",
+          "target": 25
+        }
+      ]
+    },
+    {
+      "id": "victor",
+      "display_name": "Victorious",
+      "description": "Win 10 matches.",
+      "conditions": [
+        {
+          "metric": "wins",
+          "target": 10
+        }
+      ]
+    },
+    {
+      "id": "alliance",
+      "display_name": "Elemental Alliance",
+      "description": "Win with all four Commanders.",
+      "conditions": [
+        {
+          "metric": "commanders_won",
+          "target": 4
+        }
+      ]
+    },
+    {
+      "id": "fire_adept",
+      "display_name": "Ember Adept",
+      "description": "Reach Level 3 and win 3 matches with the Fire Commander.",
+      "commander_id": "commander_fire_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 3
+        },
+        {
+          "metric": "wins",
+          "target": 3
+        }
+      ]
+    },
+    {
+      "id": "fire_expert",
+      "display_name": "Ember Expert",
+      "description": "Reach Level 5 and win 10 matches with the Fire Commander.",
+      "commander_id": "commander_fire_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 5
+        },
+        {
+          "metric": "wins",
+          "target": 10
+        }
+      ]
+    },
+    {
+      "id": "fire_master",
+      "display_name": "Ember Master",
+      "description": "Reach Level 10 and win 25 matches with the Fire Commander.",
+      "commander_id": "commander_fire_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 10
+        },
+        {
+          "metric": "wins",
+          "target": 25
+        }
+      ]
+    },
+    {
+      "id": "water_adept",
+      "display_name": "Tide Adept",
+      "description": "Reach Level 3 and win 3 matches with the Water Commander.",
+      "commander_id": "commander_water_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 3
+        },
+        {
+          "metric": "wins",
+          "target": 3
+        }
+      ]
+    },
+    {
+      "id": "water_expert",
+      "display_name": "Tide Expert",
+      "description": "Reach Level 5 and win 10 matches with the Water Commander.",
+      "commander_id": "commander_water_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 5
+        },
+        {
+          "metric": "wins",
+          "target": 10
+        }
+      ]
+    },
+    {
+      "id": "water_master",
+      "display_name": "Tide Master",
+      "description": "Reach Level 10 and win 25 matches with the Water Commander.",
+      "commander_id": "commander_water_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 10
+        },
+        {
+          "metric": "wins",
+          "target": 25
+        }
+      ]
+    },
+    {
+      "id": "earth_adept",
+      "display_name": "Grove Adept",
+      "description": "Reach Level 3 and win 3 matches with the Earth Commander.",
+      "commander_id": "commander_earth_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 3
+        },
+        {
+          "metric": "wins",
+          "target": 3
+        }
+      ]
+    },
+    {
+      "id": "earth_expert",
+      "display_name": "Grove Expert",
+      "description": "Reach Level 5 and win 10 matches with the Earth Commander.",
+      "commander_id": "commander_earth_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 5
+        },
+        {
+          "metric": "wins",
+          "target": 10
+        }
+      ]
+    },
+    {
+      "id": "earth_master",
+      "display_name": "Grove Master",
+      "description": "Reach Level 10 and win 25 matches with the Earth Commander.",
+      "commander_id": "commander_earth_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 10
+        },
+        {
+          "metric": "wins",
+          "target": 25
+        }
+      ]
+    },
+    {
+      "id": "slime_adept",
+      "display_name": "Jelly Adept",
+      "description": "Reach Level 3 and win 3 matches with Slime Princess.",
+      "commander_id": "commander_slime_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 3
+        },
+        {
+          "metric": "wins",
+          "target": 3
+        }
+      ]
+    },
+    {
+      "id": "slime_expert",
+      "display_name": "Jelly Expert",
+      "description": "Reach Level 5 and win 10 matches with Slime Princess.",
+      "commander_id": "commander_slime_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 5
+        },
+        {
+          "metric": "wins",
+          "target": 10
+        }
+      ]
+    },
+    {
+      "id": "slime_master",
+      "display_name": "Jelly Master",
+      "description": "Reach Level 10 and win 25 matches with Slime Princess.",
+      "commander_id": "commander_slime_01",
+      "conditions": [
+        {
+          "metric": "level",
+          "target": 10
+        },
+        {
+          "metric": "wins",
+          "target": 25
+        }
+      ]
+    }
+  ]
+}

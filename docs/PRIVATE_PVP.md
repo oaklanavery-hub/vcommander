@@ -1,5 +1,9 @@
 # Private friend playtest
 
+**Availability: Coming Soon.** The user paused PvP on 2026-10-20. Ordinary title/warband/room flows cannot create, join or reconnect, even with a server URL override. The implementation and isolated integration checks remain. The deployed service is unchanged; this client release introduces new content and must not be pointed at the old server for public acceptance. Re-enabling requires a compatible server release and a decision about collection ownership.
+
+The remainder records the implemented playtest and developer workflow. QA scripts explicitly enable their in-memory OnlineSession gate; configuring a URL alone does not enable the player feature.
+
 The approved unranked friend playtest includes create/join codes, hidden drafting, shared 1× battles and sixty-second reconnect forfeits. It does not grant local mastery or competitive rank. The Free Singapore Render service is deployed at `wss://vcommander-friend-playtest.onrender.com`, and hosted two-browser acceptance passed in [CI #39261069996](https://github.com/oaklanavery-hub/vcommander/actions/runs/39261069996). The game configures that verified endpoint by default. One private room can run at a time. The local harness needs no provider account or database.
 
 ## Run and verify

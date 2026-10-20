@@ -4,11 +4,12 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.10.1 — Free friend matches**
+**v0.11.0 — Achievements & Commander rewards**
 
 The current playable prototype supports:
 
-- private friend-room PvP: invitation codes, hidden drafting, shared 1× battles and sixty-second reconnect grace, hosted on a free one-room server
+- **PvP · Coming Soon**: friend matches are paused; the tested private-room implementation is retained
+- eighteen local achievements and four new mastery reward companions, with progress in the Achievements & Rewards journal
 
 - separate personal PvAI records for every Commander: matches, wins/losses/forfeits, win rate, permanent mastery levels and XP progress
 - full-match win +100 XP, completed loss +25 XP, forfeit +0 XP; every 250 XP earns a level, with no combat stat advantages
@@ -45,7 +46,7 @@ The current playable prototype supports:
 - deterministic left-vs-right auto-combat after the opening draft
 - automatic Tank → Melee → Backline formation, target locking, movement/collision and ranged spacing
 - Commander skills and the starter roster's data-driven unit abilities
-- sixteen distinct Army units plus summoned plants, full-field battle playback, HP bars and match heart meters
+- sixteen starter Army units and four mastery reward units plus summoned plants, full-field battle playback, HP bars and match heart meters
 - eight-direction movement poses, four-direction attacks, neutral idle/death and combat VFX
 - optional sound, reduced motion, HP numbers, pause and keyboard shortcuts
 - seeded match input, Commander-theme quick equip and visible opponent progress
@@ -83,7 +84,7 @@ Pull requests run CI. On `main`, Deploy Web calls that same validation workflow 
 
 ## Local start
 
-The private friend playtest has create/join codes, hidden drafting, shared 1× battles and sixty-second reconnect forfeits. It grants no mastery or ranked rewards. Choose **Friend match** after building four cards, then create/share a room code or join a friend. The free Singapore server hosts one room at a time and may take about a minute to wake. See [the playtest and free-hosting guide](docs/PRIVATE_PVP.md).
+Friend PvP is **Coming Soon** while development focuses on PvAI progression. The private-room implementation and integration tests are retained for later. See [the developer playtest guide](docs/PRIVATE_PVP.md).
 
 Open `project.godot` using Godot 4.7 stable and run the project. Choose **Play**, select a Commander card and choose **Next**. Keep their prefilled starter warband or select cards to add/remove companions, choose **Battle**, spend all opening picks, then start the battle. Continue through the results until the match ends. **How to play** is available from the title menu and **Menu / Esc** throughout the game. Local menus pause the draft clock; leaving an active match asks for confirmation.
 
@@ -118,8 +119,23 @@ CI renders 89 desktop captures, including title animation phases/reduced motion,
 
 ## Commander mastery
 
-Each Commander starts at Level 1 and keeps a separate personal PvAI match record on this device/browser. Win a complete match for 100 XP, finish a lost match for 25 XP, and earn one permanent level every 250 XP. A better win ratio earns mastery faster at the same match count. Individual battle rounds never grant separate XP; mastery provides no combat stats or drafting advantages.
+Each Commander starts at Level 1 and keeps a separate personal PvAI match record on this device/browser. Win a complete match for 100 XP, finish a lost match for 25 XP, and earn one permanent level every 250 XP. A better win ratio earns mastery faster at the same match count. Individual battle rounds never grant separate XP; mastery levels provide no combat stat multipliers. New collection rewards are described below.
 
 Leaving before the first battle has no record. Leaving or closing an unfinished game after battle begins counts as one loss/forfeit with zero XP; interrupted stored matches settle when the game next opens. An already resolved final match keeps its actual outcome. Replaying a result never awards XP again. The gallery shows each Commander's level, record, win rate and next-level progress; the final match result animates the XP gain after battle playback.
 
 Records use local browser/device storage and a backup. Clearing site data or using a different browser/device does not retain the same record; private browsing or blocked storage may prevent saving. Visible notices explain save/load failures, and an unreadable profile is preserved instead of silently overwritten. This release does not provide account sync, online competitive ratings or a shared leaderboard. Automated test/capture scripts use isolated profiles.
+
+## Achievements and unit rewards
+
+Open **Achievements & rewards** on the title screen, or **Rewards** in the Commander gallery/warband builder. Eighteen achievements track completed matches, wins, Commander coverage and mastery milestones. Forfeits do not count as completed matches for achievements. Earned achievements and unlocked units remain permanent on this device.
+
+Reach **Level 3 and three wins** with a Commander to unlock its first new companion automatically:
+
+| Commander | Reward | Role | Recruit / cap |
+|---|---|---|---|
+| Fire | Ash Phoenix | Healer with a small healing sanctuary | 1 / 2 |
+| Water | Tidal Guard | Melee with an empowered third strike | 2 / 4 |
+| Earth | Spore Sage | Ranged splash attacker | 1 / 3 |
+| Slime Princess | Jelly Medic | Healer with a medium healing pool | 1 / 3 |
+
+All sixteen original cards stay available. Reward cards expand the collection to twenty, may be mixed into any Commander's four-card warband, and are not auto-equipped. Click a locked card to see its requirements. Existing qualifying mastery records receive rewards automatically after updating. These new units have initial playtest tuning. Browser/site-data clearing removes local progression; no account or purchase is required.

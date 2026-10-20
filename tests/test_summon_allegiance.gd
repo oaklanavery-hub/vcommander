@@ -5,7 +5,7 @@ func _init() -> void:
     call_deferred("run")
 
 func side(id: String, db, skill: bool = true) -> Dictionary:
-    var cards: Array = db.get_cards_by_set("set_earth_01")
+    var cards: Array = db.get_cards_by_set("set_earth_01").slice(0, 4)
     var counts := {}
     for card in cards:
         counts[str(card["id"])] = 1

@@ -15,6 +15,11 @@ var mastery_panel := CommanderMasteryPanel.new()
 func _ready() -> void:
     ScreenStyle.apply(self)
     ScreenStyle.primary(build_army_button)
+    var rewards := Button.new()
+    rewards.text = "Rewards"
+    rewards.custom_minimum_size = Vector2(110, 46)
+    rewards.pressed.connect(func(): ProgressJournal.open(get_tree(), scene_file_path, selected_commander_id))
+    $Margin/Main/Header.add_child(rewards)
     mastery_panel.configure(GameState.commander_progress, ContentDatabase, GameAudio)
     $Margin/Main/Body/Portrait/Content.add_child(mastery_panel)
     build_army_button.pressed.connect(_open_army_builder)

@@ -21,6 +21,7 @@ func run() -> void:
     db = root.get_node("ContentDatabase")
     state = root.get_node("GameState")
     session = root.get_node("OnlineSession")
+    session.available = true # Explicit isolated QA seam; ordinary entry remains Coming Soon.
     for path in ["res://scripts/network/private_room_screen.gd", "res://scripts/network/shared_battle_presentation.gd", "res://scripts/combat/combat_screen.gd"]:
         var script = load(path)
         if script == null or not script.can_instantiate():
@@ -64,7 +65,8 @@ func run() -> void:
     var guest_commander: Dictionary = db.get_all_commanders()[2]
     var cards: Array = []
     for card in db.get_cards_by_set(guest_commander["signature_set_id"]):
-        cards.append(card["id"])
+        if not card.has("mastery_unlock"):
+            cards.append(card["id"])
     guest.join_room(session.client.room, guest_commander["id"], cards)
     if not await until(func(): return session.client.state.get("phase") == "draft" and guest.state.get("phase") == "draft", "friend joins UI draft"):
         finish()
