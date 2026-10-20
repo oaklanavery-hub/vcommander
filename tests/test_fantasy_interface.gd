@@ -24,6 +24,8 @@ func run() -> void:
         check(texture != null and texture.get_width() >= 1280 and texture.get_width() <= 2048, "production scenery is present and bounded: " + path)
     var font := load("res://assets/fonts/PixelifySans.ttf") as Font
     check(font != null and font.get_string_size("VCommander", HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x > 30, "self-hosted pixel display face is usable")
+    var font_notice := FileAccess.get_file_as_string("res://assets/fonts/OFL-PixelifySans.txt")
+    check(font_notice.contains("SIL OPEN FONT LICENSE"), "font notice accompanies the actual exported game")
     var before: Dictionary = {}
     for commander in db.get_all_commanders():
         before[str(commander["id"])] = state.commander_progress.record(str(commander["id"])).duplicate(true)
