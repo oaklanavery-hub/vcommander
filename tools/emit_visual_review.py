@@ -18,10 +18,12 @@ VIEWS = (
     "fantasy_gallery_water", "fantasy_gallery_earth", "fantasy_gallery_slime",
     "fantasy_battle_details", "fantasy_blessings",
 )
+emitted = 0
 for name in VIEWS:
     source = ROOT / (name + ".png")
     if not source.is_file():
-        raise SystemExit("Missing native review image: " + str(source))
+        print("VC_REVIEW_MISSING " + name, flush=True)
+        continue
     with Image.open(source) as image:
         image = image.convert("RGB")
         image.thumbnail((1280, 720), Image.Resampling.NEAREST)
@@ -40,3 +42,6 @@ for name in VIEWS:
     for start in range(0, len(encoded), 8000):
         print("VC_REVIEW_CHUNK " + name + " " + encoded[start:start + 8000], flush=True)
     print("VC_REVIEW_END " + name, flush=True)
+    emitted += 1
+if not emitted:
+    raise SystemExit("No native screenshots available for review")

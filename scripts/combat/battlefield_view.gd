@@ -23,6 +23,9 @@ var replay_enabled := false
 var replay_complete := false
 var frozen_sides: Array[String] = []
 
+func _ready() -> void:
+    texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
 func configure_frost() -> void:
     frozen_sides.clear()
     for side in _sides:

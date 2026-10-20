@@ -46,11 +46,9 @@ func run() -> void:
         quit(1)
         return
     # A legal three-blessing offer, including the two longest names.
-    state.draft.current_offer = []
-    var selected: Array[String] = []
+    state.draft.current_offer.clear()
     for buff in db.get_all_buffs():
         if str(buff["stat"]).ends_with("speed") or str(buff["stat"]) == "defense":
-            selected.append(str(buff["id"]))
             state.draft.current_offer.append({"type": "buff", "id": buff["id"]})
     change_scene_to_file("res://scenes/draft/draft.tscn")
     await scene_changed

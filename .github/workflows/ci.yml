@@ -146,9 +146,11 @@ jobs:
           done
 
       - name: Emit bounded native review previews
+        if: always()
         run: /usr/bin/python3 tools/emit_visual_review.py
 
       - name: Upload visual QA screenshots
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-visual-qa
