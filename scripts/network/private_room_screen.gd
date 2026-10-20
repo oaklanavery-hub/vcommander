@@ -229,7 +229,9 @@ func _render_offers(view: Dictionary) -> void:
             var buff := ContentDatabase.get_buff(str(option["id"]))
             var blessing := BuffTile.new()
             blessing.definition = buff
-            blessing.stacks = int(view["self"].get("buff_stacks", {}).get(str(option["id"]), 0))
+            for applied in view["self"].get("buffs", []):
+                if str(applied.get("definition", {}).get("id", "")) == str(option["id"]):
+                    blessing.stacks = int(applied.get("stacks", 0))
             button = blessing
         button.custom_minimum_size = Vector2(200, 216)
         button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

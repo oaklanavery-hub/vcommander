@@ -80,9 +80,6 @@ func _draw() -> void:
     footer.corner_radius_top_right = 0
     draw_style_box(footer, Rect2(Vector2(3, size.y - 43), Vector2(size.x - 6, 39)))
     draw_line(Vector2(12, size.y - 43), Vector2(size.x - 12, size.y - 43), Color(0.88, 0.75, 0.46, 0.35))
-    if button_pressed and not definition.is_empty():
-        var ribbon := PackedVector2Array([Vector2(size.x - 31, size.y - 46), Vector2(size.x - 13, size.y - 46), Vector2(size.x - 13, size.y - 29), Vector2(size.x - 22, size.y - 34), Vector2(size.x - 31, size.y - 29)])
-        draw_colored_polygon(ribbon, Color("d6b476"))
     if definition.is_empty():
         var center := Vector2(size.x * 0.5, size.y * 0.48).floor()
         draw_rect(Rect2(center - Vector2(2, 12), Vector2(4, 24)), Color("819478"))

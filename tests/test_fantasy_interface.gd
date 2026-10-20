@@ -49,6 +49,12 @@ func run() -> void:
     for commander_id in before:
         check(state.commander_progress.record(commander_id) == before[commander_id], "constructing and focusing cosmetic cards never changes progression")
     row.queue_free()
+    var room := load("res://scenes/online/private_room.tscn").instantiate()
+    root.add_child(room)
+    var buff: Dictionary = db.get_all_buffs()[0]
+    room._render_offers({"round": 2, "revision": 1, "offer": [{"type": "buff", "id": buff["id"]}], "self": {"buffs": [{"definition": buff, "stacks": 2}]}})
+    check(room.offers.get_child(0).stacks == 2, "private blessing uses the supplied public self projection, without reading authoritative draft state")
+    room.queue_free()
     if not failed:
         print("Fantasy interface tests passed: compact material controls, source/pack scenery and font, all five blessing layouts and keyboard focus, no progression writes.")
     quit(1 if failed else 0)

@@ -4,9 +4,13 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.11.0 — Achievements & Commander rewards**
+**v0.12.0 — Fantasy pixel interface**
 
 The current playable prototype supports:
+
+- a shared woodland lodge art direction across Commander/army selection, drafting, battle, achievements and menus: original detailed scenery, arched portrait vignettes, rounded carved frames, brass trim and pixel display lettering
+- a detailed open forest clearing with matching roster plaques; existing tactical formations, frost coverage, hit timing and unit animations remain intact
+- illustrated blessing offers, achievement medals, a balanced four-Commander gallery and styled settings controls
 
 - **PvP · Coming Soon**: friend matches are paused; the tested private-room implementation is retained
 - eighteen local achievements and four new mastery reward companions, with progress in the Achievements & Rewards journal
@@ -22,7 +26,7 @@ The current playable prototype supports:
 - Commander skill openings that finish before armies move and the battle clock begins
 - stretching/retracting Pitcher Plant vines, visible enemy pulls, distinct arrows/fireballs/flames/water/ice/seeds and impact/attack motion
 - every battle starts at 1×, with results shown after the battle completes
-- four distinct detailed Commander designs and seventeen detailed army sprites, shared by cards and battles
+- four distinct detailed Commander designs and twenty-one detailed unit sprites (twenty collectible units plus the summoned plant), shared by cards and battles
 - Slime Princess: pink royal artwork, Royal Jelly's once-per-ally revival and +100% attack for qualifying death spawns
 - Giant Slime 1/4 (green split Tank), Slime Cannon 2/4 (green slowing shots), Slime Ball 2/6 (white damage-absorbing Melee), Slime Barrel 2/6 (pink ten-second death pools)
 - rounded pixel-edged card frames, gold selection borders, darker nameplates and refined panels/navigation
@@ -107,6 +111,8 @@ Music and sound begin after the first player interaction. **Settings** has separ
 
 A card’s top-left badge identifies its element. Army cards show recruits per pick / unit cap at the top right, with a class symbol underneath (shield: Tank, sword: Melee, bow: Range, cross: Healer). Hover for ability and stat details. The Commander portrait, theme passive and active skill are shown separately before army building.
 
+Headings use the self-hosted OFL-licensed Pixelify Sans face; smaller body/badge text retains the readable fallback. The lodge/forest images are original decorative presentation assets and never define collision or formation positions. Campaign development is currently on hold (KIV).
+
 Detailed artwork uses transparent 128×192 Commander and 64×64 unit atlas cells with nearest-neighbor display. Designs are original generated fantasy artwork; provenance and exact prompts are in `assets/pixel/CREDITS.md`. Combat movement/attacks remain procedural presentation driven by the replay.
 
 Choose Preset 1, 2 or 3, then **Save** a complete four-card warband. Clicking a populated preset loads it. Empty slots preserve the current selection; **Clear** empties only the current warband. Presets are saved per Commander on this device and are checked against current content before loading. The top-right dropdown filters the collection; a gold card border marks equipped companions.
@@ -115,7 +121,7 @@ Choose Preset 1, 2 or 3, then **Save** a complete four-card warband. Clicking a 
 
 Run `python3 tools/run_checks.py --godot /path/to/godot` for all content/art validation and headless suites. Run `godot --headless --path . --script tools/run_balance.gd -- --seeds=8 --seed-start=1000 --output=/tmp/balance.json` for a reproducible AI sample. See `docs/PLAYTEST_REPORT.md` for methods, tuning and limitations.
 
-CI renders 89 desktop captures, including title animation phases/reduced motion, help/settings/pause, projectile contact, attack phases, frost, summon ownership, the Slime Court and tactical formations, and tests the exported game pack. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.
+CI renders 115 desktop captures, including title animation phases/reduced motion, help/settings/pause, projectile contact, attack phases, frost, summon ownership, the Slime Court and tactical formations, all four elemental galleries, compact battle details and long blessing labels, and tests the exported game pack. Bounded native review previews supplement the full-resolution PNG artifact. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.
 
 ## Commander mastery
 

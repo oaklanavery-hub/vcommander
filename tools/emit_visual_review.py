@@ -29,6 +29,11 @@ for name in VIEWS:
         image.save(buffer, "WEBP", quality=88, method=6)
     payload = buffer.getvalue()
     if len(payload) > 250_000:
+        image.thumbnail((960, 540), Image.Resampling.NEAREST)
+        buffer = BytesIO()
+        image.save(buffer, "WEBP", quality=82, method=6)
+        payload = buffer.getvalue()
+    if len(payload) > 250_000:
         raise SystemExit("Review image exceeds bounded size: " + name)
     encoded = base64.b64encode(payload).decode("ascii")
     print(f"VC_REVIEW_BEGIN {name} image/webp {len(payload)} {hashlib.sha256(payload).hexdigest()}", flush=True)
