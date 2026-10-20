@@ -21,9 +21,9 @@ func _ready() -> void:
     add_child(portrait)
     portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     portrait.offset_left = 9
-    portrait.offset_top = 34
+    portrait.offset_top = 32
     portrait.offset_right = -9
-    portrait.offset_bottom = -45
+    portrait.offset_bottom = -47
     portrait.set_content(definition, commander)
     portrait.visible = not definition.is_empty()
     add_child(caption)
@@ -71,12 +71,17 @@ func set_content(content: Dictionary, is_commander := false) -> void:
 func _draw() -> void:
     caption.modulate = Color("f5dfa7") if button_pressed else Color("f1e8d3")
     portrait.modulate = Color("798b85") if locked else (Color(1.07, 1.07, 1.04) if _hovered else Color.WHITE)
-    var footer := ScreenStyle.frame(Color(0.06, 0.1, 0.08, 0.42), Color.TRANSPARENT, 7)
+    var footer := ScreenStyle.frame(Color(0.09, 0.065, 0.045, 0.74), Color.TRANSPARENT, 7)
     footer.set_border_width_all(0)
+    footer.shadow_size = 0
+    footer.ornaments = false
     footer.corner_radius_top_left = 0
     footer.corner_radius_top_right = 0
     draw_style_box(footer, Rect2(Vector2(3, size.y - 43), Vector2(size.x - 6, 39)))
     draw_line(Vector2(12, size.y - 43), Vector2(size.x - 12, size.y - 43), Color(0.88, 0.75, 0.46, 0.35))
+    if button_pressed and not definition.is_empty():
+        var ribbon := PackedVector2Array([Vector2(size.x - 31, size.y - 46), Vector2(size.x - 13, size.y - 46), Vector2(size.x - 13, size.y - 29), Vector2(size.x - 22, size.y - 34), Vector2(size.x - 31, size.y - 29)])
+        draw_colored_polygon(ribbon, Color("d6b476"))
     if definition.is_empty():
         var center := Vector2(size.x * 0.5, size.y * 0.48).floor()
         draw_rect(Rect2(center - Vector2(2, 12), Vector2(4, 24)), Color("819478"))
@@ -88,7 +93,7 @@ func _draw_badges(canvas: Control) -> void:
         return
     _element_badge(Vector2(19, 18), str(definition.get("element", "earth")), canvas)
     if locked:
-        var banner := ScreenStyle.frame(Color("182a29"), Color("9d8c60"), 4)
+        var banner := ScreenStyle.frame(Color("2b2823"), Color("9d8c60"), 4)
         banner.set_content_margin_all(0)
         banner.set_border_width_all(1)
         canvas.draw_style_box(banner, Rect2(10, size.y - 70, size.x - 20, 22))

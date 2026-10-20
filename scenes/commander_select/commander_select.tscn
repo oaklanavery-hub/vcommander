@@ -34,7 +34,7 @@ theme_override_constants/separation = 10
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 32
-text = "CHOOSE YOUR COMMANDER"
+text = "Choose your Commander"
 
 [node name="Back" type="Button" parent="Margin/Main/Header"]
 layout_mode = 2
@@ -62,7 +62,7 @@ follow_focus = true
 [node name="CardsGrid" type="GridContainer" parent="Margin/Main/Body/Gallery"]
 layout_mode = 2
 size_flags_horizontal = 3
-columns = 3
+columns = 2
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 14
 

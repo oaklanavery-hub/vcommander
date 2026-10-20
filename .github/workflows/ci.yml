@@ -41,7 +41,7 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: 1
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb
+          sudo apt-get install -y -qq xvfb python3-pil
           mkdir -p build/qa
           touch build/.gdignore
           set -o pipefail
@@ -138,6 +138,9 @@ jobs:
           for view in warband lobby waiting draft menu opening battle reconnect result forfeit; do
             test -s "build/qa/pvp_${view}.png"
           done
+
+      - name: Emit bounded native review previews
+        run: python3 tools/emit_visual_review.py
 
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4

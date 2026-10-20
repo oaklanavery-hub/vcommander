@@ -67,15 +67,15 @@ func _menu_button(text: String, height: float) -> Button:
     button.text = text
     button.custom_minimum_size = Vector2(320, height)
     button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-    var normal := ScreenStyle.frame(Color("14263a"), Color("7d8994"), 9)
+    var normal := ScreenStyle.frame(Color("34312a"), Color("9a7d50"), 12)
     normal.set_border_width_all(1)
     normal.content_margin_top = 8
     normal.content_margin_bottom = 8
-    var hover := normal.duplicate() as StyleBoxFlat
-    hover.bg_color = Color("263f53")
+    var hover := normal.duplicate() as FantasyFrame
+    hover.bg_color = Color("514533")
     hover.border_color = Color("dfbd78")
-    var pressed := normal.duplicate() as StyleBoxFlat
-    pressed.bg_color = Color("0e1e30")
+    var pressed := normal.duplicate() as FantasyFrame
+    pressed.bg_color = Color("29271f")
     button.add_theme_stylebox_override("normal", normal)
     button.add_theme_stylebox_override("hover", hover)
     button.add_theme_stylebox_override("pressed", pressed)

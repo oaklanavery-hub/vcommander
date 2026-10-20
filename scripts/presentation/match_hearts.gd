@@ -27,7 +27,7 @@ func remaining(side: String) -> int:
     return clampi(4 - int(displayed_losses.get(side, 0)), 0, 4)
 
 func _draw() -> void:
-    draw_style_box(ScreenStyle.frame(Color("1d342f"), Color("6c7152"), 8), Rect2(Vector2.ZERO, size))
+    draw_style_box(ScreenStyle.frame(Color("302d24"), Color("8c7851"), 12), Rect2(Vector2.ZERO, size))
     for side_index in range(2):
         var side := "player" if side_index == 0 else "opponent"
         var start := Vector2(14 if side_index == 0 else size.x - 230, 15)

@@ -7,6 +7,7 @@ static func apply(screen: Control) -> void:
     var background := Backdrop.new()
     screen.add_child(background)
     screen.move_child(background, 0)
+    background.name = "LodgeBackdrop"
     var main := screen.get_node_or_null("Margin/Main")
     if main == null:
         return
@@ -27,17 +28,22 @@ static func apply(screen: Control) -> void:
     menu.tooltip_text = "Pause, help and settings (Esc)"
     menu.pressed.connect(GameMenu.open_pause)
     header.add_child(menu)
+    var title_label := header.get_node_or_null("Title") as Label
+    if title_label != null:
+        title_label.add_theme_color_override("font_color", Color("f3d59a"))
+        title_label.add_theme_color_override("font_shadow_color", Color("171e1c"))
+        title_label.add_theme_constant_override("shadow_offset_y", 2)
     GameAudio.set_context("battle" if screen.name == "Combat" else "menu")
 
 static func primary(button: Button) -> void:
-    var style := frame(Color("dfbd78"), Color("8b633b"), 8)
+    var style := frame(Color("d4b37b"), Color("8e683e"), 12)
     style.border_width_bottom = 4
     button.add_theme_stylebox_override("normal", style)
-    var hover := style.duplicate() as StyleBoxFlat
-    hover.bg_color = Color("f3d797")
+    var hover := style.duplicate() as FantasyFrame
+    hover.bg_color = Color("ecd39d")
     hover.border_color = Color("b68a4a")
-    var pressed := style.duplicate() as StyleBoxFlat
-    pressed.bg_color = Color("c9a45f")
+    var pressed := style.duplicate() as FantasyFrame
+    pressed.bg_color = Color("bd975e")
     pressed.border_width_bottom = 2
     button.add_theme_stylebox_override("hover", hover)
     button.add_theme_stylebox_override("pressed", pressed)
@@ -50,39 +56,41 @@ static func primary(button: Button) -> void:
     button.add_theme_font_size_override("font_size", 20)
 
 static func card(button: Button, element: String) -> void:
-    var colors := {"fire": Color("594335"), "water": Color("304c56"), "earth": Color("40523c"), "slime": Color("593e56")}
-    var style := frame(colors.get(element, Color("3a4b42")), Color("938460"), 10)
+    var colors := {"fire": Color("553b2d"), "water": Color("2e4548"), "earth": Color("3b4631"), "slime": Color("503747")}
+    var style := frame(colors.get(element, Color("3d342b")), Color("9a7b4e"), 14)
     style.shadow_color = Color(0.03, 0.06, 0.05, 0.45)
     style.shadow_size = 3
     style.shadow_offset = Vector2(0, 3)
     button.add_theme_stylebox_override("normal", style)
-    var hover := style.duplicate() as StyleBoxFlat
+    var hover := style.duplicate() as FantasyFrame
     hover.bg_color = style.bg_color.lightened(0.1)
     hover.border_color = Color("f2d799")
-    var pressed := style.duplicate() as StyleBoxFlat
+    var pressed := style.duplicate() as FantasyFrame
     pressed.bg_color = style.bg_color.lightened(0.06)
     pressed.border_color = Color("f0cd7e")
     pressed.set_border_width_all(3)
-    var hover_pressed := pressed.duplicate() as StyleBoxFlat
+    var hover_pressed := pressed.duplicate() as FantasyFrame
     hover_pressed.bg_color = style.bg_color.lightened(0.15)
-    var focus := frame(Color.TRANSPARENT, Color("94d6c7"), 10)
+    var focus := frame(Color.TRANSPARENT, Color("a6d6cc"), 14)
     focus.shadow_size = 0
     button.add_theme_stylebox_override("hover", hover)
     button.add_theme_stylebox_override("pressed", pressed)
     button.add_theme_stylebox_override("hover_pressed", hover_pressed)
     button.add_theme_stylebox_override("focus", focus)
+    var disabled := style.duplicate() as FantasyFrame
+    disabled.bg_color = Color("302d27")
+    disabled.border_color = Color("625844")
+    button.add_theme_stylebox_override("disabled", disabled)
     button.add_theme_constant_override("icon_max_width", 64)
     button.expand_icon = true
     button.add_theme_font_size_override("font_size", 18)
 
-static func frame(background: Color, border: Color, radius: int = 8) -> StyleBoxFlat:
-    var style := StyleBoxFlat.new()
+static func frame(background: Color, border: Color, radius: int = 8) -> FantasyFrame:
+    var style := FantasyFrame.new()
     style.bg_color = background
     style.border_color = border
     style.set_border_width_all(2)
     style.set_corner_radius_all(radius)
-    style.corner_detail = 4
-    style.anti_aliasing = false
     style.set_content_margin_all(14)
     return style
 

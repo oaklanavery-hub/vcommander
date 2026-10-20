@@ -45,7 +45,7 @@ func _ready() -> void:
     title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     header.add_child(title)
     var hero := PanelContainer.new()
-    hero.add_theme_stylebox_override("panel", ScreenStyle.frame(Color("192e2a"), Color("8e8057"), 12))
+    hero.add_theme_stylebox_override("panel", ScreenStyle.frame(Color("332d24"), Color("9a7c50"), 12))
     main.add_child(hero)
     var hero_body := VBoxContainer.new()
     hero_body.add_theme_constant_override("separation", 4)
@@ -145,7 +145,7 @@ func _render() -> void:
 func _panel(earned: bool) -> VBoxContainer:
     var panel := PanelContainer.new()
     panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    panel.add_theme_stylebox_override("panel", ScreenStyle.frame(Color("213d32") if earned else Color("1b2b2b"), Color("b4a168") if earned else Color("57685d"), 12))
+    panel.add_theme_stylebox_override("panel", ScreenStyle.frame(Color("343d2a") if earned else Color("2f2b25"), Color("b4a168") if earned else Color("78694e"), 12))
     grid.add_child(panel)
     var body := VBoxContainer.new()
     body.add_theme_constant_override("separation", 7)
