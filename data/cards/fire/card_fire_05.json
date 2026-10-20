@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "id": "card_fire_05",
+  "display_name": "Ash Phoenix",
+  "element": "fire",
+  "set_id": "set_fire_01",
+  "status": "playtest",
+  "role": "healer",
+  "summon_amount": 1,
+  "unit_cap": 2,
+  "stats": {
+    "health": 480,
+    "attack": 38,
+    "defense": 16,
+    "attack_speed": 65,
+    "movement_speed": 100,
+    "range": 5
+  },
+  "ability": {
+    "id": "ember_sanctuary",
+    "display_name": "Ember Sanctuary",
+    "type": "area_heal",
+    "radius": "small",
+    "duration_seconds": 4,
+    "heal_target_max_hp_pct": 4,
+    "tick_seconds": 2,
+    "description": "Places a small sanctuary beneath a wounded ally, restoring 4% of nearby allies’ Max HP every 2 seconds for 4 seconds."
+  },
+  "mastery_unlock": {
+    "commander_id": "commander_fire_01",
+    "level": 3,
+    "wins": 3
+  },
+  "tags": [
+    "fire",
+    "healer",
+    "mastery_reward"
+  ]
+}

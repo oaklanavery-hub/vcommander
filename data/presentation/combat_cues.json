@@ -86,20 +86,39 @@
       "rig": "bow"
     },
     "card_slime_01": {
-      "projectile": "none", "motion": "bounce", "rig": "slime",
-      "attack_sound": "slime_bounce", "impact_sound": "slime_splat", "impact_style": "slime_green", "accent": "a5e97c"
+      "projectile": "none",
+      "motion": "bounce",
+      "rig": "slime",
+      "attack_sound": "slime_bounce",
+      "impact_sound": "slime_splat",
+      "impact_style": "slime_green",
+      "accent": "a5e97c"
     },
     "card_slime_02": {
-      "projectile": "slime_green", "motion": "shoot", "rig": "cannon",
-      "attack_sound": "slime_shot", "impact_sound": "slime_splat", "accent": "a5e97c"
+      "projectile": "slime_green",
+      "motion": "shoot",
+      "rig": "cannon",
+      "attack_sound": "slime_shot",
+      "impact_sound": "slime_splat",
+      "accent": "a5e97c"
     },
     "card_slime_03": {
-      "projectile": "none", "motion": "bounce", "rig": "slime",
-      "attack_sound": "slime_bounce", "impact_sound": "slime_splat", "impact_style": "slime_white", "accent": "f1f0ff"
+      "projectile": "none",
+      "motion": "bounce",
+      "rig": "slime",
+      "attack_sound": "slime_bounce",
+      "impact_sound": "slime_splat",
+      "impact_style": "slime_white",
+      "accent": "f1f0ff"
     },
     "card_slime_04": {
-      "projectile": "none", "motion": "bounce", "rig": "barrel",
-      "attack_sound": "wood_hit", "impact_sound": "slime_splat", "impact_style": "slime_pink", "accent": "ffa5d2"
+      "projectile": "none",
+      "motion": "bounce",
+      "rig": "barrel",
+      "attack_sound": "wood_hit",
+      "impact_sound": "slime_splat",
+      "impact_style": "slime_pink",
+      "accent": "ffa5d2"
     },
     "commander_plant": {
       "projectile": "seed",
@@ -107,6 +126,36 @@
       "attack_sound": "seed_cast",
       "impact_sound": "wood_hit",
       "rig": "plant"
+    },
+    "card_fire_05": {
+      "projectile": "fireball",
+      "motion": "cast",
+      "rig": "healer",
+      "attack_sound": "fire_cast",
+      "impact_sound": "healing_water",
+      "accent": "ffc674"
+    },
+    "card_water_05": {
+      "projectile": "none",
+      "motion": "slash",
+      "rig": "claw",
+      "attack_sound": "claw",
+      "impact_sound": "ice_cast"
+    },
+    "card_earth_05": {
+      "projectile": "seed",
+      "motion": "cast",
+      "rig": "mage",
+      "attack_sound": "seed_cast",
+      "impact_sound": "wood_hit"
+    },
+    "card_slime_05": {
+      "projectile": "slime_green",
+      "motion": "cast",
+      "rig": "slime",
+      "attack_sound": "slime_rebirth",
+      "impact_sound": "healing_water",
+      "accent": "c0efce"
     }
   }
 }

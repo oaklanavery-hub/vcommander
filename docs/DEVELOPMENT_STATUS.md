@@ -2,6 +2,19 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
+## Current task — Achievements and mastery unit rewards
+
+- User has paused friend PvP: show **Coming Soon**, keep the implementation for later, and prevent ordinary entry/connection attempts. No Render/billing/deployment change is needed.
+- User explicitly selected **new units** as mastery rewards. Keep all sixteen current cards available. Add one playtest reward card to each Commander theme; reward unlocks expand the collection and never add combat stat bonuses to mastery levels.
+- Branch `feat/achievements`, base verified main `9fe98879ed03cb4d6e28455783a8b8ff3c0ae597`. PR #28 remains a separate capacity report; its diagnostic code is outside this feature.
+- Checkpoint 1: data-driven achievements and permanent card entitlements in the existing atomic local profile, schema-1 migration/backfill, exact-once reward receipts, headless unlock enforcement, and Coming Soon gating. Preserve XP/records/interrupted-match semantics.
+- Checkpoint 2: original pixel reward units using existing mechanics, achievement/reward journal, locked previews in the collection, Commander/result feedback and safe presets. Initial reward requirement: Commander Level 3 and three wins; later achievements recognize Level 5/10 without stat bonuses. Tuning and new unit details must be documented as playtest values.
+- Acceptance: migration/corruption/restart/idempotency and unlock-boundary tests; actual new-unit combat/draft/theme integration; current source tests, native visual review, Web/exported-pack/browser and served-pack gates. Save coherent work before full CI.
+- Checkpoint 1 implemented: schema-2 entitlements/achievements, schema-1 migration and backfill, generic unlock queries/receipts, headless equipment/start/preset enforcement and equal available AI collection. Four reward definitions use existing mechanics; original detailed pixel art is packed without changing older frames. PvP transport is retained behind an ordinary-player Coming Soon gate; isolated QA explicitly enables it.
+- Passing: all three data/art/presentation validators, clean Godot import, new achievement/migration/unlock suite and existing Commander progress suite. The first migration test caught numeric JSON membership semantics; explicit version comparisons fix schema-1 reads. Lifecycle/private regression checks are running.
+- Pending: player journal/collection/result feedback, reward-unit integration tests, full CI/native/Web/served review. Next: save this headless checkpoint and implement the interface.
+
+
 ## Current task — Free friend playtest launch
 
 - User approved private friend PvP, strictly free hosting, shared 1× playback and a sixty-second reconnect forfeit. No accounts/rating/cloud mastery or paid add-ons. Preserve existing PvAI records, gameplay and pixel presentation.

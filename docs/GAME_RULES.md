@@ -333,3 +333,17 @@ Both players watch shared 1× playback without individual pause, speed or result
 
 **R097 — Online reconnect and forfeit**
 In a started two-player match, a disconnected player has sixty seconds to reconnect to their reserved seat using their private session. The server clock and legal timeout selections continue. At expiry that player forfeits and the other side wins; if both seats expire at exactly the same time, the abandoned match cancels without a winner/reward. A completed final battle retains its result when it finishes before a disconnect deadline. Reconnect restores the current phase and shared playback time. A free-host restart or room resource expiry cancels the session without awarding a fabricated match result. These unranked outcomes never grant local mastery or rating.
+
+## Achievements and mastery rewards
+
+**R098 — PvP availability**
+Friend PvP is paused and presented as **Coming Soon**. Ordinary players cannot create, join or reconnect through the game, including with a server URL override. The implementation remains for a later compatible release. Developer integration fixtures explicitly enable it in memory.
+
+**R099 — Achievement progression**
+Local achievements use settled complete-match records. Forfeits count in the existing loss record but do not count as completed matches for achievements. Match wins and permanent Commander levels contribute to the data-defined milestones. Achievements are granted automatically, once, remain earned, and grant recognition without extra XP, currencies or combat stat bonuses. They appear in the Achievements & Rewards journal. Existing qualifying records receive earned achievements when the profile is loaded.
+
+**R100 — Mastery collection rewards**
+All sixteen original Army cards remain available from the start. The first reward for each Commander requires both permanent Level 3 (500 XP) and three wins with that Commander. The reward unlocks automatically and permanently, is not auto-equipped, and may then be used in any Commander's mixed warband. Any four unique cards of a theme still satisfy R005/R006; a warband always has exactly four slots. The PvAI opponent chooses from the same currently available collection as the player. Locked cards are visible for preview but cannot be equipped, loaded via a preset or used to start a match. Existing qualifying records receive the unlock on load; levels, wins and XP are preserved.
+
+**R101 — Initial mastery reward roster**
+Fire unlocks **Ash Phoenix**, a 1/2 Healer placing a small four-second healing sanctuary. Water unlocks **Tidal Guard**, a 2/4 Melee unit whose third attack is empowered. Earth unlocks **Spore Sage**, a 1/3 Range unit firing small-area splash projectiles. Slime unlocks **Jelly Medic**, a 1/3 Healer placing a medium four-second healing pool. These use the existing generic area-heal, empowered-attack and ranged-AoE mechanics; they obey ordinary collision, targeting, defense and death/revival rules. New numbers in data are initial playtest tuning, not guarantees of final balance. Rewards add tactical choices without modifying existing unit stats.

@@ -26,7 +26,7 @@
     }
   },
   "units": {
-    "texture": "res://assets/pixel/roster-v3.png",
+    "texture": "res://assets/pixel/roster-v4.png",
     "cell_size": [
       64,
       64
@@ -99,6 +99,22 @@
       "card_slime_04": [
         3,
         4
+      ],
+      "card_fire_05": [
+        0,
+        5
+      ],
+      "card_water_05": [
+        1,
+        5
+      ],
+      "card_earth_05": [
+        2,
+        5
+      ],
+      "card_slime_05": [
+        3,
+        5
       ]
     }
   },

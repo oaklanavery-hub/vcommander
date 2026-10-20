@@ -19,15 +19,15 @@ var _preset_buttons: Array[Button] = []
 var friend_button: Button
 
 func _ready() -> void:
-    preset_store = WarbandPresets.new(ContentDatabase)
+    preset_store = WarbandPresets.new(ContentDatabase, WarbandPresets.DEFAULT_PATH, 4, GameState.commander_progress)
     ScreenStyle.apply(self)
     ScreenStyle.primary(begin_draft_button)
     back_button.pressed.connect(_go_back)
     begin_draft_button.pressed.connect(_begin_draft)
     friend_button = Button.new()
-    friend_button.text = "Friend match"
+    friend_button.text = "Friend match" if OnlineSession.available else "PvP · Coming Soon"
     friend_button.custom_minimum_size = Vector2(156, 54)
-    friend_button.visible = not OnlineSession.endpoint.is_empty()
+    friend_button.visible = true
     friend_button.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/online/private_room.tscn"))
     var actions := get_node("Margin/Main/Setup/Actions/Navigation")
     actions.add_child(friend_button)
@@ -109,7 +109,7 @@ func _refresh() -> void:
             tile.empty_caption = "Slot %d" % (index + 1)
         slots_row.add_child(tile)
     begin_draft_button.disabled = not GameState.army.is_full()
-    friend_button.disabled = not GameState.army.is_full()
+    friend_button.disabled = not OnlineSession.available or OnlineSession.endpoint.is_empty() or not GameState.army.is_full()
     save_button.disabled = not GameState.army.is_full()
     var bonus: Dictionary = GameState.get_selected_signature_set().get("bonus", {})
     if GameState.army.is_full():

@@ -2,7 +2,7 @@ class_name CommanderProgress
 extends RefCounted
 
 const DEFAULT_PATH := "user://commander_profile.json"
-const SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 2
 const MAX_COUNTER := 9007199254740991
 
 var path: String
@@ -14,7 +14,7 @@ var last_receipt: Dictionary = {}
 var _content: Object
 var _rules: Dictionary
 var _primary_valid := false
-var _data := {"schema_version": SCHEMA_VERSION, "match_serial": 0, "commanders": {}, "active_match": {}}
+var _data := {"schema_version": SCHEMA_VERSION, "match_serial": 0, "commanders": {}, "active_match": {}, "achievements": [], "unlocked_cards": []}
 
 func _init(content: Object, storage_path: String = DEFAULT_PATH) -> void:
     _content = content
@@ -22,6 +22,10 @@ func _init(content: Object, storage_path: String = DEFAULT_PATH) -> void:
     path = storage_path
     if not path.is_empty():
         _load_profile()
+    var grants := _refresh_rewards()
+    if not read_only and (grants["changed"] or _data.get("schema_version") != SCHEMA_VERSION):
+        _data["schema_version"] = SCHEMA_VERSION
+        last_save_error = _save_profile()
 
 func record(commander_id: String) -> Dictionary:
     var stats: Dictionary = _data["commanders"].get(commander_id, {"wins": 0, "losses": 0, "forfeits": 0, "xp": 0}).duplicate(true)
@@ -64,7 +68,8 @@ func finish_match(match_id: String, outcome: String) -> Dictionary:
     stats["xp"] += gained
     _data["commanders"][commander_id] = stats
     _data["active_match"] = {}
-    last_receipt = {"match_id": match_id, "commander_id": commander_id, "outcome": outcome,
+    var grants := _refresh_rewards()
+    last_receipt = {"achievements": grants["achievements"], "unlocked_cards": grants["unlocked_cards"], "match_id": match_id, "commander_id": commander_id, "outcome": outcome,
         "xp_awarded": gained, "before": before, "after": record(commander_id)}
     last_save_error = _save_profile()
     return last_receipt.duplicate(true)
@@ -72,6 +77,89 @@ func finish_match(match_id: String, outcome: String) -> Dictionary:
 func recover_interrupted_match() -> Dictionary:
     var pending: Dictionary = _data["active_match"]
     return finish_match(str(pending.get("id", "")), "forfeit") if not pending.is_empty() else {}
+
+func is_card_unlocked(card_id: String) -> bool:
+    var card: Dictionary = _content.get_card(card_id)
+    return not card.is_empty() and (not card.has("mastery_unlock") or _data["unlocked_cards"].has(card_id))
+
+func available_cards() -> Array[Dictionary]:
+    var result: Array[Dictionary] = []
+    for card in _content.get_all_cards():
+        if is_card_unlocked(str(card["id"])):
+            result.append(card)
+    return result
+
+func unlocked_card_ids() -> Array:
+    return _data["unlocked_cards"].duplicate()
+
+func achievement_entries() -> Array[Dictionary]:
+    var entries: Array[Dictionary] = []
+    for definition in _content.get_achievement_rules().get("achievements", []):
+        var entry: Dictionary = definition.duplicate(true)
+        entry["earned"] = _data["achievements"].has(str(entry["id"]))
+        entry["progress"] = _condition_progress(entry.get("conditions", []), str(entry.get("commander_id", "")))
+        entries.append(entry)
+    return entries
+
+func card_reward(card_id: String) -> Dictionary:
+    var card: Dictionary = _content.get_card(card_id)
+    var requirement: Dictionary = card.get("mastery_unlock", {})
+    if requirement.is_empty():
+        return {}
+    var commander_id := str(requirement["commander_id"])
+    var stats := record(commander_id)
+    return {"card_id": card_id, "commander_id": commander_id, "unlocked": is_card_unlocked(card_id),
+        "level": int(stats["level"]), "wins": int(stats["wins"]),
+        "required_level": int(requirement["level"]), "required_wins": int(requirement["wins"])}
+
+func unlock_description(card_id: String) -> String:
+    var reward := card_reward(card_id)
+    if reward.is_empty():
+        return "Available from the start"
+    var commander: Dictionary = _content.get_commander(str(reward["commander_id"]))
+    return "%s · Level %d + %d wins" % [str(commander.get("display_name", "Commander")), int(reward["required_level"]), int(reward["required_wins"])]
+
+func _condition_progress(conditions: Array, commander_id: String) -> Array[Dictionary]:
+    var result: Array[Dictionary] = []
+    for condition in conditions:
+        var metric := str(condition["metric"])
+        var value := 0
+        if not commander_id.is_empty():
+            var stats := record(commander_id)
+            value = int(stats["wins"]) + int(stats["losses"]) - int(stats["forfeits"]) if metric == "completed" else int(stats.get(metric, 0))
+        else:
+            for id in _data["commanders"]:
+                var stats := record(str(id))
+                match metric:
+                    "completed": value += int(stats["played"]) - int(stats["forfeits"])
+                    "wins": value += int(stats["wins"])
+                    "level": value = maxi(value, int(stats["level"]))
+                    "commanders_won":
+                        if not _content.get_commander(str(id)).is_empty() and int(stats["wins"]) > 0:
+                            value += 1
+        result.append({"metric": metric, "value": value, "target": int(condition["target"])})
+    return result
+
+func _refresh_rewards() -> Dictionary:
+    var achievements: Array[String] = []
+    var cards: Array[String] = []
+    for entry in achievement_entries():
+        if entry["earned"]:
+            continue
+        var earned: bool = not entry["progress"].is_empty()
+        for condition in entry["progress"]:
+            earned = earned and int(condition["value"]) >= int(condition["target"])
+        if earned:
+            var id := str(entry["id"])
+            _data["achievements"].append(id)
+            achievements.append(id)
+    for card in _content.get_all_cards():
+        var reward := card_reward(str(card["id"]))
+        if not reward.is_empty() and not reward["unlocked"] and int(reward["level"]) >= int(reward["required_level"]) and int(reward["wins"]) >= int(reward["required_wins"]):
+            var id := str(card["id"])
+            _data["unlocked_cards"].append(id)
+            cards.append(id)
+    return {"achievements": achievements, "unlocked_cards": cards, "changed": not achievements.is_empty() or not cards.is_empty()}
 
 func storage_notice() -> String:
     if read_only:
@@ -105,10 +193,21 @@ func _read_profile(file_path: String) -> Dictionary:
     if parser.parse(file.get_as_text()) != OK:
         return {}
     var parsed = parser.data
-    if not parsed is Dictionary or parsed.get("schema_version") != SCHEMA_VERSION:
+    if not parsed is Dictionary or (parsed.get("schema_version") != 1 and parsed.get("schema_version") != SCHEMA_VERSION):
         return {}
     if not _counter(parsed.get("match_serial")) or not parsed.get("commanders") is Dictionary or not parsed.get("active_match") is Dictionary:
         return {}
+    if parsed["schema_version"] == 1:
+        parsed["achievements"] = []
+        parsed["unlocked_cards"] = []
+    for field in ["achievements", "unlocked_cards"]:
+        if not parsed.get(field) is Array:
+            return {}
+        var seen := {}
+        for id in parsed[field]:
+            if not id is String or id.is_empty() or seen.has(id):
+                return {}
+            seen[id] = true
     for id in parsed["commanders"]:
         var entry = parsed["commanders"][id]
         if not id is String or id.is_empty() or not entry is Dictionary:

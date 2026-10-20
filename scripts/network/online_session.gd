@@ -4,6 +4,8 @@ signal changed
 
 var client := PrivateRoomClient.new()
 var endpoint := ""
+# Product gate: transport/authority remain covered by explicit developer fixtures.
+var available := false
 var active := false
 var status := "Create a room or enter your friend's code."
 var replay: Dictionary = {}
@@ -37,6 +39,10 @@ func _ready() -> void:
     client.failed.connect(_failed)
 
 func start(intent: String, code: String = "") -> bool:
+    if not available:
+        status = "PvP · Coming Soon"
+        changed.emit()
+        return false
     if active:
         return false
     if endpoint.is_empty():

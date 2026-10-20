@@ -56,6 +56,9 @@ func get_game_balance() -> Dictionary:
 func get_mastery_rules() -> Dictionary:
     return progression.get("commander_mastery", {})
 
+func get_achievement_rules() -> Dictionary:
+    return progression.get("achievements", {})
+
 func get_all_commanders() -> Array[Dictionary]:
     return _sorted_values(commanders)
 

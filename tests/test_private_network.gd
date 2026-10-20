@@ -117,7 +117,7 @@ func run() -> void:
 func setup(index: int) -> Dictionary:
     var commander: Dictionary = db.get_all_commanders()[index]
     var cards: Array = []
-    for card in db.get_cards_by_set(commander["signature_set_id"]):
+    for card in db.get_cards_by_set(commander["signature_set_id"]).slice(0, 4):
         cards.append(card["id"])
     return {"commander": commander["id"], "cards": cards}
 

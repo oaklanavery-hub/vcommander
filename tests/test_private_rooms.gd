@@ -22,7 +22,7 @@ func run() -> void:
 func setup_command(kind: String, theme_index: int = 0) -> Dictionary:
     var commander: Dictionary = db.get_all_commanders()[theme_index]
     var cards: Array = []
-    for card in db.get_cards_by_set(commander["signature_set_id"]):
+    for card in db.get_cards_by_set(commander["signature_set_id"]).slice(0, 4):
         cards.append(card["id"])
     return {"v": PrivateProtocol.VERSION, "type": kind, "commander": commander["id"], "cards": cards, "content": PrivateProtocol.content_hash(db)}
 

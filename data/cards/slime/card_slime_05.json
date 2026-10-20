@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "id": "card_slime_05",
+  "display_name": "Jelly Medic",
+  "element": "slime",
+  "set_id": "set_slime_01",
+  "status": "playtest",
+  "role": "healer",
+  "summon_amount": 1,
+  "unit_cap": 3,
+  "stats": {
+    "health": 430,
+    "attack": 32,
+    "defense": 18,
+    "attack_speed": 75,
+    "movement_speed": 80,
+    "range": 5
+  },
+  "ability": {
+    "id": "jelly_remedy",
+    "display_name": "Jelly Remedy",
+    "type": "area_heal",
+    "radius": "medium",
+    "duration_seconds": 4,
+    "heal_target_max_hp_pct": 4,
+    "tick_seconds": 2,
+    "description": "Places a medium healing pool beneath a wounded ally, restoring 4% of nearby allies’ Max HP every 2 seconds for 4 seconds."
+  },
+  "mastery_unlock": {
+    "commander_id": "commander_slime_01",
+    "level": 3,
+    "wins": 3
+  },
+  "tags": [
+    "slime",
+    "healer",
+    "mastery_reward"
+  ]
+}
