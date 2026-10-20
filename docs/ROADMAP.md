@@ -139,6 +139,14 @@
 - Original pixel reward artwork, locked collection previews, result feedback and an Achievements & Rewards journal.
 - Version-1 save migration/backfill, permanent entitlements and headless equipment/preset validation; equal available PvAI collection.
 
+## v0.12.0 — Requested fantasy pixel presentation
+
+- Consistent lodge/woodland materials, rounded carved cards, arched portraits and original detailed environment art throughout the existing game.
+- Shared pixel display headings, readable small text, brass/control details, illustrated blessing offers and achievement medals.
+- Balanced four-Commander gallery, equipped-card rack, forest battle arena and matching roster plaques.
+- Source/export skin integration guards, all five blessing layouts/focus, and six additional native views alongside existing browser/container and deployment verification.
+- Campaign/story remains KIV. PvP stays Coming Soon. Gameplay, unlocks, accessibility preferences and free hosting remain unchanged.
+
 ## Further major phase — Game Director scope decision
 
-The elemental PvAI vertical slice, requested Slime Court roster expansion and personal Commander mastery are implemented. Private friend-room PvP development is approved above. Campaign/run progression, account-backed competitive rankings and VTuber/mascot roster integration still need explicit direction. Human playtesting should inform further balance values; current tuning remains provisional.
+The elemental PvAI vertical slice, requested Slime Court roster expansion and personal Commander mastery are implemented. Private friend-room PvP development is approved above. Campaign/run progression is explicitly KIV/on hold. Account-backed competitive rankings and VTuber/mascot roster integration still need explicit direction. Human playtesting should inform further balance values; current tuning remains provisional.

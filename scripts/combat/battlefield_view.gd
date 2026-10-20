@@ -2,6 +2,7 @@ class_name BattlefieldView
 extends Control
 
 const UnitArt = preload("res://scripts/presentation/pixel_unit_art.gd")
+const GROUND := preload("res://assets/pixel/forest-clearing-v1.png")
 static var reduced_motion := false
 static var show_hp_numbers := false
 var _frame: Dictionary = {}
@@ -21,6 +22,9 @@ var replay := BattleReplay.new()
 var replay_enabled := false
 var replay_complete := false
 var frozen_sides: Array[String] = []
+
+func _ready() -> void:
+    texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 func configure_frost() -> void:
     frozen_sides.clear()
@@ -134,7 +138,7 @@ func _point(x: float, y: float) -> Vector2:
     return (_arena.position + Vector2(x / _field_width * _arena.size.x, y / _field_height * _arena.size.y)).round()
 
 func _draw() -> void:
-    draw_rect(Rect2(Vector2.ZERO, size), Color("172d28"))
+    draw_rect(Rect2(Vector2.ZERO, size), Color("22291f"))
     var height := maxf(1.0, size.y - 8.0)
     var width := height * _field_width / _field_height
     if width > size.x - 8.0:
@@ -282,25 +286,28 @@ func _draw_frost() -> void:
             draw_polyline(crack, Color(0.76, 0.93, 0.97, 0.3), 1)
 
 func _draw_ground() -> void:
-    draw_rect(_arena.grow(4), Color("b4a272"))
-    draw_rect(_arena, Color("42664c"))
-    for y in range(0, int(_arena.size.y), 16):
-        for x in range(0, int(_arena.size.x), 16):
-            var pattern := (x * 17 + y * 31) % 97
-            var tile := Rect2(_arena.position + Vector2(x, y), Vector2(minf(16, _arena.size.x - x), minf(16, _arena.size.y - y)))
-            draw_rect(tile, Color("3e6048") if pattern < 42 else Color("42674b"))
-            if pattern < 10:
-                draw_rect(Rect2(tile.position + Vector2(4, 7), Vector2(2, 4)), Color("7d9b60"))
-            if pattern == 16:
-                draw_rect(Rect2(tile.position + Vector2(8, 8), Vector2(3, 3)), Color("edc888"))
-    var path_y := _arena.get_center().y
-    draw_rect(Rect2(Vector2(_arena.position.x, path_y - 24), Vector2(_arena.size.x, 48)), Color("817951"))
-    for x in range(4, int(_arena.size.x - 16), 24):
-        draw_rect(Rect2(Vector2(_arena.position.x + x, path_y - 10 + (x % 5) * 3), Vector2(12, 5)), Color("aaa06e"))
-    for right in [false, true]:
-        var flag := _arena.position + Vector2(_arena.size.x - 20 if right else 12, 12)
-        draw_rect(Rect2(flag, Vector2(3, 35)), Color("302c3c"))
-        draw_rect(Rect2(flag + Vector2(3, 0), Vector2(12, 16)), Color("d98c78") if right else Color("89d8ce"))
+    # Scenery is decorative: the unchanged world-to-screen arena still owns all
+    # positions, frost coverage, projectile contacts and formation coordinates.
+    var rim := ScreenStyle.frame(Color("263121"), Color("8a754b"), 12)
+    rim.set_content_margin_all(0)
+    rim.ornaments = false
+    draw_style_box(rim, _arena.grow(3))
+    var points := PackedVector2Array()
+    var uv := PackedVector2Array()
+    var radius := minf(10, _arena.size.y * 0.06)
+    var corners := [
+        [_arena.position + Vector2(radius, radius), PI],
+        [Vector2(_arena.end.x - radius, _arena.position.y + radius), PI * 1.5],
+        [_arena.end - Vector2(radius, radius), 0.0],
+        [Vector2(_arena.position.x + radius, _arena.end.y - radius), PI * 0.5]
+    ]
+    for corner in corners:
+        for index in range(5):
+            var angle := float(corner[1]) + PI * 0.5 * float(index) / 4.0
+            var point: Vector2 = corner[0] + Vector2.from_angle(angle) * radius
+            points.append(point)
+            uv.append((point - _arena.position) / _arena.size)
+    draw_polygon(points, PackedColorArray([Color(0.89, 0.94, 0.88, 1)]), uv, GROUND)
 
 func roster_layout(card_count: int) -> Dictionary:
     var compact := size.y < 330
@@ -314,6 +321,12 @@ func _draw_rosters() -> void:
     for index in range(2):
         var x := _arena.end.x + 20 if index == 1 else 16.0
         var color := Color("e8a48c") if index == 1 else Color("9dd9cc")
+        var panel_x := _arena.end.x + 10 if index == 1 else 6.0
+        var panel_width := minf(_arena.position.x - 18, size.x - panel_x - 6)
+        var panel := ScreenStyle.frame(Color("302e24"), Color("706342"), 12)
+        panel.set_content_margin_all(0)
+        panel.ornaments = false
+        draw_style_box(panel, Rect2(panel_x, 6, panel_width, maxf(1, size.y - 12)))
         var config: Dictionary = _sides[index]
         var layout := roster_layout(config.get("cards", []).size())
         var compact: bool = layout["compact"]

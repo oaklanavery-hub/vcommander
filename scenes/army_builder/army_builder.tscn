@@ -33,7 +33,7 @@ theme_override_constants/separation = 12
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 32
-text = "BUILD YOUR WARBAND"
+text = "Build your warband"
 
 [node name="Filter" type="OptionButton" parent="Margin/Main/Header"]
 layout_mode = 2
@@ -149,7 +149,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 20
-text = "COMPANION COLLECTION"
+text = "Companion collection"
 
 [node name="Hint" type="Label" parent="Margin/Main/CollectionHeading"]
 layout_mode = 2

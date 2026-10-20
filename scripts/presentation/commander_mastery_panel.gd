@@ -21,7 +21,7 @@ func configure(profile: CommanderProgress, content: Object, audio: Object) -> vo
     _audio = audio
 
 func _init() -> void:
-    add_theme_stylebox_override("panel", ScreenStyle.frame(Color("152e29"), Color("897b50"), 9))
+    add_theme_stylebox_override("panel", ScreenStyle.frame(Color("302c24"), Color("9b8053"), 12))
     var body := VBoxContainer.new()
     body.add_theme_constant_override("separation", 5)
     add_child(body)
@@ -41,7 +41,7 @@ func _init() -> void:
     body.add_child(record_label)
     progress_bar.show_percentage = false
     progress_bar.custom_minimum_size.y = 9
-    var track := ScreenStyle.frame(Color("0e201d"), Color("43554b"), 4)
+    var track := ScreenStyle.frame(Color("1d231e"), Color("595840"), 4)
     track.set_border_width_all(1)
     track.set_content_margin_all(0)
     var fill := ScreenStyle.frame(Color("dfbd78"), Color.TRANSPARENT, 4)

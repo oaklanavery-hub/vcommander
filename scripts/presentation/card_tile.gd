@@ -21,9 +21,9 @@ func _ready() -> void:
     add_child(portrait)
     portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     portrait.offset_left = 9
-    portrait.offset_top = 34
+    portrait.offset_top = 32
     portrait.offset_right = -9
-    portrait.offset_bottom = -45
+    portrait.offset_bottom = -47
     portrait.set_content(definition, commander)
     portrait.visible = not definition.is_empty()
     add_child(caption)
@@ -36,7 +36,8 @@ func _ready() -> void:
     caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-    caption.add_theme_font_size_override("font_size", 14)
+    caption.add_theme_font_size_override("font_size", 16)
+    caption.add_theme_font_override("font", ScreenStyle.DISPLAY_FONT)
     caption.text = str(definition.get("display_name", empty_caption))
     if not detail_text.is_empty():
         caption.text += "\n" + detail_text
@@ -71,8 +72,10 @@ func set_content(content: Dictionary, is_commander := false) -> void:
 func _draw() -> void:
     caption.modulate = Color("f5dfa7") if button_pressed else Color("f1e8d3")
     portrait.modulate = Color("798b85") if locked else (Color(1.07, 1.07, 1.04) if _hovered else Color.WHITE)
-    var footer := ScreenStyle.frame(Color(0.06, 0.1, 0.08, 0.42), Color.TRANSPARENT, 7)
+    var footer := ScreenStyle.frame(Color(0.09, 0.065, 0.045, 0.74), Color.TRANSPARENT, 7)
     footer.set_border_width_all(0)
+    footer.shadow_size = 0
+    footer.ornaments = false
     footer.corner_radius_top_left = 0
     footer.corner_radius_top_right = 0
     draw_style_box(footer, Rect2(Vector2(3, size.y - 43), Vector2(size.x - 6, 39)))
@@ -88,7 +91,7 @@ func _draw_badges(canvas: Control) -> void:
         return
     _element_badge(Vector2(19, 18), str(definition.get("element", "earth")), canvas)
     if locked:
-        var banner := ScreenStyle.frame(Color("182a29"), Color("9d8c60"), 4)
+        var banner := ScreenStyle.frame(Color("2b2823"), Color("9d8c60"), 4)
         banner.set_content_margin_all(0)
         banner.set_border_width_all(1)
         canvas.draw_style_box(banner, Rect2(10, size.y - 70, size.x - 20, 22))

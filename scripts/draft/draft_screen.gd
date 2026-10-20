@@ -113,8 +113,10 @@ func _refresh_offer() -> void:
             tile.tooltip_text += "\nPick with " + str(index + 1)
             button = tile
         else:
-            button = Button.new()
-            button.text = _option_text(option)
+            var blessing := BuffTile.new()
+            blessing.definition = ContentDatabase.get_buff(str(option["id"]))
+            blessing.stacks = GameState.draft.get_buff_stacks(str(option["id"]))
+            button = blessing
         button.custom_minimum_size = Vector2(156, 204)
         button.disabled = GameState.draft.is_phase_complete()
         button.pressed.connect(_select_offer.bind(index))
