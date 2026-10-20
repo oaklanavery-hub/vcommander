@@ -98,7 +98,7 @@ func run() -> void:
     current_scene.set_process(false)
     check(current_scene._speed_index == 0 and current_scene.speed_button.text.contains("1x"), "next battle resets the manually changed speed to 1x")
     for commander in db.get_all_commanders():
-        var cards: Array = db.get_cards_by_set(str(commander["signature_set_id"]))
+        var cards: Array = db.get_cards_by_set(str(commander["signature_set_id"])).slice(0, 4)
         var counts := {}
         for card in cards:
             counts[str(card["id"])] = 1

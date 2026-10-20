@@ -2,7 +2,7 @@ extends "res://tools/capture_battle_fx.gd"
 
 func themed(element: String, id: String, skill: bool = false) -> Dictionary:
     var db = root.get_node("ContentDatabase")
-    var cards: Array = db.get_cards_by_set("set_" + element + "_01")
+    var cards: Array = db.get_cards_by_set("set_" + element + "_01").slice(0, 4)
     var counts := {}
     for card in cards:
         counts[str(card["id"])] = int(card["unit_cap"])
