@@ -146,7 +146,7 @@ jobs:
           done
 
       - name: Emit bounded native review previews
-        run: python3 tools/emit_visual_review.py
+        run: /usr/bin/python3 tools/emit_visual_review.py
 
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4

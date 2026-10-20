@@ -49,7 +49,7 @@ func run() -> void:
     for commander_id in before:
         check(state.commander_progress.record(commander_id) == before[commander_id], "constructing and focusing cosmetic cards never changes progression")
     row.queue_free()
-    var room := load("res://scenes/online/private_room.tscn").instantiate()
+    var room = load("res://scenes/online/private_room.tscn").instantiate()
     root.add_child(room)
     var buff: Dictionary = db.get_all_buffs()[0]
     room._render_offers({"round": 2, "revision": 1, "offer": [{"type": "buff", "id": buff["id"]}], "self": {"buffs": [{"definition": buff, "stacks": 2}]}})
