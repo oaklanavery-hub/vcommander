@@ -155,7 +155,7 @@ func _panel(earned: bool) -> VBoxContainer:
 func _reward_card(card: Dictionary, reward: Dictionary) -> void:
     displayed_ids.append(str(card["id"]))
     var body := _panel(reward["unlocked"])
-    body.custom_minimum_size.y = 180
+    body.custom_minimum_size.y = 172
     var commander := ContentDatabase.get_commander(str(reward["commander_id"]))
     var eyebrow := _text(str(commander["display_name"]).to_upper() + ("  ·  UNLOCKED" if reward["unlocked"] else "  ·  MASTERY REWARD"), 12)
     eyebrow.add_theme_color_override("font_color", Color("e0c18a"))
@@ -165,7 +165,7 @@ func _reward_card(card: Dictionary, reward: Dictionary) -> void:
     row.size_flags_vertical = Control.SIZE_EXPAND_FILL
     body.add_child(row)
     var portrait := CardPortrait.new()
-    portrait.custom_minimum_size = Vector2(122, 122)
+    portrait.custom_minimum_size = Vector2(112, 112)
     portrait.set_content(card, false)
     row.add_child(portrait)
     var details := VBoxContainer.new()

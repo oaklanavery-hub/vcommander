@@ -32,6 +32,7 @@ func run() -> void:
     check_bounds(journal.get_node("Margin/Main"), "journal")
     check(journal.displayed_ids.size() == 4 and journal.summary_label.text.contains("0 / 18"), "new profile sees four rewards and all eighteen achievements")
     check(journal.grid.get_child_count() == 4 and journal.grid.columns == 2, "reward cards use two readable columns")
+    check(journal.grid.size.y <= journal.scroll.size.y + 1, "all four mastery reward cards fit without a partial bottom row")
     journal._select_tab(1)
     check(journal.displayed_ids.size() == 18, "achievement view includes every milestone")
     var filter_index := 0
