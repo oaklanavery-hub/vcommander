@@ -77,6 +77,7 @@ func open_settings() -> void:
     _volume("Music", GameAudio.music_volume, GameAudio.set_music_volume)
     _volume("Sound effects", GameAudio.effects_volume, GameAudio.set_effects_volume)
     var motion := CheckButton.new()
+    _skin_toggle(motion)
     motion.text = "Reduced motion"
     motion.button_pressed = GameAudio.reduced_motion
     motion.toggled.connect(func(value: bool):
@@ -84,6 +85,7 @@ func open_settings() -> void:
         _apply_accessibility())
     _body.add_child(motion)
     var hp := CheckButton.new()
+    _skin_toggle(hp)
     hp.text = "Show health numbers"
     hp.button_pressed = GameAudio.show_hp_numbers
     hp.toggled.connect(func(value: bool):
@@ -99,6 +101,9 @@ func _volume(title: String, value: float, callback: Callable) -> void:
     label.custom_minimum_size.x = 150
     row.add_child(label)
     var slider := HSlider.new()
+    var grip := load("res://assets/ui/slider-grip.svg") as Texture2D
+    slider.add_theme_icon_override("grabber", grip)
+    slider.add_theme_icon_override("grabber_highlight", grip)
     slider.name = title.replace(" ", "")
     slider.min_value = 0
     slider.max_value = 100
@@ -114,6 +119,16 @@ func _volume(title: String, value: float, callback: Callable) -> void:
     slider.value_changed.connect(func(number: float): amount.text = "%d%%" % int(number))
     row.add_child(amount)
     _body.add_child(row)
+
+func _skin_toggle(toggle: CheckButton) -> void:
+    # The project theme loads before the editor imports new textures on a clean
+    # checkout. Bind icon textures only when an actual settings page is opened.
+    var enabled := load("res://assets/ui/toggle-on.svg") as Texture2D
+    var disabled := load("res://assets/ui/toggle-off.svg") as Texture2D
+    toggle.add_theme_icon_override("checked", enabled)
+    toggle.add_theme_icon_override("unchecked", disabled)
+    toggle.add_theme_icon_override("checked_disabled", enabled)
+    toggle.add_theme_icon_override("unchecked_disabled", disabled)
 
 func _apply_accessibility() -> void:
     BattlefieldView.reduced_motion = GameAudio.reduced_motion

@@ -1,9 +1,6 @@
-[gd_resource type="Theme" load_steps=17 format=3]
+[gd_resource type="Theme" load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/presentation/fantasy_frame.gd" id="1_frame"]
-[ext_resource type="Texture2D" path="res://assets/ui/toggle-on.svg" id="2_on"]
-[ext_resource type="Texture2D" path="res://assets/ui/toggle-off.svg" id="3_off"]
-[ext_resource type="Texture2D" path="res://assets/ui/slider-grip.svg" id="4_grip"]
 
 [sub_resource type="StyleBox" id="panel"]
 script = ExtResource("1_frame")
@@ -249,7 +246,7 @@ content_margin_bottom = 1.0
 default_font_size = 16
 Label/colors/font_color = Color(0.94, 0.91, 0.82, 1)
 Button/colors/font_color = Color(0.98, 0.93, 0.80, 1)
-Button/colors/font_disabled_color = Color(0.58, 0.57, 0.51, 1)
+Button/colors/font_disabled_color = Color(0.69, 0.65, 0.55, 1)
 Button/colors/font_hover_color = Color(1, 0.96, 0.84, 1)
 Button/styles/normal = SubResource("button")
 Button/styles/hover = SubResource("hover")
@@ -277,12 +274,6 @@ VScrollBar/styles/grabber_pressed = SubResource("scroll_hover")
 HSlider/styles/slider = SubResource("progress_bg")
 HSlider/styles/grabber_area = SubResource("progress_fill")
 HSlider/styles/grabber_area_highlight = SubResource("progress_fill")
-HSlider/icons/grabber = ExtResource("4_grip")
-HSlider/icons/grabber_highlight = ExtResource("4_grip")
-CheckButton/icons/checked = ExtResource("2_on")
-CheckButton/icons/unchecked = ExtResource("3_off")
-CheckButton/icons/checked_disabled = ExtResource("2_on")
-CheckButton/icons/unchecked_disabled = ExtResource("3_off")
 CheckButton/colors/font_color = Color(0.94, 0.91, 0.82, 1)
 HSeparator/styles/separator = SubResource("separator")
 TooltipPanel/styles/panel = SubResource("panel")
