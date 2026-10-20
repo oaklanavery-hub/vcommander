@@ -139,6 +139,12 @@ jobs:
             test -s "build/qa/pvp_${view}.png"
           done
 
+          timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_fantasy.gd -- --output-dir=build/qa 2>&1 | tee /tmp/fantasy-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/fantasy-qa.log; then exit 1; fi
+          for view in gallery_fire gallery_water gallery_earth gallery_slime battle_details blessings; do
+            test -s "build/qa/fantasy_${view}.png"
+          done
+
       - name: Emit bounded native review previews
         run: python3 tools/emit_visual_review.py
 

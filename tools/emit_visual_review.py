@@ -15,6 +15,8 @@ VIEWS = (
     "menu", "commander", "army", "draft", "battle", "result",
     "help", "settings", "progression_new", "progression_achievements_earned",
     "slime_commander", "frozen_field_late", "pvp_lobby",
+    "fantasy_gallery_water", "fantasy_gallery_earth", "fantasy_gallery_slime",
+    "fantasy_battle_details", "fantasy_blessings",
 )
 for name in VIEWS:
     source = ROOT / (name + ".png")

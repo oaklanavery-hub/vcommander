@@ -1,9 +1,11 @@
 # Changelog
 
-## Unreleased — Fantasy pixel presentation
+## v0.12.0 — Fantasy pixel presentation
 
 - Original woodland clearing and lodge courtyard environments replace the coarse backdrop.
 - Shared carved wood/leather material, brass trim, parchment actions, rounded elemental cards and arched scenery portraits across navigation, collection, draft, mastery/rewards and menus.
+- The battlefield uses an original detailed forest clearing, with rounded map trim and matching roster plaques. World positions and battle animations are unchanged.
+- Blessing offers and earned achievements use shared illustrated foil emblems; headings use a self-hosted OFL pixel face while small text stays readable.
 - The Commander gallery groups all four leaders in two balanced rows. Existing detailed character sprites and animation remain shared by cards and combat.
 - Theme-aware volume/toggle controls, consistent dropdowns, tooltips and visible keyboard focus.
 - Bounded native CI previews supplement full-resolution screenshot artifacts for visual review when no local workspace is available.

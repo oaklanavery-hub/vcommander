@@ -36,7 +36,8 @@ func _ready() -> void:
     caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-    caption.add_theme_font_size_override("font_size", 14)
+    caption.add_theme_font_size_override("font_size", 16)
+    caption.add_theme_font_override("font", ScreenStyle.DISPLAY_FONT)
     caption.text = str(definition.get("display_name", empty_caption))
     if not detail_text.is_empty():
         caption.text += "\n" + detail_text

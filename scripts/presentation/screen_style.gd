@@ -2,6 +2,7 @@ class_name ScreenStyle
 extends RefCounted
 
 const Backdrop = preload("res://scripts/presentation/pixel_backdrop.gd")
+const DISPLAY_FONT := preload("res://assets/fonts/PixelifySans.ttf")
 
 static func apply(screen: Control) -> void:
     var background := Backdrop.new()
@@ -33,6 +34,15 @@ static func apply(screen: Control) -> void:
         title_label.add_theme_color_override("font_color", Color("f3d59a"))
         title_label.add_theme_color_override("font_shadow_color", Color("171e1c"))
         title_label.add_theme_constant_override("shadow_offset_y", 2)
+    _style_headings(main)
+    header.draw.connect(func():
+        var y := header.size.y + 5
+        var color := Color(0.83, 0.69, 0.42, 0.6)
+        header.draw_line(Vector2(6, y), Vector2(header.size.x * 0.5 - 7, y), color, 1.0, false)
+        header.draw_line(Vector2(header.size.x * 0.5 + 7, y), Vector2(header.size.x - 6, y), color, 1.0, false)
+        var center := Vector2(header.size.x * 0.5, y)
+        header.draw_colored_polygon(PackedVector2Array([center + Vector2(0, -3), center + Vector2(4, 0), center + Vector2(0, 3), center + Vector2(-4, 0)]), color))
+    header.resized.connect(header.queue_redraw)
     GameAudio.set_context("battle" if screen.name == "Combat" else "menu")
 
 static func primary(button: Button) -> void:
@@ -54,6 +64,7 @@ static func primary(button: Button) -> void:
     button.add_theme_color_override("font_focus_color", Color("302d24"))
     button.add_theme_color_override("font_hover_pressed_color", Color("302d24"))
     button.add_theme_font_size_override("font_size", 20)
+    button.add_theme_font_override("font", DISPLAY_FONT)
 
 static func card(button: Button, element: String) -> void:
     var colors := {"fire": Color("553b2d"), "water": Color("2e4548"), "earth": Color("3b4631"), "slime": Color("503747")}
@@ -98,7 +109,15 @@ static func label(text: String, font_size: int = 18) -> Label:
     var result := Label.new()
     result.text = text
     result.add_theme_font_size_override("font_size", font_size)
+    if font_size >= 20:
+        result.add_theme_font_override("font", DISPLAY_FONT)
     return result
+
+static func _style_headings(node: Node) -> void:
+    if node is Label and node.get_theme_font_size("font_size") >= 20:
+        node.add_theme_font_override("font", DISPLAY_FONT)
+    for child in node.get_children():
+        _style_headings(child)
 
 static func skill_description(commander: Dictionary) -> String:
     var skill: Dictionary = commander.get("active_skill", {})

@@ -227,9 +227,10 @@ func _render_offers(view: Dictionary) -> void:
             button = tile
         else:
             var buff := ContentDatabase.get_buff(str(option["id"]))
-            button = Button.new()
-            button.text = "%s\n\n+%d%% %s\n\nArmy-wide blessing" % [buff["display_name"], int(buff["percentage"]), str(buff["stat"]).replace("_", " ")]
-            button.add_theme_font_size_override("font_size", 18)
+            var blessing := BuffTile.new()
+            blessing.definition = buff
+            blessing.stacks = int(view["self"].get("buff_stacks", {}).get(str(option["id"]), 0))
+            button = blessing
         button.custom_minimum_size = Vector2(200, 216)
         button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
         button.pressed.connect(_act.bind("pick", index))

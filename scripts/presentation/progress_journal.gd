@@ -188,7 +188,14 @@ func _achievement_card(entry: Dictionary) -> void:
     body.custom_minimum_size.y = 145
     var eyebrow := _text("★  EARNED" if entry["earned"] else "◇  IN PROGRESS", 12)
     eyebrow.add_theme_color_override("font_color", Color("e8c77f") if entry["earned"] else Color("a5baaa"))
-    body.add_child(eyebrow)
+    var heading := HBoxContainer.new()
+    heading.add_theme_constant_override("separation", 9)
+    var emblem := FantasyEmblem.new()
+    emblem.custom_minimum_size = Vector2(32, 32)
+    emblem.accent = Color("d5b578") if entry["earned"] else Color("8f8864")
+    heading.add_child(emblem)
+    heading.add_child(eyebrow)
+    body.add_child(heading)
     body.add_child(_text(str(entry["display_name"]), 21))
     var detail := _text(str(entry["description"]), 14)
     detail.size_flags_vertical = Control.SIZE_EXPAND_FILL

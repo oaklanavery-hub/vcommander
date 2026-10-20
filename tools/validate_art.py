@@ -65,3 +65,19 @@ assert list(struct.unpack('>II', header[16:24])) == scene['size'] == [640, 360]
 assert atlas_manifest['menu_commanders']['cell_size'] == [128, 128]
 assert atlas_manifest['menu_fire']['cell_size'] == [80, 80]
 print('Menu art OK: 640x360 scenery, four seated Commander frames, six fire frames and valid texture regions')
+
+# Decorative environments are independent of gameplay collision/placement.
+scenery_bytes = 0
+for name in ("forest-clearing-v1.png", "lodge-courtyard-v1.png"):
+    path = root / "assets/pixel" / name
+    raw = path.read_bytes()
+    assert raw[:8] == b'\x89PNG\r\n\x1a\n', path
+    width, height = struct.unpack('>II', raw[16:24])
+    assert 1280 <= width <= 2048 and 720 <= height <= 1152, path
+    assert abs(width / height - 16 / 9) < 0.03, path
+    assert raw[25] in (2, 6), f"Expected RGB/RGBA pixel scenery: {path}"
+    scenery_bytes += len(raw)
+assert scenery_bytes < 10_000_000, "Keep both scenery assets within the browser download budget"
+assert (root / "assets/fonts/PixelifySans.ttf").stat().st_size < 200_000
+assert "SIL OPEN FONT LICENSE" in (root / "assets/fonts/OFL-PixelifySans.txt").read_text()
+print("Fantasy scenery OK: two original bounded 16:9 environments, download budget and self-hosted font license")

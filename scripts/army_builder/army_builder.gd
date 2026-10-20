@@ -22,6 +22,11 @@ func _ready() -> void:
     preset_store = WarbandPresets.new(ContentDatabase, WarbandPresets.DEFAULT_PATH, 4, GameState.commander_progress)
     ScreenStyle.apply(self)
     ScreenStyle.primary(begin_draft_button)
+    slots_row.draw.connect(func():
+        var rack := ScreenStyle.frame(Color("302c23"), Color("82704a"), 14)
+        rack.ornaments = false
+        slots_row.draw_style_box(rack, Rect2(Vector2(-9, -10), slots_row.size + Vector2(18, 20))))
+    slots_row.resized.connect(slots_row.queue_redraw)
     var rewards := Button.new()
     rewards.text = "Rewards"
     rewards.custom_minimum_size = Vector2(110, 42)
