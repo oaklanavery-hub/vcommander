@@ -13,13 +13,25 @@ static func terrain(field: Control, frame: Dictionary, time: float, reduced: boo
         for segment in hazard["segments"]:
             var a := screen(field, segment, "from")
             var b := screen(field, segment, "to")
-            field.draw_line(a, b, Color(0.35, 0.12, 0.12, alpha * 0.8), 8)
-            field.draw_line(a, b, Color(0.95, 0.35, 0.12, alpha * 0.8), 4)
-            var steps := maxi(1, int(a.distance_to(b) / 8))
+            var radius: float = float(hazard["radius"]) / field._field_width * field._arena.size.x
+            # The soft ground footprint matches the damaging path width. The
+            # irregular stepped flames avoid a repeated fence/picket pattern.
+            field.draw_line(a, b, Color(0.9, 0.24, 0.06, alpha * 0.13), radius * 2)
+            field.draw_line(a, b, Color(0.22, 0.12, 0.16, alpha * 0.35), radius * 0.8)
+            field.draw_line(a, b, Color(0.95, 0.3, 0.08, alpha * 0.8), 3)
+            var steps := maxi(1, int(a.distance_to(b) / 6))
             for index in range(steps + 1):
                 var p := a.lerp(b, float(index) / float(steps)).round()
-                var rise := 3.0 if reduced else 3.0 + sin(time * 13 + p.x) * 3
-                field.draw_rect(Rect2(p - Vector2(1, rise), Vector2(3, rise + 1)), Color(1, 0.75, 0.22, alpha))
+                var seed_value := absf(sin(p.x * 2.17 + p.y * 0.73))
+                var sway := 0.0 if reduced else sin(time * 9 + p.x * 0.5) * 2
+                var rise := 5 + seed_value * 9 + sway
+                var offset := Vector2(sway, -rise)
+                field.draw_rect(Rect2((p + offset).round(), Vector2(3, rise)), Color(1, 0.37, 0.08, alpha * 0.9))
+                field.draw_rect(Rect2((p + offset + Vector2(1, 2)).round(), Vector2(2, maxf(2, rise - 3))), Color(1, 0.75, 0.2, alpha))
+                field.draw_rect(Rect2((p + offset + Vector2(2, 4)).round(), Vector2(1, 3)), Color(1, 0.94, 0.62, alpha))
+                if int(seed_value * 10) % 3 == 0:
+                    var drift := 4.0 if reduced else fmod(time * 12 + p.x, 11.0)
+                    field.draw_rect(Rect2((p + Vector2(sway + 3, -rise - drift)).round(), Vector2(2, 2)), Color(1, 0.7, 0.24, alpha * 0.8))
     for wall in frame.get("obstacles", []):
         if float(wall["expires_at"]) <= time:
             continue
@@ -30,15 +42,20 @@ static func terrain(field: Control, frame: Dictionary, time: float, reduced: boo
         var steps := maxi(2, int(a.distance_to(b) / 9))
         for index in range(steps + 1):
             var p := a.lerp(b, float(index) / float(steps))
-            p += normal * (2 if index % 2 == 0 else -2)
+            p += normal * (sin(float(index) * 7.31 + a.x) * 4)
             points.append(p.round())
         var alpha := clampf((float(wall["expires_at"]) - time) / 0.5, 0, 1)
-        field.draw_polyline(points, Color(0.17, 0.12, 0.14, alpha), 7)
-        field.draw_polyline(points, Color(0.68, 0.47, 0.26, alpha), 3)
-        for index in range(1, points.size(), 3):
-            var p := points[index]
-            field.draw_line(p, (p + normal * 9).round(), Color(0.2, 0.15, 0.16, alpha), 2)
-            field.draw_rect(Rect2(p + normal * 5 - Vector2(2, 3), Vector2(4, 4)), Color(0.76, 0.62, 0.37, alpha))
+        field.draw_polyline(points, Color(0.12, 0.09, 0.13, alpha), 8)
+        # Broken lit lips and occasional branching fissures sit beside a dark
+        # center, rather than filling the entire crack with a brown stripe.
+        for index in range(1, points.size()):
+            var edge := normal * (3 if index % 3 != 0 else -3)
+            field.draw_line((points[index - 1] + edge).round(), (points[index] + edge).round(), Color(0.61, 0.46, 0.27, alpha), 2)
+            if index % 4 == 0:
+                var p := points[index]
+                var branch := p + normal * (9 + index % 5)
+                field.draw_line(p, branch.round(), Color(0.15, 0.11, 0.14, alpha), 3)
+                field.draw_rect(Rect2((branch - Vector2(2, 3)).round(), Vector2(4, 3)), Color(0.74, 0.61, 0.4, alpha))
 
 static func transit_at(events: Array, id: String, time: float) -> Dictionary:
     for event in events:
@@ -63,6 +80,17 @@ static func actor(field: Control, unit: Dictionary, time: float, reduced: bool) 
     p -= Vector2(0, 13)
     var main := Color("ff883a") if mode == "flame" else Color("5dcddc")
     var light := Color("ffe39c") if mode == "flame" else Color("e3ffff")
+    if mode == "gush":
+        var angle := direction.angle()
+        field.draw_arc(p, 12, angle - 1.2, angle + 1.2, 10, Color("276b9a"), 7)
+        field.draw_arc(p, 12, angle - 1.2, angle + 1.2, 10, main, 5)
+        field.draw_arc(p + direction * 2, 12, angle - 1.1, angle + 1.1, 10, light, 2)
+        var normal := direction.orthogonal()
+        for index in range(5):
+            var drift := 0.0 if reduced else sin(time * 11 + float(index)) * 2
+            var foam := p - direction * float(index * 6) + normal * (float(index % 3 - 1) * 5 + drift)
+            field.draw_rect(Rect2(foam.round() - Vector2(2, 2), Vector2(5, 4)), main if index % 2 == 0 else light)
+        return
     var pulse := 1.0 if reduced else 1 + sin(time * 17) * 0.15
     for index in range(6, 0, -1):
         var q := p - direction * float(index * 5)
