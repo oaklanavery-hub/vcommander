@@ -29,7 +29,7 @@ func _init() -> void:
                 var count: int = ai.draft.get_unit_count(str(card["id"]))
                 check(count <= int(card["unit_cap"]), "unit caps respected")
             for buff in db.get_all_buffs():
-                var stacks := ai.draft.get_buff_stacks(str(buff["id"]))
+                var stacks: int = ai.draft.get_buff_stacks(str(buff["id"]))
                 var limit := int(buff.get("max_stacks", 0))
                 check(limit == 0 or stacks <= limit, "configured power limits respected")
                 exceeded_old_limit = exceeded_old_limit or stacks > 3
