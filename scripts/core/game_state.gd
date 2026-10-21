@@ -104,7 +104,7 @@ func begin_match(seed_value: int) -> bool:
     match_started = true
     battle_result.clear()
     opponent = AiScript.new()
-    if not opponent.configure(ContentDatabase.get_all_commanders(), commander_progress.available_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571):
+    if not opponent.configure(ContentDatabase.get_all_commanders(), commander_progress.available_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571, ContentDatabase.get_game_balance().get("stats", {})):
         match_started = false
         return false
     opponent_public_side = opponent.get_side()

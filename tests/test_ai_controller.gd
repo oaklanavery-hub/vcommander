@@ -48,6 +48,13 @@ func _init() -> void:
     check(first_healer > support_ai.score_option({"type": "unit", "id": "card_water_01"}), "AI values the first healer for an established army")
     support_ai.draft.unit_counts["card_water_03"] = 1
     check(support_ai.score_option({"type": "unit", "id": "card_water_03"}) < first_healer, "support coverage has diminishing draft value")
+    for card in support_ai.cards:
+        support_ai.draft.unit_counts[card["id"]] = int(card["unit_cap"])
+    for buff in db.get_all_buffs():
+        if str(buff.get("stat", "")) in ["attack_speed", "movement_speed"]:
+            support_ai.draft.buff_stacks[buff["id"]] = 10000
+            check(support_ai.score_option({"type": "buff", "id": buff["id"]}) == 0, "AI avoids ineffective speed picks after the army reaches its stat cap")
+    check(support_ai.score_option({"type": "buff", "id": "buff_attack"}) > 0, "uncapped attack growth remains useful in the same late-round offer")
     db.free()
     if not failed:
         print("AiController tests passed: 50 seeds, 700 drafting phases.")

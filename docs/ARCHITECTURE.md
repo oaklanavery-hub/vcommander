@@ -211,3 +211,5 @@ GameState enforces equipment/start eligibility and passes the same available col
 ## Temporary battle terrain and backline effects
 
 `CombatTerrain` is a pure geometry helper for swept capsule barriers and bounded visibility-graph routes. CombatSimulator owns temporary cracks, per-unit route caches, timed transit, path hazards and nonrecursive damage links. It expires them by the deterministic simulation clock and records ordinary replay dictionaries. Central damage application checks explicit transit immunity before all damage sources, then shares actual HP damage with an explicit recursion guard. The existing recursive guest perspective mirrors coordinates/IDs for the added state without protocol-specific exceptions. `AssassinEffects` only draws recorded state and original sprites; it never changes collision, damage or targeting.
+
+With unlimited power picks, AiController weights speed boosts by their remaining benefit below configured rating caps. Legal but fully ineffective speed boosts score zero; the offer remains unchanged for either player. GameState supplies the shared balance cap definitions.

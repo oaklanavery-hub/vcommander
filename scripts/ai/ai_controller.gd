@@ -9,10 +9,13 @@ var cards: Array[Dictionary] = []
 var signature_set: Dictionary = {}
 var draft = DraftScript.new()
 var _rng := RandomNumberGenerator.new()
+var _stat_caps: Dictionary = {"attack_speed": 200, "movement_speed": 200}
 
 # Only previous-round public enemy information crosses this boundary.
-func configure(commanders: Array, all_cards: Array, sets: Dictionary, buffs: Array, seed_value: int) -> bool:
+func configure(commanders: Array, all_cards: Array, sets: Dictionary, buffs: Array, seed_value: int, stat_rules: Dictionary = {}) -> bool:
     _rng.seed = seed_value
+    for stat in ["attack_speed", "movement_speed"]:
+        _stat_caps[stat] = float(stat_rules.get(stat + "_cap", 200))
     commander.clear()
     cards.clear()
     var candidates: Array = commanders.duplicate()
@@ -102,6 +105,28 @@ func score_option(option: Dictionary) -> float:
     var value := float(buff.get("percentage", 0)) * float(_unit_total()) * 0.65
     if str(buff.get("stat", "")) in ["health", "attack"]:
         value *= 1.2
+    var stat := str(buff.get("stat", ""))
+    if _stat_caps.has(stat):
+        # Unlimited speed cards remain legal, but an already-capped army gets
+        # no benefit from them. Prefer useful growth when the offer permits it.
+        var weighted_gain := 0.0
+        var total := 0
+        var multiplier := 1 + float(buff.get("percentage", 0)) / 100.0
+        for card in cards:
+            var count := draft.get_unit_count(str(card["id"]))
+            var base := maxf(1, float(card.get("stats", {}).get(stat, 100)))
+            var log_value := log(base)
+            for id in draft.buff_definitions:
+                var active: Dictionary = draft.buff_definitions[id]
+                if str(active.get("stat", "")) == stat:
+                    log_value += float(draft.get_buff_stacks(str(id))) * log(1 + float(active.get("percentage", 0)) / 100.0)
+            var cap := float(_stat_caps[stat])
+            var current := minf(cap, exp(minf(log(cap), log_value)))
+            if current >= cap - 0.0001:
+                current = cap
+            weighted_gain += float(count) * (minf(cap, current * multiplier) - current) / maxf(0.001, current * (multiplier - 1))
+            total += count
+        value *= weighted_gain / float(maxi(1, total))
     return value
 
 func _unit_total() -> int:

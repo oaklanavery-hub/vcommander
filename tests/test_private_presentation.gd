@@ -67,7 +67,7 @@ func run() -> void:
     for card in db.get_cards_by_set(guest_commander["signature_set_id"]):
         if not card.has("mastery_unlock"):
             cards.append(card["id"])
-    guest.join_room(session.client.room, guest_commander["id"], cards)
+    guest.join_room(session.client.room, guest_commander["id"], cards.slice(0, 4))
     if not await until(func(): return session.client.state.get("phase") == "draft" and guest.state.get("phase") == "draft", "friend joins UI draft"):
         finish()
         return
