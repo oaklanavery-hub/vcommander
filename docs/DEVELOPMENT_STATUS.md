@@ -2,7 +2,26 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Fantasy pixel presentation throughout the game
+## Current task — Unlimited power cards and backline specialists
+
+- Branch `feat/assassin-units`, based on current main `6680fe7c6ef8747e921c7eac59ecb34dcdca84ab` (v0.12.0, PR #30, deployed and served-pack verified).
+- User requests unlimited power/Buff picks, no units standing on decorative trees, and Spriggan/Nymph/Mole/Sticky Slime (all recruit 2/cap 4).
+- Preserve four-card armies, existing mastery rewards, all previous content, deterministic headless rules, pixel presentation, PvP Coming Soon, campaign KIV and free hosting. No Render changes.
+- Checkpoint 1: remove Buff cap across data/draft/UI; map the playable arena to tree-free ground; focused checks and save.
+- Checkpoint 2: content-driven backline transit, flame trail, gush damage/push, temporary bidirectional crack obstacles with repathing, third strike and nonrecursive shared damage; original pixel art, replay effects and sound. Save before full CI.
+- Playtest defaults for unspecified tuning: Mole tunnel cooldown 5 seconds, third strike 180%; Sticky copies 50% actual damage to its linked partner for 5 seconds, one-target casts retain a visible mark but have no partner to share with. Gush damages contacted enemies. New units are ordinary collection cards; mastery rewards remain unchanged. Fire/Water invulnerability applies only during transit. Mole tunnels ignore surface collision during travel but are not damage-immune.
+- Validation before editing: verified remote main and prior released deployment. New checks not yet run. Local Godot 4.7 is available again.
+- Checkpoint 1 implemented: unlimited Buff data/draft/labels, 40 repeated late-round selection checks, and tree-free ground UV mapping. Passing: content validation, clean Godot 4.7 import, draft suite (40 late Sudden Death rounds) and fantasy interface integration suite.
+- Checkpoint 2 implemented: four ordinary 2/4 specialist definitions; generic timed transit, swept trails/gush, expiring crack routing and guarded shared damage; original atlas row, four sounds, replay effects and rules/schema.
+- Passing focused new simulation suite: mirrored backline/immunity, trail/gush contact, both-team detours/expiry, third strike, allied shared damage/recursion/absorption, capped specialist determinism and numeric safety. Art and presentation validators pass. Existing combat, Slime absorption, achievements and scene-flow regression suites also pass. A new presentation check exposed unsupported scientific string formatting; replaced it with explicit mantissa/exponent formatting. Native rendering is unavailable locally (X11 socket/display startup fails), so Actions supplies the seven new native views and complete regression/export/browser/container gates. Those are pending.
+- PR #31 is open. The prior complete gate passed all 33 source/pack suites, browser/container and 122 native captures at `869f26c4a4f3be4e9feda538a4c5980674339289` (CI #39669721748). Refined visual head `744237c23cfc3d8a85e84e5a239be76167fdbebe` has passing focused UI/presentation checks and full CI pending.
+- Next: inspect the refined native views, require the final exact-head CI gate, merge PR #31 and verify the actual served v0.13.0 pack before reporting live. No Render deployment is needed.
+
+## Previous release
+
+v0.12.0 fantasy interface released in PR #30; main Deploy Web run 39471568484 passed all gates including 31 source/export suites, 115 native captures and actual served-pack SHA256 `21925169f851116191a9d5a0da09c2d873bce0509bb9d43ea946b143110db60f`.
+
+## Archived implementation log — Fantasy pixel presentation throughout the game
 
 - User has placed campaign/story in KIV. Improve the complete visual interface using the supplied Hunter’s Lodge references: Commander selection, warband/collection, draft, battlefield, rewards, title and utility modals. No gameplay/progression/network rule changes.
 - Branch `feat/fantasy-lodge-ui`, base main `ff40a5d391bd93e32ccc9ab5c8e567a6ec3e735f` (verified v0.11.0). PR #29 achievements/mastery is released; main Deploy Web #39373288633 passed all gates and served-pack verification. PR #28 remains separate.
@@ -30,3 +49,11 @@ Verify this handoff against GitHub and the working tree before resuming.
 - CI #39469486399 at `56973d995234c7851f3a81e0ed18c89e137f7dd8`: source validation/all 31 suites and all 115 native captures pass; pack checks and container pass, browser finish is pending at this checkpoint. Reviewed actual native title, Earth/Water/Slime galleries, warband, draft, blessings, rewards, achievements, help/settings, frozen field, compact details and result. Most layouts are readable and cohesive. Review caught vertical wrapping of achievement status labels after adding the medal row; expanding that label fixes the available width. Added a real line-count assertion across all 18 statuses. Fixed blessing heading/value row heights align emblems across short/long names. Final native review must confirm these two refinements and the Fire full portrait, then require exact-head CI before merging/releasing.
 
 - Final packaging review: explicitly include the self-hosted font's OFL notice in the Web pack, with a source/export assertion that the notice is available alongside the font. The source notice was already retained; this closes the non-resource export filter gap. Visual code remains the reviewed/refined presentation. Exact-head full CI and release verification remain required.
+
+- PR #31 opened at remote head `95a8ce252c32f341f67172601176057293c51049`. First full CI #39668928348 stopped at the older AI suite hardcoding three Buff stacks. Updated it to validate declared limits and exercise unlimited picks, and made missing native previews avoid a secondary Pillow error before the renderer dependencies install. Added crowded crack-rise evacuation/pushback replay coverage. Next: focused checks, publish the correction and inspect the full exact-head gate.
+
+- Follow-up `1c268bbd3abe41e9c99dadf202cb36262d01b5fc` corrects the dynamic AI fixture type; its focused suite passes (50 seeds/700 draft phases). Unlimited speed picks remain legal, while AI scoring now discounts their capped-away benefit using configured speed caps; focused coverage verifies uncapped attack still has value. Full CI/native review is pending.
+
+- CI #39669281342 passed eighteen source/pack suites including new mechanics, full PvAI and private WebSocket transport, then found the private UI guest fixture submitting every ordinary themed card (now five) instead of a four-card loadout. Bounded that fixture to four; production already enforces four slots. Container gate passed. Focused AI/capped-value and normal scene-flow suites pass. Next: publish the fixture/scoring checkpoint and resume native/full gates.
+
+- Exact-head CI #39669721748 at `869f26c4a4f3be4e9feda538a4c5980674339289` passed all 33 source suites, 33 exported-pack suites, real two-session WebGL2 flow, production container and 122 native views. Reviewed the new collection/transit/terrain/links/power views. Visual review found inconsistent blessing row heights and cramped long unlimited-stack labels; fixed rows and compact stack text now have child-bounds coverage at 12,000 stacks. Refined flame footprint/tongues and dark broken crack edges to avoid fence-like visuals; distinct water crest/foam. Simulation is unchanged in this refinement. Next: focused UI check, publish, inspect refined native views and require exact-head final CI before merge/deployment.

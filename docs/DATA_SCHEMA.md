@@ -112,7 +112,7 @@ A bonus may define `trigger: on_death_spawn` with `stat: attack`. Its percentage
   "display_name": "Attack Boost",
   "stat": "attack",
   "percentage": 15,
-  "max_stacks": 3,
+  "max_stacks": 0,
   "stacking": "multiplicative",
   "status": "playtest"
 }
@@ -182,7 +182,7 @@ Pull events provide `source_x/y`, `from_x/y`, `to_x/y` and original target HP fo
 - Every Army card has positive `summon_amount`, `unit_cap`, and required combat stats.
 - `summon_amount` cannot exceed `unit_cap`.
 - Every Army card defines an ability `id` and generic `type`.
-- Every Buff Card has a positive percentage and `max_stacks` of 3.
+- Every Buff Card has a positive percentage and a nonnegative integer `max_stacks`; `0` means unlimited.
 - Required battlefield/simulation balance values are positive.
 - JSON parses without errors.
 
@@ -225,3 +225,12 @@ Profile writes use a completed temporary file/rename and a current `.bak` copy. 
 A card may declare `mastery_unlock: {commander_id, level, wins}`; both positive integer requirements must be met by that Commander. Its set matches the owner Commander's signature set. Each theme retains at least four cards without unlock requirements. Absence of this field means available from the start.
 
 Local profile schema 2 adds unique string arrays `achievements` and `unlocked_cards`. Historical unknown IDs remain stored. These are permanent entitlements; display progress is derived from the existing records. Valid schema-1 saves migrate automatically without changing counters or pending match identity, then backfill qualifying rewards and use the existing atomic save/backup path. Corrupt/future saves remain protected. Match receipts add arrays of newly granted achievement/card IDs; receipt display never grants anything. All rewards remain device-local.
+
+
+## Backline ability and terrain data (v0.13)
+
+The roster has four Commanders, twenty ordinary cards and four mastery reward cards. A `backline_transit` ability declares `mode` (`flame`, `gush`, `burrow`), positive `cooldown_seconds`, `transit_seconds`, and explicit `invulnerable`. Flame adds trail lifetime/radius/tick/ATK percentage. Gush adds contact radius/ATK percentage/pushback. Burrow adds `obstacle_seconds`, `every_n_attacks` and empowered `attack_pct`. These are generic behavior parameters, independent of content IDs.
+
+`damage_link` declares positive cooldown/duration/link radius, `max_targets: 2` and `shared_damage_pct` in (0,100]. Runtime links identify source side/body and target body IDs, expiry and sharing percentage. Shared hits are tagged `no_share` and retain the original attacker's side and ID.
+
+Replay frames additionally carry `obstacles` (finite from/to world segments with absolute expiry), `hazards` (swept path segments with radius/pulse/expiry), `links`, and per-unit `transit`. Ability events record transit endpoints/start/end/mode and arrivals, crack creation and link casts. Core HP/ATK/DEF and damage use rounded float values to support unlimited Buff stacks without signed-integer overflow; speed ratings retain their 200 caps. Modified base stats have a technical 1e100 numerical ceiling, never a draft stack cap. All values are serializable in the ordinary JSON replay and mirrored by the existing recursive guest perspective adapter.

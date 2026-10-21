@@ -16,7 +16,7 @@ func _buff(buff_id: String) -> Dictionary:
     return {
         "id": buff_id,
         "display_name": buff_id,
-        "max_stacks": 3
+        "max_stacks": 0
     }
 
 func _init() -> void:
@@ -71,10 +71,14 @@ func _init() -> void:
     _assert(normal.current_offer.size() == 3, "all-unit-exhausted offer should still show three buffs")
     _assert(_count_type(normal.current_offer, "buff") == 3, "three buffs are allowed after all units exhaust")
 
-    normal.buff_stacks["atk"] = 3
-    normal.refresh_offer()
-    for option in normal.current_offer:
-        _assert(str(option.get("id")) != "atk", "3/3 buff must leave the offer pool")
+    for id in normal.buff_stacks:
+        normal.buff_stacks[id] = 300
+    for round_index in range(40):
+        normal.begin_round(false, false, true)
+        _assert(normal.current_offer.size() == 3, "late Sudden Death always has three power choices")
+        while not normal.is_phase_complete():
+            _assert(normal.auto_select(), "late-round auto selection makes progress")
+    _assert(normal.buff_stacks.values().max() > 300, "power cards remain selectable beyond the old limit")
 
     if not _failed:
         print("DraftSystem tests passed.")

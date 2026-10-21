@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.13.0 — Backline specialists
+
+- Added Spriggan, Nymph, Mole and Sticky Slime (all 2/4), original pixel sprites, elemental travel, damage trails, gush pushback, temporary crack terrain/repathing, third strikes and shared damage links.
+- Added four original ability sounds and replay-driven pixel effects.
+- Power cards can be picked indefinitely; the late-round draft stays available after unit caps.
+- Battlefield ground uses the clear grassy interior, keeping decorative trees outside unit positions.
+
 ## v0.12.0 — Fantasy pixel presentation
 
 - Original woodland clearing and lodge courtyard environments replace the coarse backdrop.

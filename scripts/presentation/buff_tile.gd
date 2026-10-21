@@ -19,27 +19,35 @@ func _ready() -> void:
     body.offset_top = 12
     body.offset_bottom = -12
     body.alignment = BoxContainer.ALIGNMENT_CENTER
-    body.add_theme_constant_override("separation", 5)
+    body.add_theme_constant_override("separation", 4)
     var emblem := FantasyEmblem.new()
     emblem.kind = str(definition.get("stat", "mastery"))
     emblem.accent = Color("d5b578")
-    emblem.custom_minimum_size = Vector2(56, 56)
+    emblem.custom_minimum_size = Vector2(48, 48)
     emblem.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
     body.add_child(emblem)
     var heading := ScreenStyle.label(str(definition.get("display_name", "Warband blessing")), 20)
-    heading.custom_minimum_size.y = 44
+    heading.custom_minimum_size.y = 54
     heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     body.add_child(heading)
     var value := ScreenStyle.label("+%d%% %s" % [int(definition.get("percentage", 0)), str(definition.get("stat", "")).replace("_", " ")], 14)
-    value.custom_minimum_size.y = 36
+    value.custom_minimum_size.y = 44
     value.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     value.add_theme_color_override("font_color", Color("eed299"))
     body.add_child(value)
-    var detail := ScreenStyle.label("Army-wide · %d / %d" % [stacks, int(definition.get("max_stacks", 3))], 12)
+    var detail := ScreenStyle.label("%d stacks · ∞" % stacks, 12)
     detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     body.add_child(detail)
-    tooltip_text = "%s\n+%d%% %s for the whole warband\nCurrent stacks: %d / %d" % [str(definition.get("display_name", "Blessing")), int(definition.get("percentage", 0)), str(definition.get("stat", "")).replace("_", " "), stacks, int(definition.get("max_stacks", 3))]
+    tooltip_text = "%s\n+%d%% %s for the whole warband\nCurrent stacks: %s" % [str(definition.get("display_name", "Blessing")), int(definition.get("percentage", 0)), str(definition.get("stat", "")).replace("_", " "), stack_text(definition, stacks)]
+
+    var rating_cap := int(ContentDatabase.get_game_balance().get("stats", {}).get(str(definition.get("stat", "")) + "_cap", 0))
+    if rating_cap > 0:
+        tooltip_text += "\nSpeed rating limit: %d. Additional picks do not increase a rating already at its limit." % rating_cap
+
+static func stack_text(buff: Dictionary, count: int) -> String:
+    var limit := int(buff.get("max_stacks", 0))
+    return "%d / %d" % [count, limit] if limit > 0 else "%d · No limit" % count

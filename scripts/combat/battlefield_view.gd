@@ -148,6 +148,7 @@ func _draw() -> void:
     _draw_ground()
     _draw_frost()
     _draw_rosters()
+    AssassinEffects.terrain(self, _frame, _visual_time, reduced_motion)
     var next_units := {}
     for unit in _next_frame.get("units", []):
         next_units[str(unit.get("id", ""))] = unit
@@ -206,6 +207,13 @@ func _draw() -> void:
             unit["_pull_visual"] = true
             if age < 0.54:
                 unit["hp"] = pull.get("from_hp", unit.get("hp", 0))
+        var transit := AssassinEffects.transit_at(_effects, id_value, _visual_time)
+        unit["transit"] = transit
+        if not transit.is_empty():
+            var progress := clampf((_visual_time - float(transit["started_at"])) / maxf(0.001, float(transit["ends_at"]) - float(transit["started_at"])), 0, 1)
+            var travel := CombatTerrain.point(transit, "from").lerp(CombatTerrain.point(transit, "to"), progress)
+            unit["x"] = travel.x
+            unit["y"] = travel.y
         var pose: Dictionary = _poses.get(id_value, {"facing": 4 if unit.get("side") == "opponent" else 0})
         pose["rig"] = CombatCues.profile(str(unit.get("card_id", ""))).get("rig", "claw")
         pose["cycle"] = _visual_time * 8 + float(unit.get("y", 0))
@@ -241,6 +249,7 @@ func _draw() -> void:
     units.sort_custom(func(a, b): return float(a.get("y", 0)) < float(b.get("y", 0)))
     for unit in units:
         _draw_unit(unit)
+    AssassinEffects.links(self, _frame, _known, _visual_time, reduced_motion)
     _draw_royal_opening()
     for effect in _effects:
         var age := _visual_time - float(effect.get("time", 0))
@@ -286,7 +295,9 @@ func _draw_frost() -> void:
             draw_polyline(crack, Color(0.76, 0.93, 0.97, 0.3), 1)
 
 func _draw_ground() -> void:
-    # Scenery is decorative: the unchanged world-to-screen arena still owns all
+    # Only the tree-free central clearing is playable. Decorative tree canopies
+    # are outside this UV window, including the actor height above its feet.
+    # The unchanged world-to-screen arena still owns all
     # positions, frost coverage, projectile contacts and formation coordinates.
     var rim := ScreenStyle.frame(Color("263121"), Color("8a754b"), 12)
     rim.set_content_margin_all(0)
@@ -306,7 +317,7 @@ func _draw_ground() -> void:
             var angle := float(corner[1]) + PI * 0.5 * float(index) / 4.0
             var point: Vector2 = corner[0] + Vector2.from_angle(angle) * radius
             points.append(point)
-            uv.append((point - _arena.position) / _arena.size)
+            uv.append(Vector2(0.21, 0.23) + (point - _arena.position) / _arena.size * Vector2(0.58, 0.42))
     draw_polygon(points, PackedColorArray([Color(0.89, 0.94, 0.88, 1)]), uv, GROUND)
 
 func roster_layout(card_count: int) -> Dictionary:
@@ -367,6 +378,9 @@ func _draw_aura(unit: Dictionary) -> void:
     draw_arc(_point(float(unit["x"]), float(unit["y"])), radius, 0, TAU, 16, color, 1)
 
 func _draw_unit(unit: Dictionary) -> void:
+    if not unit.get("transit", {}).is_empty():
+        AssassinEffects.actor(self, unit, _visual_time, reduced_motion)
+        return
     var p := _point(float(unit.get("x", 0)), float(unit.get("y", 0)))
     var id_value := str(unit.get("id", ""))
     var side := str(unit.get("side", "player"))
@@ -423,7 +437,7 @@ func _draw_unit(unit: Dictionary) -> void:
         for tip in [0, 4, 8]:
             draw_rect(Rect2(crown + Vector2(tip, -3), Vector2(2, 4)), Color("f2a1c6"))
     if show_hp_numbers:
-        draw_string(ThemeDB.fallback_font, bar + Vector2(-4, -3), "%d/%d" % [int(unit.get("hp", 0)), int(unit.get("max_hp", 1))], HORIZONTAL_ALIGNMENT_CENTER, 40, 10, Color("fff3d5"))
+        draw_string(ThemeDB.fallback_font, bar + Vector2(-4, -3), "%s/%s" % [AssassinEffects.number(float(unit.get("hp", 0))), AssassinEffects.number(float(unit.get("max_hp", 1)))], HORIZONTAL_ALIGNMENT_CENTER, 40, 10, Color("fff3d5"))
 
 func _sprite_position(unit: Dictionary, pose: Dictionary) -> Vector2:
     var sprite_position := _point(float(unit.get("x", 0)), float(unit.get("y", 0)))
@@ -537,7 +551,7 @@ func _draw_effects() -> void:
                     draw_rect(Rect2(p + Vector2(9, -18), Vector2(5, 2)), color)
                     draw_rect(Rect2(p + Vector2(10, -20), Vector2(2, 6)), color)
                 continue
-            draw_string(ThemeDB.fallback_font, p + Vector2(-8, -48 - (0.0 if reduced_motion else age * 24)), ("+" if type == "heal" else "") + str(int(effect.get("amount", 0))), HORIZONTAL_ALIGNMENT_CENTER, 40, 12, color)
+            draw_string(ThemeDB.fallback_font, p + Vector2(-8, -48 - (0.0 if reduced_motion else age * 24)), ("+" if type == "heal" else "") + AssassinEffects.number(float(effect.get("amount", 0))), HORIZONTAL_ALIGNMENT_CENTER, 40, 12, color)
         elif type == "defeat" and age < 0.5:
             var unit: Dictionary = effect.get("unit", {})
             var pose := {"state": "death", "alpha": 1.0 - age * 2.0}

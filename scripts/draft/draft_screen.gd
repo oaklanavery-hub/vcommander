@@ -145,12 +145,11 @@ func _option_text(option: Dictionary) -> String:
 
     var buff: Dictionary = ContentDatabase.get_buff(option_id)
     var stack: int = GameState.draft.get_buff_stacks(option_id)
-    return "%s\n+%s%% %s\nStacks %d/%d" % [
+    return "%s\n+%s%% %s\nStacks %s" % [
         str(buff.get("display_name", option_id)),
         str(int(buff.get("percentage", 0))),
         str(buff.get("stat", "stat")).replace("_", " ").to_upper(),
-        stack,
-        int(buff.get("max_stacks", 3))
+        BuffTile.stack_text(buff, stack)
     ]
 
 func _refresh_skill(commander: Dictionary) -> void:
@@ -189,10 +188,9 @@ func _refresh_summaries() -> void:
         if stacks <= 0:
             continue
         any_buff = true
-        buff_lines.append("%s  %d/%d" % [
+        buff_lines.append("%s  %s" % [
             str(buff.get("display_name", buff_id)),
-            stacks,
-            int(buff.get("max_stacks", 3))
+            BuffTile.stack_text(buff, stacks)
         ])
     if not any_buff:
         buff_lines.append("None — buffs begin from Round 2")

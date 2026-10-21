@@ -7,6 +7,7 @@ var failed := false
 func _init() -> void:
     var db = Database.new()
     db.reload()
+    var exceeded_old_limit := false
     for seed_value in range(50):
         var ai = Ai.new()
         var copy = Ai.new()
@@ -28,13 +29,17 @@ func _init() -> void:
                 var count: int = ai.draft.get_unit_count(str(card["id"]))
                 check(count <= int(card["unit_cap"]), "unit caps respected")
             for buff in db.get_all_buffs():
-                check(ai.draft.get_buff_stacks(str(buff["id"])) <= 3, "buff caps respected")
+                var stacks: int = ai.draft.get_buff_stacks(str(buff["id"]))
+                var limit := int(buff.get("max_stacks", 0))
+                check(limit == 0 or stacks <= limit, "configured power limits respected")
+                exceeded_old_limit = exceeded_old_limit or stacks > 3
             check(ai.draft.commander_skill_uses <= 2, "skill use cap respected")
             if round_index == 0:
                 check(ai.draft.buff_stacks.values().all(func(value): return value == 0), "opening army only")
                 check(ai.draft.commander_skill_uses == 0, "AI preserves opening summons")
         check(public_before["unit_counts"].values().all(func(count): return count == 0), "snapshot does not reveal future picks")
         check(public_before["skill_uses_remaining"] == 2, "snapshot does not reveal skill spending")
+    check(exceeded_old_limit, "AI continues spending power picks beyond the old three-stack limit")
     var support_ai = Ai.new()
     support_ai.configure([db.get_commander("commander_water_01")], db.get_cards_by_set("set_water_01"), db.sets, db.get_all_buffs(), 77)
     support_ai.draft.unit_counts["card_water_01"] = 4
@@ -43,6 +48,13 @@ func _init() -> void:
     check(first_healer > support_ai.score_option({"type": "unit", "id": "card_water_01"}), "AI values the first healer for an established army")
     support_ai.draft.unit_counts["card_water_03"] = 1
     check(support_ai.score_option({"type": "unit", "id": "card_water_03"}) < first_healer, "support coverage has diminishing draft value")
+    for card in support_ai.cards:
+        support_ai.draft.unit_counts[card["id"]] = int(card["unit_cap"])
+    for buff in db.get_all_buffs():
+        if str(buff.get("stat", "")) in ["attack_speed", "movement_speed"]:
+            support_ai.draft.buff_stacks[buff["id"]] = 10000
+            check(support_ai.score_option({"type": "buff", "id": buff["id"]}) == 0, "AI avoids ineffective speed picks after the army reaches its stat cap")
+    check(support_ai.score_option({"type": "buff", "id": "buff_attack"}) > 0, "uncapped attack growth remains useful in the same late-round offer")
     db.free()
     if not failed:
         print("AiController tests passed: 50 seeds, 700 drafting phases.")

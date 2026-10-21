@@ -2,6 +2,7 @@ class_name CombatSimulator
 extends RefCounted
 
 const BattleEventScript = preload("res://scripts/combat/battle_event.gd")
+const Terrain = preload("res://scripts/combat/combat_terrain.gd")
 const FormationPlannerScript = preload("res://scripts/ai/formation_planner.gd")
 
 const PLAYER_SIDE := "player"
@@ -22,6 +23,10 @@ var _pre_battle: Dictionary = {}
 var _death_spawn_attack_pct: Dictionary = {}
 var _spawn_sequence := 0
 var _formations: Dictionary = {}
+var _obstacles: Array[Dictionary] = []
+var _hazards: Array[Dictionary] = []
+var _links: Array[Dictionary] = []
+var _terrain_revision := 0
 
 var _time := 0.0
 var _step := 0.1
@@ -68,6 +73,7 @@ func simulate(
 
     while _time + EPSILON < _round_limit:
         _time = minf(_round_limit, _time + _step)
+        _tick_special_effects()
         _tick_status_effects()
         _tick_area_effects()
         _tick_auras()
@@ -102,6 +108,10 @@ func _reset(battle_seed: int, balance: Dictionary) -> void:
     _death_spawn_attack_pct.clear()
     _spawn_sequence = 0
     _formations.clear()
+    _obstacles.clear()
+    _hazards.clear()
+    _links.clear()
+    _terrain_revision = 0
     _time = 0.0
     _next_frame_time = 0.0
 
@@ -181,8 +191,8 @@ func _spawn_unit(spec: Dictionary, position: Vector2) -> void:
         "movement_speed",
         side_config
     )
-    attack_speed = mini(_attack_speed_cap, maxi(1, attack_speed))
-    movement_speed = mini(_movement_speed_cap, maxi(1, movement_speed))
+    attack_speed = minf(_attack_speed_cap, maxf(1, attack_speed))
+    movement_speed = minf(_movement_speed_cap, maxf(1, movement_speed))
 
     var unit_id := "%s:%s:%d" % [side_id, card_id, unit_index]
     var unit: Dictionary = {
@@ -232,7 +242,9 @@ func _spawn_unit(spec: Dictionary, position: Vector2) -> void:
     }))
 
 
-func _modified_stat(base_value: int, stat_name: String, side_config: Dictionary) -> int:
+func _modified_stat(base_value: int, stat_name: String, side_config: Dictionary) -> float:
+    if base_value == 0:
+        return 0.0
     var value := float(base_value)
 
     var set_bonus: Dictionary = side_config.get("set_bonus", {})
@@ -249,10 +261,11 @@ func _modified_stat(base_value: int, stat_name: String, side_config: Dictionary)
             continue
         var stacks := maxi(0, int(buff_state.get("stacks", 0)))
         var multiplier := 1.0 + float(definition.get("percentage", 0)) / 100.0
-        for _stack in range(stacks):
-            value *= multiplier
+        # Numerical safety only: finite floating-point output even after thousands
+        # of picks. This ceiling is far beyond any playable match.
+        value = exp(minf(log(1.0e100), log(maxf(1.0e-20, value)) + float(stacks) * log(multiplier)))
 
-    return int(round(value))
+    return round(value)
 
 
 func _resolve_pre_battle_skills(player_side: Dictionary, opponent_side: Dictionary) -> void:
@@ -319,7 +332,7 @@ func _spawn_summon_skill_if_active(side_config: Dictionary) -> void:
     var max_hp := _modified_stat(int(plant.get("health", 1)), "health", side_config)
     var defense := _modified_stat(int(plant.get("defense", 0)), "defense", side_config)
     var attack_speed := _modified_stat(base_attack_speed, "attack_speed", side_config)
-    attack_speed = mini(_attack_speed_cap, maxi(1, attack_speed))
+    attack_speed = minf(_attack_speed_cap, maxf(1, attack_speed))
     for index in range(count):
         var position := _random_skill_spawn_position(on_right)
         var unit_id := "%s:commander_plant:%d" % [side_id, index]
@@ -587,12 +600,21 @@ func _tick_units() -> void:
             float(unit.get("ability_cooldown", 0.0)) - _step
         )
 
+        if not unit.get("transit", {}).is_empty():
+            continue
+        var ability_definition: Dictionary = unit.get("ability", {})
+        if str(ability_definition.get("type", "")) == "backline_transit" and float(unit.get("ability_cooldown", 0)) <= EPSILON:
+            if _begin_transit(unit, ability_definition):
+                continue
+
         var target := _locked_or_new_target(unit)
         if target.is_empty():
             continue
 
         var ability: Dictionary = unit.get("ability", {})
         var ability_type := str(ability.get("type", ""))
+        if ability_type == "damage_link" and float(unit.get("ability_cooldown", 0)) <= EPSILON:
+            _cast_damage_link(unit, target, ability)
         if ability_type == "pull_then_melee":
             _tick_pull_unit(unit, target, ability)
             continue
@@ -603,7 +625,8 @@ func _tick_units() -> void:
 
         var attack_range := float(unit.get("range", 1.0))
         var distance := _unit_position(unit).distance_to(_unit_position(target))
-        if distance <= attack_range + EPSILON:
+        var melee_blocked := not _is_ranged(unit) and not Terrain.clear_line(_unit_position(unit), _unit_position(target), _obstacles, 0.05)
+        if distance <= attack_range + EPSILON and not melee_blocked:
             if float(unit.get("attack_timer", 0.0)) <= EPSILON:
                 _perform_attack(unit, target)
             elif _is_ranged(unit) and distance < attack_range * 0.55:
@@ -696,7 +719,7 @@ func _perform_attack(attacker: Dictionary, target: Dictionary) -> void:
     attacker["attack_count"] = int(attacker.get("attack_count", 0)) + 1
 
     var raw_damage := float(attacker.get("attack", 0))
-    if ability_type == "empowered_attack":
+    if ability.has("every_n_attacks"):
         var every_n := maxi(1, int(ability.get("every_n_attacks", 3)))
         if int(attacker.get("attack_count", 0)) % every_n == 0:
             raw_damage *= float(ability.get("attack_pct", 100)) / 100.0
@@ -945,7 +968,7 @@ func _resolve_pending_effects() -> void:
         var maximum := float(target.get("max_hp", 1))
         var amount := maxf(0.0, float(heal_info.get("amount", 0.0)))
         target["hp"] = minf(maximum, before + amount)
-        var actual_heal := maxi(0, int(round(float(target.get("hp", before)) - before)))
+        var actual_heal := maxf(0, round(float(target.get("hp", before)) - before))
         if actual_heal > 0:
             _events.append(BattleEventScript.make("heal", _time, {
                 "target_id": target_id,
@@ -986,6 +1009,9 @@ func _apply_damage_event(damage_info: Dictionary, fallback_source: String = "dam
     var target := _unit_by_id(target_id)
     if target.is_empty() or not bool(target.get("alive", false)) or not _are_enemies(str(damage_info.get("source_side", "")), str(target.get("side", ""))):
         return
+    if _is_invulnerable(target):
+        return
+    var hp_before := float(target.get("hp", 0))
     var amount := maxf(0, float(damage_info.get("amount", _minimum_damage)))
     var absorbed := 0.0
     var ability: Dictionary = target.get("ability", {})
@@ -1004,6 +1030,8 @@ func _apply_damage_event(damage_info: Dictionary, fallback_source: String = "dam
         event["absorbed"] = absorbed
         event["absorbed_total"] = float(target["absorbed_damage"])
     _events.append(event)
+    if not bool(damage_info.get("no_share", false)):
+        _share_damage(target, minf(amount, maxf(0, hp_before)), damage_info)
 
 
 func _tick_absorbed_bursts() -> void:
@@ -1078,9 +1106,9 @@ func _spawn_death_children(source: Dictionary, ability: Dictionary) -> void:
     for _index in range(maxi(0, int(ability.get("spawn_count", 2)))):
         var child := source.duplicate(true)
         child["display_name"] = "Small " + str(source.get("display_name", "Unit"))
-        child["max_hp"] = maxi(1, int(round(float(source.get("max_hp", 1)) * float(ability.get("child_health_pct", 50)) / 100.0)))
+        child["max_hp"] = maxf(1, round(float(source.get("max_hp", 1)) * float(ability.get("child_health_pct", 50)) / 100.0))
         child["hp"] = float(child["max_hp"])
-        child["attack"] = maxi(1, int(round(float(source.get("attack", 1)) * float(ability.get("child_attack_pct", 50)) / 100.0)))
+        child["attack"] = maxf(1, round(float(source.get("attack", 1)) * float(ability.get("child_attack_pct", 50)) / 100.0))
         child["ability"] = {"type": "basic_melee"}
         child["visual_scale"] = float(ability.get("child_visual_scale", 0.68))
         child["revives_remaining"] = 0
@@ -1098,13 +1126,16 @@ func _add_death_spawn(unit: Dictionary, source: Dictionary, cause: String) -> vo
     _spawn_sequence += 1
     var side_id := str(source.get("side", ""))
     unit["id"] = "%s:%s:spawn%d" % [side_id, str(unit.get("card_id", "unit")), _spawn_sequence]
-    unit["attack"] = maxi(1, int(round(float(unit.get("attack", 1)) * (1.0 + float(_death_spawn_attack_pct.get(side_id, 0)) / 100.0))))
+    unit["attack"] = maxf(1, round(float(unit.get("attack", 1)) * (1.0 + float(_death_spawn_attack_pct.get(side_id, 0)) / 100.0)))
     unit["alive"] = true
     unit["summoned"] = true
     unit["starting_army"] = false
     unit["target_id"] = ""
     unit["dots"] = []
     unit["speed_debuffs"] = []
+    unit["transit"] = {}
+    unit["route"] = []
+    unit["ability_cooldown"] = 0.0
     unit["attack_timer"] = 0.0
     unit["ability_timer"] = float(unit.get("ability", {}).get("tick_seconds", 0))
     unit["ability_cooldown"] = 0.0
@@ -1214,10 +1245,8 @@ func _queue_raw_damage(
     })
 
 
-func _damage_after_defense(raw_damage: float, target: Dictionary) -> int:
-    var rounded_raw := int(round(raw_damage))
-    var defense := int(target.get("defense", 0))
-    return maxi(_minimum_damage, rounded_raw - defense)
+func _damage_after_defense(raw_damage: float, target: Dictionary) -> float:
+    return maxf(_minimum_damage, round(raw_damage) - float(target.get("defense", 0)))
 
 
 func _locked_or_new_target(unit: Dictionary) -> Dictionary:
@@ -1294,8 +1323,23 @@ func _nearest_injured_ally(unit: Dictionary, max_range: float) -> Dictionary:
 func _move_toward(unit: Dictionary, target: Dictionary) -> void:
     if bool(unit.get("stationary", false)):
         return
-    var direction := (_unit_position(target) - _unit_position(unit)).normalized()
-    _attempt_move(unit, direction)
+    var origin := _unit_position(unit)
+    var goal := _unit_position(target)
+    if not _obstacles.is_empty():
+        var cached_goal: Vector2 = unit.get("route_goal", Vector2(INF, INF))
+        var path: Array = unit.get("route", [])
+        if int(unit.get("route_revision", -1)) != _terrain_revision or cached_goal.distance_to(goal) > 0.9 or path.is_empty():
+            path = Terrain.route(origin, goal, _obstacles, Rect2(Vector2.ONE * _field_margin, Vector2(_field_width, _field_height) - Vector2.ONE * _field_margin * 2), _collision_radius + 0.06)
+            unit["route_revision"] = _terrain_revision
+            unit["route_goal"] = goal
+        while path.size() > 1 and origin.distance_to(path[0]) < 0.25:
+            path.pop_front()
+        unit["route"] = path
+        if path.is_empty():
+            unit["target_id"] = ""
+            return
+        goal = path[0]
+    _attempt_move(unit, (goal - origin).normalized())
 
 
 func _move_away_from(unit: Dictionary, target: Dictionary) -> void:
@@ -1321,7 +1365,7 @@ func _attempt_move(unit: Dictionary, direction: Vector2) -> void:
         var angle := float(raw_angle)
         var candidate := origin + direction.rotated(angle).normalized() * distance
         candidate = _clamp_position(candidate)
-        if not _position_collides(candidate, unit_id):
+        if not _position_collides(candidate, unit_id) and Terrain.clear_line(origin, candidate, _obstacles, _collision_radius):
             unit["x"] = candidate.x
             unit["y"] = candidate.y
             unit["blocked_steps"] = 0
@@ -1335,7 +1379,7 @@ func _attempt_move(unit: Dictionary, direction: Vector2) -> void:
 
 func _displace_unit(unit: Dictionary, desired: Vector2) -> void:
     var clamped := _clamp_position(desired)
-    if not _position_collides(clamped, str(unit.get("id", ""))):
+    if not _position_collides(clamped, str(unit.get("id", ""))) and Terrain.clear_line(_unit_position(unit), clamped, _obstacles, _collision_radius):
         unit["x"] = clamped.x
         unit["y"] = clamped.y
 
@@ -1352,9 +1396,11 @@ func _push_from_position(target: Dictionary, source_position: Vector2, distance:
 
 
 func _position_collides(position: Vector2, ignored_unit_id: String) -> bool:
+    if not Terrain.clear_line(position, position, _obstacles, _collision_radius):
+        return true
     var minimum_distance := _collision_radius * 2.0
     for other in _units:
-        if not bool(other.get("alive", false)):
+        if not bool(other.get("alive", false)) or not other.get("transit", {}).is_empty():
             continue
         if str(other.get("id", "")) == ignored_unit_id:
             continue
@@ -1503,7 +1549,8 @@ func _snapshot() -> Dictionary:
         "time": snappedf(_time, 0.001),
         "units": frame_units,
         "projectiles": _projectiles.duplicate(true),
-        "areas": _area_effects.duplicate(true)
+        "areas": _area_effects.duplicate(true),
+        "obstacles": _obstacles.duplicate(true), "hazards": _hazards.duplicate(true), "links": _links.duplicate(true)
     }
 
 
@@ -1518,7 +1565,7 @@ func _unit_snapshot(unit: Dictionary) -> Dictionary:
             "summoned": bool(unit.get("summoned", false)),
             "visual_scale": float(unit.get("visual_scale", 1)),
             "spawned_at": float(unit.get("spawned_at", 0)),
-            "attack": int(unit.get("attack", 0)),
+            "attack": float(unit.get("attack", 0)),
             "absorbed_damage": float(unit.get("absorbed_damage", 0)),
             "next_burst_at": float(unit.get("next_burst_at", 0)),
             "burst_seconds": float(unit.get("ability", {}).get("burst_seconds", 10)),
@@ -1527,8 +1574,9 @@ func _unit_snapshot(unit: Dictionary) -> Dictionary:
             "x": float(unit.get("x", 0.0)),
             "y": float(unit.get("y", 0.0)),
             "hp": maxf(0, float(unit.get("hp", 0.0))),
-            "max_hp": int(unit.get("max_hp", 1)),
+            "max_hp": float(unit.get("max_hp", 1)),
             "burning": not unit.get("dots", []).is_empty(),
+            "transit": unit.get("transit", {}).duplicate(true),
             "ability_type": str(unit.get("ability", {}).get("type", "")),
             "aura_radius": _radius_from_value(str(unit.get("ability", {}).get("radius", "small"))) if str(unit.get("ability", {}).get("type", "")).begins_with("aura_") else 0.0
     }
@@ -1554,3 +1602,191 @@ func _finish_result(winner: String, reason: String) -> Dictionary:
             "height": _field_height
         }
     }
+
+
+func _is_invulnerable(unit: Dictionary) -> bool:
+    return bool(unit.get("transit", {}).get("invulnerable", false))
+
+
+func _begin_transit(unit: Dictionary, ability: Dictionary) -> bool:
+    var enemies := _alive_units(_other_side(str(unit["side"])))
+    if enemies.is_empty():
+        return false
+    # Prefer support/ranged units, then the deepest enemy. Stable ID breaks ties.
+    var direction := 1.0 if str(unit["side"]) == PLAYER_SIDE else -1.0
+    enemies.sort_custom(func(a, b):
+        var support_a := 1 if str(a.get("role", "")) in ["range", "healer"] else 0
+        var support_b := 1 if str(b.get("role", "")) in ["range", "healer"] else 0
+        if support_a != support_b:
+            return support_a > support_b
+        if absf(float(a["x"]) - float(b["x"])) > EPSILON:
+            return float(a["x"]) * direction > float(b["x"]) * direction
+        return str(a["id"]) < str(b["id"]))
+    var target: Dictionary = enemies[0]
+    var desired := _clamp_position(_unit_position(target) + Vector2(direction * 1.1, 0))
+    var destination := _free_landing(desired, str(unit["id"]))
+    if destination.x < 0:
+        return false
+    var origin := _unit_position(unit)
+    var duration := maxf(_step, float(ability.get("transit_seconds", 0.8)))
+    var transit := {"from_x": origin.x, "from_y": origin.y, "to_x": destination.x, "to_y": destination.y, "started_at": _time, "ends_at": _time + duration, "mode": str(ability.get("mode", "flame")), "invulnerable": bool(ability.get("invulnerable", false)), "hit_ids": []}
+    unit["transit"] = transit
+    unit["target_id"] = str(target["id"])
+    unit["ability_cooldown"] = float(ability.get("cooldown_seconds", 5))
+    _events.append(BattleEventScript.make("ability", _time, {"kind": "backline_transit", "side": unit["side"], "unit_id": unit["id"], "card_id": unit["card_id"], "target_id": target["id"], "transit": transit.duplicate(true)}))
+    return true
+
+
+func _free_landing(desired: Vector2, unit_id: String) -> Vector2:
+    for ring in range(7):
+        for index in range(12):
+            var candidate := _clamp_position(desired + Vector2.from_angle(float(index) * TAU / 12.0) * float(ring) * 0.6)
+            if not _position_collides(candidate, unit_id):
+                return candidate
+    return Vector2(-1, -1)
+
+
+func _tick_special_effects() -> void:
+    var previous_size := _obstacles.size()
+    _obstacles = _obstacles.filter(func(wall): return float(wall["expires_at"]) > _time + EPSILON)
+    if _obstacles.size() != previous_size:
+        _terrain_revision += 1
+    _links = _links.filter(func(link): return float(link["expires_at"]) > _time + EPSILON)
+    for unit in _units:
+        var transit: Dictionary = unit.get("transit", {})
+        if not bool(unit.get("alive", false)) or transit.is_empty():
+            continue
+        var ability: Dictionary = unit.get("ability", {})
+        var origin := _unit_position(unit)
+        var progress := clampf((_time - float(transit["started_at"])) / maxf(_step, float(transit["ends_at"]) - float(transit["started_at"])), 0, 1)
+        var point := Terrain.point(transit, "from").lerp(Terrain.point(transit, "to"), progress)
+        unit["x"] = point.x
+        unit["y"] = point.y
+        if str(transit["mode"]) == "gush":
+            for enemy in _alive_units(_other_side(str(unit["side"]))):
+                if transit["hit_ids"].has(str(enemy["id"])):
+                    continue
+                if Terrain.segment_distance(origin, point, _unit_position(enemy), _unit_position(enemy)) <= float(ability.get("contact_radius", 1.3)):
+                    transit["hit_ids"].append(str(enemy["id"]))
+                    if not _is_invulnerable(enemy):
+                        _queue_raw_damage(str(enemy["id"]), float(unit["attack"]) * float(ability.get("attack_pct", 80)) / 100.0, str(unit["side"]), str(unit["id"]), "gush")
+                        var closest := Geometry2D.get_closest_point_to_segment(_unit_position(enemy), origin, point)
+                        var before := _unit_position(enemy)
+                        _push_from_position(enemy, closest, _push_from_value(str(ability.get("pushback", "moderate"))))
+                        _events.append(BattleEventScript.make("pushback", _time, {"kind": "gush_hit", "side": unit["side"], "unit_id": unit["id"], "target_id": enemy["id"], "from_x": before.x, "from_y": before.y, "to_x": enemy["x"], "to_y": enemy["y"]}))
+        if str(transit["mode"]) == "flame" and origin.distance_to(point) > EPSILON:
+            # One swept segment per step; one tick per enemy per cast across all
+            # segments avoids overlapping dots multiplying the trail damage.
+            var cast_id := str(unit["id"]) + ":" + str(transit["started_at"])
+            var hazard: Dictionary = {}
+            for existing in _hazards:
+                if existing["id"] == cast_id:
+                    hazard = existing
+                    break
+            if hazard.is_empty():
+                hazard = {"id": cast_id, "side": unit["side"], "source_id": unit["id"], "segments": [], "expires_at": _time + float(ability.get("trail_seconds", 4)), "next_tick": _time, "tick_seconds": float(ability.get("tick_seconds", 0.5)), "radius": float(ability.get("trail_radius", 0.7)), "damage": float(unit["attack"]) * float(ability.get("damage_attack_pct_per_tick", 35)) / 100.0}
+                _hazards.append(hazard)
+            hazard["segments"].append({"from_x": origin.x, "from_y": origin.y, "to_x": point.x, "to_y": point.y})
+        if progress >= 1 - EPSILON:
+            # Another actor may occupy the destination since cast time.
+            var landing := _free_landing(point, str(unit["id"]))
+            if landing.x < 0:
+                landing = _free_landing(Terrain.point(transit, "from"), str(unit["id"]))
+            if landing.x < 0:
+                # Stay in travel briefly rather than materializing inside an actor.
+                transit["ends_at"] = _time + _step
+                continue
+            unit["x"] = landing.x
+            unit["y"] = landing.y
+            unit["transit"] = {}
+            unit["route"] = []
+            if str(transit["mode"]) == "burrow":
+                _create_crack(unit, transit, float(ability.get("obstacle_seconds", 5)))
+            _events.append(BattleEventScript.make("ability", _time, {"kind": "transit_arrival", "side": unit["side"], "unit_id": unit["id"], "card_id": unit["card_id"], "x": unit["x"], "y": unit["y"], "mode": transit["mode"]}))
+    _hazards = _hazards.filter(func(hazard): return float(hazard["expires_at"]) > _time + EPSILON)
+    for hazard in _hazards:
+        if _time + EPSILON < float(hazard["next_tick"]):
+            continue
+        hazard["next_tick"] = _time + float(hazard["tick_seconds"])
+        for enemy in _alive_units(_other_side(str(hazard["side"]))):
+            for segment in hazard["segments"]:
+                if Terrain.segment_distance(Terrain.point(segment, "from"), Terrain.point(segment, "to"), _unit_position(enemy), _unit_position(enemy)) <= float(hazard["radius"]):
+                    _queue_raw_damage(str(enemy["id"]), float(hazard["damage"]), str(hazard["side"]), str(hazard["source_id"]), "flame_trail")
+                    break
+
+
+func _create_crack(unit: Dictionary, transit: Dictionary, duration: float) -> void:
+    var a := Terrain.point(transit, "from")
+    var b := _unit_position(unit)
+    var axis := (b - a).normalized()
+    # Leave room around both ends, including when a transit begins at an edge.
+    a += axis * 1.0
+    b -= axis * 1.0
+    if a.distance_to(b) < 1.0 or (b - a).dot(axis) <= 0:
+        return
+    var wall := {"from_x": a.x, "from_y": a.y, "to_x": b.x, "to_y": b.y, "expires_at": _time + duration, "side": unit["side"]}
+    _obstacles.append(wall)
+    _terrain_revision += 1
+    # A rising crack can appear under an actor. Move its center to the nearest
+    # free shoulder once; subsequent movement may never cross the barrier.
+    for other in _units:
+        if not bool(other.get("alive", false)) or not other.get("transit", {}).is_empty():
+            continue
+        var old := _unit_position(other)
+        if Terrain.clear_line(old, old, _obstacles, _collision_radius):
+            continue
+        var normal := axis.orthogonal()
+        var closest := Geometry2D.get_closest_point_to_segment(old, a, b)
+        if (old - closest).dot(normal) < 0:
+            normal = -normal
+        for side_sign in [1.0, -1.0]:
+            var proposed := _clamp_position(closest + normal * side_sign * (_collision_radius + 0.15))
+            if not _position_collides(proposed, str(other["id"])):
+                other["x"] = proposed.x
+                other["y"] = proposed.y
+                break
+        if not Terrain.clear_line(_unit_position(other), _unit_position(other), _obstacles, _collision_radius):
+            var fallback := _free_landing(old, str(other["id"]))
+            if fallback.x >= 0:
+                other["x"] = fallback.x
+                other["y"] = fallback.y
+        if _unit_position(other).distance_to(old) > EPSILON:
+            _events.append(BattleEventScript.make("pushback", _time, {"kind": "crack_rise", "target_id": other["id"], "from_x": old.x, "from_y": old.y, "to_x": other["x"], "to_y": other["y"]}))
+    _events.append(BattleEventScript.make("ability", _time, {"kind": "crack", "side": unit["side"], "unit_id": unit["id"], "wall": wall.duplicate(true)}))
+
+
+func _cast_damage_link(unit: Dictionary, target: Dictionary, ability: Dictionary) -> void:
+    if _unit_position(unit).distance_to(_unit_position(target)) > float(unit.get("range", 5)) + EPSILON:
+        return
+    var targets: Array[String] = [str(target["id"])]
+    var nearby := _alive_units(_other_side(str(unit["side"])))
+    nearby.sort_custom(func(a, b):
+        var da := _unit_position(a).distance_squared_to(_unit_position(target))
+        var db := _unit_position(b).distance_squared_to(_unit_position(target))
+        return da < db if absf(da - db) > EPSILON else str(a["id"]) < str(b["id"]))
+    for enemy in nearby:
+        if targets.size() >= int(ability.get("max_targets", 2)):
+            break
+        if targets.has(str(enemy["id"])):
+            continue
+        if _unit_position(enemy).distance_to(_unit_position(target)) <= float(ability.get("link_radius", 3.5)) and _unit_position(enemy).distance_to(_unit_position(unit)) <= float(unit.get("range", 5)) + EPSILON:
+            targets.append(str(enemy["id"]))
+    _links = _links.filter(func(link): return link["source_id"] != unit["id"])
+    var link := {"source_id": unit["id"], "side": unit["side"], "target_ids": targets, "expires_at": _time + float(ability.get("duration_seconds", 5)), "shared_damage_pct": float(ability.get("shared_damage_pct", 50))}
+    _links.append(link)
+    unit["ability_cooldown"] = float(ability.get("cooldown_seconds", 5))
+    _events.append(BattleEventScript.make("ability", _time, {"kind": "sticky_link", "side": unit["side"], "unit_id": unit["id"], "card_id": unit["card_id"], "link": link.duplicate(true)}))
+
+
+func _share_damage(target: Dictionary, amount: float, original: Dictionary) -> void:
+    if amount <= 0:
+        return
+    var partners := {}
+    for link in _links:
+        if float(link["expires_at"]) <= _time + EPSILON or str(link["side"]) != str(original.get("source_side", "")) or not link["target_ids"].has(str(target["id"])):
+            continue
+        for partner_id in link["target_ids"]:
+            if partner_id != str(target["id"]):
+                partners[partner_id] = maxf(float(partners.get(partner_id, 0)), float(link["shared_damage_pct"]))
+    for partner_id in partners:
+        _apply_damage_event({"target_id": partner_id, "amount": amount * float(partners[partner_id]) / 100.0, "source_side": original.get("source_side", ""), "source_unit_id": original.get("source_unit_id", ""), "source": "sticky_share", "no_share": true})

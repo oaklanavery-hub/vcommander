@@ -36,7 +36,7 @@ func run() -> void:
     for buff in db.get_all_buffs():
         var tile = load("res://scripts/presentation/buff_tile.gd").new()
         tile.definition = buff
-        tile.stacks = 2
+        tile.stacks = 12000
         tile.custom_minimum_size = Vector2(156, 204)
         row.add_child(tile)
     for i in range(4):
@@ -46,7 +46,10 @@ func run() -> void:
         var bounds := body.get_global_rect()
         var tile_bounds: Rect2 = tile.get_global_rect()
         check(tile_bounds.grow(1).encloses(bounds), "all five blessing layouts fit their actual offer size: " + str(tile.definition["stat"]))
-        check(tile.tooltip_text.contains("2 / 3"), "blessing preserves supplied stack information")
+        check(tile.tooltip_text.contains("12000 · No limit"), "blessing preserves supplied stack information")
+        for child in body.get_children():
+            check(tile_bounds.grow(1).encloses(child.get_global_rect()), "long names and five-digit unlimited stack labels stay inside the card")
+        check(body.get_child(1).size.y == 54 and body.get_child(2).size.y == 44, "short and long blessing names use aligned fixed rows")
         tile.grab_focus()
         check(tile.has_focus(), "blessing remains keyboard selectable")
     for commander_id in before:

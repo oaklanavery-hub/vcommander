@@ -156,6 +156,34 @@
       "attack_sound": "slime_rebirth",
       "impact_sound": "healing_water",
       "accent": "c0efce"
+    },
+    "card_fire_06": {
+      "projectile": "none",
+      "motion": "slash",
+      "rig": "claw",
+      "attack_sound": "fire_cast",
+      "impact_sound": "fire_cast"
+    },
+    "card_water_06": {
+      "projectile": "none",
+      "motion": "slash",
+      "rig": "claw",
+      "attack_sound": "water_cast",
+      "impact_sound": "magic_hit"
+    },
+    "card_earth_06": {
+      "projectile": "none",
+      "motion": "slash",
+      "rig": "claw",
+      "attack_sound": "wood_hit",
+      "impact_sound": "heavy_hit"
+    },
+    "card_slime_06": {
+      "projectile": "slime_green",
+      "motion": "shoot",
+      "rig": "slime",
+      "attack_sound": "slime_shot",
+      "impact_sound": "slime_splat"
     }
   }
 }

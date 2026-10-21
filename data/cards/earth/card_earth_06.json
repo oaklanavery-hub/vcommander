@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "id": "card_earth_06",
+  "display_name": "Mole",
+  "element": "earth",
+  "set_id": "set_earth_01",
+  "status": "playtest",
+  "role": "melee",
+  "summon_amount": 2,
+  "unit_cap": 4,
+  "stats": {
+    "health": 680,
+    "attack": 100,
+    "defense": 30,
+    "attack_speed": 100,
+    "movement_speed": 105,
+    "range": 1
+  },
+  "ability": {
+    "id": "burrowing_ambush",
+    "display_name": "Burrowing Ambush",
+    "type": "backline_transit",
+    "mode": "burrow",
+    "cooldown_seconds": 5,
+    "transit_seconds": 1,
+    "invulnerable": false,
+    "obstacle_seconds": 5,
+    "every_n_attacks": 3,
+    "attack_pct": 180,
+    "description": "Tunnels to the enemy backline every 5 seconds, leaving a crack barrier for 5 seconds. Both armies must go around it. Every third strike deals 180% attack damage. Not damage-immune underground."
+  },
+  "tags": [
+    "starter",
+    "earth",
+    "melee",
+    "assassin"
+  ]
+}

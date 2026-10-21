@@ -4,7 +4,7 @@
   "display_name": "Attack Boost",
   "stat": "attack",
   "percentage": 15,
-  "max_stacks": 3,
+  "max_stacks": 0,
   "stacking": "multiplicative",
   "status": "playtest"
 }
