@@ -4,9 +4,14 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.13.0 — Fantasy pixel interface**
+**v0.13.0 — Backline specialists**
 
 The current playable prototype supports:
+
+- unlimited power-card picks, including after every unit reaches its cap; speed rating caps remain and AI discounts ineffective speed boosts
+- Spriggan, Nymph, Mole and Sticky Slime, each 2/4: elemental backline travel, fire paths, damaging water gushes/pushback, five-second cracks that both armies route around, third-strike damage and shared enemy damage links
+- original pixel art and distinct ability sounds for all four new units, with ordinary collection access and the existing four-card loadout limit
+- tree-free playable grass throughout the battlefield; decorative scenery does not overlap units
 
 - a shared woodland lodge art direction across Commander/army selection, drafting, battle, achievements and menus: original detailed scenery, arched portrait vignettes, rounded carved frames, brass trim and pixel display lettering
 - a detailed open forest clearing with matching roster plaques; existing tactical formations, frost coverage, hit timing and unit animations remain intact
@@ -35,10 +40,10 @@ The current playable prototype supports:
 - four warband slots, an eight-column collection, element filters and three saved presets per Commander
 - a forest-camp title menu, How to Play and shared pause/settings menus
 - starter warbands, a filtered companion collection and clearer draft/result guidance
-- two original looping music tracks, 31 sound effects and saved volume/accessibility settings
+- two original looping music tracks, 35 sound effects and saved volume/accessibility settings
 
 - Fire, Water and Earth starter Commanders
-- 12 approved starter Army cards plus 4 Slime cards with provisional playtest stats/ability tuning
+- 20 ordinary Army cards and 4 mastery reward cards with provisional playtest stats/ability tuning
 - exactly 4 unique pre-match Army cards, freely mixed across elements
 - Commander themed-set bonuses when all four selected cards match the theme
 - seeded 3-choice pre-battle drafting
