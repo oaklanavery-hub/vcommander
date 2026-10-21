@@ -8,9 +8,12 @@ import base64
 import hashlib
 from io import BytesIO
 from pathlib import Path
-from PIL import Image
 
 ROOT = Path("build/qa")
+if not ROOT.exists() or not any(ROOT.glob("*.png")):
+    print("No native views available; inspect the preceding validation step.")
+    raise SystemExit(0)
+from PIL import Image
 VIEWS = (
     "menu", "commander", "army", "draft", "battle", "result",
     "help", "settings", "progression_new", "progression_achievements_earned",

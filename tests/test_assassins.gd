@@ -79,6 +79,13 @@ func test_terrain() -> void:
             sim._move_toward(actor, {"x": 12.0, "y": 7.0})
             check(CombatTerrain.clear_line(sim._unit_position(actor), sim._unit_position(actor), sim._obstacles, sim._collision_radius), "detours never cross or occupy crack geometry")
         check(sim._unit_position(actor).distance_to(Vector2(12, 7)) < 0.6, "both teams find a route around the barrier endpoint")
+    var crowded := setup("earth")
+    crowded._units[0].merge({"x": 18.0, "y": 7.0}, true)
+    crowded._units[1].merge({"x": 12.0, "y": 7.0}, true)
+    crowded._units[2].merge({"x": 12.0, "y": 7.57}, true)
+    crowded._create_crack(crowded._units[0], {"from_x": 5.0, "from_y": 7.0}, 5)
+    for actor in crowded._units:
+        check(CombatTerrain.clear_line(crowded._unit_position(actor), crowded._unit_position(actor), crowded._obstacles, crowded._collision_radius), "rising crack evacuates occupied shoulders in a crowded formation")
     var sim := setup("earth")
     var mole: Dictionary = sim._units[0]
     var enemy: Dictionary = sim._units[1]

@@ -1745,6 +1745,13 @@ func _create_crack(unit: Dictionary, transit: Dictionary, duration: float) -> vo
                 other["x"] = proposed.x
                 other["y"] = proposed.y
                 break
+        if not Terrain.clear_line(_unit_position(other), _unit_position(other), _obstacles, _collision_radius):
+            var fallback := _free_landing(old, str(other["id"]))
+            if fallback.x >= 0:
+                other["x"] = fallback.x
+                other["y"] = fallback.y
+        if _unit_position(other).distance_to(old) > EPSILON:
+            _events.append(BattleEventScript.make("pushback", _time, {"kind": "crack_rise", "target_id": other["id"], "from_x": old.x, "from_y": old.y, "to_x": other["x"], "to_y": other["y"]}))
     _events.append(BattleEventScript.make("ability", _time, {"kind": "crack", "side": unit["side"], "unit_id": unit["id"], "wall": wall.duplicate(true)}))
 
 
