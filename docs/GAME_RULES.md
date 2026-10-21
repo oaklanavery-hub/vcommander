@@ -140,7 +140,7 @@ Army unit counts, Buff stacks, Commander skill uses spent and round losses persi
 ## Formation and movement
 
 **R043 — Battlefield orientation**  
-The desktop battlefield is a completely open left-versus-right 2D field. The player starts on the left and the opponent on the right.
+The desktop battlefield starts as an open left-versus-right 2D field. Temporary ability-created crack barriers may block movement during combat. Decorative trees are outside the rendered playable ground. The player starts on the left and the opponent on the right.
 
 **R044 — Full-field camera**  
 The entire battlefield remains visible throughout combat; combat does not require camera panning or dynamic zoom.
@@ -218,7 +218,7 @@ Attack Speed and Movement Speed are whole-number ratings. Attack Speed 100 equal
 Attack Speed and Movement Speed are each capped at 200.
 
 **R067 — Uncapped core stats**  
-HP, ATK and DEF have no hard cap beyond content/buff rules.
+HP, ATK and DEF have no ordinary gameplay cap. Calculations use finite floating-point values; at impractical thousands-of-picks scales, modified base stats saturate at 1e100 solely to avoid numeric overflow. This does not exhaust or reject Buff picks.
 
 **R068 — Minimum damage**  
 DEF may reduce a valid damaging hit to 1 damage but never to zero or below. R091 absorption then reduces the damage reaching HP and can produce fractional damage below 1.
@@ -347,3 +347,24 @@ All sixteen original Army cards remain available from the start. The first rewar
 
 **R101 — Initial mastery reward roster**
 Fire unlocks **Ash Phoenix**, a 1/2 Healer placing a small four-second healing sanctuary. Water unlocks **Tidal Guard**, a 2/4 Melee unit whose third attack is empowered. Earth unlocks **Spore Sage**, a 1/3 Range unit firing small-area splash projectiles. Slime unlocks **Jelly Medic**, a 1/3 Healer placing a medium four-second healing pool. These use the existing generic area-heal, empowered-attack and ranged-AoE mechanics; they obey ordinary collision, targeting, defense and death/revival rules. New numbers in data are initial playtest tuning, not guarantees of final balance. Rewards add tactical choices without modifying existing unit stats.
+
+
+## Backline specialists
+
+**R102 — Expanded ordinary collection**
+Spriggan (Fire), Nymph (Water), Mole (Earth) and Sticky Slime (Slime) each recruit two units per pick with a cap of four. The first three are Melee assassins; Sticky Slime is Range support. They are available from the start alongside the original sixteen starters. Mastery reward requirements stay unchanged. Four unique equipped cards remain the army limit.
+
+**R103 — Backline transit**
+Spriggan and Nymph cast once every five seconds, beginning when combat starts. They select the deepest living enemy backline unit (Range/Healer preferred, then other roles), travel rapidly across the field and materialize in a free position beside it. Both are invulnerable only during transit. They do not attack during transit and ignore surface collision; other units do not collide with their travelling form. Cooldown runs from cast start. Damage from every source, including shared damage and damage over time, respects this immunity. The transit endpoint is committed at cast time; it does not chase moving targets indefinitely. A new cast selects the current enemy backline again.
+
+**R104 — Spriggan flame trail**
+Spriggan's fireball leaves a continuous burning path. Enemies within its width take damage over time; allies never take trail damage. Each enemy takes at most one pulse per cast per tick regardless of overlapping trail segments. The trail can persist after its caster dies, but it does not count as a surviving unit. Initial tuning: 0.8-second transit, four-second trail from its first segment, 0.7-unit radius and 35% ATK every 0.5 seconds, subject to normal DEF.
+
+**R105 — Nymph gush**
+Nymph's moving water damages and pushes enemies in or near its swept path, once per enemy per cast. Allies are unaffected; enemy transit immunity is respected. Pushback respects field, actor collision and active crack barriers. Initial tuning: 0.8-second transit, 1.3-unit contact radius, 80% ATK damage and moderate pushback. This interprets the requested gush damage as damage received by contacted enemies.
+
+**R106 — Mole tunnels and cracks**
+Mole tunnels to the enemy backline using the same target/landing policy and leaves a crack segment along its tunnel on emergence. A crack lasts five seconds and blocks BOTH armies' ordinary movement and forced displacement. Units route around finite endpoints; melee attacks cannot cross a crack. Projectiles and ability transit can cross it. A crack rising under a unit displaces it to a free shoulder when possible; it grants no damage or friendly fire. Cracks expire even if the Mole dies and never count as survivors. Mole ignores surface collision while travelling but receives damage normally; its request does not grant immunity. Initial tuning: five-second tunnel cooldown, one-second tunnel, every third ordinary strike deals 180% ATK before DEF. Existing Bear/Tidal Guard third-strike numbers remain unchanged.
+
+**R107 — Sticky damage links**
+Every five seconds, while an enemy is in normal attack range, Sticky Slime marks that enemy and up to one additional enemy in range and near the first. Marks last five seconds. A single marked enemy has no partner to share with. Any allied damaging source hitting one of a pair also deals 50% of the actual HP damage (after DEF and absorption, excluding overkill) to the other. The original hit is not reduced. Copied damage is already post-defense, can be absorbed, respects invulnerability and never triggers another share. Duplicate marks do not multiply the copy to the same partner; distinct partner pairs can coexist. Marks retain their caster's allegiance and expire on time, including after caster death. Defeated/revived bodies do not inherit old marks. Initial tuning: normal range 5 and partner radius 3.5 units.

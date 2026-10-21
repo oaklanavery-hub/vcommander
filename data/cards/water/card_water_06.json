@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "id": "card_water_06",
+  "display_name": "Nymph",
+  "element": "water",
+  "set_id": "set_water_01",
+  "status": "playtest",
+  "role": "melee",
+  "summon_amount": 2,
+  "unit_cap": 4,
+  "stats": {
+    "health": 620,
+    "attack": 85,
+    "defense": 22,
+    "attack_speed": 105,
+    "movement_speed": 120,
+    "range": 1
+  },
+  "ability": {
+    "id": "gushing_ambush",
+    "display_name": "Gushing Ambush",
+    "type": "backline_transit",
+    "mode": "gush",
+    "cooldown_seconds": 5,
+    "transit_seconds": 0.8,
+    "invulnerable": true,
+    "contact_radius": 1.3,
+    "attack_pct": 80,
+    "pushback": "moderate",
+    "description": "Every 5 seconds gushes to the enemy backline, invulnerable during travel. Enemies near the water path take damage and are pushed away once per gush."
+  },
+  "tags": [
+    "starter",
+    "water",
+    "melee",
+    "assassin"
+  ]
+}

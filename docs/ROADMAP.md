@@ -150,3 +150,8 @@
 ## Further major phase — Game Director scope decision
 
 The elemental PvAI vertical slice, requested Slime Court roster expansion and personal Commander mastery are implemented. Private friend-room PvP development is approved above. Campaign/run progression is explicitly KIV/on hold. Account-backed competitive rankings and VTuber/mascot roster integration still need explicit direction. Human playtesting should inform further balance values; current tuning remains provisional.
+
+
+## v0.13 — Backline specialists
+
+Unlimited power picks and clear playable ground; four 2/4 units with backline travel, path damage/pushback, temporary crack obstacles and linked damage. Source simulation, replay/native views, exported-pack, browser/container and release verification gate this milestone. Exact numeric ability values remain playtest tuning.

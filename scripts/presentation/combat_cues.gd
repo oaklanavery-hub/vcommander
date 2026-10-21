@@ -32,6 +32,10 @@ static func sound(event: Dictionary) -> String:
         return "slime_rebirth" if event.get("source") == "revival" else "slime_bounce"
     if type == "commander_skill":
         return {"targeted_aoe_max_hp": "fire_cast", "round_debuff": "freeze", "summon_stationary_units": "plant_grow", "army_revival": "slime_rebirth"}.get(str(event.get("skill_type", "")), "commander_skill")
+    if type == "ability" and event.get("kind") == "backline_transit":
+        return {"flame": "ember_dash", "gush": "water_gush", "burrow": "earth_rumble"}.get(str(event.get("transit", {}).get("mode", "")), "")
+    if type == "ability" and event.get("kind") == "sticky_link":
+        return "sticky_link"
     if type == "ability":
         return {"pull": "vine_pull", "meteor": "meteor", "on_death": "explosion", "area_heal": "healing_water", "death_area": "slime_burst", "slow_splash": "slime_splat", "absorb_burst": "slime_burst"}.get(str(event.get("kind", "")), "")
     if type == "projectile_impact":

@@ -13,7 +13,7 @@ func award(profile: CommanderProgress, commander: String, outcome: String) -> Di
 func run() -> void:
     db = root.get_node("ContentDatabase")
     var profile := CommanderProgress.new(db, "")
-    check(profile.available_cards().size() == 16, "all sixteen original cards stay available")
+    check(profile.available_cards().size() == 20, "all original and specialist starters stay available")
     for card in db.get_all_cards():
         check(profile.is_card_unlocked(card["id"]) == not card.has("mastery_unlock"), "only declared rewards are locked")
     check(not profile.is_card_unlocked("unknown"), "unknown card is never available")
@@ -21,7 +21,7 @@ func run() -> void:
         award(profile, "commander_fire_01", "win")
     check(not profile.is_card_unlocked("card_fire_05"), "four wins do not bypass the level requirement")
     var receipt := award(profile, "commander_fire_01", "win")
-    check(profile.is_card_unlocked("card_fire_05") and profile.available_cards().size() == 17, "Level 3 and wins unlock one new card")
+    check(profile.is_card_unlocked("card_fire_05") and profile.available_cards().size() == 21, "Level 3 and wins unlock one new card")
     check(receipt["unlocked_cards"] == ["card_fire_05"] and receipt["achievements"].has("fire_adept"), "receipt carries newly earned unit and achievement")
     var repeated := profile.finish_match(receipt["match_id"], "loss")
     check(repeated == receipt and profile.record("commander_fire_01")["wins"] == 5, "repeat settlement preserves the exact original receipt")
@@ -34,7 +34,7 @@ func run() -> void:
         for i in range(5):
             award(profile, "commander_%s_01" % e, "win")
         check(profile.is_card_unlocked("card_%s_05" % e), "each Commander grants its own reward through the same rules")
-    check(profile.available_cards().size() == 20, "all four rewards expand the collection")
+    check(profile.available_cards().size() == 24, "all four rewards expand the collection")
     check(earned(profile, "alliance"), "wins with all four Commanders earn coverage achievement")
     var losses := CommanderProgress.new(db, "")
     for i in range(20):

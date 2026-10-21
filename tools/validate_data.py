@@ -80,6 +80,19 @@ def main() -> int:
         ability = army_card.get("ability", {})
         if not ability.get("id") or not ability.get("type"):
             raise ValueError(f"{army_card['id']} must define an ability id and type")
+        if ability.get("type") == "backline_transit":
+            for key in ("cooldown_seconds", "transit_seconds"):
+                require_positive_number(ability.get(key), f"{army_card['id']} {key}")
+            if ability.get("mode") not in ("flame", "gush", "burrow") or type(ability.get("invulnerable")) is not bool:
+                raise ValueError("backline_transit requires a supported mode and explicit immunity")
+            mode_fields = {"flame": ("trail_seconds", "trail_radius", "tick_seconds", "damage_attack_pct_per_tick"), "gush": ("contact_radius", "attack_pct"), "burrow": ("obstacle_seconds", "every_n_attacks", "attack_pct")}
+            for key in mode_fields[ability["mode"]]:
+                require_positive_number(ability.get(key), f"{army_card['id']} {key}")
+        if ability.get("type") == "damage_link":
+            for key in ("cooldown_seconds", "duration_seconds", "link_radius", "shared_damage_pct"):
+                require_positive_number(ability.get(key), f"{army_card['id']} {key}")
+            if ability.get("max_targets") != 2 or ability["shared_damage_pct"] > 100:
+                raise ValueError("damage_link supports up to two targets and at most 100% copied damage")
         if ability.get("type") == "death_split":
             for key in ("spawn_count", "child_health_pct", "child_attack_pct", "child_visual_scale"):
                 require_positive_number(ability.get(key), f"{army_card['id']} {key}")

@@ -4,7 +4,7 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.12.0 — Fantasy pixel interface**
+**v0.13.0 — Fantasy pixel interface**
 
 The current playable prototype supports:
 
@@ -26,7 +26,7 @@ The current playable prototype supports:
 - Commander skill openings that finish before armies move and the battle clock begins
 - stretching/retracting Pitcher Plant vines, visible enemy pulls, distinct arrows/fireballs/flames/water/ice/seeds and impact/attack motion
 - every battle starts at 1×, with results shown after the battle completes
-- four distinct detailed Commander designs and twenty-one detailed unit sprites (twenty collectible units plus the summoned plant), shared by cards and battles
+- four distinct detailed Commander designs and twenty-five detailed unit sprites (twenty-four collectible units plus the summoned plant), shared by cards and battles
 - Slime Princess: pink royal artwork, Royal Jelly's once-per-ally revival and +100% attack for qualifying death spawns
 - Giant Slime 1/4 (green split Tank), Slime Cannon 2/4 (green slowing shots), Slime Ball 2/6 (white damage-absorbing Melee), Slime Barrel 2/6 (pink ten-second death pools)
 - rounded pixel-edged card frames, gold selection borders, darker nameplates and refined panels/navigation
@@ -44,7 +44,7 @@ The current playable prototype supports:
 - seeded 3-choice pre-battle drafting
 - Army-card summon amounts and maximum unit counts
 - opening Battle 1 draft restricted to Army cards
-- 5 persistent Army-wide Buff Cards with multiplicative stacking and 3-stack caps
+- 5 persistent Army-wide Buff Cards with multiplicative stacking and unlimited picks (existing speed caps still apply)
 - Commander skill selection cost and twice-per-match / once-per-round limits
 - 30-second pick timer and random auto-selection on timeout
 - deterministic left-vs-right auto-combat after the opening draft
@@ -144,4 +144,4 @@ Reach **Level 3 and three wins** with a Commander to unlock its first new compan
 | Earth | Spore Sage | Ranged splash attacker | 1 / 3 |
 | Slime Princess | Jelly Medic | Healer with a medium healing pool | 1 / 3 |
 
-All sixteen original cards stay available. Reward cards expand the collection to twenty, may be mixed into any Commander's four-card warband, and are not auto-equipped. Click a locked card to see its requirements. Existing qualifying mastery records receive rewards automatically after updating. These new units have initial playtest tuning. Browser/site-data clearing removes local progression; no account or purchase is required.
+All sixteen original cards and four backline specialists are available from the start. Reward cards expand the collection to twenty-four, may be mixed into any Commander's four-card warband, and are not auto-equipped. Click a locked card to see its requirements. Existing qualifying mastery records receive rewards automatically after updating. These new units have initial playtest tuning. Browser/site-data clearing removes local progression; no account or purchase is required.

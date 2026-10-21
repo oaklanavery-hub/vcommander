@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "id": "card_slime_06",
+  "display_name": "Sticky Slime",
+  "element": "slime",
+  "set_id": "set_slime_01",
+  "status": "playtest",
+  "role": "range",
+  "summon_amount": 2,
+  "unit_cap": 4,
+  "stats": {
+    "health": 550,
+    "attack": 65,
+    "defense": 18,
+    "attack_speed": 80,
+    "movement_speed": 90,
+    "range": 5
+  },
+  "ability": {
+    "id": "sticky_bond",
+    "display_name": "Sticky Bond",
+    "type": "damage_link",
+    "cooldown_seconds": 5,
+    "duration_seconds": 5,
+    "max_targets": 2,
+    "link_radius": 3.5,
+    "shared_damage_pct": 50,
+    "description": "Every 5 seconds marks up to two nearby enemies for 5 seconds. Damage from any ally to one also deals 50% of the actual damage to its linked partner. Shared damage does not trigger another share."
+  },
+  "tags": [
+    "starter",
+    "slime",
+    "range",
+    "support"
+  ]
+}

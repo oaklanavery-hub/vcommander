@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "id": "card_fire_06",
+  "display_name": "Spriggan",
+  "element": "fire",
+  "set_id": "set_fire_01",
+  "status": "playtest",
+  "role": "melee",
+  "summon_amount": 2,
+  "unit_cap": 4,
+  "stats": {
+    "health": 580,
+    "attack": 95,
+    "defense": 20,
+    "attack_speed": 110,
+    "movement_speed": 125,
+    "range": 1
+  },
+  "ability": {
+    "id": "ember_ambush",
+    "display_name": "Ember Ambush",
+    "type": "backline_transit",
+    "mode": "flame",
+    "cooldown_seconds": 5,
+    "transit_seconds": 0.8,
+    "invulnerable": true,
+    "trail_seconds": 4,
+    "trail_radius": 0.7,
+    "tick_seconds": 0.5,
+    "damage_attack_pct_per_tick": 35,
+    "description": "Becomes an invulnerable fireball every 5 seconds and sweeps to the enemy backline. Leaves a burning trail for 4 seconds, damaging enemies crossing it."
+  },
+  "tags": [
+    "starter",
+    "fire",
+    "melee",
+    "assassin"
+  ]
+}

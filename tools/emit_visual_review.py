@@ -17,6 +17,7 @@ VIEWS = (
     "slime_commander", "frozen_field_late", "pvp_lobby",
     "fantasy_gallery_fire", "fantasy_gallery_water", "fantasy_gallery_slime",
     "fantasy_battle_details", "fantasy_blessings",
+    "assassins_collection", "assassins_transit", "assassins_terrain", "assassins_cooldown", "assassins_links", "assassins_reduced", "assassins_powercards",
 )
 emitted = 0
 for name in VIEWS:

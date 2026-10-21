@@ -145,6 +145,12 @@ jobs:
             test -s "build/qa/fantasy_${view}.png"
           done
 
+          timeout 75s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_assassins.gd -- --output-dir=build/qa 2>&1 | tee /tmp/assassin-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/assassin-qa.log; then exit 1; fi
+          for view in collection transit terrain cooldown links reduced powercards; do
+            test -s "build/qa/assassins_${view}.png"
+          done
+
       - name: Emit bounded native review previews
         if: always()
         run: /usr/bin/python3 tools/emit_visual_review.py

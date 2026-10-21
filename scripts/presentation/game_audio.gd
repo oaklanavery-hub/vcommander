@@ -35,7 +35,11 @@ const EFFECTS := {
     "slime_shot": "res://assets/audio/slime_shot.wav",
     "slime_splat": "res://assets/audio/slime_splat.wav",
     "slime_burst": "res://assets/audio/slime_burst.wav",
-    "slime_rebirth": "res://assets/audio/slime_rebirth.wav"
+    "slime_rebirth": "res://assets/audio/slime_rebirth.wav",
+    "ember_dash": "res://assets/audio/ember_dash.wav",
+    "water_gush": "res://assets/audio/water_gush.wav",
+    "earth_rumble": "res://assets/audio/earth_rumble.wav",
+    "sticky_link": "res://assets/audio/sticky_link.wav"
 }
 
 var music_volume := 0.55
