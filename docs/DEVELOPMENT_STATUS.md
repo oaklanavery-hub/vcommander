@@ -2,7 +2,23 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Fantasy pixel presentation throughout the game
+## Current task — Unlimited power cards and backline specialists
+
+- Branch `feat/assassin-units`, based on current main `6680fe7c6ef8747e921c7eac59ecb34dcdca84ab` (v0.12.0, PR #30, deployed and served-pack verified).
+- User requests unlimited power/Buff picks, no units standing on decorative trees, and Spriggan/Nymph/Mole/Sticky Slime (all recruit 2/cap 4).
+- Preserve four-card armies, existing mastery rewards, all previous content, deterministic headless rules, pixel presentation, PvP Coming Soon, campaign KIV and free hosting. No Render changes.
+- Checkpoint 1: remove Buff cap across data/draft/UI; map the playable arena to tree-free ground; focused checks and save.
+- Checkpoint 2: content-driven backline transit, flame trail, gush damage/push, temporary bidirectional crack obstacles with repathing, third strike and nonrecursive shared damage; original pixel art, replay effects and sound. Save before full CI.
+- Playtest defaults for unspecified tuning: Mole tunnel cooldown 5 seconds, third strike 180%; Sticky copies 50% actual damage to its linked partner for 5 seconds, one-target casts retain a visible mark but have no partner to share with. Gush damages contacted enemies. New units are ordinary collection cards; mastery rewards remain unchanged. Fire/Water invulnerability applies only during transit. Mole tunnels ignore surface collision during travel but are not damage-immune.
+- Validation before editing: verified remote main and prior released deployment. New checks not yet run. Local Godot 4.7 is available again.
+- Checkpoint 1 implemented: unlimited Buff data/draft/labels, 40 repeated late-round selection checks, and tree-free ground UV mapping. Passing: content validation, clean Godot 4.7 import, draft suite (40 late Sudden Death rounds) and fantasy interface integration suite.
+- Next: validate checkpoint 1, then the bounded simulation extension and its deterministic tests. Exact-head CI/native/export/browser/container and Pages served-pack verification are required before reporting live.
+
+## Previous release
+
+v0.12.0 fantasy interface released in PR #30; main Deploy Web run 39471568484 passed all gates including 31 source/export suites, 115 native captures and actual served-pack SHA256 `21925169f851116191a9d5a0da09c2d873bce0509bb9d43ea946b143110db60f`.
+
+## Archived implementation log — Fantasy pixel presentation throughout the game
 
 - User has placed campaign/story in KIV. Improve the complete visual interface using the supplied Hunter’s Lodge references: Commander selection, warband/collection, draft, battlefield, rewards, title and utility modals. No gameplay/progression/network rule changes.
 - Branch `feat/fantasy-lodge-ui`, base main `ff40a5d391bd93e32ccc9ab5c8e567a6ec3e735f` (verified v0.11.0). PR #29 achievements/mastery is released; main Deploy Web #39373288633 passed all gates and served-pack verification. PR #28 remains separate.

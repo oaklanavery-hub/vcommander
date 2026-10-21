@@ -124,8 +124,8 @@ def main() -> int:
 
     for buff in buffs.values():
         require_positive_number(buff.get("percentage"), f"{buff['id']} percentage")
-        if buff.get("max_stacks") != 3:
-            raise ValueError(f"{buff['id']} max_stacks must be 3")
+        if type(buff.get("max_stacks")) is not int or buff["max_stacks"] < 0:
+            raise ValueError(f"{buff['id']} max_stacks must be a nonnegative integer (0 means unlimited)")
         if buff.get("stacking") != "multiplicative":
             raise ValueError(f"{buff['id']} must stack multiplicatively")
 

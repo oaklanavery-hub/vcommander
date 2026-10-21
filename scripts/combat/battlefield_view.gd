@@ -286,7 +286,9 @@ func _draw_frost() -> void:
             draw_polyline(crack, Color(0.76, 0.93, 0.97, 0.3), 1)
 
 func _draw_ground() -> void:
-    # Scenery is decorative: the unchanged world-to-screen arena still owns all
+    # Only the tree-free central clearing is playable. Decorative tree canopies
+    # are outside this UV window, including the actor height above its feet.
+    # The unchanged world-to-screen arena still owns all
     # positions, frost coverage, projectile contacts and formation coordinates.
     var rim := ScreenStyle.frame(Color("263121"), Color("8a754b"), 12)
     rim.set_content_margin_all(0)
@@ -306,7 +308,7 @@ func _draw_ground() -> void:
             var angle := float(corner[1]) + PI * 0.5 * float(index) / 4.0
             var point: Vector2 = corner[0] + Vector2.from_angle(angle) * radius
             points.append(point)
-            uv.append((point - _arena.position) / _arena.size)
+            uv.append(Vector2(0.21, 0.23) + (point - _arena.position) / _arena.size * Vector2(0.58, 0.42))
     draw_polygon(points, PackedColorArray([Color(0.89, 0.94, 0.88, 1)]), uv, GROUND)
 
 func roster_layout(card_count: int) -> Dictionary:

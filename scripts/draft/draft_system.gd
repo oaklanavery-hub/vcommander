@@ -176,8 +176,8 @@ func _apply_buff(buff_id: String) -> bool:
         return false
     var buff: Dictionary = buff_definitions[buff_id]
     var current: int = get_buff_stacks(buff_id)
-    var max_stacks: int = int(buff.get("max_stacks", 3))
-    if current >= max_stacks:
+    var max_stacks: int = int(buff.get("max_stacks", 0))
+    if max_stacks > 0 and current >= max_stacks:
         return false
     buff_stacks[buff_id] = current + 1
     return true
@@ -197,7 +197,7 @@ func _eligible_buff_ids() -> Array[String]:
     for raw_id in buff_definitions.keys():
         var buff_id := str(raw_id)
         var buff: Dictionary = buff_definitions[buff_id]
-        if get_buff_stacks(buff_id) < int(buff.get("max_stacks", 3)):
+        if int(buff.get("max_stacks", 0)) == 0 or get_buff_stacks(buff_id) < int(buff.get("max_stacks", 0)):
             result.append(buff_id)
     result.sort()
     return result

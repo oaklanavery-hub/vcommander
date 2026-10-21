@@ -64,10 +64,10 @@ A normal pre-battle phase gives three selections. The side that lost the previou
 After every selection, all three displayed choices are randomized again. There is no manual reroll.
 
 **R020 — Buff stacking**  
-The same Buff Card may be selected up to three times per match. Identical and different buffs stack multiplicatively.
+The same Buff Card may be selected any number of times per match. Identical and different buffs stack multiplicatively. Existing Attack Speed and Movement Speed caps still apply.
 
-**R021 — Maxed buffs**  
-A Buff Card at 3/3 stacks leaves that player's draft pool.
+**R021 — Unlimited power cards**  
+Buff Cards do not exhaust and stay in the draft pool regardless of stack count.
 
 **R022 — One Army card remaining**  
 If exactly one Army card remains eligible, every offer must include it plus up to two Buff Cards.
@@ -76,7 +76,7 @@ If exactly one Army card remains eligible, every offer must include it plus up t
 Once all four Army cards are exhausted, offers may contain three Buff Cards.
 
 **R024 — No legal cards remaining**  
-If every Army card and every Buff Card has reached its cap, the remaining selection phase ends automatically.
+A phase ends early only if no legal choice exists. With the standard unlimited Buff pool, non-opening phases always have legal power-card choices, including repeated Sudden Death rounds.
 
 **R025 — Selection timer**  
 Each individual selection has a 30-second timer. The timer resets after every selection. Local pause, help and settings menus suspend the selection clock until the player returns.

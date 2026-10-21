@@ -39,7 +39,11 @@ func _ready() -> void:
     value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     value.add_theme_color_override("font_color", Color("eed299"))
     body.add_child(value)
-    var detail := ScreenStyle.label("Army-wide · %d / %d" % [stacks, int(definition.get("max_stacks", 3))], 12)
+    var detail := ScreenStyle.label("Army-wide · " + stack_text(definition, stacks), 12)
     detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     body.add_child(detail)
-    tooltip_text = "%s\n+%d%% %s for the whole warband\nCurrent stacks: %d / %d" % [str(definition.get("display_name", "Blessing")), int(definition.get("percentage", 0)), str(definition.get("stat", "")).replace("_", " "), stacks, int(definition.get("max_stacks", 3))]
+    tooltip_text = "%s\n+%d%% %s for the whole warband\nCurrent stacks: %s" % [str(definition.get("display_name", "Blessing")), int(definition.get("percentage", 0)), str(definition.get("stat", "")).replace("_", " "), stack_text(definition, stacks)]
+
+static func stack_text(buff: Dictionary, count: int) -> String:
+    var limit := int(buff.get("max_stacks", 0))
+    return "%d / %d" % [count, limit] if limit > 0 else "%d · No limit" % count

@@ -46,7 +46,7 @@ func run() -> void:
         var bounds := body.get_global_rect()
         var tile_bounds: Rect2 = tile.get_global_rect()
         check(tile_bounds.grow(1).encloses(bounds), "all five blessing layouts fit their actual offer size: " + str(tile.definition["stat"]))
-        check(tile.tooltip_text.contains("2 / 3"), "blessing preserves supplied stack information")
+        check(tile.tooltip_text.contains("2 · No limit"), "blessing preserves supplied stack information")
         tile.grab_focus()
         check(tile.has_focus(), "blessing remains keyboard selectable")
     for commander_id in before:

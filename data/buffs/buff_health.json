@@ -4,7 +4,7 @@
   "display_name": "Health Boost",
   "stat": "health",
   "percentage": 25,
-  "max_stacks": 3,
+  "max_stacks": 0,
   "stacking": "multiplicative",
   "status": "playtest"
 }

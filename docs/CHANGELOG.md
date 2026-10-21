@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — Backline specialists
+
+- Power cards can be picked indefinitely; the late-round draft stays available after unit caps.
+- Battlefield ground uses the clear grassy interior, keeping decorative trees outside unit positions.
+
 ## v0.12.0 — Fantasy pixel presentation
 
 - Original woodland clearing and lodge courtyard environments replace the coarse backdrop.

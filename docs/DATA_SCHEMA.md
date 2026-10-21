@@ -112,7 +112,7 @@ A bonus may define `trigger: on_death_spawn` with `stat: attack`. Its percentage
   "display_name": "Attack Boost",
   "stat": "attack",
   "percentage": 15,
-  "max_stacks": 3,
+  "max_stacks": 0,
   "stacking": "multiplicative",
   "status": "playtest"
 }
@@ -182,7 +182,7 @@ Pull events provide `source_x/y`, `from_x/y`, `to_x/y` and original target HP fo
 - Every Army card has positive `summon_amount`, `unit_cap`, and required combat stats.
 - `summon_amount` cannot exceed `unit_cap`.
 - Every Army card defines an ability `id` and generic `type`.
-- Every Buff Card has a positive percentage and `max_stacks` of 3.
+- Every Buff Card has a positive percentage and a nonnegative integer `max_stacks`; `0` means unlimited.
 - Required battlefield/simulation balance values are positive.
 - JSON parses without errors.
 
