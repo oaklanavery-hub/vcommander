@@ -1,5 +1,11 @@
 # Changelog
 
+## Development workflow
+
+- Verified pinned browser/package caching and bounded network setup replace repeated cold installs and multi-minute registry stalls.
+- Eight default native review previews with a total payload budget; targeted/all-view options and every full-resolution PNG remain available.
+- A short active handoff replaces accumulated checkpoint history, which is retained separately. Focused checkpoints and batched release validation reduce repeated work without removing release checks.
+
 ## v0.15.0 — Battle feedback and learning
 
 - Exact read-only battle reports count effective damage/healing, absorption, kills, surviving bodies and role-relevant highlights across both sides.
