@@ -15,6 +15,7 @@ GameState="*res://scripts/core/game_state.gd"
 GameAudio="*res://scripts/presentation/game_audio.gd"
 GameMenu="*res://scripts/presentation/game_menu.gd"
 OnlineSession="*res://scripts/network/online_session.gd"
+FirstMatchGuide="*res://scripts/presentation/first_match_guide.gd"
 
 [network]
 

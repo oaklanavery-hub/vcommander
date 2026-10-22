@@ -5,6 +5,7 @@ var _body: VBoxContainer
 var _previous_pause := false
 var _previous_focus: Control
 var _leave_target := "res://scenes/main_menu/main_menu.tscn"
+var _leave_callback := Callable()
 
 func _ready() -> void:
     layer = 50
@@ -198,7 +199,29 @@ func open_help() -> void:
     mastery.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     _body.add_child(mastery)
     _body.add_child(ScreenStyle.label("30 seconds per pick • Esc: menu • Space: pause battle • 1 / 2 / 4: speed", 14))
-    _button("Got it", _back_from_page, true).grab_focus()
+    var actions := HBoxContainer.new()
+    actions.add_theme_constant_override("separation", 12)
+    _body.add_child(actions)
+    var guided := Button.new()
+    guided.name = "GuidedFirstMatch"
+    guided.text = "Replay guided match" if FirstMatchGuide.completed else "Guided first match"
+    guided.custom_minimum_size = Vector2(260, 46)
+    guided.pressed.connect(_start_guided_match)
+    guided.disabled = OnlineSession.active
+    guided.tooltip_text = "A guide through a normal local match. Your usual match rules and mastery apply."
+    actions.add_child(guided)
+    var done := Button.new()
+    done.text = "Got it"
+    done.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    done.custom_minimum_size.y = 46
+    done.pressed.connect(_back_from_page)
+    ScreenStyle.primary(done)
+    actions.add_child(done)
+    done.grab_focus()
+
+func _start_guided_match() -> void:
+    if not OnlineSession.active:
+        confirm_leave("res://scenes/commander_select/commander_select.tscn", FirstMatchGuide.start)
 
 func _back_from_page() -> void:
     GameAudio.save_settings()
@@ -207,8 +230,9 @@ func _back_from_page() -> void:
     else:
         close()
 
-func confirm_leave(target: String = "res://scenes/main_menu/main_menu.tscn") -> void:
+func confirm_leave(target: String = "res://scenes/main_menu/main_menu.tscn", after_leave: Callable = Callable()) -> void:
     _leave_target = target
+    _leave_callback = after_leave
     if OnlineSession.active and OnlineSession.client.state.get("phase") != "complete":
         _page("Leave this friend match?", "Your seat is held for 60 seconds after disconnecting. If you do not return, you forfeit. Friend playtests do not affect mastery or rank.")
         _button("Keep playing", close, true).grab_focus()
@@ -225,13 +249,18 @@ func confirm_leave(target: String = "res://scenes/main_menu/main_menu.tscn") -> 
     _button("Leave match", _leave)
 
 func _leave() -> void:
+    var callback := _leave_callback
     close()
+    FirstMatchGuide.stop()
     if OnlineSession.active:
         OnlineSession.leave()
     GameState.leave_match()
+    if callback.is_valid():
+        callback.call()
     get_tree().change_scene_to_file(_leave_target)
 
 func close() -> void:
+    _leave_callback = Callable()
     if not overlay.visible:
         return
     overlay.hide()

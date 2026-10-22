@@ -6,6 +6,7 @@
 - Completed replay evidence preserves death-source, descendant, revival and Commander attribution; fractional healing remains visible and overkill is excluded from damage totals.
 - A post-battle report compares both warbands and explains surviving bodies, protection and individual contribution without awarding additional rewards.
 - Click or tap a companion for a separate live inspection panel with replay-current HP, modified stats, ability description, cooldown and active effects.
+- Optional Guided first match in How to play teaches real Commander/warband/draft/skill/battle/report actions. Notes pause local clocks; completion and ending guidance grant no extra XP or units.
 
 ## v0.14.0 — Commander mastery lineup
 

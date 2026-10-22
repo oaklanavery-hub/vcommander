@@ -318,6 +318,7 @@ func reveal_report() -> void:
         return
     _close_inspection()
     report_button.show()
+    FirstMatchGuide.battle_finished()
 
 func _open_report() -> void:
     # Completion is gated here as well as on the button: inspection never leaks the result.
@@ -326,6 +327,7 @@ func _open_report() -> void:
     if _report.is_empty():
         _report = BattleReport.build(_source.battle_result)
     report_view.open(_report, _source.match_state.round_number)
+    FirstMatchGuide.report_opened()
 
 func _inspect_unit(unit: Dictionary) -> void:
     if unit.is_empty():
