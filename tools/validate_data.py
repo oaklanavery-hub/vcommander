@@ -213,6 +213,8 @@ def main() -> int:
             raise ValueError(f"{card['id']} collection tags must match its unlock requirement")
         if requirement is None:
             continue
+        if not str(card.get("ability", {}).get("description", "")).strip():
+            raise ValueError(f"{card['id']} mastery preview needs an ability description")
         if not isinstance(requirement, dict) or requirement.get("commander_id") not in commanders:
             raise ValueError(f"{card['id']} needs a valid reward Commander")
         owner = commanders[requirement["commander_id"]]

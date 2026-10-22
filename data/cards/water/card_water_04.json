@@ -20,7 +20,8 @@
     "id": "tidal_push",
     "display_name": "Tidal Push",
     "type": "ranged_pushback",
-    "pushback": "small"
+    "pushback": "small",
+    "description": "Ranged water shots damage the enemy hit and push it back a short distance."
   },
   "tags": [
     "water",
