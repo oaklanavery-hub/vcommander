@@ -34,7 +34,9 @@ jobs:
           include-templates: false
 
       - name: Validate content, art, project and every regression suite
-        run: python3 tools/run_checks.py
+        run: |
+          python3 -m unittest discover -s tests -p 'test_delivery_tools.py'
+          python3 tools/run_checks.py
 
       - name: Render desktop visual QA with the Compatibility renderer
         env:
@@ -196,10 +198,25 @@ jobs:
           if grep -E "SCRIPT ERROR:|ERROR:" /tmp/pvp-import.log; then exit 1; fi
           timeout 120s godot --headless --path . --export-release Web build/web/index.html
           python3 tools/run_checks.py --pack build/web/index.pck
-      - name: Install pinned browser QA runtime
-        run: |
-          npm install --prefix build/browser --no-save playwright@1.64.1
-          build/browser/node_modules/.bin/playwright install --with-deps chromium
+      - name: Restore pinned browser runtime
+        id: browser-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/browser
+            ~/.cache/ms-playwright
+          key: browser-qa-v1-${{ runner.os }}-${{ runner.arch }}-node24-${{ hashFiles('tools/setup_browser_qa.py') }}
+      - name: Ensure pinned browser QA runtime with bounded network waits
+        timeout-minutes: 4
+        run: timeout --kill-after=5s 190s python3 tools/setup_browser_qa.py
+      - name: Save verified browser runtime
+        if: steps.browser-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/browser
+            ~/.cache/ms-playwright
+          key: ${{ steps.browser-cache.outputs.cache-primary-key }}
       - name: Run two isolated WebGL2 game sessions against the authority
         env:
           PVP_SERVER_URL: ${{ inputs.private_server_url || '' }}

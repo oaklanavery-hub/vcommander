@@ -36,6 +36,14 @@ Read `docs/DEVELOPMENT_STATUS.md` at the start of a development run, then inspec
 - Give external commands bounded timeouts. If a command stalls, save its command, output and current state; investigate or use an available alternative instead of repeatedly starting the same stalled operation.
 - Before ending a run, leave the branch, check/run links and next action in the handoff. A saved checkpoint enables resumption; it does not make a new ChatGPT turn start automatically or remove platform limits.
 
+## Fast feedback
+
+- Implement one reviewable feature or fix at a time. Finish its focused checks and batch routine refinements before starting the full release gate. Do not restart a passing full gate for another cosmetic tweak; make a follow-up only for an observed defect or a new request.
+- Keep `docs/DEVELOPMENT_STATUS.md` short: current verified release, active scope, checks, blockers and next action. Move completed implementation logs to `docs/history/`; read history only when the task needs it. A new task should be resumable from the repository without replaying the entire chat.
+- Read and print only relevant file sections, matching tool metadata, failure lines and check summaries. Use the default bounded screenshot previews; request specific views with `tools/emit_visual_review.py --views NAME ...` or fetch full PNG artifacts when needed.
+- Reuse the pinned local runtime when available. Never reinstall/download a working tool as a routine startup step. Browser QA reuses a verified pinned cache and has a three-minute setup budget; a dependency failure must not trigger code changes without evidence.
+- Report a saved, reviewable checkpoint promptly while long checks run, stating what is verified and what is pending. Claim a live release only after deployment verification. Keep the existing full source/pack/browser/container/native release checks.
+
 ## Placeholder rule
 
 Anything marked `placeholder`, `provisional`, or `design_pending` is infrastructure, not approved final game design. Do not treat placeholder stats, names, abilities, or art direction as locked decisions.
