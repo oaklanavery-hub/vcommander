@@ -27,7 +27,7 @@ static func describe(unit: Dictionary, card: Dictionary, clock: float, frozen: b
     if frozen:
         effects.append("Frozen Field · this round")
     if bool(unit.get("burning", false)):
-        effects.append("Burning")
+        effects.append("Damage over time")
     if bool(unit.get("slowed", false)):
         effects.append("Slowed")
     if bool(unit.get("aura_slowed", false)):

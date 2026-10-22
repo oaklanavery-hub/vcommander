@@ -127,7 +127,7 @@ func _ready() -> void:
     _refresh_summaries()
     _update_speed_label()
     _update_timer_label()
-    result_label.text = "Battle in progress…"
+    result_label.text = "Battle in progress… Click or tap a companion to inspect."
     if _prelude.active():
         var names: Array[String] = []
         for skill in _prelude.skills:
@@ -180,7 +180,7 @@ func _advance_prelude(delta: float) -> void:
         battlefield.prelude_skills = []
         battlefield.set_frame(_frames[0] if not _frames.is_empty() else frame)
         speed_button.disabled = false
-        result_label.text = "Battle in progress…"
+        result_label.text = "Battle in progress… Click or tap a companion to inspect."
         _update_timer_label()
 
 func _advance_frames() -> void:

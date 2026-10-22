@@ -11,7 +11,7 @@ func run() -> void:
     var original := JSON.stringify(unit)
     var data := UnitInspection.describe(unit, card, 3.0, true)
     check(data["hp"] == 37.5 and data["cooldown"] == "Ready in 3.0s" and data["description"] == "A future ability.", "sampled stats and elapsed cooldown remain exact and data driven")
-    check(data["effects"].has("Burning") and data["effects"].has("Slowed") and data["effects"].has("Frozen Field · this round"), "active effects live in inspection, not actor labels")
+    check(data["effects"].has("Damage over time") and data["effects"].has("Slowed") and data["effects"].has("Frozen Field · this round"), "active effects live in inspection, not actor labels")
     var effects: Array = UnitInspection.describe(unit.merged({"aura_slowed": true, "sticky_mark": {"target_ids": ["p:future", "p:other"], "shared_damage_pct": 50}}, true), card, 3.0)["effects"]
     check(effects.has("Freezing aura · attack speed reduced") and effects.has("Sticky link · 50% shared damage"), "aura and linked damage are visible alongside temporary slows")
     check(not UnitInspection.number(1.2e100).contains("inf") and UnitInspection.number(37.5) == "37.5", "fractional and unlimited-power numbers stay readable")
