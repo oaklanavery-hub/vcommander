@@ -8,7 +8,14 @@
   "role": "tank",
   "summon_amount": 1,
   "unit_cap": 4,
-  "stats": {"health": 1050, "attack": 90, "defense": 32, "attack_speed": 65, "movement_speed": 60, "range": 1},
+  "stats": {
+    "health": 1050,
+    "attack": 90,
+    "defense": 32,
+    "attack_speed": 65,
+    "movement_speed": 60,
+    "range": 1
+  },
   "ability": {
     "id": "slime_split",
     "display_name": "Jelly Twins",
@@ -20,5 +27,10 @@
     "child_visual_scale": 0.68,
     "description": "On death, splits into two smaller slimes with half its Max HP and attack. Children cannot split. Each Giant splits only once, even if revived."
   },
-  "tags": ["slime", "tank", "death_spawn"]
+  "tags": [
+    "starter",
+    "slime",
+    "tank",
+    "death_spawn"
+  ]
 }

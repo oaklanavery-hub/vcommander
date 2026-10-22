@@ -27,6 +27,7 @@
     "description": "Places a medium healing pool beneath a wounded ally, restoring 4% of nearby allies\u2019 Max HP every 2 seconds for 4 seconds."
   },
   "tags": [
+    "starter",
     "slime",
     "healer"
   ]

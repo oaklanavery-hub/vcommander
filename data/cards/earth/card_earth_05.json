@@ -26,6 +26,7 @@
     "description": "Fires a spore bolt. Nearby enemies take 50% of attack as splash damage before defense."
   },
   "tags": [
+    "starter",
     "earth",
     "range"
   ]

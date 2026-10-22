@@ -28,7 +28,6 @@
     "description": "Every 5 seconds marks up to two nearby enemies for 5 seconds. Damage from any ally to one also deals 50% of the actual damage to its linked partner. Shared damage does not trigger another share."
   },
   "tags": [
-    "starter",
     "slime",
     "range",
     "support",

@@ -30,7 +30,6 @@
     "description": "Every 5 seconds gushes to the enemy backline, invulnerable during travel. Enemies near the water path take damage and are pushed away once per gush."
   },
   "tags": [
-    "starter",
     "water",
     "melee",
     "assassin",

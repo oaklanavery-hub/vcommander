@@ -25,6 +25,7 @@
     "description": "Every third attack deals 160% of attack before normal defense."
   },
   "tags": [
+    "starter",
     "water",
     "melee"
   ]

@@ -208,6 +208,9 @@ def main() -> int:
             positive_integer(condition.get("target"), f"{ident} target")
     for card in cards.values():
         requirement = card.get("mastery_unlock")
+        tags = card.get("tags", [])
+        if ("starter" in tags) != (requirement is None) or ("mastery_reward" in tags) != (requirement is not None):
+            raise ValueError(f"{card['id']} collection tags must match its unlock requirement")
         if requirement is None:
             continue
         if not isinstance(requirement, dict) or requirement.get("commander_id") not in commanders:

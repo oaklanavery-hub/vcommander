@@ -8,11 +8,28 @@
   "role": "melee",
   "summon_amount": 2,
   "unit_cap": 6,
-  "stats": {"health": 410, "attack": 75, "defense": 12, "attack_speed": 115, "movement_speed": 125, "range": 1},
+  "stats": {
+    "health": 410,
+    "attack": 75,
+    "defense": 12,
+    "attack_speed": 115,
+    "movement_speed": 125,
+    "range": 1
+  },
   "ability": {
-    "id": "jelly_bop", "display_name": "Jelly Burst", "type": "absorb_burst",
-    "absorb_pct": 30, "burst_seconds": 10, "radius": "medium", "pushback": "moderate", "death_multiplier": 2,
+    "id": "jelly_bop",
+    "display_name": "Jelly Burst",
+    "type": "absorb_burst",
+    "absorb_pct": 30,
+    "burst_seconds": 10,
+    "radius": "medium",
+    "pushback": "moderate",
+    "death_multiplier": 2,
     "description": "Absorbs and stores 30% of damage after defense. Every 10s, releases all stored damage in a medium radius and pushes enemies back, then resets. On death, releases double the stored damage. Continues regular melee attacks."
   },
-  "tags": ["slime", "melee"]
+  "tags": [
+    "starter",
+    "slime",
+    "melee"
+  ]
 }

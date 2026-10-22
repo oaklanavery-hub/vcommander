@@ -30,7 +30,6 @@
     "description": "Tunnels to the enemy backline every 5 seconds, leaving a crack barrier for 5 seconds. Both armies must go around it. Every third strike deals 180% attack damage. Not damage-immune underground."
   },
   "tags": [
-    "starter",
     "earth",
     "melee",
     "assassin",
