@@ -33,8 +33,8 @@ ALL_VIEWS = (
     "learning_death_phases", "learning_death_reduced", "attack_slam_windup", "attack_slam_recover",
     "layout_draft", "layout_ready", "layout_battle", "layout_inspection", "layout_result", "layout_powercards",
 )
-DEFAULT_VIEWS = ('layout_draft', 'layout_battle', 'layout_inspection', 'layout_powercards',
-                 'layout_ready', 'layout_result', 'learning_report_player', 'menu')
+DEFAULT_VIEWS = ('commander', 'army', 'draft', 'layout_battle', 'layout_inspection',
+                 'layout_powercards', 'learning_report_player', 'menu')
 VIEWS = args.views or (ALL_VIEWS if args.all else DEFAULT_VIEWS)
 if any(not name.replace('_', '').isalnum() for name in VIEWS):
     parser.error('Screenshot names may contain only letters, numbers and underscores')

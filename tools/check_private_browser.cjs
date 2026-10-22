@@ -58,6 +58,7 @@ const path = require('node:path');
       ...window.vcommanderPvpQa, observed_at_ms: Date.now()
     }))));
     if (first.room !== second.room || first.side !== 'player' || second.side !== 'opponent') throw Error('Incorrect private seats');
+    if (first.font_symbols_ready !== true || second.font_symbols_ready !== true) throw Error('Exported browser is missing bundled UI symbol glyphs');
     if (first.play_at !== second.play_at || first.play_until !== second.play_until) throw Error('Different server timelines');
     const clockSkew = playbackClockSkew(first, second);
     if (clockSkew > 0.5) throw Error('Browser playback clocks diverged: ' + JSON.stringify({ clockSkew, first, second }));
@@ -74,7 +75,7 @@ const path = require('node:path');
     if (errors.length) throw Error(errors.join('\n'));
     await host.screenshot({ path: path.join(output, 'browser_host_result.png') });
     await guest.screenshot({ path: path.join(output, 'browser_guest_result.png') });
-    console.log('Exported-browser PvP passed against ' + serverUrl.host + ': two isolated WebGL2 sessions, invite/join/draft, Commander opening, shared 1x clock, mirrored guest, common result and untouched mastery.');
+    console.log('Exported-browser PvP passed against ' + serverUrl.host + ': two isolated WebGL2 sessions, bundled UI glyphs, invite/join/draft, Commander opening, shared 1x clock, mirrored guest, common result and untouched mastery.');
   } catch (error) {
     console.error(consoleLog.slice(-60).join('\n'));
     fs.writeFileSync(path.join(output, 'browser-console.txt'), consoleLog.join('\n'));

@@ -6,6 +6,13 @@
 - Eight default native review previews with a total payload budget; targeted/all-view options and every full-resolution PNG remain available.
 - A short active handoff replaces accumulated checkpoint history, which is retained separately. Focused checkpoints and batched release validation reduce repeated work without removing release checks.
 
+## v0.16.1 — Portable UI symbols
+
+- Replace missing-character boxes in Next/Battle buttons and recruit-count arrows with bundled original pixel glyphs, preserving the existing lettering.
+- Provide arrows, heart outlines/fills and achievement star/diamond symbols in both display and body font chains; preserve other configured fallbacks.
+- The tiny native font resource loads before asset import and works without installed system fonts. Its pixel masks and deterministic build recipe are included.
+- Source/exported-pack shaping tests disable system fallback and verify actual navigation, recruit, heart and achievement strings at four sizes, including real button/card controls.
+
 ## v0.16.0 — Shared battlefield and draft layout
 
 - Apply the approved battlefield wireframe to both phases: Commander portraits/hearts at opposite ends, centered round/time, mirrored four-card roster rails and a central draft window over the clearing.

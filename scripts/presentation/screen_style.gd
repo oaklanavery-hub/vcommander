@@ -2,9 +2,18 @@ class_name ScreenStyle
 extends RefCounted
 
 const Backdrop = preload("res://scripts/presentation/pixel_backdrop.gd")
-const DISPLAY_FONT := preload("res://assets/fonts/PixelifySans.ttf")
+const DISPLAY_FONT := preload("res://assets/fonts/pixel_display.tres")
+const SYMBOL_FONT := preload("res://assets/fonts/ui_symbols.tres")
+
+static func ensure_font_fallbacks() -> void:
+    var body := ThemeDB.fallback_font
+    if not body.fallbacks.has(SYMBOL_FONT):
+        var fonts: Array[Font] = body.fallbacks.duplicate()
+        fonts.append(SYMBOL_FONT)
+        body.fallbacks = fonts
 
 static func apply(screen: Control) -> void:
+    ensure_font_fallbacks()
     var background := Backdrop.new()
     screen.add_child(background)
     screen.move_child(background, 0)
