@@ -31,9 +31,14 @@
     "description": "Becomes an invulnerable fireball every 5 seconds and sweeps to the enemy backline. Leaves a burning trail for 4 seconds, damaging enemies crossing it."
   },
   "tags": [
-    "starter",
     "fire",
     "melee",
-    "assassin"
-  ]
+    "assassin",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_fire_01",
+    "level": 3,
+    "wins": 3
+  }
 }

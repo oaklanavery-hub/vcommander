@@ -28,9 +28,14 @@
     "description": "Every 5 seconds marks up to two nearby enemies for 5 seconds. Damage from any ally to one also deals 50% of the actual damage to its linked partner. Shared damage does not trigger another share."
   },
   "tags": [
-    "starter",
     "slime",
     "range",
-    "support"
-  ]
+    "support",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_slime_01",
+    "level": 5,
+    "wins": 6
+  }
 }

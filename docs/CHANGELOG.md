@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.14.0 — Commander mastery lineup
+
+- Four starters per Commander, followed by rewards at Level 3 + three wins and Level 5 + six wins.
+- Ash Phoenix, Tidal Guard, Spore Sage and Jelly Medic join the starting lineup; Spore Sage recruits 2/cap 4.
+- Safe schema-3 migration permanently retains existing card ownership, records and saved-warband eligibility.
+- Private developer collection access uses a separately delivered key and keeps mastery, achievements and win/loss records truthful.
+
 ## v0.13.0 — Backline specialists
 
 - Added Spriggan, Nymph, Mole and Sticky Slime (all 2/4), original pixel sprites, elemental travel, damage trails, gush pushback, temporary crack terrain/repathing, third strikes and shared damage links.

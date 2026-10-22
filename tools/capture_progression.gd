@@ -35,7 +35,7 @@ func run() -> void:
         award("commander_fire_01", "loss")
     await journal("progression_partial", "commander_fire_01")
     for element in ["fire", "water", "earth", "slime"]:
-        for i in range(5):
+        for i in range(10):
             award("commander_%s_01" % element, "win")
     await journal("progression_unlocked")
     await journal("progression_achievements_earned", "", 1)

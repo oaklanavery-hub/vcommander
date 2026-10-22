@@ -7,6 +7,9 @@ const MatchScript = preload("res://scripts/core/match_state.gd")
 const AiScript = preload("res://scripts/ai/ai_controller.gd")
 const CombatSimulatorScript = preload("res://scripts/combat/combat_simulator.gd")
 const CommanderProgressScript = preload("res://scripts/core/commander_progress.gd")
+const DeveloperAccessScript = preload("res://scripts/core/developer_access.gd")
+
+signal collection_changed
 
 var selected_commander_id := ""
 var army = ArmyLoadoutScript.new(4)
@@ -20,6 +23,7 @@ var opponent = AiScript.new()
 var opponent_public_side: Dictionary = {}
 var opponent_combat_side: Dictionary = {}
 var commander_progress: CommanderProgress
+var developer_access: DeveloperAccess
 var mastery_reward: Dictionary = {}
 var _progress_match_id := ""
 
@@ -27,8 +31,22 @@ func _ready() -> void:
     # Tool scripts receive an in-memory profile and cannot touch a player's records.
     var arguments := OS.get_cmdline_args()
     var scripted := arguments.has("--script") or arguments.has("-s") or DisplayServer.get_name() == "headless"
-    commander_progress = CommanderProgressScript.new(ContentDatabase, "" if scripted else CommanderProgressScript.DEFAULT_PATH)
+    developer_access = DeveloperAccessScript.new("" if scripted else DeveloperAccessScript.DEFAULT_PATH)
+    developer_access.changed.connect(_on_collection_access_changed)
+    commander_progress = CommanderProgressScript.new(ContentDatabase, "" if scripted else CommanderProgressScript.DEFAULT_PATH, developer_access)
     commander_progress.recover_interrupted_match()
+
+func activate_developer_access(key: String) -> Error:
+    return ERR_BUSY if match_started or OnlineSession.active else developer_access.activate(key)
+
+func remove_developer_access() -> Error:
+    return ERR_BUSY if match_started or OnlineSession.active else developer_access.remove()
+
+func _on_collection_access_changed() -> void:
+    for index in range(army.size() - 1, -1, -1):
+        if not commander_progress.is_card_unlocked(army.get_cards()[index]):
+            army.unequip_at(index)
+    collection_changed.emit()
 
 func select_commander(commander_id: String) -> bool:
     if ContentDatabase.get_commander(commander_id).is_empty():
@@ -61,6 +79,22 @@ func unequip_card_at(index: int) -> bool:
 func clear_army() -> void:
     _reset_match_runtime()
     army.clear()
+
+func equip_starter_army() -> bool:
+    var signature := get_selected_signature_set()
+    if signature.is_empty():
+        return false
+    var candidate = ArmyLoadoutScript.new(army.max_slots)
+    for card in ContentDatabase.get_cards_by_set(str(signature["id"])):
+        if not card.has("mastery_unlock") and commander_progress.is_card_unlocked(str(card["id"])):
+            candidate.equip(str(card["id"]))
+        if candidate.is_full():
+            break
+    if not candidate.is_full():
+        return false
+    _reset_match_runtime()
+    army = candidate
+    return true
 
 func get_signature_progress() -> int:
     var signature_set := get_selected_signature_set()

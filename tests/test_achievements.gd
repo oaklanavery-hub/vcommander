@@ -13,36 +13,36 @@ func award(profile: CommanderProgress, commander: String, outcome: String) -> Di
 func run() -> void:
     db = root.get_node("ContentDatabase")
     var profile := CommanderProgress.new(db, "")
-    check(profile.available_cards().size() == 20, "all original and specialist starters stay available")
+    check(profile.available_cards().size() == 16, "four approved starters per Commander are available")
     for card in db.get_all_cards():
         check(profile.is_card_unlocked(card["id"]) == not card.has("mastery_unlock"), "only declared rewards are locked")
     check(not profile.is_card_unlocked("unknown"), "unknown card is never available")
     for i in range(4):
         award(profile, "commander_fire_01", "win")
-    check(not profile.is_card_unlocked("card_fire_05"), "four wins do not bypass the level requirement")
+    check(not profile.is_card_unlocked("card_fire_06"), "four wins do not bypass the level requirement")
     var receipt := award(profile, "commander_fire_01", "win")
-    check(profile.is_card_unlocked("card_fire_05") and profile.available_cards().size() == 21, "Level 3 and wins unlock one new card")
-    check(receipt["unlocked_cards"] == ["card_fire_05"] and receipt["achievements"].has("fire_adept"), "receipt carries newly earned unit and achievement")
+    check(profile.is_card_unlocked("card_fire_06") and profile.available_cards().size() == 17, "Level 3 and wins unlock one new card")
+    check(receipt["unlocked_cards"] == ["card_fire_06"] and receipt["achievements"].has("fire_adept"), "receipt carries newly earned unit and achievement")
     var repeated := profile.finish_match(receipt["match_id"], "loss")
     check(repeated == receipt and profile.record("commander_fire_01")["wins"] == 5, "repeat settlement preserves the exact original receipt")
     receipt["unlocked_cards"].clear()
     var entries := profile.achievement_entries()
     entries[0]["earned"] = false
-    check(profile.is_card_unlocked("card_fire_05") and profile.achievement_entries()[0]["earned"], "returned entries/receipts cannot change entitlements")
+    check(profile.is_card_unlocked("card_fire_06") and profile.achievement_entries()[0]["earned"], "returned entries/receipts cannot change entitlements")
     check(not award(profile, "commander_fire_01", "forfeit")["unlocked_cards"].size(), "later matches do not grant an earned unit again")
-    for e in ["water", "earth", "slime"]:
-        for i in range(5):
+    for e in ["fire", "water", "earth", "slime"]:
+        for i in range(10):
             award(profile, "commander_%s_01" % e, "win")
-        check(profile.is_card_unlocked("card_%s_05" % e), "each Commander grants its own reward through the same rules")
-    check(profile.available_cards().size() == 24, "all four rewards expand the collection")
+        check(profile.is_card_unlocked("card_%s_05" % e), "each Commander retains its starter companion")
+    check(profile.available_cards().size() == 24, "all eight rewards expand the collection")
     check(earned(profile, "alliance"), "wins with all four Commanders earn coverage achievement")
     var losses := CommanderProgress.new(db, "")
     for i in range(20):
         award(losses, "commander_water_01", "loss")
-    check(losses.record("commander_water_01")["level"] == 3 and not losses.is_card_unlocked("card_water_05"), "loss XP alone cannot satisfy the win requirement")
+    check(losses.record("commander_water_01")["level"] == 3 and not losses.is_card_unlocked("card_water_04"), "loss XP alone cannot satisfy the win requirement")
     for i in range(3):
         award(losses, "commander_water_01", "win")
-    check(losses.is_card_unlocked("card_water_05"), "the exact third win completes an already met level requirement")
+    check(losses.is_card_unlocked("card_water_04"), "the exact third win completes an already met level requirement")
     var forfeits := CommanderProgress.new(db, "")
     for i in range(12):
         award(forfeits, "commander_earth_01", "forfeit")
@@ -68,31 +68,31 @@ func test_migration() -> void:
         "active_match": {"id": "match:7", "commander_id": "commander_water_01"}}
     write_file(path, JSON.stringify(legacy))
     var profile := CommanderProgress.new(db, path)
-    check(not profile.read_only and profile.last_save_error == OK and profile.is_card_unlocked("card_fire_05"), "legacy records backfill eligible unit on load")
+    check(not profile.read_only and profile.last_save_error == OK and profile.is_card_unlocked("card_fire_06"), "legacy records backfill eligible unit on load")
     check(earned(profile, "fire_adept") and profile.record("commander_fire_01")["xp"] == 525 and profile.record("historical_commander")["xp"] == 100, "migration preserves XP and historical records while backfilling achievements")
     var persisted: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
-    check(persisted["schema_version"] == 2 and persisted["active_match"] == legacy["active_match"], "schema migration preserves the pending match identity")
+    check(persisted["schema_version"] == 3 and persisted["active_match"] == legacy["active_match"], "schema migration preserves the pending match identity")
     profile.recover_interrupted_match()
-    check(profile.record("commander_water_01")["forfeits"] == 1 and profile.is_card_unlocked("card_fire_05"), "interruption settles once without losing another Commander's reward")
+    check(profile.record("commander_water_01")["forfeits"] == 1 and profile.is_card_unlocked("card_fire_06"), "interruption settles once without losing another Commander's reward")
     persisted = JSON.parse_string(FileAccess.get_file_as_string(path))
     persisted["achievements"].append("historical_badge")
     persisted["unlocked_cards"].append("historical_card")
     write_file(path, JSON.stringify(persisted))
     # Earned items remain permanent even if future tuning increases requirements.
-    var original: Dictionary = db.cards["card_fire_05"]["mastery_unlock"].duplicate()
-    db.cards["card_fire_05"]["mastery_unlock"]["level"] = 99
+    var original: Dictionary = db.cards["card_fire_06"]["mastery_unlock"].duplicate()
+    db.cards["card_fire_06"]["mastery_unlock"]["level"] = 99
     profile = CommanderProgress.new(db, path)
-    check(profile.is_card_unlocked("card_fire_05") and profile.unlocked_card_ids().has("historical_card"), "reload keeps permanent and unknown historical entitlements")
+    check(profile.is_card_unlocked("card_fire_06") and profile.unlocked_card_ids().has("historical_card"), "reload keeps permanent and unknown historical entitlements")
     check(profile.recover_interrupted_match().is_empty(), "migration/reload does not repeat an interruption")
     award(profile, "commander_fire_01", "loss")
     persisted = JSON.parse_string(FileAccess.get_file_as_string(path))
     check(persisted["achievements"].has("historical_badge"), "saving keeps historical achievement IDs")
-    db.cards["card_fire_05"]["mastery_unlock"] = original
+    db.cards["card_fire_06"]["mastery_unlock"] = original
     write_file(path, "broken primary")
     profile = CommanderProgress.new(db, path)
-    check(profile.recovered_from_backup and profile.is_card_unlocked("card_fire_05"), "backup recovery preserves rewards")
+    check(profile.recovered_from_backup and profile.is_card_unlocked("card_fire_06"), "backup recovery preserves rewards")
     cleanup()
-    persisted["unlocked_cards"] = ["card_fire_05", "card_fire_05"]
+    persisted["unlocked_cards"] = ["card_fire_06", "card_fire_06"]
     var invalid := JSON.stringify(persisted)
     write_file(path, invalid)
     profile = CommanderProgress.new(db, path)
@@ -106,8 +106,8 @@ func test_unlock_boundaries() -> void:
     state.commander_progress = CommanderProgress.new(db, "")
     state.select_commander("commander_fire_01")
     state.clear_army()
-    check(not state.equip_card("card_fire_05") and state.army.size() == 0, "headless equipment refuses a locked reward")
-    var cards: Array[String] = ["card_fire_01", "card_fire_02", "card_fire_03", "card_fire_05"]
+    check(not state.equip_card("card_fire_06") and state.army.size() == 0, "headless equipment refuses a locked reward")
+    var cards: Array[String] = ["card_fire_01", "card_fire_02", "card_fire_03", "card_fire_06"]
     for id in cards:
         state.army.equip(id)
     check(not state.begin_match(718), "begin-match revalidates even a directly injected locked army")

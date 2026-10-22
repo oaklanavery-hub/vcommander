@@ -15,6 +15,7 @@ func fixture(own: Dictionary, enemy: Dictionary):
     var db = root.get_node("ContentDatabase")
     state.select_commander(str(own["commander"]["id"]))
     state.clear_army()
+    unlock_fixture_collection(state.commander_progress, db)
     for card in own["cards"]:
         state.equip_card(str(card["id"]))
     state.begin_match(1729)

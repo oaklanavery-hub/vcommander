@@ -46,6 +46,7 @@ func _ready() -> void:
     if not commander_buttons.has(initial_id) and not commander_buttons.is_empty():
         initial_id = str(commander_buttons.keys()[0])
     _select_commander(initial_id)
+    GameState.collection_changed.connect(func(): mastery_panel.show_record(selected_commander_id))
 
 func _select_commander(commander_id: String) -> void:
     var commander := ContentDatabase.get_commander(commander_id)
@@ -72,7 +73,5 @@ func _open_army_builder() -> void:
         return
     GameState.select_commander(selected_commander_id)
     if GameState.army.size() == 0:
-        for card in ContentDatabase.get_cards_by_set(str(GameState.get_selected_commander().get("signature_set_id", ""))):
-            if not GameState.equip_card(str(card["id"])):
-                break
+        GameState.equip_starter_army()
     get_tree().change_scene_to_file("res://scenes/army_builder/army_builder.tscn")

@@ -30,9 +30,14 @@
     "description": "Every 5 seconds gushes to the enemy backline, invulnerable during travel. Enemies near the water path take damage and are pushed away once per gush."
   },
   "tags": [
-    "starter",
     "water",
     "melee",
-    "assassin"
-  ]
+    "assassin",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_water_01",
+    "level": 5,
+    "wins": 6
+  }
 }

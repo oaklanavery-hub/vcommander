@@ -34,7 +34,7 @@ Required core fields:
 
 The optional Commander `description` is player-facing flavor text. It does not grant abilities or modify stats.
 
-Detailed presentation atlases use `assets/pixel/art_manifest.json` schema 1. Each atlas group provides a texture resource path, a two-number `cell_size`, and a `frames` map from stable presentation/content IDs to zero-based column/row coordinates. Frames are unique, within the RGBA texture bounds, and never define gameplay stats. The current atlases cover four Commander themes and all twenty Army cards plus the summoned Commander plant. `menu_commanders` adds four transparent 128×128 seated frames keyed by Commander element for the title scene. `menu_fire` adds six 80×80 transparent flame frames keyed `0` through `5`, packed with a common root anchor. The separate `menu_scene` entry provides a background `texture` path and pixel `size` (640×360), rather than atlas cells; neither menu resource supplies gameplay data.
+Detailed presentation atlases use `assets/pixel/art_manifest.json` schema 1. Each atlas group provides a texture resource path, a two-number `cell_size`, and a `frames` map from stable presentation/content IDs to zero-based column/row coordinates. Frames are unique, within the RGBA texture bounds, and never define gameplay stats. The current atlases cover four Commander themes and all twenty-four Army cards plus the summoned Commander plant. `menu_commanders` adds four transparent 128×128 seated frames keyed by Commander element for the title scene. `menu_fire` adds six 80×80 transparent flame frames keyed `0` through `5`, packed with a common root anchor. The separate `menu_scene` entry provides a background `texture` path and pixel `size` (640×360), rather than atlas cells; neither menu resource supplies gameplay data.
 
 Starter skill behavior types in v0.4 are:
 
@@ -174,7 +174,7 @@ Pull events provide `source_x/y`, `from_x/y`, `to_x/y` and original target HP fo
 ## Validation expectations
 
 - IDs are unique within each content type.
-- Content groups are nonempty and there is one global balance file. The roster currently contains 4 Commanders, 16 Army cards, 4 themes and 5 Buff Cards, including the Slime Court expansion.
+- Content groups are nonempty and there is one global balance file. The roster currently contains 4 Commanders, 24 Army cards, 4 themes and 5 Buff Cards, including the Slime Court expansion.
 - Every Commander `signature_set_id` resolves.
 - Every Commander active skill defines an `id`, generic `type`, and positive use/cost limits.
 - Every Army card `set_id` resolves.
@@ -214,23 +214,30 @@ Defeat events include the exact final `x/y` and `unit` snapshot so a corpse rema
 
 `data/progression/commander_mastery.json` defines schema 1, `id: commander_mastery`, positive whole-number `xp_per_level` (initially 250), and `match_xp` with approved `win: 100`, `loss: 25`, `forfeit: 0`. ContentDatabase loads progression independently from global combat balance. These numbers never modify combat stats.
 
-`user://commander_profile.json` stores schema 2 (migrated from schema 1), monotonic `match_serial`, `commanders` keyed by stable Commander ID, and one `active_match` containing its generated ID/Commander ID. Each Commander record contains nonnegative whole-number `wins`, `losses`, `forfeits`, and `xp`; forfeits cannot exceed losses. Played count, win rate, permanent level and XP progress are derived. Unknown historical Commander IDs remain preserved, while beginning a match requires a current Commander definition.
+`user://commander_profile.json` stores schema 3 (migrated from schema 1 or 2), monotonic `match_serial`, `commanders` keyed by stable Commander ID, and one `active_match` containing its generated ID/Commander ID. Each Commander record contains nonnegative whole-number `wins`, `losses`, `forfeits`, and `xp`; forfeits cannot exceed losses. Played count, win rate, permanent level and XP progress are derived. Unknown historical Commander IDs remain preserved, while beginning a match requires a current Commander definition.
 
 Profile writes use a completed temporary file/rename and a current `.bak` copy. A valid backup can recover an unreadable primary; if neither stored file is valid, original bytes are retained and new play uses temporary session data. A pending match is written before the first battle simulation and settled/cleared in one saved update. GameState exposes a copied reward receipt (`match_id`, owner, outcome, XP award, before/after summaries) for UI animation; receipts are not a second source of rewards. Script-mode tests and captures default to in-memory profiles.
 
-## Achievements and mastery rewards (profile schema 2)
+## Achievements and mastery rewards (profile schema 3)
 
 `data/progression/achievements.json` has schema 1, ID `achievements`, and an ordered `achievements` array. Each entry declares a unique stable `id`, display name/description, optional `commander_id` and nonempty `conditions`. Each condition is a supported `metric` (`wins`, `completed`, `level`, `commanders_won`) and positive integer `target`. All conditions must be met. `completed` excludes forfeits; Commander coverage is global. No achievement grants XP.
 
 A card may declare `mastery_unlock: {commander_id, level, wins}`; both positive integer requirements must be met by that Commander. Its set matches the owner Commander's signature set. Each theme retains at least four cards without unlock requirements. Absence of this field means available from the start.
 
-Local profile schema 2 adds unique string arrays `achievements` and `unlocked_cards`. Historical unknown IDs remain stored. These are permanent entitlements; display progress is derived from the existing records. Valid schema-1 saves migrate automatically without changing counters or pending match identity, then backfill qualifying rewards and use the existing atomic save/backup path. Corrupt/future saves remain protected. Match receipts add arrays of newly granted achievement/card IDs; receipt display never grants anything. All rewards remain device-local.
+Local profile schema 3 retains unique string arrays `achievements` and `unlocked_cards`. Historical unknown IDs remain stored. These are permanent entitlements; display progress is derived from the existing records. Valid schema-1/2 saves migrate automatically without changing counters or pending match identity, then backfill qualifying rewards and use the existing atomic save/backup path. `commander_mastery.legacy_available_cards` freezes the twenty cards available before the lineup change. Only validated schema-1/2 profiles receive those permanent card IDs before saving schema 3; fresh/current profiles do not. Unknown historical entitlements remain preserved. Corrupt/future saves remain protected. Match receipts add arrays of newly granted achievement/card IDs; receipt display never grants anything. All rewards remain device-local.
 
 
 ## Backline ability and terrain data (v0.13)
 
-The roster has four Commanders, twenty ordinary cards and four mastery reward cards. A `backline_transit` ability declares `mode` (`flame`, `gush`, `burrow`), positive `cooldown_seconds`, `transit_seconds`, and explicit `invulnerable`. Flame adds trail lifetime/radius/tick/ATK percentage. Gush adds contact radius/ATK percentage/pushback. Burrow adds `obstacle_seconds`, `every_n_attacks` and empowered `attack_pct`. These are generic behavior parameters, independent of content IDs.
+The roster has four Commanders, sixteen starting cards and eight mastery reward cards. A `backline_transit` ability declares `mode` (`flame`, `gush`, `burrow`), positive `cooldown_seconds`, `transit_seconds`, and explicit `invulnerable`. Flame adds trail lifetime/radius/tick/ATK percentage. Gush adds contact radius/ATK percentage/pushback. Burrow adds `obstacle_seconds`, `every_n_attacks` and empowered `attack_pct`. These are generic behavior parameters, independent of content IDs.
 
 `damage_link` declares positive cooldown/duration/link radius, `max_targets: 2` and `shared_damage_pct` in (0,100]. Runtime links identify source side/body and target body IDs, expiry and sharing percentage. Shared hits are tagged `no_share` and retain the original attacker's side and ID.
 
 Replay frames additionally carry `obstacles` (finite from/to world segments with absolute expiry), `hazards` (swept path segments with radius/pulse/expiry), `links`, and per-unit `transit`. Ability events record transit endpoints/start/end/mode and arrivals, crack creation and link casts. Core HP/ATK/DEF and damage use rounded float values to support unlimited Buff stacks without signed-integer overflow; speed ratings retain their 200 caps. Modified base stats have a technical 1e100 numerical ceiling, never a draft stack cap. All values are serializable in the ordinary JSON replay and mirrored by the existing recursive guest perspective adapter.
+
+
+## Personal developer collection access
+
+`development/collection_key_sha256` in project settings contains only a 64-character SHA-256 verifier for a privately delivered random 256-bit access key. `user://developer_access.cfg` stores schema 1 and the entered credential separately from CommanderProgress. It is validated against that verifier on each load; a boolean flag does not grant access. Script fixtures use in-memory or isolated paths and a separate synthetic verifier. No private key is included in source, exported content, capture logs or test fixtures.
+
+`CommanderProgress.is_card_earned` describes ordinary/permanent ownership; `is_card_unlocked` additionally permits verified developer access. Reward grants and progress bars use earned status, not preview access. Match receipts remain actual earned events. The access service writes a completed temporary ConfigFile before replacement and removes only its own credential on revocation; neither action edits mastery counters or entitlements.

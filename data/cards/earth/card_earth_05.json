@@ -6,8 +6,8 @@
   "set_id": "set_earth_01",
   "status": "playtest",
   "role": "range",
-  "summon_amount": 1,
-  "unit_cap": 3,
+  "summon_amount": 2,
+  "unit_cap": 4,
   "stats": {
     "health": 360,
     "attack": 92,
@@ -25,14 +25,9 @@
     "damage_reduced_by_def": true,
     "description": "Fires a spore bolt. Nearby enemies take 50% of attack as splash damage before defense."
   },
-  "mastery_unlock": {
-    "commander_id": "commander_earth_01",
-    "level": 3,
-    "wins": 3
-  },
   "tags": [
+    "starter",
     "earth",
-    "range",
-    "mastery_reward"
+    "range"
   ]
 }

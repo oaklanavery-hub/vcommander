@@ -155,3 +155,12 @@ The elemental PvAI vertical slice, requested Slime Court roster expansion and pe
 ## v0.13 — Backline specialists
 
 Unlimited power picks and clear playable ground; four 2/4 units with backline travel, path damage/pushback, temporary crack obstacles and linked damage. Source simulation, replay/native views, exported-pack, browser/container and release verification gate this milestone. Exact numeric ability values remain playtest tuning.
+
+
+## v0.14 — Mastery lineup and developer collection access
+
+- Four starters and two rewards per Commander: Level 3 + three wins, Level 5 + six wins.
+- Spore Sage joins the starting Earth army at recruit 2/cap 4.
+- Versioned migration retains existing ownership/records/presets without granting old collections to new profiles.
+- Private device-local developer key enables all units without forging progression; public collection stays gated.
+- No accounts, campaign, PvP availability, paid hosting or unrelated balance changes.

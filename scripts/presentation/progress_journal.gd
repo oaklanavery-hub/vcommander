@@ -97,6 +97,7 @@ func _ready() -> void:
     notice.add_theme_color_override("font_color", Color("a4b8ab"))
     main.add_child(notice)
     ScreenStyle.apply(self)
+    GameState.collection_changed.connect(_render)
     _render()
     back.grab_focus()
 
@@ -126,17 +127,15 @@ func _render() -> void:
     for card in ContentDatabase.get_all_cards():
         if card.has("mastery_unlock"):
             rewards += 1
-            if profile.is_card_unlocked(str(card["id"])):
+            if profile.is_card_earned(str(card["id"])):
                 unlocked += 1
-    summary_label.text = "%d / %d achievements earned   ·   %d / %d companions unlocked" % [earned, entries.size(), unlocked, rewards]
+    summary_label.text = "%d / %d achievements earned   ·   %d / %d mastery rewards earned" % [earned, entries.size(), unlocked, rewards]
     for index in range(tab_buttons.size()):
         tab_buttons[index].set_pressed_no_signal(index == tab)
     grid.columns = 2 if tab == 0 else 3
     if tab == 0:
-        for card in ContentDatabase.get_all_cards():
-            var reward := profile.card_reward(str(card["id"]))
-            if not reward.is_empty() and (filter.is_empty() or filter == reward["commander_id"]):
-                _reward_card(card, reward)
+        for reward in profile.mastery_rewards(filter):
+            _reward_card(ContentDatabase.get_card(str(reward["card_id"])), reward)
     else:
         for entry in entries:
             if filter.is_empty() or str(entry.get("commander_id", "")).is_empty() or filter == entry.get("commander_id"):
@@ -154,10 +153,11 @@ func _panel(earned: bool) -> VBoxContainer:
 
 func _reward_card(card: Dictionary, reward: Dictionary) -> void:
     displayed_ids.append(str(card["id"]))
-    var body := _panel(reward["unlocked"])
+    var body := _panel(reward["earned"])
     body.custom_minimum_size.y = 172
     var commander := ContentDatabase.get_commander(str(reward["commander_id"]))
-    var eyebrow := _text(str(commander["display_name"]).to_upper() + ("  ·  UNLOCKED" if reward["unlocked"] else "  ·  MASTERY REWARD"), 12)
+    var status := "UNLOCKED" if reward["earned"] else ("DEVELOPER ACCESS" if reward["unlocked"] else "MASTERY REWARD")
+    var eyebrow := _text(str(commander["display_name"]).to_upper() + "  ·  " + status, 12)
     eyebrow.add_theme_color_override("font_color", Color("e0c18a"))
     body.add_child(eyebrow)
     var row := HBoxContainer.new()
@@ -175,11 +175,11 @@ func _reward_card(card: Dictionary, reward: Dictionary) -> void:
     details.add_child(_text(str(card["display_name"]), 24))
     details.add_child(_text("%s  ·  Recruit %d / Max %d" % [str(card["role"]).capitalize(), int(card["summon_amount"]), int(card["unit_cap"])], 13))
     details.add_child(_text(str(card.get("ability", {}).get("description", "")), 14))
-    var progress := "Available in your collection. Choose it while building a warband." if reward["unlocked"] else "Level %d / %d   ·   Wins %d / %d" % [mini(int(reward["level"]), int(reward["required_level"])), int(reward["required_level"]), mini(int(reward["wins"]), int(reward["required_wins"])), int(reward["required_wins"])]
+    var progress := "Available in your collection. Choose it while building a warband." if reward["earned"] else "Level %d / %d   ·   Wins %d / %d" % [mini(int(reward["level"]), int(reward["required_level"])), int(reward["required_level"]), mini(int(reward["wins"]), int(reward["required_wins"])), int(reward["required_wins"])]
     body.add_child(_text(progress, 14))
     var stats: Dictionary = GameState.commander_progress.record(str(reward["commander_id"]))
     var required_xp := (int(reward["required_level"]) - 1) * int(stats["xp_per_level"])
-    var value := 1.0 if reward["unlocked"] else 0.5 * (minf(1.0, float(stats["xp"]) / maxi(1, required_xp)) + minf(1.0, float(reward["wins"]) / int(reward["required_wins"])))
+    var value := 1.0 if reward["earned"] else 0.5 * (minf(1.0, float(stats["xp"]) / maxi(1, required_xp)) + minf(1.0, float(reward["wins"]) / int(reward["required_wins"])))
     body.add_child(_bar(value))
 
 func _achievement_card(entry: Dictionary) -> void:

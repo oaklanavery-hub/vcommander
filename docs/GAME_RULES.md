@@ -316,7 +316,7 @@ If Slime Ball dies with stored damage, it releases double the stored amount at i
 Each Commander has a separate local PvAI record keyed by stable Commander ID: full matches played, wins, losses, forfeits and mastery XP. A match is tracked when its first battle begins; leaving the opening draft before that point has no record or reward. Every full match settles once. Individual round wins, draws and Sudden Death rounds never grant separate mastery rewards. Match win rate is wins / (wins + losses); forfeits are included in losses. An empty record has no established win rate.
 
 **R093 — Permanent mastery**
-A completed match win grants 100 mastery XP; a completed match loss grants 25 XP. A forfeit grants 0 XP. Commanders start at Level 1 with 0 XP and gain one level per 250 XP. Levels and XP never decrease. A better win ratio earns more XP at equal match count. The initial level interval is content-defined playtest tuning. Mastery levels grant no combat stat or unit-cap multipliers. R099–R101 add achievements and permanent collection rewards; the sixteen original cards remain available from the start.
+A completed match win grants 100 mastery XP; a completed match loss grants 25 XP. A forfeit grants 0 XP. Commanders start at Level 1 with 0 XP and gain one level per 250 XP. Levels and XP never decrease. A better win ratio earns more XP at equal match count. The initial level interval is content-defined playtest tuning. Mastery levels grant no combat stat or unit-cap multipliers. R099–R101 define achievements, four starter cards per Commander and permanent collection rewards.
 
 **R094 — Forfeit and persistence**
 Leaving or replacing an unfinished match after its first battle begins records one forfeit loss for the Commander who began it. A persisted unfinished match recovered after restarting the game also settles once as a forfeit. An already completed match retains its resolved win/loss and reward, including when leaving its final battle replay. Rewards are settled by authoritative match state, with presentation revealing them only after the final replay finishes. Reopening/replaying a result never grants XP again.
@@ -343,16 +343,26 @@ Friend PvP is paused and presented as **Coming Soon**. Ordinary players cannot c
 Local achievements use settled complete-match records. Forfeits count in the existing loss record but do not count as completed matches for achievements. Match wins and permanent Commander levels contribute to the data-defined milestones. Achievements are granted automatically, once, remain earned, and grant recognition without extra XP, currencies or combat stat bonuses. They appear in the Achievements & Rewards journal. Existing qualifying records receive earned achievements when the profile is loaded.
 
 **R100 — Mastery collection rewards**
-All sixteen original Army cards remain available from the start. The first reward for each Commander requires both permanent Level 3 (500 XP) and three wins with that Commander. The reward unlocks automatically and permanently, is not auto-equipped, and may then be used in any Commander's mixed warband. Any four unique cards of a theme still satisfy R005/R006; a warband always has exactly four slots. The PvAI opponent chooses from the same currently available collection as the player. Locked cards are visible for preview but cannot be equipped, loaded via a preset or used to start a match. Existing qualifying records receive the unlock on load; levels, wins and XP are preserved.
+Each Commander starts with four Army cards and has two automatic, permanent rewards. The first requires **Level 3 (500 XP) AND three wins** with that Commander. The second requires **Level 5 (1000 XP) AND six wins**. Neither level nor wins alone is sufficient. A reward is not auto-equipped and can be used in any Commander's mixed warband. Any four unique matching theme cards still satisfy R005/R006; a warband always has four slots. The PvAI opponent chooses from the same currently available collection. Locked cards remain previewable but cannot be equipped, loaded via a preset or used to start a match.
 
-**R101 — Initial mastery reward roster**
-Fire unlocks **Ash Phoenix**, a 1/2 Healer placing a small four-second healing sanctuary. Water unlocks **Tidal Guard**, a 2/4 Melee unit whose third attack is empowered. Earth unlocks **Spore Sage**, a 1/3 Range unit firing small-area splash projectiles. Slime unlocks **Jelly Medic**, a 1/3 Healer placing a medium four-second healing pool. These use the existing generic area-heal, empowered-attack and ranged-AoE mechanics; they obey ordinary collision, targeting, defense and death/revival rules. New numbers in data are initial playtest tuning, not guarantees of final balance. Rewards add tactical choices without modifying existing unit stats.
+Valid existing schema-1/2 profiles permanently retain every previously ordinary card, including cards used in saved warbands, and all earned entitlements. Migration preserves XP, records and pending-match identity; it never fabricates wins. Fresh profiles use the new starter lineup. Qualifying records backfill rewards on load.
+
+**R101 — Starter and mastery roster**
+
+| Commander | Starting cards | Level 3 + 3 wins | Level 5 + 6 wins |
+| --- | --- | --- | --- |
+| Fire | Magma Golem, Fire Imp, Sorcerer, Ash Phoenix | Spriggan | Dragon |
+| Water | Ice Giant, Sea Serpent, Penguins, Tidal Guard | Water Wizard | Nymph |
+| Earth | Giant Tree, Bear, Wood Archers, Spore Sage | Pitcher Plant | Mole |
+| Slime | Giant Slime, Slime Cannon, Slime Ball, Jelly Medic | Slime Barrel | Sticky Slime |
+
+Spore Sage recruits two per pick with a cap of four; its HP, attack and splash ability are unchanged. Ash Phoenix, Tidal Guard, Spore Sage and Jelly Medic retain their ordinary healing, empowered attack and splash mechanics. Mastery changes availability, never unit combat stats or unit caps.
 
 
 ## Backline specialists
 
-**R102 — Expanded ordinary collection**
-Spriggan (Fire), Nymph (Water), Mole (Earth) and Sticky Slime (Slime) each recruit two units per pick with a cap of four. The first three are Melee assassins; Sticky Slime is Range support. They are available from the start alongside the original sixteen starters. Mastery reward requirements stay unchanged. Four unique equipped cards remain the army limit.
+**R102 — Backline specialist roster**
+Spriggan (Fire), Nymph (Water), Mole (Earth) and Sticky Slime (Slime) each recruit two units per pick with a cap of four. The first three are Melee assassins; Sticky Slime is Range support. Their mastery requirements are listed in R101; existing ownership is retained under R100. Four unique equipped cards remain the army limit.
 
 **R103 — Backline transit**
 Spriggan and Nymph cast once every five seconds, beginning when combat starts. They select the deepest living enemy backline unit (Range/Healer preferred, then other roles), travel rapidly across the field and materialize in a free position beside it. Both are invulnerable only during transit. They do not attack during transit and ignore surface collision; other units do not collide with their travelling form. Cooldown runs from cast start. Damage from every source, including shared damage and damage over time, respects this immunity. The transit endpoint is committed at cast time; it does not chase moving targets indefinitely. A new cast selects the current enemy backline again.
@@ -368,3 +378,7 @@ Mole tunnels to the enemy backline using the same target/landing policy and leav
 
 **R107 — Sticky damage links**
 Every five seconds, while an enemy is in normal attack range, Sticky Slime marks that enemy and up to one additional enemy in range and near the first. Marks last five seconds. A single marked enemy has no partner to share with. Any allied damaging source hitting one of a pair also deals 50% of the actual HP damage (after DEF and absorption, excluding overkill) to the other. The original hit is not reduced. Copied damage is already post-defense, can be absorbed, respects invulnerability and never triggers another share. Duplicate marks do not multiply the copy to the same partner; distinct partner pairs can coexist. Marks retain their caster's allegiance and expire on time, including after caster death. Defeated/revived bodies do not inherit old marks. Initial tuning: normal range 5 and partner radius 3.5 units.
+
+
+**R108 — Personal developer collection access**
+The developer may activate a privately supplied access key in Settings → Developer access. This enables all current collection cards on that device without granting XP, match wins, levels, achievements or permanent card entitlements. Mastery continues to earn rewards normally, and the journal distinguishes developer access from earned rewards. Ordinary players receive no access by default; an invalid key or an unverified local flag cannot enable it. The key is not published in the source or build. Activation/removal is unavailable during a match; removing it revalidates the equipped army and retains actual earned cards. PvP remains Coming Soon. This device-local testing credential is not account authentication or trusted competitive authorization.

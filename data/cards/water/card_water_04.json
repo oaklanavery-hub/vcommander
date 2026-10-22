@@ -20,11 +20,17 @@
     "id": "tidal_push",
     "display_name": "Tidal Push",
     "type": "ranged_pushback",
-    "pushback": "small"
+    "pushback": "small",
+    "description": "Ranged water shots damage the enemy hit and push it back a short distance."
   },
   "tags": [
-    "starter",
     "water",
-    "range"
-  ]
+    "range",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_water_01",
+    "level": 3,
+    "wins": 3
+  }
 }

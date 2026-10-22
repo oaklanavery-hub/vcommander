@@ -11,6 +11,7 @@ func run() -> void:
     var db := root.get_node("ContentDatabase")
     var state := root.get_node("GameState")
     state.commander_progress = CommanderProgress.new(db, "")
+    unlock_fixture_collection(state.commander_progress, db)
     state.select_commander("commander_fire_01")
     state.clear_army()
     var cards: Array = []

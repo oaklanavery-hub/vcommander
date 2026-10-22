@@ -24,11 +24,17 @@
     "burn_seconds": 4,
     "burn_attack_pct_per_second": 25,
     "refreshes_duration": true,
-    "damage_reduced_by_def": true
+    "damage_reduced_by_def": true,
+    "description": "Ranged fire attacks burn enemies in a large area for 4 seconds, dealing 25% attack each second before defense. Repeated hits refresh the burn."
   },
   "tags": [
-    "starter",
     "fire",
-    "range"
-  ]
+    "range",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_fire_01",
+    "level": 5,
+    "wins": 6
+  }
 }

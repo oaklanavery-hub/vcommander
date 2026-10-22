@@ -22,11 +22,17 @@
     "type": "pull_then_melee",
     "pull_range": 5,
     "cooldown_seconds": 5,
-    "pull_damage": 0
+    "pull_damage": 0,
+    "description": "Stretches a vine to pull a distant enemy into biting range, then attacks in melee. Vine Pull has a 5-second cooldown."
   },
   "tags": [
-    "starter",
     "earth",
-    "range"
-  ]
+    "range",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_earth_01",
+    "level": 3,
+    "wins": 3
+  }
 }
