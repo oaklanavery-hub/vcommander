@@ -4,21 +4,19 @@ Verify branch, tree and GitHub checks before resuming. This file is the short ac
 
 ## Verified release
 
-- **v0.16.0**, released source `7dfad84e4006a8555f0577541cc4f741716ff217`, [merged PR #35](https://github.com/oaklanavery-hub/vcommander/pull/35).
+- **v0.16.1**, released source `fd0c1ee431df91c5101327f5a03ba418c4c93626`, [merged PR #36](https://github.com/oaklanavery-hub/vcommander/pull/36).
 - Live: https://oaklanavery-hub.github.io/vcommander/
-- [CI 39849987217](https://github.com/oaklanavery-hub/vcommander/actions/runs/39849987217): 41 source suites, 41 pack suites, four JS clock cases, two WebGL2 sessions, production container and 150 native views passed. Six dedicated layout views were reviewed locally and in CI.
-- [Deploy 39850683713](https://github.com/oaklanavery-hub/vcommander/actions/runs/39850683713): merged-source release gate, Web export, publication and actual served-build verification passed. Manifest version/commit, resources, PCK checksum and every downloaded-pack suite matched. Independently fetched public manifest also reports 0.16.0 at the released source above.
-- Completed: shared draft/battle layout, Commander portraits/hearts and centered round/time, mirrored recruited/cap rosters outside playable ground, centered draft window, live current-HP bar, recruit highlights and readable five-power stacks. Hidden picks, pre-battle skills, 1× start, inspection, reports, guidance, mastery and private developer access are preserved.
+- [CI 39854783801](https://github.com/oaklanavery-hub/vcommander/actions/runs/39854783801): 42 source suites, 42 pack suites, four JS clock cases, two WebGL2 sessions with both actual browser font chains checked, production container and 150 native views passed.
+- [Deploy 39855363694](https://github.com/oaklanavery-hub/vcommander/actions/runs/39855363694): merged-source release gate, Web export, publication and actual served-build verification passed. Resources, PCK checksum and every downloaded-pack suite matched. An independent public manifest fetch reports 0.16.1 at the released source above.
+- Fixed: browser boxes in Next/Battle/recruit arrows. Six original bundled pixel symbols fill display/body font gaps; existing letters/metrics and other configured fallbacks are preserved. The tiny native FontFile resource loads before asset import without installed fonts or a new runtime dependency.
+- Retained: shared draft/battle layout, Commander portraits/hearts/round/time, mirrored recruited/cap rosters, centered draft, live HP bar, five-power stacks, pre-battle skills, 1× start, reports, inspection, guidance, mastery and private developer access.
 
-## Current task: missing UI symbols
+## Completed checkpoint and next action
 
-- Branch `fix/ui-symbol-font`, base main `713bb9c5efa1ad6d474b2ee7f65d16347759187f`.
-- User screenshots show missing-character boxes in Next/Battle buttons and recruit-count arrows. Confirmed Pixelify Sans lacks U+2190/U+2192 and the bundled body font also lacks the arrows; native system fallback had masked the browser failure.
-- Implement a bundled original pixel-symbol fallback, retain existing lettering, and cover all six symbol characters currently absent from the display font. No gameplay, layout, hosting or progression changes.
-- Acceptance: portable glyph shaping with system fallback disabled, actual reported button/count strings and other UI symbols; native gallery/army/draft review; focused UI checks, then full source/pack/browser/container/native release checks and actual served-build verification.
-- Implemented a 2,692-byte original embedded symbol face, shared display/body fallbacks and deterministic generator. The new shaping regression verifies actual navigation/recruit/heart/achievement strings at four sizes with system fallback disabled; browser QA also checks both actual WebAssembly font chains.
-- Passing: font coverage, fantasy interface, scene flow and match layout suites; import, data/presentation validators, deterministic regeneration, Python/JS syntax, six delivery-tool cases and diff checks. Native gallery/army/draft screenshots show the actual arrows correctly; thirteen UI views were captured.
-- Next: publish this coherent checkpoint, run the full source/pack/browser/container/native gate (including the new WebAssembly glyph assertion), merge when green and verify the served build. PvP stays Coming Soon; campaign stays KIV; hosting stays free.
+- Implementation branch `fix/ui-symbol-font`, base `713bb9c5efa1ad6d474b2ee7f65d16347759187f`; reviewed source tree `30cb7092397af123dc2eac9673a68c65a8ff0d29` exactly matches the released code commit.
+- Font regression shapes actual navigation/recruit/heart/achievement strings at four sizes with OS fallback disabled and checks bundled glyph IDs on real buttons/cards. Browser QA independently checks both actual WebAssembly font chains. Gallery/army/draft arrows were reviewed; font generation is byte-for-byte reproducible.
+- Closure branch `docs/release-v0.16.1`, based on the released source, records this verified handoff only. No implementation, export or deployment check remains. Next: human playtesting or the next explicitly scoped request.
+- No gameplay, layout, progression or hosting changes. PvP stays Coming Soon; campaign stays KIV; hosting stays free.
 
 ## Working conventions
 
