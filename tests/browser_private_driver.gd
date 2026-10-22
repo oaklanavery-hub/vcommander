@@ -10,6 +10,7 @@ var started := false
 var prepared_skill := false
 var initial_records: Dictionary = {}
 var _published_at := -1000
+var font_symbols_ready := false
 
 func _ready() -> void:
     call_deferred("run")
@@ -40,6 +41,12 @@ func run() -> void:
     root.add_child(ui)
     tree.current_scene = ui
     await tree.process_frame
+    # Verify the actual WebAssembly font chain; desktop OS fonts cannot stand in.
+    var style = load("res://scripts/presentation/screen_style.gd")
+    font_symbols_ready = true
+    for font in [style.DISPLAY_FONT, ThemeDB.fallback_font]:
+        for symbol in "←→♥♡★◇":
+            font_symbols_ready = font_symbols_ready and font.has_char(symbol.unicode_at(0))
     if role == "host":
         ui.create_button.pressed.emit()
     else:
@@ -65,7 +72,7 @@ func _process(_delta: float) -> void:
         "side": state.get("you", ""), "play_at": state.get("play_at", 0), "play_until": state.get("play_until", 0),
         "battle_time": 0.0, "opening_time": 0.0, "finished": false, "controls_locked": false,
         "local_left": false, "winner": state.get("winner", ""), "round_winner": session.replay.get("winner", ""),
-        "losses": state.get("losses", {}), "records_unchanged": true}
+        "losses": state.get("losses", {}), "records_unchanged": true, "font_symbols_ready": font_symbols_ready}
     var combat = ui.battle_screen
     if combat != null:
         data["battle_time"] = combat._playback_time
