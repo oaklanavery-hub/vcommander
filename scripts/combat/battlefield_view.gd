@@ -24,6 +24,7 @@ var prelude_time := 0.0
 var replay := BattleReplay.new()
 var replay_enabled := false
 var replay_complete := false
+var external_rosters := false
 var frozen_sides: Array[String] = []
 
 func _ready() -> void:
@@ -379,7 +380,7 @@ func roster_layout(card_count: int) -> Dictionary:
         "spacing": spacing, "icon_size": minf(24, spacing - 2) if compact else 30.0}
 
 func _draw_rosters() -> void:
-    if _arena.position.x < 160 or _sides.size() != 2:
+    if external_rosters or _arena.position.x < 160 or _sides.size() != 2:
         return
     for index in range(2):
         var x := _arena.end.x + 20 if index == 1 else 16.0

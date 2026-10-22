@@ -4,9 +4,9 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.15.0 — Battle feedback and learning**
+**v0.16.0 — Shared battlefield and draft layout**
 
-Completed battles now have reports for both armies, with separate damage, healing and protection highlights. Click or tap companions during battle for live inspection, and try the optional Guided first match from How to play.
+Drafting and fighting now share a battlefield layout: Commander portraits and hearts, centered round/time, mirrored roster panels, a live army-health bar and a centered draft window. Unit counts, theme bonuses, skill budgets and power stacks stay beside the action. Completed-battle reports, live unit inspection and the optional Guided first match remain available.
 
 The current playable prototype supports:
 

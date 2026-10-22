@@ -10,14 +10,13 @@ Verify branch, tree and GitHub checks before resuming. This file is the short ac
 - Deploy [39836962112](https://github.com/oaklanavery-hub/vcommander/actions/runs/39836962112): published source identity, resource/checksum checks and every actual served-pack suite passed.
 - Completed: reports for both armies, current unit inspection, optional real-match guide, attack/death/audio polish. Commander mastery and private developer collection access are preserved.
 
-## Current task: faster development delivery
+## Current task: battlefield layout
 
-- Branch `chore/faster-delivery`, based on the verified main above.
-- User asks to reduce time spent delivering development results. This is tooling/workflow work; game rules and assets are outside this change.
-- Implementing: verified Playwright/Chromium caching, bounded setup/network waits, a smaller default native preview stream, concise handoffs and one-feature/focused-check/release discipline.
-- Six network-free setup checks pass: warm/cold cache, invalid cached module repair, registry timeout, browser failure and missing executable. Python compile, preview selection/default/all/byte-budget/path checks, workflow YAML/retained gate checks and diff checks pass.
-- Active handoff is 89% smaller (24,946 to roughly 2,700 bytes); default preview selection drops from 36 to eight. Full artifacts and release gates remain intact. Save/push this checkpoint, require one complete Actions gate, then merge when passing. Actual cold/warm CI timings remain unmeasured.
-- No new gameplay, balance audit, progress export/import, training grounds, campaign, PvP availability or paid hosting changes. PvP stays Coming Soon; campaign stays KIV.
+- Branch `feat/battlefield-layout`, base main `4e67ddb5bcb2f340b6560d453ae708506fe9497c` (merged delivery improvements, PR #34).
+- User approved their two-phase wireframe: persistent mirrored rosters, Commander/life strip, centered round/time, army-health balance bar, and a central draft panel over the arena.
+- Implemented shared MatchStatus/WarbandRoster presentation, reserved rails outside playable ground, centered readable draft choices, current-replay health totals and recruit highlights. Hidden rival picks, pre-battle skills, 1× start, inspection, reports and progression are preserved.
+- Passing focused checks: two-phase layout/state/privacy/HP/stack coverage; existing scene flow, battle presentation, inspection, mastery and Slime presentation suites; Godot import, data/presentation validators, six delivery-tool tests, workflow YAML and diff checks. Six native Compatibility-renderer views were reviewed; all five power stacks fit the standard desktop draft.
+- Next: save/publish this coherent checkpoint, require one complete Actions source/exported-pack/browser/container/native gate, then merge and verify the actual deployment. No gameplay/balance changes. PvP stays Coming Soon; campaign stays KIV; hosting stays free.
 
 ## Working conventions
 

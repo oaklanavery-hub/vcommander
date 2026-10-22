@@ -5,14 +5,14 @@ const AudioScript = preload("res://scripts/presentation/battle_audio.gd")
 @onready var back_button: Button = $Margin/Main/Header/Back
 @onready var title_label: Label = $Margin/Main/Header/Title
 @onready var seed_label: Label = $Margin/Main/Header/Seed
-@onready var battle_timer: Label = $Margin/Main/StatusRow/BattleTimer
-@onready var speed_button: Button = $Margin/Main/StatusRow/Speed
+@onready var battle_timer: Label = _hearts_meter.timer_label
+@onready var speed_button: Button = $Margin/Main/Header/Speed
 @onready var battlefield: BattlefieldView = $Margin/Main/BattlePanel/Padding/Battlefield
 @onready var player_summary: RichTextLabel = $Margin/Main/SummaryRow/PlayerPanel/Padding/PlayerSummary
 @onready var opponent_summary: RichTextLabel = $Margin/Main/SummaryRow/OpponentPanel/Padding/OpponentSummary
 @onready var event_log: RichTextLabel = $Margin/Main/SummaryRow/EventPanel/Padding/EventLog
-@onready var pause_button: Button = $Margin/Main/StatusRow/Pause
-@onready var details_button: Button = $Margin/Main/StatusRow/Details
+@onready var pause_button: Button = $Margin/Main/Header/Pause
+@onready var details_button: Button = $Margin/Main/Header/Details
 @onready var sound_button: Button = $Margin/Main/OptionsRow/Sound
 @onready var motion_button: Button = $Margin/Main/OptionsRow/Motion
 @onready var hp_button: Button = $Margin/Main/OptionsRow/HP
@@ -41,7 +41,9 @@ var _paused := false
 var _prelude := BattlePrelude.new()
 var _audio = AudioScript.new()
 var _log_lines: Array[String] = []
-var _hearts_meter := MatchHearts.new()
+var _hearts_meter := MatchStatus.new()
+var player_roster := WarbandRoster.new()
+var opponent_roster := WarbandRoster.new()
 var mastery_panel := CommanderMasteryPanel.new()
 var inspector := UnitInspector.new()
 var report_view := BattleReportView.new()
@@ -51,6 +53,13 @@ var _report: Dictionary = {}
 func _ready() -> void:
     _source = battle_context if battle_context != null else get_node("/root/GameState")
     ScreenStyle.apply(self)
+    var stage := get_node("Margin/Main/BattlePanel/Padding")
+    player_roster.name = "PlayerRoster"
+    opponent_roster.name = "OpponentRoster"
+    stage.add_child(player_roster)
+    stage.move_child(player_roster, 0)
+    stage.add_child(opponent_roster)
+    battlefield.external_rosters = true
     inspector.name = "UnitInspector"
     $Margin/Main/BattlePanel/Padding.add_child(inspector)
     inspector.dismissed.connect(_close_inspection)
@@ -60,7 +69,9 @@ func _ready() -> void:
     report_button.name = "BattleReportButton"
     report_button.text = "Battle report"
     report_button.pressed.connect(_open_report)
-    $Margin/Main/StatusRow.add_child(report_button)
+    var header := get_node("Margin/Main/Header")
+    header.add_child(report_button)
+    header.move_child(report_button, header.get_child_count() - 2)
     report_button.hide()
     battlefield.tooltip_text = "Click a companion to inspect its stats and abilities."
     _hearts_meter.name = "MatchHearts"
@@ -71,7 +82,7 @@ func _ready() -> void:
     main.move_child(mastery_panel, main.get_child_count() - 2)
     mastery_panel.hide()
     main.add_child(_hearts_meter)
-    main.move_child(_hearts_meter, 2)
+    main.move_child(_hearts_meter, 1)
     _hearts_meter.refresh(_source.match_state, initial_hearts_revealed)
     GameAudio.set_context("battle")
     GameAudio.settings_changed.connect(_update_option_labels)
@@ -115,7 +126,11 @@ func _ready() -> void:
         float(field.get("width", 24.0)),
         float(field.get("height", 14.0))
     )
-    battlefield.set_side_configs(_source.get_player_combat_side(), _source.opponent_combat_side)
+    var player_side: Dictionary = _source.get_player_combat_side()
+    battlefield.set_side_configs(player_side, _source.opponent_combat_side)
+    player_roster.set_side(player_side)
+    opponent_roster.set_side(_source.opponent_combat_side, true)
+    _hearts_meter.set_commanders(player_side.get("commander", {}), _source.opponent_combat_side.get("commander", {}))
     battlefield.configure_frost()
     if not _frames.is_empty():
         battlefield.set_frame(_frames[0])
@@ -123,7 +138,9 @@ func _ready() -> void:
     var round_sudden: bool = _source.match_state.sudden_death
     if not _source.match_state.history.is_empty():
         round_sudden = bool(_source.match_state.history.back().get("sudden_death", false))
-    title_label.text = "Battle %d • %s" % [_source.match_state.round_number, "SUDDEN DEATH" if round_sudden else "The Verdant Crossing"]
+    title_label.text = "The Verdant Crossing"
+    _hearts_meter.round_label.text = "Round %d · %s" % [_source.match_state.round_number, "Sudden Death" if round_sudden else "Battle"]
+    _hearts_meter.show_army_health(battlefield.visible_units())
     _refresh_summaries()
     _update_speed_label()
     _update_timer_label()
@@ -163,6 +180,7 @@ func _advance_prelude(delta: float) -> void:
     var events := _prelude.advance(delta)
     var frame := _prelude.frame()
     battlefield.set_playback(frame, frame, 0.0, _prelude.elapsed)
+    _hearts_meter.show_army_health(battlefield.visible_units())
     _refresh_inspection()
     battlefield.prelude_skills = _prelude.skills if _prelude.active() else []
     battlefield.prelude_time = _prelude.elapsed
@@ -179,6 +197,7 @@ func _advance_prelude(delta: float) -> void:
         battlefield.replay_enabled = true
         battlefield.prelude_skills = []
         battlefield.set_frame(_frames[0] if not _frames.is_empty() else frame)
+        _hearts_meter.show_army_health(battlefield.visible_units())
         speed_button.disabled = false
         result_label.text = "Battle in progress… Click or tap a companion to inspect."
         _update_timer_label()
@@ -194,6 +213,7 @@ func _advance_frames() -> void:
         var next: Dictionary = _frames[mini(_frame_index + 1, _frames.size() - 1)]
         var interval := maxf(0.001, float(next.get("time", 0)) - float(current.get("time", 0)))
         battlefield.set_playback(current, next, (_playback_time - float(current.get("time", 0))) / interval, _playback_time + _end_elapsed)
+        _hearts_meter.show_army_health(battlefield.visible_units())
         _refresh_inspection()
 
 func _advance_events() -> void:
@@ -263,10 +283,10 @@ func _side_summary(title: String, side_config: Dictionary) -> String:
     return "\n".join(lines)
 
 func _update_timer_label() -> void:
-    battle_timer.text = "Battle time  %d:%02d" % [int(_playback_time) / 60, int(_playback_time) % 60]
+    battle_timer.text = "Battle · %d:%02d" % [int(_playback_time) / 60, int(_playback_time) % 60]
 
 func _update_speed_label() -> void:
-    speed_button.text = "Battle speed: %dx" % int(_speed_options[_speed_index])
+    speed_button.text = "%dx speed" % int(_speed_options[_speed_index])
 
 func _cycle_speed() -> void:
     if playback_driver != null:
@@ -301,7 +321,6 @@ func _finish_replay() -> void:
     var match_info = _source.match_state
     if winner == "draw" and match_info.sudden_death:
         result_label.text = "Sudden Death! Win the next battle outright."
-    result_label.text += "\nYou  %s   •   Rival  %s" % [_hearts(int(match_info.losses["player"])), _hearts(int(match_info.losses["opponent"]))]
     if match_info.is_complete():
         result_label.text = "Adventure won! The crossing is yours." if match_info.winner == "player" else "Your warband will rise again. Try a new strategy."
         summary_row.hide()

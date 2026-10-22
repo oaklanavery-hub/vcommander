@@ -6,6 +6,14 @@
 - Eight default native review previews with a total payload budget; targeted/all-view options and every full-resolution PNG remain available.
 - A short active handoff replaces accumulated checkpoint history, which is retained separately. Focused checkpoints and batched release validation reduce repeated work without removing release checks.
 
+## v0.16.0 — Shared battlefield and draft layout
+
+- Apply the approved battlefield wireframe to both phases: Commander portraits/hearts at opposite ends, centered round/time, mirrored four-card roster rails and a central draft window over the clearing.
+- Live army-health balance and numeric totals use only currently displayed replay HP, including summons and death-created bodies. Drafting shows a neutral, explicitly unrevealed bar.
+- Recruited/cap counts, exact theme effect, remaining skill uses and all five power-stack counts remain beside draft choices. Recruits highlight their roster entry; rival current picks stay hidden until combat.
+- Rosters are outside playable ground. The complete arena preserves its aspect ratio when inspection, army details or result controls need room.
+- Retain rounded carved frames, pixel portraits, pre-battle skill timing, 1× starts, reports, guidance, mastery, local settings and free hosting. Six dedicated native views and a two-phase layout regression join the existing release gate.
+
 ## v0.15.0 — Battle feedback and learning
 
 - Exact read-only battle reports count effective damage/healing, absorption, kills, surviving bodies and role-relevant highlights across both sides.
