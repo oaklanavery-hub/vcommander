@@ -17,31 +17,31 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 30.0
-offset_top = 20.0
-offset_right = -30.0
-offset_bottom = -20.0
+offset_left = 24.0
+offset_top = 16.0
+offset_right = -24.0
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Main" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="Header" type="HBoxContainer" parent="Margin/Main"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Back" type="Button" parent="Margin/Main/Header"]
-custom_minimum_size = Vector2(110, 42)
+custom_minimum_size = Vector2(130, 40)
 layout_mode = 2
 text = "← Draft"
 
 [node name="Title" type="Label" parent="Margin/Main/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 30
-text = "Battle 1 • The Verdant Crossing"
+theme_override_font_sizes/font_size = 22
+text = "The Verdant Crossing"
 horizontal_alignment = 1
 
 [node name="Seed" type="Label" parent="Margin/Main/Header"]
@@ -51,26 +51,17 @@ text = "Seed"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="StatusRow" type="HBoxContainer" parent="Margin/Main"]
+[node name="Speed" type="Button" parent="Margin/Main/Header"]
+custom_minimum_size = Vector2(94, 40)
 layout_mode = 2
-theme_override_constants/separation = 12
+text = "1× speed"
 
-[node name="BattleTimer" type="Label" parent="Margin/Main/StatusRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Battle 000.0 / 000.0 sec"
-
-[node name="Speed" type="Button" parent="Margin/Main/StatusRow"]
-custom_minimum_size = Vector2(170, 38)
-layout_mode = 2
-text = "Battle speed: 1x"
-
-[node name="Pause" type="Button" parent="Margin/Main/StatusRow"]
+[node name="Pause" type="Button" parent="Margin/Main/Header"]
 layout_mode = 2
 text = "Pause"
 tooltip_text = "Pause the replay (Space)"
 
-[node name="Details" type="Button" parent="Margin/Main/StatusRow"]
+[node name="Details" type="Button" parent="Margin/Main/Header"]
 layout_mode = 2
 text = "Army details"
 

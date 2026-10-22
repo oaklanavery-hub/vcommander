@@ -4,39 +4,37 @@ const UnitArt = preload("res://scripts/presentation/pixel_unit_art.gd")
 const SELECTION_SECONDS := 30.0
 
 @onready var back_button: Button = $Margin/Main/Header/Back
-@onready var commander_label: Label = $Margin/Main/Header/Commander
-@onready var round_label: Label = $Margin/Main/StatusRow/Round
-@onready var selections_label: Label = $Margin/Main/StatusRow/Selections
-@onready var timer_label: Label = $Margin/Main/StatusRow/Timer
-@onready var offer_row: HBoxContainer = $Margin/Main/OfferPanel/Padding/OfferContent/OfferRow
-@onready var skill_button: Button = $Margin/Main/OfferPanel/Padding/OfferContent/CommanderSkill
-@onready var battle_button: Button = $Margin/Main/OfferPanel/Padding/OfferContent/StartBattle
-@onready var army_summary: RichTextLabel = $Margin/Main/SummaryRow/ArmyPanel/Padding/ArmySummary
-@onready var buff_summary: RichTextLabel = $Margin/Main/SummaryRow/BuffPanel/Padding/BuffSummary
-@onready var opponent_summary: RichTextLabel = $Margin/Main/SummaryRow/OpponentPanel/Padding/OpponentSummary
+@onready var offer_content: VBoxContainer = $Margin/Main/Board/Padding/Arena/DraftCenter/OfferPanel/Padding/OfferContent
+@onready var offer_row: HBoxContainer = offer_content.get_node("OfferRow")
+@onready var skill_button: Button = offer_content.get_node("CommanderSkill")
+@onready var battle_button: Button = offer_content.get_node("StartBattle")
+@onready var selections_label: Label = offer_content.get_node("Selections")
+@onready var player_roster: WarbandRoster = $Margin/Main/Board/Padding/PlayerRoster
+@onready var opponent_roster: WarbandRoster = $Margin/Main/Board/Padding/OpponentRoster
+@onready var army_summary: RichTextLabel = player_roster.summary
+@onready var buff_summary: RichTextLabel = player_roster.buffs
+@onready var opponent_summary: RichTextLabel = opponent_roster.summary
 @onready var footer: Label = $Margin/Main/Footer
 
 var _time_left: float = SELECTION_SECONDS
 var _timer_bar := ProgressBar.new()
-var _hearts_meter := MatchHearts.new()
+var _hearts_meter := MatchStatus.new()
+var round_label: Label = _hearts_meter.round_label
+var timer_label: Label = _hearts_meter.timer_label
 
 func _ready() -> void:
     ScreenStyle.apply(self)
     _hearts_meter.name = "MatchHearts"
-    var header := get_node("Margin/Main/Header")
-    header.add_child(_hearts_meter)
-    header.move_child(_hearts_meter, 2)
-    _hearts_meter.size_flags_horizontal = Control.SIZE_FILL
-    commander_label.hide()
-    get_node("Margin/Main/Header/Title").add_theme_font_size_override("font_size", 28)
+    var main := get_node("Margin/Main")
+    main.add_child(_hearts_meter)
+    main.move_child(_hearts_meter, 1)
     ScreenStyle.primary(battle_button)
     _timer_bar.max_value = SELECTION_SECONDS
     _timer_bar.show_percentage = false
     _timer_bar.custom_minimum_size.y = 6
     _timer_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-    var content := get_node("Margin/Main/OfferPanel/Padding/OfferContent")
-    content.add_child(_timer_bar)
-    content.move_child(_timer_bar, 1)
+    offer_content.add_child(_timer_bar)
+    offer_content.move_child(_timer_bar, 2)
     back_button.pressed.connect(_go_back)
     skill_button.pressed.connect(_use_commander_skill)
     battle_button.pressed.connect(_start_battle)
@@ -66,9 +64,9 @@ func _process(delta: float) -> void:
 func _refresh_all() -> void:
     _hearts_meter.refresh(GameState.match_state)
     var commander: Dictionary = GameState.get_selected_commander()
-    commander_label.text = str(commander.get("display_name", "Commander"))
+    _hearts_meter.set_commanders(commander, GameState.opponent_public_side.get("commander", {}))
     var round_number: int = GameState.match_state.round_number
-    round_label.text = "Round %d • %s" % [round_number, "SUDDEN DEATH" if GameState.match_state.sudden_death else "Command Phase"]
+    round_label.text = "Round %d · %s" % [round_number, "Sudden Death" if GameState.match_state.sudden_death else "Draft"]
     battle_button.text = "Start Battle %d" % round_number
     selections_label.text = "Selections left: %d" % GameState.draft.selection_points
     timer_label.text = "%02ds to choose" % int(ceil(_time_left))
@@ -82,7 +80,7 @@ func _refresh_all() -> void:
     var complete: bool = bool(GameState.draft.is_phase_complete())
     offer_row.visible = not complete
     _timer_bar.visible = not complete
-    get_node("Margin/Main/OfferPanel/Padding/OfferContent/Prompt").text = "Your warband is ready" if complete else "Choose one card to grow your warband"
+    offer_content.get_node("Prompt").text = "Your warband is ready" if complete else "Choose one card to grow your warband"
     battle_button.visible = complete
     battle_button.disabled = not complete
     if complete:
@@ -169,37 +167,13 @@ func _refresh_skill(commander: Dictionary) -> void:
     )
 
 func _refresh_summaries() -> void:
-    var army_lines: Array[String] = ["[b]Your Army • %d round losses[/b]" % int(GameState.match_state.losses["player"])]
-    for card_id in GameState.army.get_cards():
-        var card: Dictionary = ContentDatabase.get_card(card_id)
-        army_lines.append("%s  %d/%d" % [
-            str(card.get("display_name", card_id)),
-            GameState.draft.get_unit_count(card_id),
-            int(card.get("unit_cap", 0))
-        ])
-    var bonus: Dictionary = GameState.get_selected_signature_set().get("bonus", {})
-    army_lines.append("Theme: " + ScreenStyle.bonus_description(bonus, true) if GameState.is_full_set_active() else "Theme: inactive")
-    army_summary.text = "\n".join(army_lines)
-
-    var buff_lines: Array[String] = ["[b]Active Buffs[/b]"]
-    var any_buff := false
-    for buff in ContentDatabase.get_all_buffs():
-        var buff_id := str(buff.get("id", ""))
-        var stacks: int = GameState.draft.get_buff_stacks(buff_id)
-        if stacks <= 0:
-            continue
-        any_buff = true
-        buff_lines.append("%s  %s" % [
-            str(buff.get("display_name", buff_id)),
-            BuffTile.stack_text(buff, stacks)
-        ])
-    if not any_buff:
-        buff_lines.append("None — buffs begin from Round 2")
-    opponent_summary.text = _opponent_text()
-    buff_summary.text = "\n".join(buff_lines)
+    player_roster.set_side(GameState.get_player_combat_side())
+    opponent_roster.set_side(GameState.opponent_public_side, true, true)
 
 func _select_offer(index: int) -> void:
+    var option: Dictionary = GameState.draft.current_offer[index] if index >= 0 and index < GameState.draft.current_offer.size() else {}
     if GameState.draft.select_offer(index):
+        player_roster.highlighted_card = str(option.get("id", "")) if option.get("type") == "unit" else ""
         GameAudio.play_effect("pick")
         _time_left = SELECTION_SECONDS
         _refresh_all()
@@ -221,30 +195,6 @@ func _start_battle() -> void:
 
 func _go_back() -> void:
     GameMenu.confirm_leave("res://scenes/army_builder/army_builder.tscn")
-
-func _opponent_text() -> String:
-    var side: Dictionary = GameState.opponent_public_side
-    var commander: Dictionary = side.get("commander", {})
-    var bonus: Dictionary = side.get("set_bonus", {})
-    var lines: Array[String] = ["[b]Rival • %s[/b]" % str(commander.get("display_name", "Commander"))]
-    var army_entries: Array[String] = []
-    for card in side.get("cards", []):
-        army_entries.append("%s ×%d" % [str(card.get("display_name", "Unit")), int(side.get("unit_counts", {}).get(card.get("id"), 0))])
-    for index in range(0, army_entries.size(), 2):
-        lines.append(" • ".join(army_entries.slice(index, mini(index + 2, army_entries.size()))))
-    lines.append("Skill uses: %d/2 • Round losses: %d" % [int(side.get("skill_uses_remaining", 2)), int(GameState.match_state.losses["opponent"])])
-    lines.append("Theme: inactive" if bonus.is_empty() else "Theme: " + ScreenStyle.bonus_description(bonus, true))
-    var buff_entries: Array[String] = []
-    var names := {"attack": "ATK", "health": "HP", "defense": "DEF", "attack_speed": "ASPD", "movement_speed": "MOVE"}
-    for buff in side.get("buffs", []):
-        var definition: Dictionary = buff.get("definition", {})
-        var stat := str(definition.get("stat", ""))
-        buff_entries.append("%s +%d%% ×%d" % [str(names.get(stat, stat)), int(definition.get("percentage", 0)), int(buff.get("stacks", 0))])
-    if buff_entries.is_empty():
-        lines.append("Buffs: none")
-    for index in range(0, buff_entries.size(), 2):
-        lines.append(" • ".join(buff_entries.slice(index, mini(index + 2, buff_entries.size()))))
-    return "\n".join(lines)
 
 func _unhandled_key_input(event: InputEvent) -> void:
     if not event is InputEventKey or not event.pressed or event.echo:

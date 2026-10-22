@@ -164,6 +164,12 @@ jobs:
             test -s "build/qa/learning_${view}.png"
           done
 
+          timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_match_layout.gd -- --output-dir=build/qa 2>&1 | tee /tmp/match-layout-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/match-layout-qa.log; then exit 1; fi
+          for view in draft ready battle inspection result powercards; do
+            test -s "build/qa/layout_${view}.png"
+          done
+
       - name: Emit bounded native review previews
         if: always()
         run: /usr/bin/python3 tools/emit_visual_review.py
