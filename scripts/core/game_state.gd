@@ -80,6 +80,22 @@ func clear_army() -> void:
     _reset_match_runtime()
     army.clear()
 
+func equip_starter_army() -> bool:
+    var signature := get_selected_signature_set()
+    if signature.is_empty():
+        return false
+    var candidate = ArmyLoadoutScript.new(army.max_slots)
+    for card in ContentDatabase.get_cards_by_set(str(signature["id"])):
+        if not card.has("mastery_unlock") and commander_progress.is_card_unlocked(str(card["id"])):
+            candidate.equip(str(card["id"]))
+        if candidate.is_full():
+            break
+    if not candidate.is_full():
+        return false
+    _reset_match_runtime()
+    army = candidate
+    return true
+
 func get_signature_progress() -> int:
     var signature_set := get_selected_signature_set()
     if signature_set.is_empty():

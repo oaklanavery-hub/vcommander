@@ -46,6 +46,20 @@ func run() -> void:
     journal.get_node("Margin/Main/Header/Back").pressed.emit()
     await scene_changed
     check(current_scene.name == "MainMenu", "Back returns to the journal's entry screen")
+    for commander in db.get_all_commanders():
+        state.clear_army()
+        var gallery = await scene("res://scenes/commander_select/commander_select.tscn")
+        gallery._select_commander(str(commander["id"]))
+        gallery.build_army_button.pressed.emit()
+        await scene_changed
+        for i in range(3):
+            await process_frame
+        check(current_scene.name == "ArmyBuilder" and state.army.size() == 4 and state.is_full_set_active(), "real Commander selection fills all four starters despite interleaved locked IDs")
+        for id in state.army.get_cards():
+            check(not db.get_card(id).has("mastery_unlock"), "new Commander opens with its approved starter lineup")
+        state.clear_army()
+        current_scene.theme_button.pressed.emit()
+        check(state.army.size() == 4 and state.is_full_set_active(), "theme shortcut restores four legally available starters")
     state.select_commander("commander_fire_01")
     state.clear_army()
     var builder = await scene("res://scenes/army_builder/army_builder.tscn")

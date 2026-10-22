@@ -192,12 +192,7 @@ func _clear_army() -> void:
     _refresh()
 
 func _equip_theme() -> void:
-    var cards := ContentDatabase.get_cards_by_set(str(GameState.get_selected_commander().get("signature_set_id", "")))
-    if cards.size() < GameState.army.max_slots:
-        return
-    GameState.clear_army()
-    for index in range(GameState.army.max_slots):
-        GameState.equip_card(str(cards[index]["id"]))
+    GameState.equip_starter_army()
     _refresh()
 
 func _begin_draft() -> void:

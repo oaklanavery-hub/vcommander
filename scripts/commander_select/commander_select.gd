@@ -73,7 +73,5 @@ func _open_army_builder() -> void:
         return
     GameState.select_commander(selected_commander_id)
     if GameState.army.size() == 0:
-        for card in ContentDatabase.get_cards_by_set(str(GameState.get_selected_commander().get("signature_set_id", ""))):
-            if not GameState.equip_card(str(card["id"])):
-                break
+        GameState.equip_starter_army()
     get_tree().change_scene_to_file("res://scenes/army_builder/army_builder.tscn")

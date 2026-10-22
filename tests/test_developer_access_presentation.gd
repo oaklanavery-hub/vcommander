@@ -41,6 +41,10 @@ func run() -> void:
     check(state.commander_progress.available_cards().size() == 24 and not builder.available_card_buttons["card_fire_06"].locked and builder.available_card_buttons["card_fire_04"].tooltip_text.contains("developer access"), "activation refreshes the visible collection immediately")
     check(not find_text(menu._body, TEST_KEY) and menu._body.find_child("DeveloperKey", true, false) == null, "active page never exposes the credential")
     menu.close()
+    check(state.equip_starter_army() and state.army.size() == 4, "developer access still offers the complete approved starting army")
+    for id in state.army.get_cards():
+        check(not db.get_card(id).has("mastery_unlock"), "starter shortcut prefers starters even when all rewards are accessible")
+    state.clear_army()
     var journal_script = load("res://scripts/presentation/progress_journal.gd")
     journal_script.initial_commander = "commander_fire_01"
     var journal = await scene("res://scenes/progression/progress_journal.tscn")
