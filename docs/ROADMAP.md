@@ -164,3 +164,11 @@ Unlimited power picks and clear playable ground; four 2/4 units with backline tr
 - Versioned migration retains existing ownership/records/presets without granting old collections to new profiles.
 - Private device-local developer key enables all units without forging progression; public collection stays gated.
 - No accounts, campaign, PvP availability, paid hosting or unrelated balance changes.
+
+## v0.15 — Battle feedback and learning
+
+- Completed-battle reports for both armies with independent damage/healing/protection highlights, effective HP accounting, body survival and descendant/Commander attribution.
+- Click/tap inspection beside the arena, showing only the current replay's stats, cooldowns and effects.
+- Optional guided normal first match, replayable from How to play, with safe local pause/exit/restart and isolated completion preference.
+- Stronger attack settling, content-driven collapse/wilt/dissolve/pop deaths, four original cues and reserved important-ability audio capacity; preserve contact timing and reduced motion.
+- No balance audit, progress export/import or training grounds. Campaign remains KIV; PvP stays Coming Soon and hosting stays free.

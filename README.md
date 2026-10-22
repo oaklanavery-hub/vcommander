@@ -4,11 +4,17 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.14.0 — Commander mastery lineup**
+**v0.15.0 — Battle feedback and learning**
 
-Four starting units per Commander, then two mastery rewards at Level 3 + three wins and Level 5 + six wins. Existing collection ownership is retained.
+Completed battles now have reports for both armies, with separate damage, healing and protection highlights. Click or tap companions during battle for live inspection, and try the optional Guided first match from How to play.
 
 The current playable prototype supports:
+
+- replay-current companion HP, modified stats, ability cooldowns and active effects in a separate inspector beside the field
+- post-playback reports with effective damage/healing, absorption, kills, bodies alive and survival, including death-created/revived bodies and Commander effects
+- a playable, optional guide through a normal match, with paused reading time and unchanged mastery/reward rules
+- clearer anticipation/recovery, four types of death motion, four new original death sounds and reserved audio capacity for important abilities; reduced motion retains static fades
+- four starting units and two mastery rewards per Commander at Level 3 + three wins and Level 5 + six wins; existing collection ownership is retained
 
 - unlimited power-card picks, including after every unit reaches its cap; speed rating caps remain and AI discounts ineffective speed boosts
 - Spriggan, Nymph, Mole and Sticky Slime, each 2/4: elemental backline travel, fire paths, damaging water gushes/pushback, five-second cracks that both armies route around, third-strike damage and shared enemy damage links

@@ -39,7 +39,11 @@ const EFFECTS := {
     "ember_dash": "res://assets/audio/ember_dash.wav",
     "water_gush": "res://assets/audio/water_gush.wav",
     "earth_rumble": "res://assets/audio/earth_rumble.wav",
-    "sticky_link": "res://assets/audio/sticky_link.wav"
+    "sticky_link": "res://assets/audio/sticky_link.wav",
+    "body_fall": "res://assets/audio/body_fall.wav",
+    "magic_dissolve": "res://assets/audio/magic_dissolve.wav",
+    "slime_pop": "res://assets/audio/slime_pop.wav",
+    "wood_fall": "res://assets/audio/wood_fall.wav"
 }
 
 var music_volume := 0.55
@@ -91,18 +95,39 @@ func set_context(context: String) -> void:
     _music.volume_db = linear_to_db(maxf(0.0001, music_volume)) - 8.0
     _music.play()
 
-func play_effect(cue: String) -> void:
+func play_effect(cue: String, priority: int = 0) -> void:
     if not _unlocked or effects_volume <= 0 or not EFFECTS.has(cue):
         return
-    var player: AudioStreamPlayer = _effects[_voice % _effects.size()]
-    for candidate in _effects:
-        if not candidate.playing:
-            player = candidate
-            break
+    var player := _effect_voice(priority)
+    if player == null:
+        return
     _voice += 1
     player.stream = _effect_streams[cue]
-    player.volume_db = linear_to_db(maxf(0.0001, effects_volume)) - (16.0 if cue == "hover" else 8.0)
+    player.set_meta("priority", priority)
+    player.set_meta("started", Time.get_ticks_msec())
+    player.volume_db = linear_to_db(maxf(0.0001, effects_volume)) - (16.0 if cue == "hover" else (5.0 if priority >= 2 else 9.0))
+    if priority >= 2:
+        for other in _effects:
+            if other != player and other.playing and int(other.get_meta("priority", 0)) < 2:
+                other.volume_db = minf(other.volume_db, linear_to_db(maxf(0.0001, effects_volume)) - 13.0)
     player.play()
+
+func _effect_voice(priority: int) -> AudioStreamPlayer:
+    # Three voices stay available for important abilities; ordinary attacks or
+    # menu sounds cannot interrupt a higher-priority cue already playing.
+    var candidates: Array[AudioStreamPlayer] = []
+    if priority >= 2:
+        candidates.append_array(_effects.slice(9))
+    candidates.append_array(_effects.slice(0, 9))
+    var oldest: AudioStreamPlayer
+    for player in candidates:
+        if not player.playing:
+            return player
+        if int(player.get_meta("priority", 0)) > priority:
+            continue
+        if oldest == null or int(player.get_meta("started", 0)) < int(oldest.get_meta("started", 0)):
+            oldest = player
+    return oldest
 
 func _watch_button(node: Node) -> void:
     if node is Button:

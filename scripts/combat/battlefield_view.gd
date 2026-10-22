@@ -436,6 +436,8 @@ func _draw_unit(unit: Dictionary) -> void:
         pose = pose.duplicate()
         pose["charge"] = float(pose.get("charge", 0)) * 0.2
         pose["power"] = float(pose.get("power", 0)) * 0.2
+        pose["articulation"] = float(pose.get("articulation", pose.get("power", 0))) * 0.2
+        pose["settle"] = 0.0
     UnitArt.draw_unit(self, sprite_position, str(unit.get("role", "range")), str(unit.get("element", "earth")), pixel, side == "opponent", bob, str(unit.get("card_id", "")), pose)
     if pose.get("state") == "attack" and pose.has("rig"):
         UnitAttackMotion.draw_action(self, _body_point(unit), pose, str(unit.get("element", "earth")), reduced_motion)
@@ -590,8 +592,9 @@ func _draw_effects() -> void:
             draw_string(ThemeDB.fallback_font, p + Vector2(-8, -48 - (0.0 if reduced_motion else age * 24)), ("+" if type == "heal" else "") + AssassinEffects.number(float(effect.get("amount", 0))), HORIZONTAL_ALIGNMENT_CENTER, 40, 12, color)
         elif type == "defeat" and age < 0.5:
             var unit: Dictionary = effect.get("unit", {})
-            var pose := {"state": "death", "alpha": 1.0 - age * 2.0}
+            var pose := UnitDeathMotion.pose(unit, age, reduced_motion)
             UnitArt.draw_unit(self, p, str(unit.get("role", "range")), str(unit.get("element", "earth")), 2.0 * float(unit.get("visual_scale", 1)), false, 0.0, str(unit.get("card_id", "")), pose)
+            UnitDeathMotion.draw_particles(self, p, unit, age, reduced_motion)
         elif type == "attack" and effect.get("kind") == "melee" and age < 0.2:
             var unit: Dictionary = _known.get(str(effect.get("target_id", "")), {})
             var target := _body_point(unit) if not unit.is_empty() else _point(float(effect.get("target_x", 0)), float(effect.get("target_y", 0))) - Vector2(0, 22)

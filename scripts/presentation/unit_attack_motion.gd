@@ -10,12 +10,14 @@ static func pose(event: Dictionary, clock: float) -> Dictionary:
     var profile := CombatCues.event_profile(event)
     var charge := smoothstep(0.0, 1.0, (elapsed + WINDUP) / WINDUP) if elapsed < 0 else 0.0
     var power := exp(-maxf(0, elapsed) * 7.0) * (1.0 - smoothstep(0.3, RECOVERY, elapsed)) if elapsed >= 0 else 0.0
+    var settle := sin(clampf((elapsed - 0.12) / (RECOVERY - 0.12), 0, 1) * PI)
     var direction := Vector2(float(event.get("target_x", 1)) - float(event.get("x", 0)), float(event.get("target_y", 0)) - float(event.get("y", 0)))
-    return {"state": "attack", "facing": posmod(int(round(direction.angle() / (PI / 2))) * 2, 8), "motion": profile.get("motion", "slash"), "rig": profile.get("rig", "claw"), "accent": profile.get("accent", ""), "charge": charge, "power": power, "attack_age": elapsed, "phase": "windup" if elapsed < 0 else ("strike" if elapsed < 0.12 else "recovery")}
+    return {"state": "attack", "facing": posmod(int(round(direction.angle() / (PI / 2))) * 2, 8), "motion": profile.get("motion", "slash"), "rig": profile.get("rig", "claw"), "accent": profile.get("accent", ""), "charge": charge, "power": power, "settle": settle, "articulation": power - settle * 0.18, "attack_age": elapsed, "phase": "windup" if elapsed < 0 else ("strike" if elapsed < 0.12 else "recovery")}
 
 static func displacement(pose: Dictionary) -> Vector2:
     var charge := float(pose.get("charge", 0))
     var power := float(pose.get("power", 0))
+    var settle := float(pose.get("settle", 0))
     var direction := Vector2.from_angle(float(pose.get("facing", 0)) * PI / 4)
     var motion := str(pose.get("motion", "slash"))
     var reach := 14.0 if motion in ["slam", "slash", "bite", "bounce"] else 4.0
@@ -23,7 +25,7 @@ static func displacement(pose: Dictionary) -> Vector2:
     if pose.get("rig") in ["pitcher", "plant", "tree"]:
         reach = 3.0
         lift = 0.0
-    return (direction * (-6.0 * charge + reach * power) + Vector2(0, lift)).round()
+    return (direction * (-8.0 * charge + reach * power - 3 * settle) + Vector2(0, lift)).round()
 
 # A small continuous textured mesh bends the existing pixel character instead
 # of just sliding an unchanged icon. Feet stay planted while arms, heads,
@@ -102,6 +104,17 @@ static func draw_action(canvas: CanvasItem, body: Vector2, pose: Dictionary, ele
     var accent := str(pose.get("accent", ""))
     var color := Color(accent if not accent.is_empty() else str(PixelUnitArt.palette(element).get("l", "e4dba6")))
     var hand := body + direction * 16
+    if charge > 0.25 and motion in ["slam", "slash", "bite", "bounce"] and not reduced:
+        var windup := body - direction * (8 + charge * 7)
+        color.a = charge * 0.6
+        if motion == "slash":
+            for index in range(2):
+                canvas.draw_line((windup + side * (index * 6 - 3)).round(), (windup - direction * 8 + side * (index * 6 - 3)).round(), color, 2)
+        elif motion == "bite":
+            canvas.draw_arc(windup, 8, direction.angle() - 1, direction.angle() + 1, 5, color, 2)
+        else:
+            canvas.draw_arc(body + Vector2(0, 20), 8 + charge * 6, 0, PI, 8, color, 2)
+        color.a = 1.0
     if motion == "shoot" and pose.get("rig") == "bow":
         var tip_a := hand + side * 15
         var tip_b := hand - side * 15

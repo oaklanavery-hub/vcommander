@@ -7,6 +7,8 @@
 - A post-battle report compares both warbands and explains surviving bodies, protection and individual contribution without awarding additional rewards.
 - Click or tap a companion for a separate live inspection panel with replay-current HP, modified stats, ability description, cooldown and active effects.
 - Optional Guided first match in How to play teaches real Commander/warband/draft/skill/battle/report actions. Notes pause local clocks; completion and ending guidance grant no extra XP or units.
+- Attacks now have clearer melee anticipation and a separate settling phase after contact. Units collapse, wilt, dissolve or pop according to their presentation profile; reduced motion uses static fades.
+- Four new original death cues and reserved sound/voice capacity keep Commander magic and important abilities audible through dense attacks. Important cues gently lower ordinary effects rather than raising the whole mix.
 
 ## v0.14.0 — Commander mastery lineup
 
