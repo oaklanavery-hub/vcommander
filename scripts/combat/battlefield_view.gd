@@ -1,6 +1,9 @@
 class_name BattlefieldView
 extends Control
 
+signal unit_selected(unit: Dictionary)
+var selected_id := ""
+
 const UnitArt = preload("res://scripts/presentation/pixel_unit_art.gd")
 const GROUND := preload("res://assets/pixel/forest-clearing-v1.png")
 static var reduced_motion := false
@@ -149,6 +152,39 @@ func _draw() -> void:
     _draw_frost()
     _draw_rosters()
     AssassinEffects.terrain(self, _frame, _visual_time, reduced_motion)
+    var units := visible_units()
+    for unit in units:
+        _draw_aura(unit)
+    var areas: Array = _frame.get("areas", []).filter(func(area): return not replay_enabled or area.get("type") != "damage_area")
+    if replay_enabled:
+        areas.append_array(replay.death_areas_at(_visual_time))
+    for area in areas:
+        var center := _point(float(area.get("x", 0)), float(area.get("y", 0)))
+        var radius := float(area.get("radius", 1)) / _field_width * _arena.size.x
+        if area.get("type") == "damage_area":
+            BattleEffects.slime_pool(self, center, radius, float(area.get("remaining", 0)), float(area.get("duration", 10)), _visual_time, reduced_motion)
+        else:
+            draw_circle(center, radius, Color(0.35, 0.8, 0.71, 0.16))
+            draw_arc(center, radius, 0, TAU, 16, Color("8bc7c0"), 1)
+    units.sort_custom(func(a, b): return float(a.get("y", 0)) < float(b.get("y", 0)))
+    for unit in units:
+        if str(unit.get("id", "")) == selected_id:
+            draw_arc(_point(float(unit["x"]), float(unit["y"])), 19, 0, TAU, 16, Color("f8dda0"), 2)
+        _draw_unit(unit)
+    AssassinEffects.links(self, _frame, _known, _visual_time, reduced_motion)
+    _draw_royal_opening()
+    for effect in _effects:
+        var age := _visual_time - float(effect.get("time", 0))
+        if effect.get("type") == "defeat" and age >= 0 and age < 0.5:
+            var corpse: Dictionary = effect.get("unit", {}).duplicate()
+            corpse["x"] = effect.get("x", corpse.get("x", 0))
+            corpse["y"] = effect.get("y", corpse.get("y", 0))
+            _known[str(effect.get("unit_id", ""))] = corpse
+            _poses[str(effect.get("unit_id", ""))] = {"state": "death"}
+    _draw_projectiles()
+    _draw_effects()
+
+func visible_units() -> Array[Dictionary]:
     var next_units := {}
     for unit in _next_frame.get("units", []):
         next_units[str(unit.get("id", ""))] = unit
@@ -166,7 +202,7 @@ func _draw() -> void:
             if not ids.has(str(birth["id"])):
                 originals.append(birth)
                 ids[str(birth["id"])] = true
-    var units: Array = []
+    var units: Array[Dictionary] = []
     for original in originals:
         var unit: Dictionary = original.duplicate()
         var id_value := str(unit.get("id", ""))
@@ -181,6 +217,7 @@ func _draw() -> void:
         if replay_enabled:
             unit["hp"] = replay.health_at(id_value, _visual_time, float(unit.get("hp", 0)))
             unit["absorbed_damage"] = replay.absorbed_at(id_value, _visual_time, float(unit.get("absorbed_damage", 0)))
+            unit["last_ability"] = replay.ability_at(id_value, _visual_time)
             if float(unit["hp"]) <= 0 and not held.has(id_value):
                 continue
             var push := replay.pushback_at(id_value, _visual_time)
@@ -234,33 +271,32 @@ func _draw() -> void:
         _poses[id_value] = pose
         _known[id_value] = unit
         units.append(unit)
-        _draw_aura(unit)
-    var areas: Array = _frame.get("areas", []).filter(func(area): return not replay_enabled or area.get("type") != "damage_area")
-    if replay_enabled:
-        areas.append_array(replay.death_areas_at(_visual_time))
-    for area in areas:
-        var center := _point(float(area.get("x", 0)), float(area.get("y", 0)))
-        var radius := float(area.get("radius", 1)) / _field_width * _arena.size.x
-        if area.get("type") == "damage_area":
-            BattleEffects.slime_pool(self, center, radius, float(area.get("remaining", 0)), float(area.get("duration", 10)), _visual_time, reduced_motion)
-        else:
-            draw_circle(center, radius, Color(0.35, 0.8, 0.71, 0.16))
-            draw_arc(center, radius, 0, TAU, 16, Color("8bc7c0"), 1)
-    units.sort_custom(func(a, b): return float(a.get("y", 0)) < float(b.get("y", 0)))
-    for unit in units:
-        _draw_unit(unit)
-    AssassinEffects.links(self, _frame, _known, _visual_time, reduced_motion)
-    _draw_royal_opening()
-    for effect in _effects:
-        var age := _visual_time - float(effect.get("time", 0))
-        if effect.get("type") == "defeat" and age >= 0 and age < 0.5:
-            var corpse: Dictionary = effect.get("unit", {}).duplicate()
-            corpse["x"] = effect.get("x", corpse.get("x", 0))
-            corpse["y"] = effect.get("y", corpse.get("y", 0))
-            _known[str(effect.get("unit_id", ""))] = corpse
-            _poses[str(effect.get("unit_id", ""))] = {"state": "death"}
-    _draw_projectiles()
-    _draw_effects()
+    return units
+
+func displayed_unit(id: String) -> Dictionary:
+    for unit in visible_units():
+        if str(unit.get("id", "")) == id:
+            return unit.duplicate(true)
+    return {}
+
+func unit_at(position: Vector2) -> Dictionary:
+    var closest := {}
+    var distance := 30.0
+    for unit in visible_units():
+        var d := _body_point(unit).distance_to(position)
+        if d < distance:
+            closest = unit
+            distance = d
+    return closest.duplicate(true)
+
+func _gui_input(event: InputEvent) -> void:
+    var pressed: bool = (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+    if pressed:
+        var unit := unit_at(event.position)
+        selected_id = str(unit.get("id", ""))
+        unit_selected.emit(unit)
+        accept_event()
+        queue_redraw()
 
 func held_defeats() -> Dictionary:
     var result := {}

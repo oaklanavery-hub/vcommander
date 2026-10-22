@@ -103,17 +103,15 @@ custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Padding" type="MarginContainer" parent="Margin/Main/BattlePanel"]
+[node name="Padding" type="HBoxContainer" parent="Margin/Main/BattlePanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
+theme_override_constants/separation = 10
 
 [node name="Battlefield" type="Control" parent="Margin/Main/BattlePanel/Padding"]
 custom_minimum_size = Vector2(0, 164)
 layout_mode = 2
-mouse_filter = 2
+size_flags_horizontal = 3
+mouse_filter = 0
 script = ExtResource("2")
 
 [node name="SummaryRow" type="HBoxContainer" parent="Margin/Main"]

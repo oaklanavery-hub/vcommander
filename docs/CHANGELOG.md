@@ -4,6 +4,8 @@
 
 - Exact read-only battle reports count effective damage/healing, absorption, kills, surviving bodies and role-relevant highlights across both sides.
 - Completed replay evidence preserves death-source, descendant, revival and Commander attribution; fractional healing remains visible and overkill is excluded from damage totals.
+- A post-battle report compares both warbands and explains surviving bodies, protection and individual contribution without awarding additional rewards.
+- Click or tap a companion for a separate live inspection panel with replay-current HP, modified stats, ability description, cooldown and active effects.
 
 ## v0.14.0 — Commander mastery lineup
 
