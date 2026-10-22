@@ -29,6 +29,12 @@
   "tags": [
     "starter",
     "fire",
-    "range"
-  ]
+    "range",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_fire_01",
+    "level": 5,
+    "wins": 6
+  }
 }

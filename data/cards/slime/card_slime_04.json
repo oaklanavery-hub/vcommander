@@ -8,7 +8,14 @@
   "role": "melee",
   "summon_amount": 2,
   "unit_cap": 6,
-  "stats": {"health": 470, "attack": 65, "defense": 18, "attack_speed": 85, "movement_speed": 100, "range": 1},
+  "stats": {
+    "health": 470,
+    "attack": 65,
+    "defense": 18,
+    "attack_speed": 85,
+    "movement_speed": 100,
+    "range": 1
+  },
   "ability": {
     "id": "jelly_spill",
     "display_name": "Jelly Spill",
@@ -21,5 +28,15 @@
     "damage_attack_pct_per_tick": 35,
     "description": "Explodes on death for 125% attack damage, leaving a large slime pool for 10 seconds. Enemies inside take 35% attack damage each second. Normal defense applies."
   },
-  "tags": ["slime", "melee", "death_area"]
+  "tags": [
+    "slime",
+    "melee",
+    "death_area",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_slime_01",
+    "level": 3,
+    "wins": 3
+  }
 }

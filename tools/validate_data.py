@@ -177,6 +177,9 @@ def main() -> int:
     for outcome, expected in {"win": 100, "loss": 25, "forfeit": 0}.items():
         if mastery.get("match_xp", {}).get(outcome) != expected:
             raise ValueError(f"Approved mastery {outcome} reward must be {expected}")
+    legacy_cards = mastery.get("legacy_available_cards")
+    if not isinstance(legacy_cards, list) or len(legacy_cards) != 20 or any(type(ident) is not str or ident not in cards for ident in legacy_cards) or len(set(legacy_cards)) != len(legacy_cards):
+        raise ValueError("Legacy collection migration needs twenty unique existing card IDs")
 
     def positive_integer(value, label):
         if type(value) is not int or value < 1:

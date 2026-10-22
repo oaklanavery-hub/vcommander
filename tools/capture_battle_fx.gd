@@ -18,6 +18,7 @@ func save_image(name: String) -> void:
 func prepare(element: String, skill: bool):
     var state = root.get_node("GameState")
     var db = root.get_node("ContentDatabase")
+    unlock_fixture_collection(state.commander_progress, db)
     state.select_commander("commander_" + element + "_01")
     state.clear_army()
     for card in db.get_cards_by_set("set_" + element + "_01"):
@@ -38,6 +39,14 @@ func prepare(element: String, skill: bool):
     await scene_changed
     current_scene.set_process(false)
     return current_scene
+
+func unlock_fixture_collection(profile: CommanderProgress, content: Object) -> void:
+    # Script-mode profiles are isolated. Exercise normally earned access rather
+    # than reading a player's developer credential or bypassing equipment rules.
+    for commander in content.get_all_commanders():
+        var id := str(commander["id"])
+        while int(profile.record(id)["xp"]) < 1000 or int(profile.record(id)["wins"]) < 6:
+            profile.finish_match(profile.begin_match(id), "win")
 
 func seek(scene, time: float) -> void:
     scene.battlefield.finish_replay()

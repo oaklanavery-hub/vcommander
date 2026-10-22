@@ -27,6 +27,12 @@
   "tags": [
     "starter",
     "earth",
-    "range"
-  ]
+    "range",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_earth_01",
+    "level": 3,
+    "wins": 3
+  }
 }

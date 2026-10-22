@@ -33,6 +33,12 @@
     "starter",
     "water",
     "melee",
-    "assassin"
-  ]
+    "assassin",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_water_01",
+    "level": 5,
+    "wins": 6
+  }
 }

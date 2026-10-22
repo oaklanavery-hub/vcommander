@@ -25,6 +25,12 @@
   "tags": [
     "starter",
     "water",
-    "range"
-  ]
+    "range",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_water_01",
+    "level": 3,
+    "wins": 3
+  }
 }

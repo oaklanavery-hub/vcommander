@@ -29,7 +29,7 @@ func run() -> void:
                     offered = true
             draft.auto_select()
         check(offered, "reward participates in the ordinary draft pool: " + element)
-        check(SetBonusChecker.is_complete(cards, "set_%s_01" % element, 4), "any four of five themed units activate the bonus")
+        check(SetBonusChecker.is_complete(cards, "set_%s_01" % element, 4), "any four of six themed units activate the bonus")
         var player := {"id": "player", "cards": cards, "unit_counts": counts, "buffs": [], "set_bonus": db.get_signature_set("set_%s_01" % element)["bonus"], "commander": db.get_commander("commander_%s_01" % element), "commander_skill_active": false}
         var enemy := player.duplicate(true)
         enemy["id"] = "opponent"
@@ -52,7 +52,7 @@ func run() -> void:
                     splash += 1
             check(launches > 0 and splash > 0, "Spore Sage launches real damaging splash projectiles")
     if not failed:
-        print("Mastery unit tests passed: all four reward definitions draft, replace a themed starter, use actual abilities on both teams and retain seeded replay determinism.")
+        print("Mastery unit tests passed: all four companion definitions draft, replace a themed starter, use actual abilities on both teams and retain seeded replay determinism.")
     quit(1 if failed else 0)
 
 func check(condition: bool, message: String) -> void:

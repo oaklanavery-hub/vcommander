@@ -24,14 +24,8 @@
     "attack_pct": 160,
     "description": "Every third attack deals 160% of attack before normal defense."
   },
-  "mastery_unlock": {
-    "commander_id": "commander_water_01",
-    "level": 3,
-    "wins": 3
-  },
   "tags": [
     "water",
-    "melee",
-    "mastery_reward"
+    "melee"
   ]
 }

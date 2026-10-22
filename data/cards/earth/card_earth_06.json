@@ -33,6 +33,12 @@
     "starter",
     "earth",
     "melee",
-    "assassin"
-  ]
+    "assassin",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_earth_01",
+    "level": 5,
+    "wins": 6
+  }
 }

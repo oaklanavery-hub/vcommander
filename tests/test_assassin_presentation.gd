@@ -16,7 +16,7 @@ func run() -> void:
     var units: Array = []
     for element in ["fire", "water", "earth", "slime"]:
         var card: Dictionary = db.get_card("card_%s_06" % element)
-        check(card["summon_amount"] == 2 and card["unit_cap"] == 4 and progress.is_card_unlocked(card["id"]), "specialist is an available ordinary 2/4 card: " + element)
+        check(card["summon_amount"] == 2 and card["unit_cap"] == 4 and not progress.is_card_unlocked(card["id"]), "specialist is a previewable mastery 2/4 card: " + element)
         var frame := PixelAtlasArt.icon("units", str(card["id"]))
         check(frame != null, "new art survives source and pack imports: " + element)
     var transit := {"from_x": 4.0, "from_y": 7.0, "to_x": 20.0, "to_y": 7.0, "started_at": 5.0, "ends_at": 5.8, "mode": "flame", "invulnerable": true}

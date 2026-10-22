@@ -24,16 +24,10 @@
     "duration_seconds": 4,
     "heal_target_max_hp_pct": 4,
     "tick_seconds": 2,
-    "description": "Places a medium healing pool beneath a wounded ally, restoring 4% of nearby allies’ Max HP every 2 seconds for 4 seconds."
-  },
-  "mastery_unlock": {
-    "commander_id": "commander_slime_01",
-    "level": 3,
-    "wins": 3
+    "description": "Places a medium healing pool beneath a wounded ally, restoring 4% of nearby allies\u2019 Max HP every 2 seconds for 4 seconds."
   },
   "tags": [
     "slime",
-    "healer",
-    "mastery_reward"
+    "healer"
   ]
 }

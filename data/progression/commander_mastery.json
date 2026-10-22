@@ -3,5 +3,31 @@
   "id": "commander_mastery",
   "status": "playtest",
   "xp_per_level": 250,
-  "match_xp": {"win": 100, "loss": 25, "forfeit": 0}
+  "match_xp": {
+    "win": 100,
+    "loss": 25,
+    "forfeit": 0
+  },
+  "legacy_available_cards": [
+    "card_earth_01",
+    "card_earth_02",
+    "card_earth_03",
+    "card_earth_04",
+    "card_earth_06",
+    "card_fire_01",
+    "card_fire_02",
+    "card_fire_03",
+    "card_fire_04",
+    "card_fire_06",
+    "card_slime_01",
+    "card_slime_02",
+    "card_slime_03",
+    "card_slime_04",
+    "card_slime_06",
+    "card_water_01",
+    "card_water_02",
+    "card_water_03",
+    "card_water_04",
+    "card_water_06"
+  ]
 }

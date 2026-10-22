@@ -2,6 +2,17 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
+## Current task — Starter lineup and personal developer collection access
+
+- Branch `feat/mastery-lineup`, based on verified main `8e51282ac40881186bed4a779342610fdf3d6242` (v0.13.0, PR #31). Main Deploy Web #39671260998 passed source/export/browser/container/native and actual served-pack verification.
+- Apply the approved four starters per Commander, Level 3 + 3 wins and Level 5 + 6 wins rewards; Spore Sage becomes recruit 2/cap 4. Preserve existing ownership, XP, records, pending-match identity, presets and all other combat rules. PvP remains Coming Soon; free hosting and campaign KIV stay unchanged.
+- Give the developer a private random access key, delivered outside the public repository. The public build contains only its SHA-256 verifier. A separate device-local access service validates the key on every load; access grants collection use, never earned achievements, XP or wins. No accounts or trusted competitive entitlement is claimed. Changes to access are blocked during a match.
+- Checkpoint 1: content, schema-3 grandfathering, exact reward boundaries and updated fixtures; focused validation, commit and push. Checkpoint 2: developer access, settings activation/revocation and truthful reward presentation; isolated persistence/UI tests and native views. Then full Actions source/export/browser/container/native gate, visual review, merge and actual served-pack verification.
+- Local execution and Godot 4.7 are available in a new isolated worktree; earlier dirty worktrees are untouched. No new validation has run yet.
+- Next: implement content/migration and focused boundary tests. Never commit or log the private key; tests use a separate synthetic verifier and isolated files.
+- Checkpoint 1 implemented: exact starter/reward lineup, Spore 2/4, frozen legacy ownership migration and isolated capture access. Data validation and clean Godot 4.7 import pass. Passing focused suites: mastery lineup (all eight independent level/win boundaries and schema-1/2/current/corrupt/future/backup migration/presets), achievements, Commander progress, companion mechanics, mastery lifecycle, scene flow and specialist presentation. A first test run exposed JSON-number type differences in schema membership; numeric validation now precedes integer schema dispatch and the regression passes.
+- Remaining: truthful eight-reward UI, private developer key/service/settings, isolated access tests and native capture updates. Full Actions/export/browser/container/native gate has not run for this change.
+
 ## Current task — Unlimited power cards and backline specialists
 
 - Branch `feat/assassin-units`, based on current main `6680fe7c6ef8747e921c7eac59ecb34dcdca84ab` (v0.12.0, PR #30, deployed and served-pack verified).

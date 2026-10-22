@@ -34,6 +34,12 @@
     "starter",
     "fire",
     "melee",
-    "assassin"
-  ]
+    "assassin",
+    "mastery_reward"
+  ],
+  "mastery_unlock": {
+    "commander_id": "commander_fire_01",
+    "level": 3,
+    "wins": 3
+  }
 }
