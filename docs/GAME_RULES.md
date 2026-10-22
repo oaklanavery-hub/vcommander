@@ -382,3 +382,14 @@ Every five seconds, while an enemy is in normal attack range, Sticky Slime marks
 
 **R108 — Personal developer collection access**
 The developer may activate a privately supplied access key in Settings → Developer access. This enables all current collection cards on that device without granting XP, match wins, levels, achievements or permanent card entitlements. Mastery continues to earn rewards normally, and the journal distinguishes developer access from earned rewards. Ordinary players receive no access by default; an invalid key or an unverified local flag cannot enable it. The key is not published in the source or build. Activation/removal is unavailable during a match; removing it revalidates the equipped army and retains actual earned cards. PvP remains Coming Soon. This device-local testing credential is not account authentication or trusted competitive authorization.
+
+## Battle feedback and learning
+
+**R109 — Battle report**
+After complete battle playback, players may inspect a two-sided report grouped by unit type. Damage counts actual HP removed, excluding overkill; healing counts positive HP restored, excluding overheal. Absorption counts recorded damage prevented/stored by an absorption ability, independently of DEF. Kills credit the last damaging source only when that body actually dies. Death-spawned and revived bodies group with their card, while Commander skill damage and summoned units remain identifiable. Survival counts living bodies and their actual lifetimes. Damage, healing and protection have separate highlights; there is no score that treats raw damage as every role's value. Reports never change outcomes or grant rewards, and cannot expose a result before replay completion.
+
+**R110 — Unit inspection**
+Selecting a visible unit during local battle playback opens its current HP, modified stats, ability/cooldown and active effects beside the arena. The whole field remains visible. Inspection reads the displayed replay time only and never controls movement, targeting or combat. Unit ownership/effect word labels remain off battlefield actors.
+
+**R111 — Optional guided first match**
+Players may start guidance from How to Play. It teaches actual Commander selection, four-card army setup, legal drafting and optional skill selection, normal pre-battle/battle playback, inspection and the report. Short reading panels pause local clocks and restore the prior pause state. Guidance may be ended at any time. The match uses normal rules, records, XP and forfeit behavior; completing guidance creates no extra reward. Only tutorial completion is saved as a separate local preference. Guidance is not available in friend PvP.

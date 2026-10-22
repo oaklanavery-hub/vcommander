@@ -2,7 +2,19 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Starter lineup and personal developer collection access
+## Current task — Battle reports, unit inspection and guided first match
+
+- Branch `feat/battle-learning`, based on verified main `dd8a82c7b84b1dc5b3a2af575377d1e779daea88` (v0.14.0, PR #32). Main Deploy Web #39725616243 and actual served-pack checks passed. Earlier task logs below are archived implementation history, not unfinished releases.
+- User approved recommendations 1–3 and visual/audio polish, explicitly excluding 4 (balance review), 5 (progress export/import) and 6 (training grounds). Preserve all stats, mastery/developer access, draft legality, deterministic outcomes, automatic formations, 1× default, complete Commander openings, no result skip, uncluttered units, PvP Coming Soon, campaign KIV and free hosting.
+- Checkpoint 1: read-only report aggregation and exact effective HP damage/healing/absorption/kill attribution, including death spawns, revival and Commander effects; focused tests and save.
+- Checkpoint 2: post-replay two-sided report with separate damage/protection/healing highlights; click/tap unit inspection beside the full visible arena, current replay stats/cooldowns/status only. No future outcome reveal or gameplay inputs. Focused integration/native views and save.
+- Checkpoint 3: optional guided normal first match through actual Commander/army/draft/skill/battle/inspection/report actions. Brief pausing coach panels, opt-out, replay from Help, isolated tutorial preference; no tutorial XP or altered rules. Save checkpoint.
+- Checkpoint 4: stronger presentation-only anticipation/recovery, role-appropriate death motion and prioritised ability sound cues, preserving recorded hit timing and reduced motion. Full Actions source/export/browser/container/native checks, inspect actual rendered views, merge and verify served pack.
+- Scratch maintenance removed previous local worktrees/tools; a fresh isolated clone is checked out at current main. Godot 4.7 is being restored from the project's pinned official binary. No new tests have run yet. No private developer key is needed or read for this work.
+- Next: implement the exact report data path and its focused checks. Keep UI from owning results and save each coherent checkpoint before lengthy CI.
+- Checkpoint 1 implemented: pure BattleReport aggregation, effective HP damage/healing metadata and copied Commander summon births. Passing: pinned Godot 4.7 checksum/import, exact synthetic/real report tests, absorption/death/revival regression, combat simulator and Slime Commander suites. No combat stats, rules or damage/healing mutations changed. Fractional healing metadata now records sub-half-HP heals instead of rounding the event away. Reports/inspection UI, tutorial, polish and full CI/native/export checks remain pending.
+
+## Archived task — Starter lineup and personal developer collection access
 
 - Branch `feat/mastery-lineup`, based on verified main `8e51282ac40881186bed4a779342610fdf3d6242` (v0.13.0, PR #31). Main Deploy Web #39671260998 passed source/export/browser/container/native and actual served-pack verification.
 - Apply the approved four starters per Commander, Level 3 + 3 wins and Level 5 + 6 wins rewards; Spore Sage becomes recruit 2/cap 4. Preserve existing ownership, XP, records, pending-match identity, presets and all other combat rules. PvP remains Coming Soon; free hosting and campaign KIV stay unchanged.

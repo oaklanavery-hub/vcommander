@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.15.0 — Battle feedback and learning
+
+- Exact read-only battle reports count effective damage/healing, absorption, kills, surviving bodies and role-relevant highlights across both sides.
+- Completed replay evidence preserves death-source, descendant, revival and Commander attribution; fractional healing remains visible and overkill is excluded from damage totals.
+
 ## v0.14.0 — Commander mastery lineup
 
 - Four starters per Commander, followed by rewards at Level 3 + three wins and Level 5 + six wins.

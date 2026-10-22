@@ -378,7 +378,8 @@ func _spawn_summon_skill_if_active(side_config: Dictionary) -> void:
             "x": position.x,
             "y": position.y,
             "source": "commander_skill",
-            "summoned": true
+            "summoned": true,
+            "unit": _unit_snapshot(unit)
         }))
 
 
@@ -968,11 +969,12 @@ func _resolve_pending_effects() -> void:
         var maximum := float(target.get("max_hp", 1))
         var amount := maxf(0.0, float(heal_info.get("amount", 0.0)))
         target["hp"] = minf(maximum, before + amount)
-        var actual_heal := maxf(0, round(float(target.get("hp", before)) - before))
+        var actual_heal := maxf(0, float(target.get("hp", before)) - before)
         if actual_heal > 0:
             _events.append(BattleEventScript.make("heal", _time, {
                 "target_id": target_id,
                 "amount": actual_heal,
+                "effective_healing": maxf(0, maxf(0, float(target["hp"])) - maxf(0, before)),
                 "hp_after": float(target["hp"]),
                 "source_unit_id": str(heal_info.get("source_unit_id", "")),
                 "source": str(heal_info.get("source", "heal"))
@@ -1022,6 +1024,7 @@ func _apply_damage_event(damage_info: Dictionary, fallback_source: String = "dam
     target["hp"] = float(target.get("hp", 0)) - amount
     var event := BattleEventScript.make("damage", _time, {
         "target_id": target_id, "amount": amount, "hp_after": float(target["hp"]),
+        "hp_loss": minf(amount, maxf(0, hp_before)),
         "source_side": str(damage_info.get("source_side", "")),
         "source_unit_id": str(damage_info.get("source_unit_id", "")),
         "source": str(damage_info.get("source", fallback_source))
