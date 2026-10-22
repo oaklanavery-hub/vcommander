@@ -2,16 +2,16 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## v0.14.0 — Release verification in progress
+## v0.14.0 — Released and verified
 
 - PR #32 is merged into main as `dd8a82c7b84b1dc5b3a2af575377d1e779daea88`. The complete source tree matches reviewed feature head `c1c1ac4608929f8835082f109ac505f6531327d9`.
 - Final feature CI [#39725038994](https://github.com/oaklanavery-hub/vcommander/actions/runs/39725038994) passed all 36 source suites, all 36 exported-pack suites, two isolated WebGL2 sessions, the production container and 128 native views. Native validation job 119647314757; browser 119647314982; container 119647315006. Reviewed all four Commander panels, Settings, developer activation/status, collection, earned-vs-access progress, all reward descriptions and journal scrolling.
-- Main [Deploy Web #39725616243](https://github.com/oaklanavery-hub/vcommander/actions/runs/39725616243) is running; publication and actual served-pack verification are pending. Do not claim the live site has v0.14.0 until its final verify job passes.
+- Main [Deploy Web #39725616243](https://github.com/oaklanavery-hub/vcommander/actions/runs/39725616243) passed every gate: source/native 119648694191, browser/export 119648694342, production container 119648694019, export build 119649695277, Pages deploy 119650098482 and actual served-pack verification 119650179293. All 36 suites passed from source, exported pack and the downloaded live pack. The verified public game is https://oaklanavery-hub.github.io/vcommander/ at v0.14.0 / main `dd8a82c7b84b1dc5b3a2af575377d1e779daea88`. Exported/served PCK SHA-256: `6c641a498ab12f1bd5b7269964fd4e91d16e0a7a6f9819892c26807e844c5105`.
 - Approved lineup: four starters, then Level 3 + 3 wins and Level 5 + 6 wins rewards per Commander. See R100/R101 for exact units. Spore Sage is 2/4. Valid older saves retain previous ownership, XP, records and preset eligibility through schema 3. No other combat rules change.
 - The developer's private access file was delivered outside the public repository. Never publish or log its key. Only the SHA-256 verifier is in project settings; the file's key was verified against it and was absent from all project files. Settings → Developer access enables all current units on a device without granting XP, wins, achievements or earned card entitlements. Removal preserves actual progression and revalidates equipment. In-match changes are blocked. This is local testing access, not account authentication or trusted PvP authorization.
 - PvP remains Coming Soon; campaign stays KIV; free hosting is unchanged. No Render operation or paid resource was used.
 - Release handoff is on docs-only branch `docs/mastery-lineup-release`. Local worktree `/workspace/scratch/5d3e19c21d4d/vcommander-mastery-lineup`; older dirty worktrees remain untouched. Shell Git push lacks credentials, so authenticated Git Data tools published identical verified trees.
-- Next: wait for all main release jobs, inspect final served-pack identity/checksum and suite result, then update this handoff and report the live game plus the private key activation steps. Do not rerun broad local validation without a new reason.
+- This request is complete. The owner can paste the privately supplied key in Settings → Developer access on their browser; that browser activation is the only owner-side step. No code, test or deployment work remains. Future work should verify actual main and start a fresh focused branch; do not rerun unchanged broad validation or assume old handoff tasks are pending.
 
 ## Archived task — Starter lineup and personal developer collection access
 
@@ -32,7 +32,7 @@ Verify this handoff against GitHub and the working tree before resuming.
 - Content metadata review aligned starter/reward tags with the approved gates and added validation against contradictory tags; gameplay reads the declared unlock requirement. Data validation passes. CI for starter-flow correction `757a1103c2a18ad4cb3225bcd6a1674624add288` is #39724546666; metadata follow-up will require a final exact-head gate.
 - CI #39724546666 passed all 36 source suites, all 36 exported-pack suites, two isolated WebGL2 sessions, the production container and 128 native views. Reviewed every Commander mastery panel, settings, all six new access/lineup views, collection and journal scroll. Layouts and earned-vs-access status are readable; no private credential appears. Review found empty ability descriptions on the older Dragon/Water Wizard/Pitcher Plant reward definitions. Added accurate descriptions without changing mechanics, plus a validator requiring mastery preview text. Final content head still requires its own complete CI gate and served-pack verification.
 
-## Current task — Unlimited power cards and backline specialists
+## Archived task — Unlimited power cards and backline specialists
 
 - Branch `feat/assassin-units`, based on current main `6680fe7c6ef8747e921c7eac59ecb34dcdca84ab` (v0.12.0, PR #30, deployed and served-pack verified).
 - User requests unlimited power/Buff picks, no units standing on decorative trees, and Spriggan/Nymph/Mole/Sticky Slime (all recruit 2/cap 4).
