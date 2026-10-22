@@ -2,7 +2,18 @@
 
 Verify this handoff against GitHub and the working tree before resuming.
 
-## Current task — Starter lineup and personal developer collection access
+## v0.14.0 — Release verification in progress
+
+- PR #32 is merged into main as `dd8a82c7b84b1dc5b3a2af575377d1e779daea88`. The complete source tree matches reviewed feature head `c1c1ac4608929f8835082f109ac505f6531327d9`.
+- Final feature CI [#39725038994](https://github.com/oaklanavery-hub/vcommander/actions/runs/39725038994) passed all 36 source suites, all 36 exported-pack suites, two isolated WebGL2 sessions, the production container and 128 native views. Native validation job 119647314757; browser 119647314982; container 119647315006. Reviewed all four Commander panels, Settings, developer activation/status, collection, earned-vs-access progress, all reward descriptions and journal scrolling.
+- Main [Deploy Web #39725616243](https://github.com/oaklanavery-hub/vcommander/actions/runs/39725616243) is running; publication and actual served-pack verification are pending. Do not claim the live site has v0.14.0 until its final verify job passes.
+- Approved lineup: four starters, then Level 3 + 3 wins and Level 5 + 6 wins rewards per Commander. See R100/R101 for exact units. Spore Sage is 2/4. Valid older saves retain previous ownership, XP, records and preset eligibility through schema 3. No other combat rules change.
+- The developer's private access file was delivered outside the public repository. Never publish or log its key. Only the SHA-256 verifier is in project settings; the file's key was verified against it and was absent from all project files. Settings → Developer access enables all current units on a device without granting XP, wins, achievements or earned card entitlements. Removal preserves actual progression and revalidates equipment. In-match changes are blocked. This is local testing access, not account authentication or trusted PvP authorization.
+- PvP remains Coming Soon; campaign stays KIV; free hosting is unchanged. No Render operation or paid resource was used.
+- Release handoff is on docs-only branch `docs/mastery-lineup-release`. Local worktree `/workspace/scratch/5d3e19c21d4d/vcommander-mastery-lineup`; older dirty worktrees remain untouched. Shell Git push lacks credentials, so authenticated Git Data tools published identical verified trees.
+- Next: wait for all main release jobs, inspect final served-pack identity/checksum and suite result, then update this handoff and report the live game plus the private key activation steps. Do not rerun broad local validation without a new reason.
+
+## Archived task — Starter lineup and personal developer collection access
 
 - Branch `feat/mastery-lineup`, based on verified main `8e51282ac40881186bed4a779342610fdf3d6242` (v0.13.0, PR #31). Main Deploy Web #39671260998 passed source/export/browser/container/native and actual served-pack verification.
 - Apply the approved four starters per Commander, Level 3 + 3 wins and Level 5 + 6 wins rewards; Spore Sage becomes recruit 2/cap 4. Preserve existing ownership, XP, records, pending-match identity, presets and all other combat rules. PvP remains Coming Soon; free hosting and campaign KIV stay unchanged.
