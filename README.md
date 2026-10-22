@@ -48,7 +48,7 @@ The current playable prototype supports:
 - four warband slots, an eight-column collection, element filters and three saved presets per Commander
 - a forest-camp title menu, How to Play and shared pause/settings menus
 - starter warbands, a filtered companion collection and clearer draft/result guidance
-- two original looping music tracks, 35 sound effects and saved volume/accessibility settings
+- two original looping music tracks, 39 sound effects and saved volume/accessibility settings
 
 - Fire, Water and Earth starter Commanders
 - 16 starter Army cards and 8 mastery reward cards with provisional playtest stats/ability tuning

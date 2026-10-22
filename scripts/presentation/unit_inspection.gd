@@ -30,6 +30,11 @@ static func describe(unit: Dictionary, card: Dictionary, clock: float, frozen: b
         effects.append("Burning")
     if bool(unit.get("slowed", false)):
         effects.append("Slowed")
+    if bool(unit.get("aura_slowed", false)):
+        effects.append("Freezing aura · attack speed reduced")
+    var mark: Dictionary = unit.get("sticky_mark", {})
+    if not mark.is_empty():
+        effects.append("Sticky link · %s%% shared damage" % number(float(mark.get("shared_damage_pct", 0))) if mark.get("target_ids", []).size() > 1 else "Sticky mark")
     if bool(unit.get("revival_ready", false)):
         effects.append("Revival ready")
     var transit: Dictionary = unit.get("transit", {})

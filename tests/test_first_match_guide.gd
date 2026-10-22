@@ -38,6 +38,8 @@ func run() -> void:
     menu.open_help()
     menu._start_guided_match()
     await scene_changed
+    await settle()
+    check(current_scene.build_army_button.text.contains("Next") and guide.STEPS["commander"][2].contains("Next"), "Commander guidance names the visible navigation button")
     await expect_step("commander")
     current_scene._open_army_builder()
     await scene_changed
@@ -97,6 +99,13 @@ func run() -> void:
     check(guide.active and current_scene.name == "CommanderSelect" and state.commander_progress.record(state.selected_commander_id)["forfeits"] == 1, "confirmed restart records the normal forfeit exactly once and starts guidance")
     guide.stop()
     check(not paused and not guide.overlay.visible, "ending guidance restores the original pause state")
+    check(state.equip_starter_army() and state.begin_match(7304) and state.draft.use_commander_skill(), "the first pick can legally be Commander magic")
+    guide.start()
+    guide.announce("skill")
+    await settle()
+    check(guide.overlay.find_child("CoachHeading", true, false).text == "Magic is prepared", "guide acknowledges an already spent skill rather than suggesting a second use")
+    guide.stop()
+    state.leave_match()
     var online := root.get_node("OnlineSession")
     online.active = true
     guide.start()

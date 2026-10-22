@@ -276,7 +276,23 @@ func visible_units() -> Array[Dictionary]:
 func displayed_unit(id: String) -> Dictionary:
     for unit in visible_units():
         if str(unit.get("id", "")) == id:
-            return unit.duplicate(true)
+            var display: Dictionary = unit.duplicate(true)
+            display["sticky_mark"] = _sticky_mark(id)
+            return display
+    return {}
+
+func _sticky_mark(id: String) -> Dictionary:
+    var links := {}
+    for link in _frame.get("links", []):
+        links[str(link.get("source_id", ""))] = link
+    if replay_enabled:
+        for actor in replay.ability_uses:
+            var event := replay.ability_at(str(actor), _visual_time)
+            if event.has("link") and float(event.get("time", 0)) >= float(_frame.get("time", 0)):
+                links[str(actor)] = event["link"]
+    for link in links.values():
+        if float(link.get("expires_at", 0)) > _visual_time and link.get("target_ids", []).has(id):
+            return link.duplicate(true)
     return {}
 
 func unit_at(position: Vector2) -> Dictionary:

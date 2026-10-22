@@ -1558,6 +1558,7 @@ func _snapshot() -> Dictionary:
 
 
 func _unit_snapshot(unit: Dictionary) -> Dictionary:
+    var effective_attack_speed := _effective_attack_speed(unit)
     return {
             "id": str(unit.get("id", "")),
             "name": str(unit.get("display_name", "Unit")),
@@ -1570,7 +1571,8 @@ func _unit_snapshot(unit: Dictionary) -> Dictionary:
             "spawned_at": float(unit.get("spawned_at", 0)),
             "attack": float(unit.get("attack", 0)),
             "defense": float(unit.get("defense", 0)),
-            "attack_speed": _effective_attack_speed(unit),
+            "attack_speed": effective_attack_speed,
+            "aura_slowed": effective_attack_speed < _speed_after_debuffs(unit, "attack_speed"),
             "movement_speed": 0 if bool(unit.get("stationary", false)) else _speed_after_debuffs(unit, "movement_speed"),
             "range": float(unit.get("range", 1)),
             "sample_time": _time,

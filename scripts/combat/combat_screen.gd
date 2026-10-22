@@ -334,7 +334,8 @@ func _inspect_unit(unit: Dictionary) -> void:
         _close_inspection()
         return
     battlefield.selected_id = str(unit.get("id", ""))
-    inspector.inspect(unit, ContentDatabase.get_card(str(unit.get("card_id", ""))), battlefield._visual_time, battlefield.frozen_sides.has(str(unit.get("side", ""))) and battlefield.frost_coverage() >= 1.0)
+    var display := battlefield.displayed_unit(battlefield.selected_id)
+    inspector.inspect(display, ContentDatabase.get_card(str(display.get("card_id", ""))), battlefield._visual_time, battlefield.frozen_sides.has(str(display.get("side", ""))) and battlefield.frost_coverage() >= 1.0)
 
 func _refresh_inspection() -> void:
     if inspector.selected_id.is_empty():
@@ -407,6 +408,8 @@ func _update_option_labels() -> void:
     hp_button.text = "HP numbers: On" if BattlefieldView.show_hp_numbers else "HP numbers: Off"
 
 func _unhandled_key_input(event: InputEvent) -> void:
+    if report_view.overlay.visible:
+        return
     if playback_driver != null:
         if GameMenu.overlay.visible:
             return

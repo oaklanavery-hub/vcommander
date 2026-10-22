@@ -2,7 +2,7 @@ extends CanvasLayer
 
 const DEFAULT_PATH := "user://first_match_guide.cfg"
 const STEPS := {
-    "commander": ["Choose your Commander", "Each Commander has a signature theme and a different opening skill. Select any leader, read their magic, then choose Build Warband. Your four starting companions are ready to try.", "Choose a leader, then Build Warband"],
+    "commander": ["Choose your Commander", "Each Commander has a signature theme and a different opening skill. Select any leader, read their magic, then choose Next to build your warband. Your four starting companions are ready to try.", "Choose a leader, then Next"],
     "warband": ["Four companions, one strategy", "Keep a sturdy frontline and companions who can attack or help from behind. Four unique cards matching your Commander's theme activate the set bonus. You can use the starter warband or choose any unlocked companions.", "When all four slots are filled, choose Battle"],
     "draft": ["Recruit your first fighters", "Choose one of the three cards. A pick adds the shown number of bodies to your army and refreshes the choices. You have 30 seconds per pick; these notes pause that clock while you read.", "Choose a companion card"],
     "skill": ["Save a pick for magic?", "Your Commander skill costs one selection. You can prepare it once per round and twice per match. It resolves before either army moves. You may use it now, or spend your picks recruiting instead.", "Spend your remaining selections"],
@@ -140,12 +140,17 @@ func _show_step(step: String) -> void:
     body.add_theme_constant_override("separation", 16)
     panel.add_child(body)
     body.add_child(ScreenStyle.label("FIELD NOTES    ·    %d / %d" % [ORDER.find(step) + 1, ORDER.size()], 15))
-    body.add_child(ScreenStyle.label(str(STEPS[step][0]), 30))
-    var text := ScreenStyle.label(str(STEPS[step][1]), 18)
+    var note: Array = STEPS[step].duplicate()
+    if step == "skill" and GameState.draft.commander_skill_used_this_round:
+        note = ["Magic is prepared", "Your Commander skill is prepared for this battle and has spent one selection. It finishes before either army moves. You can use a skill once per round and twice per match; use your remaining picks to recruit companions.", "Recruit with your remaining selections"]
+    var heading := ScreenStyle.label(str(note[0]), 30)
+    heading.name = "CoachHeading"
+    body.add_child(heading)
+    var text := ScreenStyle.label(str(note[1]), 18)
     text.custom_minimum_size.x = 610
     text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     body.add_child(text)
-    var action := ScreenStyle.label(str(STEPS[step][2]), 20)
+    var action := ScreenStyle.label(str(note[2]), 20)
     action.add_theme_color_override("font_color", Color("edd198"))
     action.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     body.add_child(action)
