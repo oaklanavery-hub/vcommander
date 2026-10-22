@@ -76,12 +76,12 @@ func show_record(commander_id: String) -> void:
     _show_stats(stats)
     _show_progress(int(stats["xp"]))
     xp_label.text += "\nPermanent levels · Win +100 / Loss +25 XP"
-    for card in _content.get_all_cards():
-        var reward: Dictionary = _profile.card_reward(str(card["id"]))
-        if not reward.is_empty() and reward["commander_id"] == commander_id:
-            xp_label.text += "\n" + ("Unlocked: " if reward["unlocked"] else "Next: ") + str(card["display_name"])
-            if not reward["unlocked"]:
-                xp_label.text += " · Lv. %d + %d wins" % [int(reward["required_level"]), int(reward["required_wins"])]
+    for reward in _profile.mastery_rewards(commander_id):
+        var card: Dictionary = _content.get_card(str(reward["card_id"]))
+        var status := "Unlocked: " if reward["earned"] else ("Dev access: " if reward["unlocked"] else "Next: ")
+        xp_label.text += "\n" + status + str(card["display_name"])
+        if not reward["earned"]:
+            xp_label.text += " · Lv. %d + %d wins" % [int(reward["required_level"]), int(reward["required_wins"])]
     reward_label.hide()
     notice_label.text = _profile.storage_notice()
     show()

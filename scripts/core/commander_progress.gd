@@ -14,10 +14,12 @@ var last_receipt: Dictionary = {}
 var _content: Object
 var _rules: Dictionary
 var _primary_valid := false
+var _developer_access: DeveloperAccess
 var _data := {"schema_version": SCHEMA_VERSION, "match_serial": 0, "commanders": {}, "active_match": {}, "achievements": [], "unlocked_cards": []}
 
-func _init(content: Object, storage_path: String = DEFAULT_PATH) -> void:
+func _init(content: Object, storage_path: String = DEFAULT_PATH, developer_access: DeveloperAccess = null) -> void:
     _content = content
+    _developer_access = developer_access
     _rules = content.get_mastery_rules().duplicate(true)
     path = storage_path
     if not path.is_empty():
@@ -86,6 +88,9 @@ func recover_interrupted_match() -> Dictionary:
     return finish_match(str(pending.get("id", "")), "forfeit") if not pending.is_empty() else {}
 
 func is_card_unlocked(card_id: String) -> bool:
+    return is_card_earned(card_id) or (not _content.get_card(card_id).is_empty() and _developer_access != null and _developer_access.is_enabled())
+
+func is_card_earned(card_id: String) -> bool:
     var card: Dictionary = _content.get_card(card_id)
     return not card.is_empty() and (not card.has("mastery_unlock") or _data["unlocked_cards"].has(card_id))
 
@@ -115,9 +120,23 @@ func card_reward(card_id: String) -> Dictionary:
         return {}
     var commander_id := str(requirement["commander_id"])
     var stats := record(commander_id)
-    return {"card_id": card_id, "commander_id": commander_id, "unlocked": is_card_unlocked(card_id),
+    return {"card_id": card_id, "commander_id": commander_id, "unlocked": is_card_unlocked(card_id), "earned": is_card_earned(card_id),
         "level": int(stats["level"]), "wins": int(stats["wins"]),
         "required_level": int(requirement["level"]), "required_wins": int(requirement["wins"])}
+
+func mastery_rewards(commander_id: String = "") -> Array[Dictionary]:
+    var result: Array[Dictionary] = []
+    for card in _content.get_all_cards():
+        var reward := card_reward(str(card["id"]))
+        if not reward.is_empty() and (commander_id.is_empty() or reward["commander_id"] == commander_id):
+            result.append(reward)
+    result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+        if a["commander_id"] != b["commander_id"]:
+            return str(a["commander_id"]) < str(b["commander_id"])
+        if a["required_level"] != b["required_level"]:
+            return int(a["required_level"]) < int(b["required_level"])
+        return str(a["card_id"]) < str(b["card_id"]))
+    return result
 
 func unlock_description(card_id: String) -> String:
     var reward := card_reward(card_id)
@@ -162,7 +181,7 @@ func _refresh_rewards() -> Dictionary:
             achievements.append(id)
     for card in _content.get_all_cards():
         var reward := card_reward(str(card["id"]))
-        if not reward.is_empty() and not reward["unlocked"] and int(reward["level"]) >= int(reward["required_level"]) and int(reward["wins"]) >= int(reward["required_wins"]):
+        if not reward.is_empty() and not reward["earned"] and int(reward["level"]) >= int(reward["required_level"]) and int(reward["wins"]) >= int(reward["required_wins"]):
             var id := str(card["id"])
             _data["unlocked_cards"].append(id)
             cards.append(id)

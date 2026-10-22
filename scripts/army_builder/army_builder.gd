@@ -72,6 +72,7 @@ func _ready() -> void:
         return
     commander_label.text = str(commander.get("display_name", "Commander"))
     _populate_available_cards()
+    GameState.collection_changed.connect(_refresh)
     _refresh()
 
 func _populate_available_cards() -> void:
@@ -79,10 +80,6 @@ func _populate_available_cards() -> void:
         var id := str(card.get("id", ""))
         var tile := CardTile.new()
         tile.set_content(card)
-        tile.locked = not GameState.commander_progress.is_card_unlocked(id)
-        if card.has("mastery_unlock"):
-            tile.tooltip_text += "\n\n" + GameState.commander_progress.unlock_description(id)
-            tile.tooltip_text += "\nOpen Rewards to see your progress." if tile.locked else "\nMastery reward unlocked."
         tile.toggle_mode = true
         tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         tile.pressed.connect(_card_pressed.bind(id))
@@ -143,6 +140,16 @@ func _refresh_available_cards() -> void:
     for id in available_card_buttons:
         var tile: CardTile = available_card_buttons[id]
         var card := ContentDatabase.get_card(str(id))
+        tile.locked = not GameState.commander_progress.is_card_unlocked(str(id))
+        tile.set_content(card)
+        if card.has("mastery_unlock"):
+            tile.tooltip_text += "\n\n" + GameState.commander_progress.unlock_description(str(id))
+            if tile.locked:
+                tile.tooltip_text += "\nOpen Rewards to see your progress."
+            elif not GameState.commander_progress.is_card_earned(str(id)):
+                tile.tooltip_text += "\nAvailable with developer access. Mastery reward not yet earned."
+            else:
+                tile.tooltip_text += "\nMastery reward unlocked."
         tile.visible = _filter == "all" or (_filter == "theme" and str(card.get("set_id", "")) == theme) or str(card.get("element", "")) == _filter
         tile.set_pressed_no_signal(GameState.army.contains(str(id)))
         tile.queue_redraw()

@@ -4,13 +4,15 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.13.0 — Backline specialists**
+**v0.14.0 — Commander mastery lineup**
+
+Four starting units per Commander, then two mastery rewards at Level 3 + three wins and Level 5 + six wins. Existing collection ownership is retained.
 
 The current playable prototype supports:
 
 - unlimited power-card picks, including after every unit reaches its cap; speed rating caps remain and AI discounts ineffective speed boosts
 - Spriggan, Nymph, Mole and Sticky Slime, each 2/4: elemental backline travel, fire paths, damaging water gushes/pushback, five-second cracks that both armies route around, third-strike damage and shared enemy damage links
-- original pixel art and distinct ability sounds for all four new units, with ordinary collection access and the existing four-card loadout limit
+- original pixel art and distinct ability sounds for all four new units, with mastery collection access and the existing four-card loadout limit
 - tree-free playable grass throughout the battlefield; decorative scenery does not overlap units
 
 - a shared woodland lodge art direction across Commander/army selection, drafting, battle, achievements and menus: original detailed scenery, arched portrait vignettes, rounded carved frames, brass trim and pixel display lettering
@@ -18,7 +20,7 @@ The current playable prototype supports:
 - illustrated blessing offers, achievement medals, a balanced four-Commander gallery and styled settings controls
 
 - **PvP · Coming Soon**: friend matches are paused; the tested private-room implementation is retained
-- eighteen local achievements and four new mastery reward companions, with progress in the Achievements & Rewards journal
+- eighteen local achievements and eight mastery reward units, with progress in the Achievements & Rewards journal
 
 - separate personal PvAI records for every Commander: matches, wins/losses/forfeits, win rate, permanent mastery levels and XP progress
 - full-match win +100 XP, completed loss +25 XP, forfeit +0 XP; every 250 XP earns a level, with no combat stat advantages
@@ -43,7 +45,7 @@ The current playable prototype supports:
 - two original looping music tracks, 35 sound effects and saved volume/accessibility settings
 
 - Fire, Water and Earth starter Commanders
-- 20 ordinary Army cards and 4 mastery reward cards with provisional playtest stats/ability tuning
+- 16 starter Army cards and 8 mastery reward cards with provisional playtest stats/ability tuning
 - exactly 4 unique pre-match Army cards, freely mixed across elements
 - Commander themed-set bonuses when all four selected cards match the theme
 - seeded 3-choice pre-battle drafting
@@ -55,7 +57,7 @@ The current playable prototype supports:
 - deterministic left-vs-right auto-combat after the opening draft
 - automatic Tank → Melee → Backline formation, target locking, movement/collision and ranged spacing
 - Commander skills and the starter roster's data-driven unit abilities
-- sixteen starter Army units and four mastery reward units plus summoned plants, full-field battle playback, HP bars and match heart meters
+- sixteen starter Army units and eight mastery reward units plus summoned plants, full-field battle playback, HP bars and match heart meters
 - eight-direction movement poses, four-direction attacks, neutral idle/death and combat VFX
 - optional sound, reduced motion, HP numbers, pause and keyboard shortcuts
 - seeded match input, Commander-theme quick equip and visible opponent progress
@@ -140,13 +142,15 @@ Records use local browser/device storage and a backup. Clearing site data or usi
 
 Open **Achievements & rewards** on the title screen, or **Rewards** in the Commander gallery/warband builder. Eighteen achievements track completed matches, wins, Commander coverage and mastery milestones. Forfeits do not count as completed matches for achievements. Earned achievements and unlocked units remain permanent on this device.
 
-Reach **Level 3 and three wins** with a Commander to unlock its first new companion automatically:
+Every Commander has four starters and two permanent mastery rewards. Both the required level and win count must be met:
 
-| Commander | Reward | Role | Recruit / cap |
-|---|---|---|---|
-| Fire | Ash Phoenix | Healer with a small healing sanctuary | 1 / 2 |
-| Water | Tidal Guard | Melee with an empowered third strike | 2 / 4 |
-| Earth | Spore Sage | Ranged splash attacker | 1 / 3 |
-| Slime Princess | Jelly Medic | Healer with a medium healing pool | 1 / 3 |
+| Commander | Starters | Level 3 + 3 wins | Level 5 + 6 wins |
+| --- | --- | --- | --- |
+| Fire | Magma Golem, Fire Imp, Sorcerer, Ash Phoenix | Spriggan | Dragon |
+| Water | Ice Giant, Sea Serpent, Penguins, Tidal Guard | Water Wizard | Nymph |
+| Earth | Giant Tree, Bear, Wood Archers, Spore Sage | Pitcher Plant | Mole |
+| Slime Princess | Giant Slime, Slime Cannon, Slime Ball, Jelly Medic | Slime Barrel | Sticky Slime |
 
-All sixteen original cards and four backline specialists are available from the start. Reward cards expand the collection to twenty-four, may be mixed into any Commander's four-card warband, and are not auto-equipped. Click a locked card to see its requirements. Existing qualifying mastery records receive rewards automatically after updating. These new units have initial playtest tuning. Browser/site-data clearing removes local progression; no account or purchase is required.
+Spore Sage is now recruit 2/cap 4. The complete collection has twenty-four cards; any four unique themed cards activate the signature bonus. Rewards may be mixed into any warband and are never auto-equipped. Locked previews show both requirements. Valid existing profiles permanently retain their previous collection, including preset eligibility, and their records/XP stay unchanged. New profiles follow this lineup. Clearing site data removes local progress; no account or purchase is required.
+
+The developer can enter a privately supplied key under **Settings → Developer access** to use all units on that device. The public repository/build contains only a verifier, never the key. Access does not grant mastery, achievements or match records; the journal labels unearned units as developer access. Removing access retains actual earned rewards. Finish or leave a match before changing access. This is local testing access, not account authentication or trusted competitive authorization.

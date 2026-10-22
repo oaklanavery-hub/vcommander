@@ -92,7 +92,52 @@ func open_settings() -> void:
         GameAudio.show_hp_numbers = value
         _apply_accessibility())
     _body.add_child(hp)
+    _button("Developer access" + (" · Active" if GameState.developer_access.is_enabled() else ""), open_developer_access)
     _button("Done", _back_from_page, true).grab_focus()
+
+func open_developer_access() -> void:
+    _page("Developer access", "Use your private developer key to try the complete collection on this device. Mastery and achievements still follow your actual match record.")
+    var enabled := GameState.developer_access.is_enabled()
+    var status := ScreenStyle.label("All %d companions are available with developer access." % ContentDatabase.get_all_cards().size() if enabled else "Developer access is inactive. Normal mastery requirements apply.", 16)
+    status.name = "DeveloperStatus"
+    status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    _body.add_child(status)
+    if GameState.match_started or OnlineSession.active:
+        var notice := ScreenStyle.label("Return to the title before changing collection access.", 16)
+        notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+        _body.add_child(notice)
+    elif enabled:
+        var remove_button := _button("Remove developer access", func():
+            if GameState.remove_developer_access() == OK:
+                open_developer_access()
+            else:
+                status.text = "Could not remove the saved key. Please try again.")
+        remove_button.name = "RemoveDeveloperAccess"
+    else:
+        var key := LineEdit.new()
+        key.name = "DeveloperKey"
+        key.placeholder_text = "Paste your private developer key"
+        key.secret = true
+        key.max_length = DeveloperAccess.MAX_KEY_LENGTH
+        key.custom_minimum_size = Vector2(0, 44)
+        _body.add_child(key)
+        var activate := func():
+            var error := GameState.activate_developer_access(key.text)
+            if error == OK:
+                key.clear()
+                open_developer_access()
+            else:
+                status.text = "That developer key is not valid." if error == ERR_UNAUTHORIZED else "Could not save access. Please try again after returning to the title."
+        var activate_button := _button("Activate", activate, true)
+        activate_button.name = "ActivateDeveloperAccess"
+        key.text_submitted.connect(func(_value: String): activate.call())
+        key.grab_focus()
+    var back := _button("Back to settings", open_settings)
+    var key_input := _body.find_child("DeveloperKey", true, false)
+    if key_input != null:
+        key_input.grab_focus()
+    else:
+        back.grab_focus()
 
 func _volume(title: String, value: float, callback: Callable) -> void:
     var row := HBoxContainer.new()
@@ -149,7 +194,7 @@ func open_help() -> void:
         var detail := ScreenStyle.label(step[1], 16)
         detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
         _body.add_child(detail)
-    var mastery := ScreenStyle.label("Mastery: full-match win +100 XP · loss +25 XP · 250 XP per level. Level 3 + 3 wins unlocks a new unit. Leaving a played match: loss, no XP.", 14)
+    var mastery := ScreenStyle.label("Mastery: win +100 XP · loss +25 XP · 250 XP per level. Rewards: Lv. 3 + 3 wins, then Lv. 5 + 6 wins. Leaving a played match: loss, no XP.", 14)
     mastery.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     _body.add_child(mastery)
     _body.add_child(ScreenStyle.label("30 seconds per pick • Esc: menu • Space: pause battle • 1 / 2 / 4: speed", 14))

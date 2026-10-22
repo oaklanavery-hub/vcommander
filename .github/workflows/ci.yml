@@ -131,6 +131,11 @@ jobs:
           for view in new achievements_new collection_locked partial unlocked achievements_earned collection_unlocked units_battle units_action reward_result; do
             test -s "build/qa/progression_${view}.png"
           done
+          timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_collection_access.gd -- --output-dir=build/qa 2>&1 | tee /tmp/collection-access-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/collection-access-qa.log; then exit 1; fi
+          for view in lineup_rewards_fire lineup_rewards_scrolled developer_inactive developer_active developer_collection developer_rewards; do
+            test -s "build/qa/${view}.png"
+          done
           timeout 90s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tests/test_private_presentation.gd -- --output-dir=build/qa 2>&1 | tee /tmp/private-qa.log
           if grep -E "SCRIPT ERROR:|ERROR:" /tmp/private-qa.log; then
             exit 1
