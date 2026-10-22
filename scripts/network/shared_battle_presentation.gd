@@ -52,6 +52,7 @@ func finish(screen: Control) -> void:
     screen._source.update(session.client.state)
     screen.battlefield.replay_complete = true
     screen.battlefield.finish_replay()
+    screen.reveal_report()
     screen._hearts_meter.refresh(screen._source.match_state)
     var winner := str(screen._source.battle_result.get("winner", "draw"))
     GameAudio.play_effect("victory" if winner == "player" else "loss")

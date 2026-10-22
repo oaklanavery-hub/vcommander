@@ -156,6 +156,12 @@ jobs:
             test -s "build/qa/assassins_${view}.png"
           done
 
+          timeout 90s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_battle_learning.gd -- --output-dir=build/qa 2>&1 | tee /tmp/battle-learning-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/battle-learning-qa.log; then exit 1; fi
+          for view in inspection report_player report_rival report_compact report_large help guide_commander guide_warband guide_draft guide_skill guide_ready guide_battle guide_report guide_complete death_phases death_reduced; do
+            test -s "build/qa/learning_${view}.png"
+          done
+
       - name: Emit bounded native review previews
         if: always()
         run: /usr/bin/python3 tools/emit_visual_review.py
@@ -204,6 +210,7 @@ jobs:
           web_pid=$!
           trap 'kill "$server_pid" "$web_pid" 2>/dev/null || true' EXIT
           python3 tools/check_private_container.py
+          node --test tests/test_browser_clock.cjs
           PVP_PLAYWRIGHT_MODULE="$PWD/build/browser/node_modules/playwright" timeout 360s node tools/check_private_browser.cjs
           if grep -E "SCRIPT ERROR:|ERROR:" /tmp/pvp-server.log; then exit 1; fi
       - uses: actions/upload-artifact@v4

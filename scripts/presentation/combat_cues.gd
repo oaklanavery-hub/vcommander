@@ -47,5 +47,5 @@ static func sound(event: Dictionary) -> String:
     if type == "heal":
         return "heal"
     if type == "defeat":
-        return "defeat"
+        return str(profile.get("death_sound", "defeat"))
     return ""

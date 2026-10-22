@@ -103,10 +103,10 @@ static func _draw_detailed_unit(canvas: CanvasItem, texture: Texture2D, position
     var tint := Color(1.6, 1.5, 1.3) if bool(pose.get("hit", false)) else Color.WHITE
     tint.a = float(pose.get("alpha", 1.0))
     if state == "death":
-        canvas.draw_texture_rect(texture, Rect2(origin + Vector2(0, side * 0.45), Vector2(side, side * 0.55)), false, tint)
+        UnitDeathMotion.draw_body(canvas, texture, position - Vector2(0, bob), side, tint, pose)
         return
     if state == "attack" and pose.has("rig"):
-        var attack_mesh := UnitAttackMotion.mesh(str(pose["rig"]), float(pose.get("charge", 0)), float(pose.get("power", 0)), mirror)
+        var attack_mesh := UnitAttackMotion.mesh(str(pose["rig"]), float(pose.get("charge", 0)), float(pose.get("articulation", pose.get("power", 0))), mirror)
         canvas.draw_mesh(attack_mesh, PixelAtlasArt.standalone(texture), Transform2D(Vector2(side, 0), Vector2(0, side), origin), tint)
         return
     if pose.get("rig") in ["slime", "cannon", "barrel"]:

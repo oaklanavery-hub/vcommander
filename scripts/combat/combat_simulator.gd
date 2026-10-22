@@ -378,7 +378,8 @@ func _spawn_summon_skill_if_active(side_config: Dictionary) -> void:
             "x": position.x,
             "y": position.y,
             "source": "commander_skill",
-            "summoned": true
+            "summoned": true,
+            "unit": _unit_snapshot(unit)
         }))
 
 
@@ -968,11 +969,12 @@ func _resolve_pending_effects() -> void:
         var maximum := float(target.get("max_hp", 1))
         var amount := maxf(0.0, float(heal_info.get("amount", 0.0)))
         target["hp"] = minf(maximum, before + amount)
-        var actual_heal := maxf(0, round(float(target.get("hp", before)) - before))
+        var actual_heal := maxf(0, float(target.get("hp", before)) - before)
         if actual_heal > 0:
             _events.append(BattleEventScript.make("heal", _time, {
                 "target_id": target_id,
                 "amount": actual_heal,
+                "effective_healing": maxf(0, maxf(0, float(target["hp"])) - maxf(0, before)),
                 "hp_after": float(target["hp"]),
                 "source_unit_id": str(heal_info.get("source_unit_id", "")),
                 "source": str(heal_info.get("source", "heal"))
@@ -1022,6 +1024,7 @@ func _apply_damage_event(damage_info: Dictionary, fallback_source: String = "dam
     target["hp"] = float(target.get("hp", 0)) - amount
     var event := BattleEventScript.make("damage", _time, {
         "target_id": target_id, "amount": amount, "hp_after": float(target["hp"]),
+        "hp_loss": minf(amount, maxf(0, hp_before)),
         "source_side": str(damage_info.get("source_side", "")),
         "source_unit_id": str(damage_info.get("source_unit_id", "")),
         "source": str(damage_info.get("source", fallback_source))
@@ -1555,6 +1558,7 @@ func _snapshot() -> Dictionary:
 
 
 func _unit_snapshot(unit: Dictionary) -> Dictionary:
+    var effective_attack_speed := _effective_attack_speed(unit)
     return {
             "id": str(unit.get("id", "")),
             "name": str(unit.get("display_name", "Unit")),
@@ -1566,6 +1570,15 @@ func _unit_snapshot(unit: Dictionary) -> Dictionary:
             "visual_scale": float(unit.get("visual_scale", 1)),
             "spawned_at": float(unit.get("spawned_at", 0)),
             "attack": float(unit.get("attack", 0)),
+            "defense": float(unit.get("defense", 0)),
+            "attack_speed": effective_attack_speed,
+            "aura_slowed": effective_attack_speed < _speed_after_debuffs(unit, "attack_speed"),
+            "movement_speed": 0 if bool(unit.get("stationary", false)) else _speed_after_debuffs(unit, "movement_speed"),
+            "range": float(unit.get("range", 1)),
+            "sample_time": _time,
+            "ability_cooldown": maxf(0, float(unit.get("ability_cooldown", 0))),
+            "attack_ready_at": _time + maxf(0, float(unit.get("attack_timer", 0))),
+            "ability_name": str(unit.get("ability", {}).get("display_name", "Attack")),
             "absorbed_damage": float(unit.get("absorbed_damage", 0)),
             "next_burst_at": float(unit.get("next_burst_at", 0)),
             "burst_seconds": float(unit.get("ability", {}).get("burst_seconds", 10)),

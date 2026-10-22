@@ -43,10 +43,26 @@ var _audio = AudioScript.new()
 var _log_lines: Array[String] = []
 var _hearts_meter := MatchHearts.new()
 var mastery_panel := CommanderMasteryPanel.new()
+var inspector := UnitInspector.new()
+var report_view := BattleReportView.new()
+var report_button := Button.new()
+var _report: Dictionary = {}
 
 func _ready() -> void:
     _source = battle_context if battle_context != null else get_node("/root/GameState")
     ScreenStyle.apply(self)
+    inspector.name = "UnitInspector"
+    $Margin/Main/BattlePanel/Padding.add_child(inspector)
+    inspector.dismissed.connect(_close_inspection)
+    battlefield.unit_selected.connect(_inspect_unit)
+    report_view.name = "BattleReport"
+    add_child(report_view)
+    report_button.name = "BattleReportButton"
+    report_button.text = "Battle report"
+    report_button.pressed.connect(_open_report)
+    $Margin/Main/StatusRow.add_child(report_button)
+    report_button.hide()
+    battlefield.tooltip_text = "Click a companion to inspect its stats and abilities."
     _hearts_meter.name = "MatchHearts"
     var main := get_node("Margin/Main")
     mastery_panel.configure(_source.commander_progress, ContentDatabase, GameAudio)
@@ -111,7 +127,7 @@ func _ready() -> void:
     _refresh_summaries()
     _update_speed_label()
     _update_timer_label()
-    result_label.text = "Battle in progress…"
+    result_label.text = "Battle in progress… Click or tap a companion to inspect."
     if _prelude.active():
         var names: Array[String] = []
         for skill in _prelude.skills:
@@ -147,6 +163,7 @@ func _advance_prelude(delta: float) -> void:
     var events := _prelude.advance(delta)
     var frame := _prelude.frame()
     battlefield.set_playback(frame, frame, 0.0, _prelude.elapsed)
+    _refresh_inspection()
     battlefield.prelude_skills = _prelude.skills if _prelude.active() else []
     battlefield.prelude_time = _prelude.elapsed
     for event in events:
@@ -163,7 +180,7 @@ func _advance_prelude(delta: float) -> void:
         battlefield.prelude_skills = []
         battlefield.set_frame(_frames[0] if not _frames.is_empty() else frame)
         speed_button.disabled = false
-        result_label.text = "Battle in progress…"
+        result_label.text = "Battle in progress… Click or tap a companion to inspect."
         _update_timer_label()
 
 func _advance_frames() -> void:
@@ -177,6 +194,7 @@ func _advance_frames() -> void:
         var next: Dictionary = _frames[mini(_frame_index + 1, _frames.size() - 1)]
         var interval := maxf(0.001, float(next.get("time", 0)) - float(current.get("time", 0)))
         battlefield.set_playback(current, next, (_playback_time - float(current.get("time", 0))) / interval, _playback_time + _end_elapsed)
+        _refresh_inspection()
 
 func _advance_events() -> void:
     while _event_index < _events.size():
@@ -268,6 +286,7 @@ func _finish_replay() -> void:
     battlefield.replay_complete = true
     _hearts_meter.refresh(_source.match_state)
     battlefield.finish_replay()
+    reveal_report()
     var result: Dictionary = _source.battle_result
     var winner := str(result.get("winner", "draw"))
     GameAudio.play_effect("victory" if winner == "player" else "loss")
@@ -293,6 +312,42 @@ func _finish_replay() -> void:
         next_button.text = "Continue to %sRound %d" % ["Sudden Death • " if match_info.sudden_death else "", match_info.round_number + 1]
     next_button.visible = true
     next_button.grab_focus()
+
+func reveal_report() -> void:
+    if not _finished:
+        return
+    _close_inspection()
+    report_button.show()
+    FirstMatchGuide.battle_finished()
+
+func _open_report() -> void:
+    # Completion is gated here as well as on the button: inspection never leaks the result.
+    if not _finished:
+        return
+    if _report.is_empty():
+        _report = BattleReport.build(_source.battle_result)
+    report_view.open(_report, _source.match_state.round_number)
+    FirstMatchGuide.report_opened()
+
+func _inspect_unit(unit: Dictionary) -> void:
+    if unit.is_empty():
+        _close_inspection()
+        return
+    battlefield.selected_id = str(unit.get("id", ""))
+    var display := battlefield.displayed_unit(battlefield.selected_id)
+    inspector.inspect(display, ContentDatabase.get_card(str(display.get("card_id", ""))), battlefield._visual_time, battlefield.frozen_sides.has(str(display.get("side", ""))) and battlefield.frost_coverage() >= 1.0)
+
+func _refresh_inspection() -> void:
+    if inspector.selected_id.is_empty():
+        return
+    var unit := battlefield.displayed_unit(inspector.selected_id)
+    inspector.inspect(unit, ContentDatabase.get_card(str(unit.get("card_id", ""))), battlefield._visual_time, battlefield.frozen_sides.has(str(unit.get("side", ""))) and battlefield.frost_coverage() >= 1.0)
+
+func _close_inspection() -> void:
+    inspector.selected_id = ""
+    inspector.hide()
+    battlefield.selected_id = ""
+    battlefield.queue_redraw()
 
 func _hearts(losses: int) -> String:
     var remaining := clampi(4 - losses, 0, 4)
@@ -353,6 +408,8 @@ func _update_option_labels() -> void:
     hp_button.text = "HP numbers: On" if BattlefieldView.show_hp_numbers else "HP numbers: Off"
 
 func _unhandled_key_input(event: InputEvent) -> void:
+    if report_view.overlay.visible:
+        return
     if playback_driver != null:
         if GameMenu.overlay.visible:
             return

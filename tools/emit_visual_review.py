@@ -20,7 +20,9 @@ VIEWS = (
     "slime_commander", "frozen_field_late", "pvp_lobby",
     "fantasy_gallery_fire", "fantasy_gallery_water", "fantasy_gallery_slime",
     "fantasy_battle_details", "fantasy_blessings",
-    "lineup_rewards_fire", "lineup_rewards_scrolled", "developer_inactive", "developer_active", "developer_collection", "developer_rewards",
+    "learning_inspection", "learning_report_player", "learning_report_rival", "learning_report_compact", "learning_report_large", "learning_help",
+    "learning_guide_commander", "learning_guide_warband", "learning_guide_draft", "learning_guide_skill", "learning_guide_ready", "learning_guide_battle", "learning_guide_report", "learning_guide_complete",
+    "learning_death_phases", "learning_death_reduced", "attack_slam_windup", "attack_slam_recover",
 )
 emitted = 0
 for name in VIEWS:

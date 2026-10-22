@@ -10,6 +10,7 @@ var births: Dictionary = {}
 var death_areas: Array[Dictionary] = []
 var absorption: Dictionary = {}
 var pushbacks: Dictionary = {}
+var ability_uses: Dictionary = {}
 
 func configure(frames: Array, events: Array, event_start: int = 0) -> void:
     shots.clear()
@@ -19,10 +20,16 @@ func configure(frames: Array, events: Array, event_start: int = 0) -> void:
     death_areas.clear()
     absorption.clear()
     pushbacks.clear()
+    ability_uses.clear()
     var by_id := {}
     var pulls := {}
     for event in events.slice(event_start):
         var type := str(event.get("type", ""))
+        if type == "ability" and event.get("kind") in ["backline_transit", "sticky_link", "pull", "absorb_burst"]:
+            var actor := str(event.get("unit_id", ""))
+            if not ability_uses.has(actor):
+                ability_uses[actor] = []
+            ability_uses[actor].append(event.duplicate(true))
         if event.has("absorbed_total") or event.get("kind") == "absorb_burst":
             var id := str(event.get("target_id", event.get("unit_id", "")))
             if not absorption.has(id):
@@ -105,6 +112,11 @@ func health_at(id: String, clock: float, fallback: float) -> float:
     var records: Array = health.get(id, [])
     var index := _last_at(records, clock)
     return maxf(0, float(records[index]["hp"])) if index >= 0 else fallback
+
+func ability_at(id: String, clock: float) -> Dictionary:
+    var records: Array = ability_uses.get(id, [])
+    var index := _last_at(records, clock)
+    return records[index] if index >= 0 else {}
 
 func absorbed_at(id: String, clock: float, fallback: float) -> float:
     var records: Array = absorption.get(id, [])

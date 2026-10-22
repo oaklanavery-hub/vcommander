@@ -95,6 +95,7 @@ func _refresh_all() -> void:
             footer.text = "Round 1 is Army-only. Every pick rerolls all three choices."
         else:
             footer.text = "Armies and buffs persist. All units respawn at full HP each battle."
+    FirstMatchGuide.draft_updated()
 
 func _refresh_offer() -> void:
     for child in offer_row.get_children():

@@ -1,3 +1,4 @@
+const { playbackClockSkew } = require('./browser_clock.cjs');
 // Two isolated browser sessions exercise the real exported Godot UI and server.
 const serverUrl = (() => {
   let value;
@@ -53,11 +54,13 @@ const path = require('node:path');
     await host.screenshot({ path: path.join(output, 'browser_host_opening.png') });
     await guest.waitForFunction(() => window.vcommanderPvpQa?.phase === 'playing');
     await host.waitForFunction(() => window.vcommanderPvpQa?.battle_time >= 0.7);
-    const first = await host.evaluate(() => window.vcommanderPvpQa);
-    const second = await guest.evaluate(() => window.vcommanderPvpQa);
+    const [first, second] = await Promise.all([host, guest].map(tab => tab.evaluate(() => ({
+      ...window.vcommanderPvpQa, observed_at_ms: Date.now()
+    }))));
     if (first.room !== second.room || first.side !== 'player' || second.side !== 'opponent') throw Error('Incorrect private seats');
     if (first.play_at !== second.play_at || first.play_until !== second.play_until) throw Error('Different server timelines');
-    if (Math.abs(first.battle_time - second.battle_time) > 0.5) throw Error('Browser playback clocks diverged');
+    const clockSkew = playbackClockSkew(first, second);
+    if (clockSkew > 0.5) throw Error('Browser playback clocks diverged: ' + JSON.stringify({ clockSkew, first, second }));
     if (!first.controls_locked || !second.controls_locked || !first.local_left || !second.local_left) throw Error('Shared controls or local-left viewpoint failed');
     await host.screenshot({ path: path.join(output, 'browser_host_battle.png') });
     await guest.screenshot({ path: path.join(output, 'browser_guest_battle.png') });
