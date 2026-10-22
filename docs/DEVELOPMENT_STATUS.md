@@ -4,19 +4,18 @@ Verify branch, tree and GitHub checks before resuming. This file is the short ac
 
 ## Verified release
 
-- v0.15.0, main `05e7f37ebee6022b251c25b8f1428ab31c53826f`, merged PR #33.
+- **v0.16.0**, released source `7dfad84e4006a8555f0577541cc4f741716ff217`, [merged PR #35](https://github.com/oaklanavery-hub/vcommander/pull/35).
 - Live: https://oaklanavery-hub.github.io/vcommander/
-- CI [39831261015](https://github.com/oaklanavery-hub/vcommander/actions/runs/39831261015): 40 source suites, 40 pack suites, four JS clock cases, two WebGL2 sessions, production container and 144 native views passed.
-- Deploy [39836962112](https://github.com/oaklanavery-hub/vcommander/actions/runs/39836962112): published source identity, resource/checksum checks and every actual served-pack suite passed.
-- Completed: reports for both armies, current unit inspection, optional real-match guide, attack/death/audio polish. Commander mastery and private developer collection access are preserved.
+- [CI 39849987217](https://github.com/oaklanavery-hub/vcommander/actions/runs/39849987217): 41 source suites, 41 pack suites, four JS clock cases, two WebGL2 sessions, production container and 150 native views passed. Six dedicated layout views were reviewed locally and in CI.
+- [Deploy 39850683713](https://github.com/oaklanavery-hub/vcommander/actions/runs/39850683713): merged-source release gate, Web export, publication and actual served-build verification passed. Manifest version/commit, resources, PCK checksum and every downloaded-pack suite matched. Independently fetched public manifest also reports 0.16.0 at the released source above.
+- Completed: shared draft/battle layout, Commander portraits/hearts and centered round/time, mirrored recruited/cap rosters outside playable ground, centered draft window, live current-HP bar, recruit highlights and readable five-power stacks. Hidden picks, pre-battle skills, 1× start, inspection, reports, guidance, mastery and private developer access are preserved.
 
-## Current task: battlefield layout
+## Completed checkpoint and next action
 
-- Branch `feat/battlefield-layout`, base main `4e67ddb5bcb2f340b6560d453ae708506fe9497c` (merged delivery improvements, PR #34).
-- User approved their two-phase wireframe: persistent mirrored rosters, Commander/life strip, centered round/time, army-health balance bar, and a central draft panel over the arena.
-- Implemented shared MatchStatus/WarbandRoster presentation, reserved rails outside playable ground, centered readable draft choices, current-replay health totals and recruit highlights. Hidden rival picks, pre-battle skills, 1× start, inspection, reports and progression are preserved.
-- Passing focused checks: two-phase layout/state/privacy/HP/stack coverage; existing scene flow, battle presentation, inspection, mastery and Slime presentation suites; Godot import, data/presentation validators, six delivery-tool tests, workflow YAML and diff checks. Six native Compatibility-renderer views were reviewed; all five power stacks fit the standard desktop draft.
-- Next: save/publish this coherent checkpoint, require one complete Actions source/exported-pack/browser/container/native gate, then merge and verify the actual deployment. No gameplay/balance changes. PvP stays Coming Soon; campaign stays KIV; hosting stays free.
+- Implementation branch `feat/battlefield-layout`, base `4e67ddb5bcb2f340b6560d453ae708506fe9497c`. Reviewed source tree `ad63925899041b0c14d12c9ad7a2cb9b3f28fc44` exactly matches the released code commit.
+- Closure branch `docs/release-v0.16`, based on the released source, records this verified handoff only; no runtime changes or new build are needed for the closure.
+- All focused and full checks passed. No deployment, export or implementation step remains. Next: human playtesting or the next explicitly scoped request.
+- No gameplay/balance changes. PvP stays Coming Soon; campaign stays KIV; hosting stays free.
 
 ## Working conventions
 
