@@ -172,3 +172,13 @@ Unlimited power picks and clear playable ground; four 2/4 units with backline tr
 - Optional guided normal first match, replayable from How to play, with safe local pause/exit/restart and isolated completion preference.
 - Stronger attack settling, content-driven collapse/wilt/dissolve/pop deaths, four original cues and reserved important-ability audio capacity; preserve contact timing and reduced motion.
 - No balance audit, progress export/import or training grounds. Campaign remains KIV; PvP stays Coming Soon and hosting stays free.
+
+
+## v0.17 — Approved P0/P1 player experience
+
+- Resumable local adventures with exact draft/RNG/clock/heart/skill state and idempotent final settlement.
+- Effective power previews, seeded public-information AI styles and decision-based difficulty.
+- Default-off one-redraw-per-round experiment for both sides; local pacing evidence with existing overtime unchanged.
+- Factual battle recaps, optional suggestions, larger text, effects intensity, compact scrolling and a direct optional guide entry.
+- Actual browser restart/persistence acceptance, recovery/agency/accessibility regressions and twelve dedicated native views.
+- Campaign KIV, PvP Coming Soon, no P2/P3 expansion or paid infrastructure.

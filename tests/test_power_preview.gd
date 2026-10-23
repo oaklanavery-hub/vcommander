@@ -39,7 +39,7 @@ func run() -> void:
     side["unit_counts"] = counts
     tile.side_config = side
     root.add_child(tile)
-    check(tile.benefit_label.text == "All current units at limit" and not tile.disabled, "no-gain warning remains visible without banning an unlimited power pick")
+    check(tile.benefit_label.text == "All units at limit" and not tile.disabled, "no-gain warning remains visible without banning an unlimited power pick")
     tile.queue_free()
     if not failed:
         print("Power preview tests passed: partial/full caps, rounding/theme parity, future recruits, immutable inputs and legal no-gain cards.")

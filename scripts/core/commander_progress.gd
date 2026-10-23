@@ -270,6 +270,12 @@ func _read_profile(file_path: String) -> Dictionary:
                 if not _counter(receipt[field].get(key)):
                     return {}
                 receipt[field][key] = int(receipt[field][key])
+            var rate = receipt[field].get("win_rate")
+            if not (rate is int or rate is float) or not is_finite(float(rate)) or float(rate) < 0 or float(rate) > 100:
+                return {}
+        for field in ["achievements", "unlocked_cards"]:
+            if not receipt.get(field) is Array or not receipt[field].all(func(id): return id is String and not str(id).is_empty()):
+                return {}
     parsed["last_settlement"] = receipt
     return parsed
 

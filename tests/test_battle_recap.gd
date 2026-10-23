@@ -25,7 +25,7 @@ func run() -> void:
     var recap := BattleReport.recap(result, "player")
     check(recap["facts"][0] == "Frontline gone at 12.0s; 1 ranged/support bodies remained.", "frontline fact uses the final simultaneous death/spawn state, not a transient loss before a split")
     check(recap["facts"][1].contains("71%") and recap["facts"][1].contains("Linked"), "linked-damage share uses effective incoming HP loss")
-    check(recap["suggestion"].contains("option to test"), "advice is distinct from recorded facts and is not a claimed cause of defeat")
+    check(not recap["suggestion"].is_empty() and not recap["facts"].has(recap["suggestion"]), "optional advice is separate from recorded facts")
     check(JSON.stringify(result) == before and recap == BattleReport.recap(result, "player"), "recap is deterministic and read-only")
     var assassin := unit("assassin", "melee")
     assassin["ability_type"] = "backline_transit"

@@ -274,7 +274,8 @@ func _reset_match_runtime() -> void:
         match_insights.finish(_progress_match_id, "forfeit")
     if commander_progress != null and not _progress_match_id.is_empty():
         # A completed match is already settled; repeat calls cannot change its result.
-        commander_progress.finish_match(_progress_match_id, "forfeit")
+        var outcome := ("win" if match_state.winner == "player" else "loss") if match_state.is_complete() else "forfeit"
+        commander_progress.finish_match(_progress_match_id, outcome)
     elif commander_progress != null and not commander_progress.active_match().is_empty():
         commander_progress.finish_match(str(commander_progress.active_match()["id"]), "forfeit")
     if local_store != null:
@@ -385,15 +386,20 @@ func resume_match() -> bool:
         mastery_reward = value.get("reward", {}).duplicate(true)
         if mastery_reward.is_empty() and commander_progress.last_receipt.get("match_id") == _progress_match_id:
             mastery_reward = commander_progress.last_receipt.duplicate(true)
-        opponent_public_side = value["public_side"].duplicate(true)
+        opponent_public_side = decoded["public_side"]
         match_started = true
         battle_result.clear()
         opponent_combat_side.clear()
         if match_state.phase in ["result", "complete"]:
             opponent_combat_side = opponent.get_side(opponent.draft.commander_skill_used_this_round)
             battle_result = CombatSimulatorScript.new().simulate(get_player_combat_side(), opponent_combat_side, match_seed + match_state.round_number * 104729, ContentDatabase.get_game_balance())
+        if match_state.is_complete() and commander_progress.active_match().get("id") == _progress_match_id:
+            # The checkpoint may have reached disk while the final profile write
+            # failed. Retry that settled outcome, never turn it into a forfeit.
+            mastery_reward = commander_progress.finish_match(_progress_match_id, "win" if match_state.winner == "player" else "loss")
         _restoring = false
         recovery_notice = ""
+        checkpoint()
         return true
     recovery_notice = "Saved adventure could not be resumed. Your mastery records have been kept."
     return false
@@ -468,6 +474,37 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
     var public: Dictionary = value["public_side"]
     if not public.get("commander") is Dictionary or not public.get("cards") is Array or not public.get("unit_counts") is Dictionary or not public.get("buffs") is Array:
         return {}
+    if public["commander"].get("id") != value["opponent_commander"] or public["cards"].size() != 4 or not CommanderProgress._counter(public.get("skill_uses_remaining")) or int(public["skill_uses_remaining"]) > 2:
+        return {}
+    var seen_cards := {}
+    for card in public["cards"]:
+        if not card is Dictionary or not card.get("id") is String or not value["opponent_cards"].has(card["id"]) or seen_cards.has(card["id"]):
+            return {}
+        seen_cards[card["id"]] = true
+    if public["unit_counts"].size() != 4:
+        return {}
+    var public_counts := {}
+    for id in public["unit_counts"]:
+        if not seen_cards.has(id) or not CommanderProgress._counter(public["unit_counts"][id]) or int(public["unit_counts"][id]) > int(ContentDatabase.get_card(id)["unit_cap"]):
+            return {}
+        public_counts[id] = int(public["unit_counts"][id])
+    var public_buffs: Array = []
+    var seen_buffs := {}
+    for entry in public["buffs"]:
+        if not entry is Dictionary or not entry.get("definition") is Dictionary or not CommanderProgress._counter(entry.get("stacks")):
+            return {}
+        var id := str(entry["definition"].get("id", ""))
+        var definition := ContentDatabase.get_buff(id)
+        if definition.is_empty() or seen_buffs.has(id):
+            return {}
+        seen_buffs[id] = true
+        public_buffs.append({"definition": definition.duplicate(true), "stacks": int(entry["stacks"])})
+    # Rebuild definitions from current content. Corrupted saved display metadata
+    # can neither inject stats into advice nor crash roster rendering.
+    var restored_public: Dictionary = rival.get_side()
+    restored_public["unit_counts"] = public_counts
+    restored_public["buffs"] = public_buffs
+    restored_public["skill_uses_remaining"] = int(public["skill_uses_remaining"])
     var progress_id: String = value["progress_id"]
     var pending := commander_progress.active_match()
     if progress_id.is_empty() and not pending.is_empty():
@@ -491,4 +528,4 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
     restored_match.history.assign(info["history"])
     for entry in restored_match.history:
         entry["round"] = int(entry["round"])
-    return {"army": armies[0], "draft": player_draft, "opponent": rival, "match": restored_match, "progress_id": progress_id}
+    return {"army": armies[0], "draft": player_draft, "opponent": rival, "match": restored_match, "progress_id": progress_id, "public_side": restored_public}

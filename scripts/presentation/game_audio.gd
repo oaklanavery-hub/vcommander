@@ -50,6 +50,10 @@ var music_volume := 0.55
 var effects_volume := 0.75
 var reduced_motion := false
 var show_hp_numbers := false
+var interface_text_scale := 1.0
+var effects_intensity := 1.0
+var settings_path := SETTINGS_PATH
+var _memory_settings: Dictionary = {}
 var _unlocked := false
 var _context := "menu"
 var _playing_context := ""
@@ -62,6 +66,9 @@ var _effect_streams: Dictionary = {}
 
 func _ready() -> void:
     process_mode = Node.PROCESS_MODE_ALWAYS
+    var arguments := OS.get_cmdline_args()
+    if arguments.has("--script") or arguments.has("-s") or DisplayServer.get_name() == "headless":
+        settings_path = ""
     load_settings()
     for key in MUSIC:
         _music_streams[key] = load(MUSIC[key])
@@ -130,9 +137,24 @@ func _effect_voice(priority: int) -> AudioStreamPlayer:
     return oldest
 
 func _watch_button(node: Node) -> void:
+    if node is Control:
+        _scale_node.call_deferred(node.get_instance_id())
     if node is Button:
-        node.pressed.connect(play_effect.bind("click"))
-        node.mouse_entered.connect(_hover)
+        var click := play_effect.bind("click")
+        if not node.pressed.is_connected(click):
+            node.pressed.connect(click)
+        if not node.mouse_entered.is_connected(_hover):
+            node.mouse_entered.connect(_hover)
+
+func _scale_node(id: int) -> void:
+    var node := instance_from_id(id) as Node
+    if is_instance_valid(node):
+        InterfaceAccessibility.apply_node(node, interface_text_scale)
+
+func set_interface_text_scale(value: float) -> void:
+    interface_text_scale = 1.2 if value > 1.05 else 1.0
+    InterfaceAccessibility.apply_tree(get_tree().root, interface_text_scale)
+    settings_changed.emit()
 
 func _hover() -> void:
     var now := Time.get_ticks_msec()
@@ -155,18 +177,26 @@ func set_effects_volume(value: float) -> void:
 
 func save_settings() -> void:
     var config := ConfigFile.new()
-    for key in ["music_volume", "effects_volume", "reduced_motion", "show_hp_numbers"]:
+    for key in ["music_volume", "effects_volume", "reduced_motion", "show_hp_numbers", "interface_text_scale", "effects_intensity"]:
         config.set_value("presentation", key, get(key))
-    config.save(SETTINGS_PATH)
+        _memory_settings[key] = get(key)
+    if not settings_path.is_empty():
+        config.save(settings_path)
 
 func load_settings() -> void:
     var config := ConfigFile.new()
-    if config.load(SETTINGS_PATH) != OK:
+    if settings_path.is_empty():
+        for key in _memory_settings:
+            config.set_value("presentation", key, _memory_settings[key])
+    elif config.load(settings_path) != OK:
         return
     music_volume = clampf(float(config.get_value("presentation", "music_volume", 0.55)), 0.0, 1.0)
     effects_volume = clampf(float(config.get_value("presentation", "effects_volume", 0.75)), 0.0, 1.0)
     reduced_motion = bool(config.get_value("presentation", "reduced_motion", false))
     show_hp_numbers = bool(config.get_value("presentation", "show_hp_numbers", false))
+    interface_text_scale = 1.2 if float(config.get_value("presentation", "interface_text_scale", 1.0)) > 1.05 else 1.0
+    var density := float(config.get_value("presentation", "effects_intensity", 1.0))
+    effects_intensity = clampf(density, 0.35, 1.0) if is_finite(density) else 1.0
 
 func stop_all() -> void:
     _music.stop()

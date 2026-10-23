@@ -92,6 +92,7 @@ static func card(button: Button, element: String) -> void:
     var hover_pressed := pressed.duplicate() as FantasyFrame
     hover_pressed.bg_color = style.bg_color.lightened(0.15)
     var focus := frame(Color.TRANSPARENT, Color("a6d6cc"), 14)
+    focus.set_border_width_all(3)
     focus.shadow_size = 0
     button.add_theme_stylebox_override("hover", hover)
     button.add_theme_stylebox_override("pressed", pressed)

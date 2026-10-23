@@ -108,7 +108,7 @@ func _select_side(side: String) -> void:
         evidence.name = "BattleObservations"
         evidence.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
         _body.add_child(evidence)
-        var advice := ScreenStyle.label("Try next time: " + str(recap.get("suggestion", "")), 14)
+        var advice := ScreenStyle.label("Optional idea: " + str(recap.get("suggestion", "")), 14)
         advice.name = "BattleSuggestion"
         advice.modulate = Color("c7d0b5")
         advice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

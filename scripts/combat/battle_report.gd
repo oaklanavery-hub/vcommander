@@ -127,7 +127,7 @@ static func recap(result: Dictionary, side: String) -> Dictionary:
             remaining_backline = back
     if lost_frontline >= 0:
         facts.append("Frontline gone at %.1fs; %d ranged/support bodies remained." % [lost_frontline, remaining_backline])
-        suggestion = "Try reinforcing the frontline or sustain before adding another army-wide power. This is an option to test, not a prediction."
+        suggestion = "Reinforce the frontline or add sustain before another army-wide power."
     elif opening_bodies > 0 and not had_frontline:
         facts.append("No frontline bodies were present at the opening.")
         suggestion = "Consider an early frontline recruit to give ranged and healing units time to act."

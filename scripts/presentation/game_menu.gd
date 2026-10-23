@@ -6,6 +6,8 @@ var _previous_pause := false
 var _previous_focus: Control
 var _leave_target := "res://scenes/main_menu/main_menu.tscn"
 var _leave_callback := Callable()
+var _page_scroll: ScrollContainer
+var _page_panel: PanelContainer
 
 func _ready() -> void:
     layer = 50
@@ -41,7 +43,8 @@ func _page(title: String, subtitle: String) -> void:
     overlay.add_child(center)
     center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     var panel := PanelContainer.new()
-    panel.custom_minimum_size = Vector2(650, 0)
+    _page_panel = panel
+    panel.custom_minimum_size = Vector2(minf(700, get_viewport().get_visible_rect().size.x - 48), 0)
     center.add_child(panel)
     var margin := MarginContainer.new()
     for side in ["left", "right", "top", "bottom"]:
@@ -49,12 +52,26 @@ func _page(title: String, subtitle: String) -> void:
     panel.add_child(margin)
     _body = VBoxContainer.new()
     _body.add_theme_constant_override("separation", 10)
-    margin.add_child(_body)
+    _page_scroll = ScrollContainer.new()
+    _page_scroll.name = "MenuScroll"
+    _page_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+    _page_scroll.follow_focus = true
+    margin.add_child(_page_scroll)
+    _body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    _page_scroll.add_child(_body)
+    _body.minimum_size_changed.connect(_fit_page)
     _body.add_child(ScreenStyle.label(title, 32))
     var description := ScreenStyle.label(subtitle, 17)
     description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     _body.add_child(description)
     _body.add_child(HSeparator.new())
+    _fit_page.call_deferred()
+
+func _fit_page() -> void:
+    if not is_instance_valid(_page_scroll) or not is_instance_valid(_body):
+        return
+    var height := get_viewport().get_visible_rect().size.y
+    _page_scroll.custom_minimum_size.y = minf(maxf(80, _body.get_combined_minimum_size().y), maxf(120, height - 104))
 
 func _button(text: String, callback: Callable, primary := false) -> Button:
     var button := Button.new()
@@ -93,6 +110,18 @@ func open_settings() -> void:
         GameAudio.show_hp_numbers = value
         _apply_accessibility())
     _body.add_child(hp)
+    var text_size := CheckButton.new()
+    text_size.name = "LargerText"
+    _skin_toggle(text_size)
+    text_size.text = "Larger interface text"
+    text_size.button_pressed = GameAudio.interface_text_scale > 1.0
+    text_size.toggled.connect(func(value: bool):
+        GameAudio.set_interface_text_scale(1.2 if value else 1.0)
+        _fit_page.call_deferred())
+    _body.add_child(text_size)
+    _volume("Battle effects", GameAudio.effects_intensity, func(value: float):
+        GameAudio.effects_intensity = maxf(0.35, value)
+        _apply_accessibility(), 35)
     var difficulty_row := HBoxContainer.new()
     var difficulty_label := ScreenStyle.label("Next opponent", 16)
     difficulty_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -123,7 +152,10 @@ func open_settings() -> void:
     _body.add_child(redraw)
     _button("Adventure insights", open_insights)
     _button("Developer access" + (" · Active" if GameState.developer_access.is_enabled() else ""), open_developer_access)
-    _button("Done", _back_from_page, true).grab_focus()
+    _button("Done", _back_from_page, true)
+    var first_control := _body.find_child("Music", true, false) as HSlider
+    if first_control != null:
+        first_control.grab_focus()
 
 func open_insights() -> void:
     _page("Your adventure pace", "Recent adventures on this device. These observations help us understand time limits and compare the optional redraw; they do not change battle rules.")
@@ -189,7 +221,7 @@ func open_developer_access() -> void:
     else:
         back.grab_focus()
 
-func _volume(title: String, value: float, callback: Callable) -> void:
+func _volume(title: String, value: float, callback: Callable, minimum: float = 0) -> void:
     var row := HBoxContainer.new()
     row.add_theme_constant_override("separation", 18)
     var label := ScreenStyle.label(title)
@@ -200,13 +232,13 @@ func _volume(title: String, value: float, callback: Callable) -> void:
     slider.add_theme_icon_override("grabber", grip)
     slider.add_theme_icon_override("grabber_highlight", grip)
     slider.name = title.replace(" ", "")
-    slider.min_value = 0
+    slider.min_value = minimum
     slider.max_value = 100
     slider.step = 5
     slider.value = value * 100
     slider.custom_minimum_size = Vector2(280, 34)
     slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    slider.tooltip_text = title + " volume. Set to zero to mute."
+    slider.tooltip_text = "Reduce decorative particles and flashes; projectiles, impacts and active areas stay visible." if minimum > 0 else title + " volume. Set to zero to mute."
     slider.value_changed.connect(func(amount: float): callback.call(amount / 100.0))
     row.add_child(slider)
     var amount := ScreenStyle.label("%d%%" % int(value * 100))
@@ -228,6 +260,7 @@ func _skin_toggle(toggle: CheckButton) -> void:
 func _apply_accessibility() -> void:
     BattlefieldView.reduced_motion = GameAudio.reduced_motion
     BattlefieldView.show_hp_numbers = GameAudio.show_hp_numbers
+    BattleEffects.intensity = GameAudio.effects_intensity
     GameAudio.settings_changed.emit()
 
 func open_help() -> void:

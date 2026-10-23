@@ -25,11 +25,12 @@ func check_modal() -> void:
 func run() -> void:
     root.size = Vector2i(1280, 720)
     _audio = root.get_node("GameAudio")
+    _audio.settings_path = "user://test_player_experience_settings.cfg"
     _menu = root.get_node("GameMenu")
     var state = root.get_node("GameState")
-    _had_settings = FileAccess.file_exists(_audio.SETTINGS_PATH)
+    _had_settings = FileAccess.file_exists(_audio.settings_path)
     if _had_settings:
-        _settings_bytes = FileAccess.get_file_as_bytes(_audio.SETTINGS_PATH)
+        _settings_bytes = FileAccess.get_file_as_bytes(_audio.settings_path)
     for key in ["music_volume", "effects_volume", "reduced_motion", "show_hp_numbers"]:
         _original[key] = _audio.get(key)
     var title = await open_scene("res://scenes/main_menu/main_menu.tscn")
@@ -109,11 +110,11 @@ func run() -> void:
     _audio.set_music_volume(_original["music_volume"])
     _audio.set_effects_volume(_original["effects_volume"])
     if _had_settings:
-        var file := FileAccess.open(_audio.SETTINGS_PATH, FileAccess.WRITE)
+        var file := FileAccess.open(_audio.settings_path, FileAccess.WRITE)
         file.store_buffer(_settings_bytes)
         file.close()
     else:
-        DirAccess.remove_absolute(_audio.SETTINGS_PATH)
+        DirAccess.remove_absolute(_audio.settings_path)
     var decoders: Array[WeakRef] = [_music_decoder()]
     _audio.stop_all()
     _audio.set_context("menu")

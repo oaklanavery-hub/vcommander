@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — P0/P1 player experience
+## v0.17.0 — Player decisions and recoverable adventures
 
 - Recover local PvAI drafts and battles after refresh with the same offers, seed, hearts and skill budgets. Explicit abandonment still forfeits; unwatched battles replay at 1×.
 - Preserve final settlement receipts across restarts and distinguish continuing from replacing a saved adventure.
@@ -9,6 +9,8 @@
 - Optional PvAI redraw experiment gives both sides one free redraw per round without adding a pick or resetting the clock; off by default, with allowance preserved across recovery.
 - Local Adventure insights separates active drafting, simulated duration and actual viewing time, records time-limit/repeated Sudden Death draws, and distinguishes default/experiment samples without changing overtime.
 - Reports add factual frontline/damage/timeout observations and explicitly optional suggestions after complete playback; the report content scrolls independently of its close button and side tabs.
+- Larger interface text, clearer card focus, adjustable decorative battle effects and a direct optional first-adventure guide entry. Compact draft/settings/report content scrolls within its own bounds while hearts, rosters and the full combat field stay available.
+- Add actual WebAssembly/browser persistence acceptance across a full page reload and twelve new native review views; automation keeps presentation preferences isolated from player files.
 
 ## Development workflow
 

@@ -12,7 +12,7 @@ from urllib.parse import parse_qs, urlsplit
 class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         query = parse_qs(urlsplit(self.path).query)
-        if urlsplit(self.path).path == "/index.html" and query.get("qa_role", [""])[0] in ("host", "guest"):
+        if urlsplit(self.path).path == "/index.html" and query.get("qa_role", [""])[0] in ("host", "guest", "local"):
             content = Path(self.directory, "index.html").read_text()
             match = re.search(r"const GODOT_CONFIG = (\{[^\n]+\});", content)
             if not match:
@@ -20,7 +20,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return
             config = json.loads(match.group(1))
             config["args"] = ["--",
-                              "--role=" + query["qa_role"][0], "--room=" + query.get("room", [""])[0]]
+                              "--role=" + query["qa_role"][0], "--room=" + query.get("room", [""])[0],
+                              "--probe-stage=" + query.get("qa_stage", ["prepare"])[0]]
             content = content[:match.start(1)] + json.dumps(config) + content[match.end(1):]
             # Release Web templates disable --script/--scene overrides. Preload
             # Godot's standard project override into this QA browser's memory;

@@ -51,7 +51,7 @@ static func draw_particles(canvas: CanvasItem, at: Vector2, unit: Dictionary, ag
     var progress := clampf((age - 0.08) / (DURATION - 0.08), 0, 1)
     var color := Color(str(profile.get("accent", "b7ac83")))
     color.a = 1 - progress
-    var count := 7 if motion in ["pop", "dissolve"] else 4
+    var count := BattleEffects.particle_count(7 if motion in ["pop", "dissolve"] else 4)
     for index in range(count):
         var angle := float(index) * TAU / count
         var point := at + Vector2(cos(angle) * (4 + progress * 25), -sin(progress * PI) * (14 if motion == "pop" else 5))

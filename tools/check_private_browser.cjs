@@ -39,10 +39,28 @@ const path = require('node:path');
       tab.setDefaultTimeout(180000);
       return tab;
     }
-    const host = await page();
     const address = new URL('http://127.0.0.1:8765/index.html');
     address.searchParams.set('pvp_server', serverUrl.href);
     const base = address.href;
+    const local = await page();
+    await local.goto(base + '&qa_role=local&qa_stage=prepare');
+    await local.waitForFunction(() => window.vcommanderLocalQa?.stage === 'prepare');
+    const prepared = await local.evaluate(() => window.vcommanderLocalQa);
+    if (!prepared.ok || !prepared.persistent || !prepared.continue_visible) throw Error('Local browser checkpoint was not saved');
+    await local.screenshot({ path: path.join(output, 'browser_local_saved.png') });
+    // Allow the engine's normal asynchronous browser filesystem sync, then
+    // replace the entire WebAssembly instance in the same browser context.
+    await local.waitForTimeout(2500);
+    await local.goto(base + '&qa_role=local&qa_stage=restore');
+    await local.waitForFunction(() => window.vcommanderLocalQa?.stage === 'restore');
+    const restored = await local.evaluate(() => window.vcommanderLocalQa);
+    if (!restored.ok || !restored.continue_visible || restored.scene !== 'Draft') throw Error('Actual Continue adventure failed after browser restart');
+    if (JSON.stringify(prepared.snapshot) !== JSON.stringify(restored.snapshot) || restored.clock > prepared.clock || restored.clock < prepared.clock - 0.5) throw Error('Browser recovery changed the offer, seed, allowance or clock');
+    if (JSON.stringify(prepared.opponent_snapshot) !== JSON.stringify(restored.opponent_snapshot) || JSON.stringify(prepared.hearts) !== JSON.stringify(restored.hearts) || prepared.pending !== restored.pending) throw Error('Browser recovery changed the rival, hearts or pending profile identity');
+    await local.screenshot({ path: path.join(output, 'browser_local_resumed.png') });
+    await local.context().close();
+    console.log('Browser local recovery passed: IndexedDB restart, actual Continue button, exact draft/RNG, preserved redraw and clock, no profile loss.');
+    const host = await page();
     await host.goto(base + '&qa_role=host');
     await host.waitForFunction(() => window.vcommanderPvpQa?.room?.length === 6, null,
       { timeout: process.env.PVP_SERVER_URL ? 120000 : 60000 });

@@ -439,6 +439,7 @@ func _update_option_labels() -> void:
     sound_button.text = "Effects: On" if GameAudio.effects_volume > 0 else "Effects: Off"
     BattlefieldView.reduced_motion = GameAudio.reduced_motion
     BattlefieldView.show_hp_numbers = GameAudio.show_hp_numbers
+    BattleEffects.intensity = GameAudio.effects_intensity
     motion_button.text = "Motion: Reduced" if BattlefieldView.reduced_motion else "Motion: Full"
     hp_button.text = "HP numbers: On" if BattlefieldView.show_hp_numbers else "HP numbers: Off"
 

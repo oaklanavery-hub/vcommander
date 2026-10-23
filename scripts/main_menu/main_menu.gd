@@ -13,14 +13,24 @@ func _ready() -> void:
     add_child(margin)
     margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     margin.offset_left = 24
-    margin.offset_top = 76
+    margin.offset_top = 36
     margin.offset_right = -24
-    margin.offset_bottom = -224
+    margin.offset_bottom = -140
+    var scroll := ScrollContainer.new()
+    scroll.name = "Main"
+    scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+    scroll.follow_focus = true
+    margin.add_child(scroll)
+    var center := CenterContainer.new()
+    center.name = "MenuCenter"
+    center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    center.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    scroll.add_child(center)
     var main := VBoxContainer.new()
-    main.name = "Main"
+    main.name = "MenuContents"
     main.alignment = BoxContainer.ALIGNMENT_CENTER
     main.add_theme_constant_override("separation", 12)
-    margin.add_child(main)
+    center.add_child(main)
     var eyebrow := ScreenStyle.label("THE VERDANT CROSSING", 14)
     eyebrow.add_theme_color_override("font_color", Color("c6bd9d"))
     _center_label(eyebrow)
@@ -41,7 +51,8 @@ func _ready() -> void:
     var spacer := Control.new()
     spacer.custom_minimum_size.y = 8
     main.add_child(spacer)
-    if GameState.has_saved_match():
+    var can_continue: bool = GameState.has_saved_match()
+    if can_continue:
         var continue_button := _menu_button("Continue adventure", 52)
         continue_button.name = "ContinueAdventure"
         ScreenStyle.primary(continue_button)
@@ -51,9 +62,16 @@ func _ready() -> void:
     if GameState.has_pending_adventure():
         play_button.text = "New adventure"
     play_button.name = "Play"
-    ScreenStyle.primary(play_button)
+    if not can_continue:
+        ScreenStyle.primary(play_button)
     play_button.pressed.connect(start_game)
     main.add_child(play_button)
+    if not FirstMatchGuide.completed:
+        var guide := _menu_button("First adventure · guided", 44)
+        guide.name = "GuidedFirstAdventure"
+        guide.tooltip_text = "Learn through a normal adventure with optional paused notes. Uses the usual mastery and match rules."
+        guide.pressed.connect(func(): GameMenu.confirm_leave("res://scenes/commander_select/commander_select.tscn", FirstMatchGuide.start))
+        main.add_child(guide)
     var rewards := _menu_button("Achievements & rewards", 44)
     rewards.name = "Achievements"
     rewards.pressed.connect(func(): ProgressJournal.open(get_tree(), scene_file_path))
@@ -69,7 +87,8 @@ func _ready() -> void:
         notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
         notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         main.add_child(notice)
-    play_button.grab_focus()
+    var continue_entry := main.get_node_or_null("ContinueAdventure") as Button
+    (continue_entry if continue_entry != null else play_button).grab_focus()
 
 func _center_label(label: Label) -> void:
     label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

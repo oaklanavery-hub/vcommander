@@ -18,6 +18,7 @@ func _ready() -> void:
     mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
     texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
     ScreenStyle.card(self, str(definition.get("element", "earth")))
+    portrait.name = "PortraitArt"
     add_child(portrait)
     portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     portrait.offset_left = 9
@@ -35,7 +36,9 @@ func _ready() -> void:
     caption.offset_bottom = -5
     caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-    caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    caption.autowrap_mode = TextServer.AUTOWRAP_OFF
+    caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+    caption.set_meta("vc_card_caption", true)
     caption.add_theme_font_size_override("font_size", 16)
     caption.add_theme_font_override("font", ScreenStyle.DISPLAY_FONT)
     caption.text = str(definition.get("display_name", empty_caption))

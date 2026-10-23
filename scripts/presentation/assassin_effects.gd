@@ -19,7 +19,7 @@ static func terrain(field: Control, frame: Dictionary, time: float, reduced: boo
             field.draw_line(a, b, Color(0.9, 0.24, 0.06, alpha * 0.13), radius * 2)
             field.draw_line(a, b, Color(0.22, 0.12, 0.16, alpha * 0.35), radius * 0.8)
             field.draw_line(a, b, Color(0.95, 0.3, 0.08, alpha * 0.8), 3)
-            var steps := maxi(1, int(a.distance_to(b) / 6))
+            var steps := maxi(1, int(a.distance_to(b) / 6 * clampf(BattleEffects.intensity, 0.35, 1.0)))
             for index in range(steps + 1):
                 var p := a.lerp(b, float(index) / float(steps)).round()
                 var seed_value := absf(sin(p.x * 2.17 + p.y * 0.73))
@@ -29,7 +29,7 @@ static func terrain(field: Control, frame: Dictionary, time: float, reduced: boo
                 field.draw_rect(Rect2((p + offset).round(), Vector2(3, rise)), Color(1, 0.37, 0.08, alpha * 0.9))
                 field.draw_rect(Rect2((p + offset + Vector2(1, 2)).round(), Vector2(2, maxf(2, rise - 3))), Color(1, 0.75, 0.2, alpha))
                 field.draw_rect(Rect2((p + offset + Vector2(2, 4)).round(), Vector2(1, 3)), Color(1, 0.94, 0.62, alpha))
-                if int(seed_value * 10) % 3 == 0:
+                if int(seed_value * 10) % 3 == 0 and BattleEffects.intensity >= 0.6:
                     var drift := 4.0 if reduced else fmod(time * 12 + p.x, 11.0)
                     field.draw_rect(Rect2((p + Vector2(sway + 3, -rise - drift)).round(), Vector2(2, 2)), Color(1, 0.7, 0.24, alpha * 0.8))
     for wall in frame.get("obstacles", []):
@@ -116,7 +116,7 @@ static func links(field: Control, frame: Dictionary, known: Dictionary, time: fl
             var p: Vector2 = field._body_point(unit)
             points.append(p)
             field.draw_arc(p, 13, 0, TAU, 12, Color("dda7f3"), 2)
-            for index in range(3):
+            for index in range(BattleEffects.particle_count(3)):
                 field.draw_circle((p + Vector2(-7 + index * 7, 10 + index % 2 * 3)).round(), 2, Color("b7ecc0"))
         if points.size() != 2:
             continue

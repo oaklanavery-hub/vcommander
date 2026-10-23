@@ -58,6 +58,7 @@ func run() -> void:
     restored.free()
     # Crash after profile settlement but before the final checkpoint write.
     var prepared: Dictionary = {}
+    var prepared_profile := ""
     var guard := 0
     while not source.match_state.is_complete() and guard < 12:
         guard += 1
@@ -70,6 +71,7 @@ func run() -> void:
             source.draft.buff_stacks[str(buff["id"])] = 6
         source.checkpoint()
         prepared = source.local_store.candidates()[0]
+        prepared_profile = FileAccess.get_file_as_string(PROFILE)
         check(source.run_battle(), "strengthened integration fixture finishes a legal round")
     check(source.match_state.is_complete(), "fixture reaches a final whole-match result")
     var settled: Dictionary = source.commander_progress.record(source.selected_commander_id)
@@ -79,6 +81,17 @@ func run() -> void:
     check(restored.commander_progress.record(source.selected_commander_id) == settled and restored.mastery_reward == receipt, "persisted receipt prevents duplicate wins/XP and preserves rewards")
     restored.free()
     var completed: Dictionary = source.local_store.candidates()[0]
+    var pending_path := "user://test_match_recovery_pending.json"
+    var pending_file := FileAccess.open(pending_path, FileAccess.WRITE)
+    pending_file.store_string(prepared_profile)
+    pending_file.close()
+    restored = fixture(completed)
+    restored.commander_progress = CommanderProgress.new(db, pending_path)
+    restored.commander_progress.path = ""
+    check(restored.resume_match() and restored.commander_progress.record(source.selected_commander_id) == settled, "a completed checkpoint reconciles an older still-pending profile write")
+    restored.leave_match()
+    check(restored.commander_progress.record(source.selected_commander_id) == settled, "a recovered settled outcome never becomes a forfeit after a failed profile write")
+    restored.free()
     restored = fixture(completed)
     check(restored.resume_match() and restored.match_state.is_complete(), "completed result restores without another reward")
     restored.leave_match()
@@ -93,6 +106,10 @@ func run() -> void:
     invalid["draft"]["unit_counts"][source.army.get_cards()[0]] = 999
     restored = fixture(invalid)
     check(not restored.resume_match() and not restored.match_started, "illegal caps cannot partially restore a game")
+    invalid = completed.duplicate(true)
+    invalid["public_side"]["cards"] = [false, {}, 1, "broken"]
+    restored.local_store.save(invalid)
+    check(not restored.resume_match() and not restored.match_started, "corrupted rival display metadata is rejected before any UI can read it")
     restored.local_store.save({"schema": 1, "content": "old rules"})
     check(not restored.has_saved_match() and not restored.recovery_notice.is_empty(), "incompatible content gives a visible notice")
     check(restored.commander_progress.record(source.selected_commander_id) == settled, "invalid recovery never edits mastery")
@@ -106,7 +123,7 @@ func run() -> void:
     quit(1 if failed else 0)
 
 func cleanup() -> void:
-    for path in [PROFILE, SAVE]:
+    for path in [PROFILE, SAVE, "user://test_match_recovery_pending.json"]:
         for suffix in ["", ".bak", ".tmp"]:
             if FileAccess.file_exists(path + suffix):
                 DirAccess.remove_absolute(ProjectSettings.globalize_path(path + suffix))
