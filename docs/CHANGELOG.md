@@ -4,6 +4,8 @@
 
 - Recover local PvAI drafts and battles after refresh with the same offers, seed, hearts and skill budgets. Explicit abandonment still forfeits; unwatched battles replay at 1×.
 - Preserve final settlement receipts across restarts and distinguish continuing from replacing a saved adventure.
+- Power offers show effective current-army benefit and per-type before/after values from the shared combat formula, including rounding/theme bonuses and capped ratings.
+- Seeded Swarm, Sustain, Burst and Backline pressure opponents use public prior-round evidence. Casual/Standard/Veteran settings change decision consistency and counter priorities without stat or collection advantages.
 
 ## Development workflow
 

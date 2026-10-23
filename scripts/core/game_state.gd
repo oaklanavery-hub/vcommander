@@ -32,6 +32,8 @@ var draft_time_left := 30.0
 var battle_watched := false
 var recovery_notice := ""
 var _restoring := false
+var match_preferences: MatchPreferences
+var active_difficulty := "standard"
 
 func _ready() -> void:
     # Tool scripts receive an in-memory profile and cannot touch a player's records.
@@ -41,6 +43,7 @@ func _ready() -> void:
     developer_access.changed.connect(_on_collection_access_changed)
     commander_progress = CommanderProgressScript.new(ContentDatabase, "" if scripted else CommanderProgressScript.DEFAULT_PATH, developer_access)
     local_store = StoreScript.new("" if scripted else StoreScript.DEFAULT_PATH)
+    match_preferences = MatchPreferences.new("" if scripted else MatchPreferences.DEFAULT_PATH)
     _bind_draft()
     # A refresh preserves the pending identity. A legacy interrupted match still
     # follows the old recovery policy when there is no resumable checkpoint.
@@ -149,7 +152,8 @@ func begin_match(seed_value: int) -> bool:
     match_started = true
     battle_result.clear()
     opponent = AiScript.new()
-    if not opponent.configure(ContentDatabase.get_all_commanders(), commander_progress.available_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571, ContentDatabase.get_game_balance().get("stats", {})):
+    active_difficulty = match_preferences.difficulty
+    if not opponent.configure(ContentDatabase.get_all_commanders(), commander_progress.available_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571, ContentDatabase.get_game_balance().get("stats", {}), {"difficulty": active_difficulty}):
         match_started = false
         return false
     opponent_public_side = opponent.get_side()
@@ -323,6 +327,7 @@ func checkpoint() -> void:
         "army": army.get_cards(), "seed": str(match_seed), "draft": draft.snapshot(),
         "opponent_commander": str(opponent.commander.get("id", "")), "opponent_cards": opponent_ids,
         "opponent_draft": opponent.draft.snapshot(), "opponent_rng": str(opponent._rng.state),
+        "difficulty": active_difficulty, "style": opponent.style, "enemy_evidence": opponent._public_enemy.duplicate(true),
         "public_side": opponent_public_side.duplicate(true), "match": info,
         "progress_id": _progress_match_id, "clock": draft_time_left, "watched": battle_watched,
         "reward": mastery_reward.duplicate(true)
@@ -344,6 +349,7 @@ func resume_match() -> bool:
         opponent = decoded["opponent"]
         match_state = decoded["match"]
         match_seed = int(value["seed"])
+        active_difficulty = str(value.get("difficulty", "standard"))
         _progress_match_id = str(decoded["progress_id"])
         draft_time_left = float(value["clock"])
         battle_watched = bool(value["watched"])
@@ -365,6 +371,8 @@ func resume_match() -> bool:
 
 func _decode_checkpoint(value: Dictionary) -> Dictionary:
     if value.get("schema") != 1 or value.get("content") != _content_fingerprint():
+        return {}
+    if str(value.get("difficulty", "standard")) not in MatchPreferences.DIFFICULTIES or str(value.get("style", "swarm")) not in AiScript.STYLE_NAMES or not value.get("enemy_evidence", {}) is Dictionary:
         return {}
     for key in ["seed", "opponent_rng"]:
         if not value.get(key) is String or not str(value[key]).is_valid_int():
@@ -401,6 +409,9 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
     if not rival.draft.restore(value["opponent_draft"]):
         return {}
     rival._rng.state = int(value["opponent_rng"])
+    rival.difficulty = str(value.get("difficulty", "standard"))
+    rival.style = str(value.get("style", "swarm"))
+    rival._public_enemy = value.get("enemy_evidence", {}).duplicate(true)
     var info: Dictionary = value["match"]
     if not CommanderProgress._counter(info.get("round")) or int(info["round"]) < 1 or info.get("phase") not in ["draft", "result", "complete"] or info.get("winner") not in ["", "player", "opponent"]:
         return {}

@@ -5,6 +5,8 @@ extends Button
 
 var definition: Dictionary = {}
 var stacks := 0
+var side_config: Dictionary = {}
+var benefit_label: Label
 
 func _ready() -> void:
     text = ""
@@ -27,13 +29,13 @@ func _ready() -> void:
     emblem.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
     body.add_child(emblem)
     var heading := ScreenStyle.label(str(definition.get("display_name", "Warband blessing")), 20)
-    heading.custom_minimum_size.y = 54
+    heading.custom_minimum_size.y = 42 if not side_config.is_empty() else 54
     heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     body.add_child(heading)
     var value := ScreenStyle.label("+%d%% %s" % [int(definition.get("percentage", 0)), str(definition.get("stat", "")).replace("_", " ")], 14)
-    value.custom_minimum_size.y = 44
+    value.custom_minimum_size.y = 30 if not side_config.is_empty() else 44
     value.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -47,6 +49,24 @@ func _ready() -> void:
     var rating_cap := int(ContentDatabase.get_game_balance().get("stats", {}).get(str(definition.get("stat", "")) + "_cap", 0))
     if rating_cap > 0:
         tooltip_text += "\nSpeed rating limit: %d. Additional picks do not increase a rating already at its limit." % rating_cap
+    if not side_config.is_empty():
+        var preview := WarbandStats.power_preview(side_config, definition, ContentDatabase.get_game_balance().get("stats", {}))
+        benefit_label = ScreenStyle.label("Improves %d / %d units" % [preview["improved"], preview["total"]], 12)
+        benefit_label.name = "EffectiveBenefit"
+        if int(preview["total"]) == 0:
+            benefit_label.text = "For future recruits"
+        elif int(preview["capped"]) == int(preview["total"]):
+            benefit_label.text = "All current units at limit"
+            benefit_label.modulate = Color("f1b586")
+        elif int(preview["improved"]) == 0:
+            benefit_label.text = "No current stat increase"
+        benefit_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        benefit_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+        body.add_child(benefit_label)
+        tooltip_text += "\n\nNext pick · Current recruited army"
+        for row in preview["rows"]:
+            tooltip_text += "\n%s ×%d: %s → %s" % [row["name"], row["count"], UnitInspection.number(float(row["before"])), UnitInspection.number(float(row["after"]))]
+        tooltip_text += "\nIncludes theme bonuses, rounding and rating limits. Permanent power also affects future recruits."
 
 static func stack_text(buff: Dictionary, count: int) -> String:
     var limit := int(buff.get("max_stacks", 0))

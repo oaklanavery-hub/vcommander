@@ -88,7 +88,7 @@ If time expires, one of the three displayed cards is selected at random. Command
 Selection points must be spent unless no legal card choices remain.
 
 **R028 — Draft information**  
-Buff Cards display effect and stack count. Army cards display summon gain and current/capped unit count.
+Buff Cards display effect and stack count. Local PvAI offers also show how many currently recruited units gain a stat increase; tooltips show per-type before/after values using the exact combat calculation, including theme bonuses, rounding and speed caps. No-gain cards remain legal and permanent buffs also affect future recruits. Army cards display summon gain and current/capped unit count.
 
 **R029 — Current army summary**  
 The player's full current army composition, active Buff stacks, Commander skill uses remaining and round-loss count are visible during drafting.
@@ -397,3 +397,6 @@ Drafting and combat share a centered round/time and Commander/hearts strip, with
 
 **R111 — Optional guided first match**
 Players may start guidance from How to Play. It teaches actual Commander selection, four-card army setup, legal drafting and optional skill selection, normal pre-battle/battle playback, inspection and the report. Short reading panels pause local clocks and restore the prior pause state. Guidance may be ended at any time. The match uses normal rules, records, XP and forfeit behavior; completing guidance creates no extra reward. Only tutorial completion is saved as a separate local preference. Guidance is not available in friend PvP.
+
+**R112 — PvAI styles and difficulty**
+Local opponents use seeded Swarm, Sustain, Burst or Backline pressure plans when assembling and growing a legal four-card army. Settings selects Casual, Standard or Veteran before the next adventure; the active choice is retained on recovery. All difficulties use the same collection, card stats, pick budgets and skill limits. Casual makes less consistent draft decisions; Standard and Veteran weight counters to the player's previous public army, with Veteran using more consistent priorities. Neither sees current hidden picks or future combat results. The rival roster identifies its plan and difficulty. These are heuristic policies, not guarantees that one difficulty always wins a particular seed.

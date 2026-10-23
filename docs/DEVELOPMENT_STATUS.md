@@ -14,10 +14,11 @@ Verify branch, tree and GitHub checks before resuming. This file is the short ac
 ## Active scope — P0/P1 player experience
 
 - Approved 2026-10-23: resumable local PvAI, effective power previews, adaptive AI styles/difficulty, an optional one-redraw experiment, local pacing evidence, factual battle recaps, larger text/effects controls and discoverable guidance.
-- Branch `feat/player-experience`, base `6eaffa7366049821a3e8ffad9eb00441d3d560ad`. Checkpoint 1 complete: bounded atomic snapshots, same-match recovery, remaining pick clock, watched-result boundary and persisted exact-once settlement receipts.
+- Branch `feat/pvai-experience`, base `6eaffa7366049821a3e8ffad9eb00441d3d560ad`. Checkpoint 1 complete: bounded atomic snapshots, same-match recovery, remaining pick clock, watched-result boundary and persisted exact-once settlement receipts.
 - Redraw stays opt-in; overtime rules remain unchanged pending pacing evidence. No P2/P3 expansion, balance audit, training grounds, save transfer, campaign, PvP reopening or paid services.
 - Focused checks passed: project import, `test_match_recovery`, draft system, Commander progress, mastery lifecycle, scene flow and first-match guidance. Recovery checks cover >53-bit seeds/RNG continuation, identical event/frame output, no extra hearts/XP, a final-settlement write interruption, backup and invalid content/caps. Full source/pack/browser/container/native gate remains pending until the remaining checkpoints are ready.
-- Next: actual-benefit power previews and adaptive public-information-only opponent drafting. Then optional redraw, pacing records/recaps and accessibility/native review. Main/base match; the closure-only main commit intentionally skipped CI.
+- Checkpoint 2 complete: shared exact combat/power-preview formula, visible no-gain/partial-cap benefits, four seeded AI plans and Casual/Standard/Veteran decision settings. Focused power-preview, 700-phase existing AI, new public-boundary/counter adaptation, recovery, combat simulation, mastery lifecycle and player-experience suites passed.
+- Next: optional redraw, local pacing records/recaps and accessibility/native review. Remote branch uses `feat/pvai-experience` because an older unrelated branch already occupies the original name. Main/base match; the closure-only main commit intentionally skipped CI.
 
 ## Previous completed checkpoint
 

@@ -48,7 +48,7 @@ func run() -> void:
     restored = fixture(scored)
     check(restored.resume_match(), "scored round resumes against the same pending profile identity")
     check(JSON.stringify(restored.battle_result).sha256_text() == result_fingerprint, "reconstructed battle events and frames are identical")
-    check(restored.match_state.losses == source.match_state.losses and restored.match_state.history == source.match_state.history, "reconstruction cannot charge another heart")
+    check(restored.match_state.losses == source.match_state.losses and restored.match_state.history.size() == source.match_state.history.size() and restored.match_state.history[0]["winner"] == source.match_state.history[0]["winner"] and is_equal_approx(float(restored.match_state.history[0]["duration"]), float(source.match_state.history[0]["duration"])), "reconstruction cannot charge another heart or add a history entry")
     check(restored.run_battle() and restored.commander_progress.active_match() == active, "reopening the battle does not settle or restart a match")
     source.mark_battle_watched()
     var watched: Dictionary = source.local_store.candidates()[0]

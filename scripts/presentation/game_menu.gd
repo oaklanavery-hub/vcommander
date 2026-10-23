@@ -93,6 +93,23 @@ func open_settings() -> void:
         GameAudio.show_hp_numbers = value
         _apply_accessibility())
     _body.add_child(hp)
+    var difficulty_row := HBoxContainer.new()
+    var difficulty_label := ScreenStyle.label("Next opponent", 16)
+    difficulty_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    difficulty_row.add_child(difficulty_label)
+    var difficulty := OptionButton.new()
+    difficulty.name = "OpponentDifficulty"
+    difficulty.custom_minimum_size = Vector2(230, 40)
+    for mode in MatchPreferences.DIFFICULTIES:
+        difficulty.add_item(str(mode).capitalize())
+    difficulty.select(MatchPreferences.DIFFICULTIES.find(GameState.match_preferences.difficulty))
+    difficulty.disabled = GameState.has_pending_adventure()
+    difficulty.tooltip_text = "Casual: gentler drafting. Standard: adapts to public armies. Veteran: more consistent counters. Same stats, collection and legal picks. Change before starting an adventure."
+    difficulty.item_selected.connect(func(index: int):
+        GameState.match_preferences.difficulty = MatchPreferences.DIFFICULTIES[index]
+        GameState.match_preferences.save())
+    difficulty_row.add_child(difficulty)
+    _body.add_child(difficulty_row)
     _button("Developer access" + (" · Active" if GameState.developer_access.is_enabled() else ""), open_developer_access)
     _button("Done", _back_from_page, true).grab_focus()
 

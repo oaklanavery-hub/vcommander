@@ -119,6 +119,7 @@ func _refresh_offer() -> void:
             var blessing := BuffTile.new()
             blessing.definition = ContentDatabase.get_buff(str(option["id"]))
             blessing.stacks = GameState.draft.get_buff_stacks(str(option["id"]))
+            blessing.side_config = GameState.get_player_combat_side()
             button = blessing
         button.custom_minimum_size = Vector2(156, 204)
         button.disabled = GameState.draft.is_phase_complete()
