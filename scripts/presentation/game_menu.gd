@@ -238,7 +238,7 @@ func confirm_leave(target: String = "res://scenes/main_menu/main_menu.tscn", aft
         _button("Keep playing", close, true).grab_focus()
         _button("Leave match", _leave)
         return
-    if not GameState.match_started or GameState.match_state.is_complete():
+    if not GameState.has_pending_adventure() or (GameState.match_started and GameState.match_state.is_complete()):
         _leave()
         return
     var message := "Your current match will end. No match record is counted before your first battle."

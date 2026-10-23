@@ -46,6 +46,7 @@ func _ready() -> void:
         set_process(false)
         return
 
+    _time_left = GameState.draft_time_left
     _refresh_all()
 
 func _process(delta: float) -> void:
@@ -53,6 +54,7 @@ func _process(delta: float) -> void:
         return
 
     _time_left = maxf(0.0, _time_left - delta)
+    GameState.update_draft_clock(_time_left)
     timer_label.text = "%02ds to choose" % int(ceil(_time_left))
     _timer_bar.value = _time_left
     timer_label.modulate = Color("f1a27b") if _time_left < 6 else Color.WHITE
@@ -94,6 +96,8 @@ func _refresh_all() -> void:
         else:
             footer.text = "Armies and buffs persist. All units respawn at full HP each battle."
     FirstMatchGuide.draft_updated()
+    if not GameState.recovery_notice.is_empty():
+        footer.text = GameState.recovery_notice
 
 func _refresh_offer() -> void:
     for child in offer_row.get_children():

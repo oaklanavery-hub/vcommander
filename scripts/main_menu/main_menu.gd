@@ -41,7 +41,15 @@ func _ready() -> void:
     var spacer := Control.new()
     spacer.custom_minimum_size.y = 8
     main.add_child(spacer)
+    if GameState.has_saved_match():
+        var continue_button := _menu_button("Continue adventure", 52)
+        continue_button.name = "ContinueAdventure"
+        ScreenStyle.primary(continue_button)
+        continue_button.pressed.connect(_continue_adventure)
+        main.add_child(continue_button)
     play_button = _menu_button("Play", 56)
+    if GameState.has_pending_adventure():
+        play_button.text = "New adventure"
     play_button.name = "Play"
     ScreenStyle.primary(play_button)
     play_button.pressed.connect(start_game)
@@ -56,6 +64,11 @@ func _ready() -> void:
     var settings := _menu_button("Settings", 44)
     settings.pressed.connect(GameMenu.open_settings)
     main.add_child(settings)
+    if not GameState.recovery_notice.is_empty():
+        var notice := ScreenStyle.label(GameState.recovery_notice, 14)
+        notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+        notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        main.add_child(notice)
     play_button.grab_focus()
 
 func _center_label(label: Label) -> void:
@@ -83,5 +96,11 @@ func _menu_button(text: String, height: float) -> Button:
 
 func start_game() -> void:
     GameAudio.unlock()
-    GameState.leave_match()
-    get_tree().change_scene_to_file("res://scenes/commander_select/commander_select.tscn")
+    GameMenu.confirm_leave("res://scenes/commander_select/commander_select.tscn")
+
+func _continue_adventure() -> void:
+    GameAudio.unlock()
+    if GameState.resume_match():
+        get_tree().change_scene_to_file("res://scenes/draft/draft.tscn" if GameState.match_state.phase == "draft" else "res://scenes/combat/combat.tscn")
+    else:
+        play_button.tooltip_text = GameState.recovery_notice

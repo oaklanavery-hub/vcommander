@@ -153,6 +153,17 @@ func _ready() -> void:
         _advance_prelude(0.0)
     if playback_driver != null:
         playback_driver.attach(self)
+    elif _source == GameState and GameState.battle_watched:
+        # A previously watched result can reopen directly. Unwatched recovery
+        # always replays the same battle from its opening at the normal 1×.
+        _playback_time = _duration
+        _end_elapsed = _tail_length
+        _prelude.elapsed = _prelude.duration
+        battlefield.replay_enabled = true
+        battlefield.prelude_skills = []
+        _advance_frames()
+        _advance_events()
+        _finish_replay()
 
 func _process(delta: float) -> void:
     if playback_driver != null:
@@ -303,6 +314,8 @@ func _finish_replay() -> void:
     if _finished:
         return
     _finished = true
+    if _source == GameState:
+        GameState.mark_battle_watched()
     battlefield.replay_complete = true
     _hearts_meter.refresh(_source.match_state)
     battlefield.finish_replay()

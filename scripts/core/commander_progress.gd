@@ -24,6 +24,7 @@ func _init(content: Object, storage_path: String = DEFAULT_PATH, developer_acces
     path = storage_path
     if not path.is_empty():
         _load_profile()
+    last_receipt = _data.get("last_settlement", {}).duplicate(true)
     var migrated := not read_only and int(_data["schema_version"]) < SCHEMA_VERSION
     if migrated:
         # This frozen content list preserves formerly available cards, including
@@ -58,6 +59,7 @@ func begin_match(commander_id: String) -> String:
     var id := "match:%d" % int(_data["match_serial"])
     _data["active_match"] = {"id": id, "commander_id": commander_id}
     last_receipt.clear()
+    _data["last_settlement"] = {}
     last_save_error = _save_profile()
     return id
 
@@ -80,6 +82,7 @@ func finish_match(match_id: String, outcome: String) -> Dictionary:
     var grants := _refresh_rewards()
     last_receipt = {"achievements": grants["achievements"], "unlocked_cards": grants["unlocked_cards"], "match_id": match_id, "commander_id": commander_id, "outcome": outcome,
         "xp_awarded": gained, "before": before, "after": record(commander_id)}
+    _data["last_settlement"] = last_receipt.duplicate(true)
     last_save_error = _save_profile()
     return last_receipt.duplicate(true)
 
@@ -253,6 +256,21 @@ func _read_profile(file_path: String) -> Dictionary:
         if pending["id"] != "match:%d" % int(parsed["match_serial"]):
             return {}
     parsed["match_serial"] = int(parsed["match_serial"])
+    var receipt = parsed.get("last_settlement", {})
+    if not receipt is Dictionary:
+        return {}
+    if not receipt.is_empty():
+        if receipt.get("match_id") != "match:%d" % int(parsed["match_serial"]) or receipt.get("outcome") not in ["win", "loss", "forfeit"] or not receipt.get("commander_id") is String:
+            return {}
+        if not receipt.get("after") is Dictionary or not receipt.get("before") is Dictionary or not _counter(receipt.get("xp_awarded")):
+            return {}
+        receipt["xp_awarded"] = int(receipt["xp_awarded"])
+        for field in ["before", "after"]:
+            for key in ["wins", "losses", "forfeits", "xp", "played", "level", "xp_in_level", "xp_per_level"]:
+                if not _counter(receipt[field].get(key)):
+                    return {}
+                receipt[field][key] = int(receipt[field][key])
+    parsed["last_settlement"] = receipt
     return parsed
 
 static func _counter(value: Variant) -> bool:

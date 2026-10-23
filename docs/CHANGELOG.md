@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — P0/P1 player experience
+
+- Recover local PvAI drafts and battles after refresh with the same offers, seed, hearts and skill budgets. Explicit abandonment still forfeits; unwatched battles replay at 1×.
+- Preserve final settlement receipts across restarts and distinguish continuing from replacing a saved adventure.
+
 ## Development workflow
 
 - Verified pinned browser/package caching and bounded network setup replace repeated cold installs and multi-minute registry stalls.

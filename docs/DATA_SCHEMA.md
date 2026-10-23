@@ -173,6 +173,8 @@ Pull events provide `source_x/y`, `from_x/y`, `to_x/y` and original target HP fo
 
 ## Validation expectations
 
+`user://local_match.json` is a bounded schema-1 local PvAI checkpoint, atomically replaced with a current backup. It stores the gameplay-content SHA-256 fingerprint, stable Commander/card IDs, string-encoded 64-bit seeds/RNG states, both draft states, match history/hearts, public rival snapshot, pending profile identity, remaining pick time and whether the result was already watched. Replay events/frames and developer credentials are never stored here. Current content and profile identity are validated before a temporary decoded state replaces the running game. A resolved battle is deterministically reconstructed without scoring it again. Commander profiles accept an optional validated `last_settlement` receipt for exact-once recovery; old profiles without it remain valid.
+
 - IDs are unique within each content type.
 - Content groups are nonempty and there is one global balance file. The roster currently contains 4 Commanders, 24 Army cards, 4 themes and 5 Buff Cards, including the Slime Court expansion.
 - Every Commander `signature_set_id` resolves.

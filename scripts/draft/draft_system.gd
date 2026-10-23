@@ -1,6 +1,8 @@
 class_name DraftSystem
 extends RefCounted
 
+signal changed
+
 const DEFAULT_SELECTIONS := 3
 const LOSER_SELECTIONS := 4
 const OFFER_SIZE := 3
@@ -123,6 +125,7 @@ func select_offer(index: int) -> bool:
         refresh_offer()
     else:
         current_offer.clear()
+    changed.emit()
     return true
 
 func auto_select() -> bool:
@@ -145,6 +148,80 @@ func use_commander_skill() -> bool:
         refresh_offer()
     else:
         current_offer.clear()
+    changed.emit()
+    return true
+
+func snapshot() -> Dictionary:
+    return {
+        "seed": str(seed), "rng_state": str(_rng.state),
+        "unit_counts": unit_counts.duplicate(), "buff_stacks": buff_stacks.duplicate(),
+        "offer": current_offer.duplicate(true), "points": selection_points,
+        "round": round_number, "opening": opening_phase, "sudden": sudden_death,
+        "skill_uses": commander_skill_uses, "skill_prepared": commander_skill_used_this_round
+    }
+
+# Configure current content first; validate everything before mutating this draft.
+func restore(value: Dictionary) -> bool:
+    for field in ["seed", "rng_state"]:
+        if not value.get(field) is String or not str(value[field]).is_valid_int():
+            return false
+    for field in ["opening", "sudden", "skill_prepared"]:
+        if not value.get(field) is bool:
+            return false
+    for field in ["points", "round", "skill_uses"]:
+        if not CommanderProgress._counter(value.get(field)):
+            return false
+    if int(value["points"]) > LOSER_SELECTIONS or int(value["round"]) < 1 or int(value["skill_uses"]) > COMMANDER_SKILL_USES_PER_MATCH:
+        return false
+    if bool(value["skill_prepared"]) and int(value["skill_uses"]) == 0:
+        return false
+    for field in ["unit_counts", "buff_stacks"]:
+        if not value.get(field) is Dictionary:
+            return false
+        var definitions: Dictionary = card_definitions if field == "unit_counts" else buff_definitions
+        if value[field].size() != definitions.size():
+            return false
+        for id in value[field]:
+            if not definitions.has(id) or not CommanderProgress._counter(value[field][id]):
+                return false
+            if field == "unit_counts" and int(value[field][id]) > int(definitions[id].get("unit_cap", 0)):
+                return false
+    if not value.get("offer") is Array or value["offer"].size() > OFFER_SIZE:
+        return false
+    var seen := {}
+    for option in value["offer"]:
+        if not option is Dictionary or not option.get("id") is String:
+            return false
+        var id: String = option["id"]
+        if seen.has(id):
+            return false
+        seen[id] = true
+        if option.get("type") == "unit":
+            if not card_definitions.has(id) or int(value["unit_counts"][id]) >= int(card_definitions[id]["unit_cap"]):
+                return false
+        elif option.get("type") == "buff":
+            if not buff_definitions.has(id) or bool(value["opening"]):
+                return false
+        else:
+            return false
+    if (int(value["points"]) > 0) == value["offer"].is_empty():
+        return false
+    seed = int(value["seed"])
+    _rng.seed = seed
+    _rng.state = int(value["rng_state"])
+    unit_counts.clear()
+    buff_stacks.clear()
+    for id in value["unit_counts"]:
+        unit_counts[id] = int(value["unit_counts"][id])
+    for id in value["buff_stacks"]:
+        buff_stacks[id] = int(value["buff_stacks"][id])
+    current_offer.assign(value["offer"])
+    selection_points = int(value["points"])
+    round_number = int(value["round"])
+    opening_phase = bool(value["opening"])
+    sudden_death = bool(value["sudden"])
+    commander_skill_uses = int(value["skill_uses"])
+    commander_skill_used_this_round = bool(value["skill_prepared"])
     return true
 
 func get_unit_count(card_id: String) -> int:

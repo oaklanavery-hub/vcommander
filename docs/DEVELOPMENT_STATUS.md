@@ -11,7 +11,15 @@ Verify branch, tree and GitHub checks before resuming. This file is the short ac
 - Fixed: browser boxes in Next/Battle/recruit arrows. Six original bundled pixel symbols fill display/body font gaps; existing letters/metrics and other configured fallbacks are preserved. The tiny native FontFile resource loads before asset import without installed fonts or a new runtime dependency.
 - Retained: shared draft/battle layout, Commander portraits/hearts/round/time, mirrored recruited/cap rosters, centered draft, live HP bar, five-power stacks, pre-battle skills, 1× start, reports, inspection, guidance, mastery and private developer access.
 
-## Completed checkpoint and next action
+## Active scope — P0/P1 player experience
+
+- Approved 2026-10-23: resumable local PvAI, effective power previews, adaptive AI styles/difficulty, an optional one-redraw experiment, local pacing evidence, factual battle recaps, larger text/effects controls and discoverable guidance.
+- Branch `feat/player-experience`, base `6eaffa7366049821a3e8ffad9eb00441d3d560ad`. Checkpoint 1 complete: bounded atomic snapshots, same-match recovery, remaining pick clock, watched-result boundary and persisted exact-once settlement receipts.
+- Redraw stays opt-in; overtime rules remain unchanged pending pacing evidence. No P2/P3 expansion, balance audit, training grounds, save transfer, campaign, PvP reopening or paid services.
+- Focused checks passed: project import, `test_match_recovery`, draft system, Commander progress, mastery lifecycle, scene flow and first-match guidance. Recovery checks cover >53-bit seeds/RNG continuation, identical event/frame output, no extra hearts/XP, a final-settlement write interruption, backup and invalid content/caps. Full source/pack/browser/container/native gate remains pending until the remaining checkpoints are ready.
+- Next: actual-benefit power previews and adaptive public-information-only opponent drafting. Then optional redraw, pacing records/recaps and accessibility/native review. Main/base match; the closure-only main commit intentionally skipped CI.
+
+## Previous completed checkpoint
 
 - Implementation branch `fix/ui-symbol-font`, base `713bb9c5efa1ad6d474b2ee7f65d16347759187f`; reviewed source tree `30cb7092397af123dc2eac9673a68c65a8ff0d29` exactly matches the released code commit.
 - Font regression shapes actual navigation/recruit/heart/achievement strings at four sizes with OS fallback disabled and checks bundled glyph IDs on real buttons/cards. Browser QA independently checks both actual WebAssembly font chains. Gallery/army/draft arrows were reviewed; font generation is byte-for-byte reproducible.
