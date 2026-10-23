@@ -124,3 +124,14 @@ A small presentation guide orchestrates optional coach panels across the real fi
 Supersede ADR-011's restart-as-forfeit policy for recoverable local PvAI matches. A separate bounded, atomic local snapshot stores content fingerprint, stable IDs, both draft/RNG states, public opponent snapshot, scored match state and selection time. A battle is reconstructed from the same inputs/seed without rescoring an already resolved round. Profile settlement retains its last receipt so recovery across a snapshot/profile write interruption cannot duplicate XP. Explicitly abandoning/replacing a played match still forfeits; merely restarting does not. Invalid/incompatible saves produce visible guidance and never silently replace player records. Automation uses memory or isolated paths.
 
 Extend existing systems for actual power-card benefit previews, opponent styles with public-information-only adaptation and decision-based difficulty, optional one-redraw-per-round PvAI experiments, bounded device-local pacing records and factual post-replay recaps. Keep the default draft/overtime rules until the player opts into the experiment or evidence supports a further decision. Larger-text/effects-intensity preferences and optional first-match entry remain presentation only. Preserve hidden picks, equal collection, pre-battle skills, default 1×, no result skip, existing mastery, Coming Soon PvP, campaign KIV and free hosting.
+
+
+## ADR-020 — Read-only warband guidance and optional match paths
+
+**Status:** accepted for user-approved second P0/P1 research scope (2026-10-23)
+
+Use a separate presentation catalog and pure WarbandGuide for relationships/glossary; show real equipped interactions and the existing four-card theme tradeoff without creating scores or new bonuses. Keep player-facing guidance within the existing builder and scrollable shared menu.
+
+The commander-path prototype is a default-off, match-fixed local rule. Content declares two branches per Commander and narrowly validated generic ability transformations. DraftSystem owns one-pick purchase legality and the stable selected ID; CommanderSpecializations transforms copied ability input once at the simulation boundary. AiController gets the same catalog and uses its own composition. GameState checkpoints both rules and IDs and rebuilds prior public path metadata from trusted content, never from the rival's already-spent hidden draft. Default checkpoints keep their original fingerprint; prototype checkpoints include the technique catalog. No additional scene, account, currency, permanent stat progression or server is introduced. R117 records approved first-version mechanics and provisional values.
+
+Extend bounded local insights with optional composition/path/full-recruitment metadata. Run a small explicit seeded matchup/pacing sample, label it synthetic, and retain the current overtime and bonuses pending human evidence. Existing campaign/PvP and P2/P3 deferrals remain.

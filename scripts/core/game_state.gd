@@ -151,14 +151,16 @@ func begin_match(seed_value: int) -> bool:
         ContentDatabase.get_cards_by_ids(army.get_cards()),
         ContentDatabase.get_all_buffs(),
         match_seed,
-        {"redraw_experiment": match_preferences.redraw_experiment}
+        _draft_options(selected_commander_id, match_preferences.specialization_experiment)
     )
     draft.begin_round(true, false, false)
     match_started = true
     battle_result.clear()
     opponent = AiScript.new()
     active_difficulty = match_preferences.difficulty
-    if not opponent.configure(ContentDatabase.get_all_commanders(), commander_progress.available_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571, ContentDatabase.get_game_balance().get("stats", {}), {"difficulty": active_difficulty, "redraw_experiment": match_preferences.redraw_experiment}):
+    var preferences := _draft_options(selected_commander_id, match_preferences.specialization_experiment)
+    preferences["difficulty"] = active_difficulty
+    if not opponent.configure(ContentDatabase.get_all_commanders(), commander_progress.available_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571, ContentDatabase.get_game_balance().get("stats", {}), preferences):
         match_started = false
         return false
     opponent_public_side = opponent.get_side()
@@ -198,9 +200,9 @@ func run_battle() -> bool:
     )
     var resolved: bool = match_state.resolve_round(str(battle_result.get("winner", "draw")), float(battle_result.get("duration", 0.0)))
     if resolved:
-        var metadata := {"commander": selected_commander_id, "difficulty": active_difficulty, "redraw": draft.redraw_enabled, "outcome": ("win" if match_state.winner == "player" else "loss") if match_state.is_complete() else "ongoing"}
+        var metadata := {"commander": selected_commander_id, "difficulty": active_difficulty, "redraw": draft.redraw_enabled, "specializations": draft.specialization_enabled, "composition": "themed" if is_full_set_active() else "mixed", "outcome": ("win" if match_state.winner == "player" else "loss") if match_state.is_complete() else "ongoing"}
         var history: Dictionary = match_state.history.back()
-        match_insights.record_round(_progress_match_id, metadata, {"round": match_state.round_number, "winner": battle_result.get("winner"), "reason": battle_result.get("reason"), "duration": battle_result.get("duration"), "draft_seconds": _draft_elapsed, "sudden": history.get("sudden_death", false)})
+        match_insights.record_round(_progress_match_id, metadata, {"round": match_state.round_number, "winner": battle_result.get("winner"), "reason": battle_result.get("reason"), "duration": battle_result.get("duration"), "draft_seconds": _draft_elapsed, "sudden": history.get("sudden_death", false), "army_capped": draft._eligible_unit_ids().is_empty()})
     if resolved and match_state.is_complete():
         mastery_reward = commander_progress.finish_match(_progress_match_id, "win" if match_state.winner == "player" else "loss")
     battle_watched = false
@@ -265,7 +267,8 @@ func _build_combat_side(side_id: String, draft_state, skill_active: bool) -> Dic
         "unit_counts": counts,
         "buffs": buff_states,
         "set_bonus": set_bonus,
-        "skill_uses_remaining": draft_state.commander_skill_uses_remaining()
+        "skill_uses_remaining": draft_state.commander_skill_uses_remaining(),
+        "specialization": draft_state.specialization()
     }
 
 func _reset_match_runtime() -> void:
@@ -331,8 +334,14 @@ func has_saved_match() -> bool:
         recovery_notice = "This saved adventure cannot be resumed with the current rules. Starting a new match will ask before retiring it."
     return false
 
-func _content_fingerprint() -> String:
-    return JSON.stringify([ContentDatabase.commanders, ContentDatabase.cards, ContentDatabase.sets, ContentDatabase.buffs, ContentDatabase.balances]).sha256_text()
+func _draft_options(commander_id: String, enabled: bool) -> Dictionary:
+    return {"redraw_experiment": match_preferences.redraw_experiment, "specialization_experiment": enabled, "commander_id": commander_id, "specialization_catalog": ContentDatabase.get_specializations()}
+
+func _content_fingerprint(include_specializations: bool = false) -> String:
+    var definitions: Array = [ContentDatabase.commanders, ContentDatabase.cards, ContentDatabase.sets, ContentDatabase.buffs, ContentDatabase.balances]
+    if include_specializations:
+        definitions.append(ContentDatabase.get_specializations())
+    return JSON.stringify(definitions).sha256_text()
 
 func checkpoint() -> void:
     if _restoring or not match_started or local_store == null:
@@ -350,7 +359,7 @@ func checkpoint() -> void:
     for card in opponent.cards:
         opponent_ids.append(str(card["id"]))
     var error := local_store.save({
-        "schema": 1, "content": _content_fingerprint(), "commander": selected_commander_id,
+        "schema": 1, "content": _content_fingerprint(draft.specialization_enabled), "commander": selected_commander_id,
         "army": army.get_cards(), "seed": str(match_seed), "draft": draft.snapshot(),
         "opponent_commander": str(opponent.commander.get("id", "")), "opponent_cards": opponent_ids,
         "opponent_draft": opponent.draft.snapshot(), "opponent_rng": str(opponent._rng.state),
@@ -405,7 +414,8 @@ func resume_match() -> bool:
     return false
 
 func _decode_checkpoint(value: Dictionary) -> Dictionary:
-    if value.get("schema") != 1 or value.get("content") != _content_fingerprint():
+    var uses_specializations := bool(value.get("draft", {}).get("specialization_enabled", false)) if value.get("draft") is Dictionary else false
+    if value.get("schema") != 1 or value.get("content") != _content_fingerprint(uses_specializations):
         return {}
     if str(value.get("difficulty", "standard")) not in MatchPreferences.DIFFICULTIES or str(value.get("style", "swarm")) not in AiScript.STYLE_NAMES or not value.get("enemy_evidence", {}) is Dictionary:
         return {}
@@ -434,7 +444,7 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
         if not value.get(key) is Dictionary:
             return {}
     var player_draft = DraftSystemScript.new()
-    player_draft.configure(value["army"], ContentDatabase.get_cards_by_ids(value["army"]), ContentDatabase.get_all_buffs(), int(value["seed"]))
+    player_draft.configure(value["army"], ContentDatabase.get_cards_by_ids(value["army"]), ContentDatabase.get_all_buffs(), int(value["seed"]), _draft_options(str(value["commander"]), uses_specializations))
     if not player_draft.restore(value["draft"]):
         return {}
     var rival = AiScript.new()
@@ -443,8 +453,10 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
     rival.commander = ContentDatabase.get_commander(str(value["opponent_commander"])).duplicate(true)
     rival.signature_set = ContentDatabase.get_signature_set(str(rival.commander["signature_set_id"])).duplicate(true)
     rival.cards.assign(ContentDatabase.get_cards_by_ids(value["opponent_cards"]))
-    rival.draft.configure(value["opponent_cards"], rival.cards, ContentDatabase.get_all_buffs(), int(value["seed"]) + 11490)
+    rival.draft.configure(value["opponent_cards"], rival.cards, ContentDatabase.get_all_buffs(), int(value["seed"]) + 11490, _draft_options(str(value["opponent_commander"]), uses_specializations))
     if not rival.draft.restore(value["opponent_draft"]):
+        return {}
+    if rival.draft.specialization_enabled != player_draft.specialization_enabled:
         return {}
     rival._rng.state = int(value["opponent_rng"])
     rival.difficulty = str(value.get("difficulty", "standard"))
@@ -472,6 +484,11 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
     if (info["phase"] == "complete") != (not str(info["winner"]).is_empty()):
         return {}
     var public: Dictionary = value["public_side"]
+    if not public.get("specialization", {}) is Dictionary:
+        return {}
+    var public_specialization := str(public.get("specialization", {}).get("id", ""))
+    if not public_specialization.is_empty() and (not uses_specializations or public_specialization != rival.draft.specialization_id):
+        return {}
     if not public.get("commander") is Dictionary or not public.get("cards") is Array or not public.get("unit_counts") is Dictionary or not public.get("buffs") is Array:
         return {}
     if public["commander"].get("id") != value["opponent_commander"] or public["cards"].size() != 4 or not CommanderProgress._counter(public.get("skill_uses_remaining")) or int(public["skill_uses_remaining"]) > 2:
@@ -505,6 +522,7 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
     restored_public["unit_counts"] = public_counts
     restored_public["buffs"] = public_buffs
     restored_public["skill_uses_remaining"] = int(public["skill_uses_remaining"])
+    restored_public["specialization"] = rival.draft.specialization_options.get(public_specialization, {}).duplicate(true)
     var progress_id: String = value["progress_id"]
     var pending := commander_progress.active_match()
     if progress_id.is_empty() and not pending.is_empty():

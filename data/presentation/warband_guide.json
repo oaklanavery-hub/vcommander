@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "abilities": {
+    "aura_damage": {
+      "name": "Aura damage",
+      "tags": [
+        "area_damage"
+      ],
+      "explanation": "Damages nearby enemies repeatedly while the source is alive. Enemies must remain in range."
+    },
+    "explosion": {
+      "name": "Death explosion",
+      "tags": [
+        "area_damage",
+        "death_effect"
+      ],
+      "explanation": "Explodes when defeated. Its burst, burn and pushback resolve from the death position."
+    },
+    "ranged_aoe": {
+      "name": "Splash attack",
+      "tags": [
+        "ranged",
+        "area_damage"
+      ],
+      "explanation": "A ranged hit also damages nearby enemies. Defense still applies where the ability specifies it."
+    },
+    "ranged_aoe_dot": {
+      "name": "Burning area",
+      "tags": [
+        "ranged",
+        "area_damage"
+      ],
+      "explanation": "Applies damage over time in an area. Refreshing a burn extends its duration rather than adding an independent stack."
+    },
+    "area_heal": {
+      "name": "Healing area",
+      "tags": [
+        "healing"
+      ],
+      "explanation": "Creates a healing area near a wounded ally. Only allies inside benefit, and healing cannot exceed Max HP."
+    },
+    "backline_transit": {
+      "name": "Backline travel",
+      "tags": [
+        "flanker",
+        "control"
+      ],
+      "explanation": "Travels toward the enemy backline. Flame leaves a damaging trail; gush damages and pushes; burrow creates barriers for both armies. Immunity is defined by the unit."
+    },
+    "aura_debuff": {
+      "name": "Slowing aura",
+      "tags": [
+        "control"
+      ],
+      "explanation": "Nearby enemies are slowed while affected. A commander field and a unit aura have their own sources and durations."
+    },
+    "basic_ranged": {
+      "name": "Ranged attack",
+      "tags": [
+        "ranged"
+      ],
+      "explanation": "Attacks from its listed reach. Enemies can intercept projectiles; range alone does not protect against flankers."
+    },
+    "ranged_pushback": {
+      "name": "Ranged pushback",
+      "tags": [
+        "ranged",
+        "control"
+      ],
+      "explanation": "Hits push enemies away if the battlefield and collisions permit. Displacement can also push enemies out of allied damage areas."
+    },
+    "empowered_attack": {
+      "name": "Empowered strike",
+      "tags": [],
+      "explanation": "A specified numbered strike deals increased damage. Attack speed changes how quickly the unit reaches that strike."
+    },
+    "aura_heal": {
+      "name": "Healing aura",
+      "tags": [
+        "healing"
+      ],
+      "explanation": "Restores nearby allies at fixed intervals while the source lives. Position and survival determine its coverage."
+    },
+    "pull_then_melee": {
+      "name": "Pull and bite",
+      "tags": [
+        "control"
+      ],
+      "explanation": "Pulls an enemy toward the source, then fights in melee. A ranged class badge does not mean it stays safely behind the frontline."
+    },
+    "death_split": {
+      "name": "Death spawn",
+      "tags": [
+        "death_spawn",
+        "death_effect"
+      ],
+      "explanation": "Creates temporary children on death. They do not consume draft capacity and cannot split again. An active death-spawn theme can improve their attack."
+    },
+    "ranged_aoe_slow": {
+      "name": "Slowing splash",
+      "tags": [
+        "ranged",
+        "control"
+      ],
+      "explanation": "Slows enemy movement and attack speed in a small area. Repeated applications refresh the slow."
+    },
+    "absorb_burst": {
+      "name": "Stored damage",
+      "tags": [
+        "absorption",
+        "area_damage"
+      ],
+      "explanation": "Prevents and stores part of damage after defense. Periodic bursts release it, then reset; death releases the stored amount with the unit's death multiplier."
+    },
+    "death_damage_area": {
+      "name": "Death pool",
+      "tags": [
+        "area_damage",
+        "death_effect"
+      ],
+      "explanation": "Explodes on death and leaves a temporary damaging area. Enemies outside the area take no pool damage."
+    },
+    "damage_link": {
+      "name": "Damage link",
+      "tags": [
+        "ranged",
+        "link"
+      ],
+      "explanation": "Links up to two enemies. Actual damage from any ally to one is shared with its partner. Shared hits cannot create another share."
+    }
+  },
+  "roles": {
+    "tank": [
+      "frontline"
+    ],
+    "melee": [
+      "frontline"
+    ],
+    "range": [
+      "ranged"
+    ],
+    "healer": [
+      "healing"
+    ]
+  },
+  "relationships": [
+    {
+      "id": "screen",
+      "requires": [
+        "frontline",
+        "ranged"
+      ],
+      "title": "A screen for ranged companions",
+      "text": "{frontline} can screen for {ranged}. Automatic formation considers both armies; enemy flankers and pulls can still reach the backline."
+    },
+    {
+      "id": "heal",
+      "requires": [
+        "healing",
+        "frontline"
+      ],
+      "title": "Keep the screen standing",
+      "text": "{healing} can support {frontline}. Healing depends on coverage and survival, so it is not guaranteed to reach every ally."
+    },
+    {
+      "id": "zone",
+      "requires": [
+        "control",
+        "area_damage"
+      ],
+      "title": "Control and damage areas",
+      "text": "{control} can help {area_damage} keep enemies in reach. Pushback can also move enemies out of a burn or death pool."
+    },
+    {
+      "id": "links",
+      "requires": [
+        "link"
+      ],
+      "title": "Many attackers, one linked pair",
+      "text": "{link} lets allied damage reach a linked partner too. A single marked enemy has no partner to share with."
+    },
+    {
+      "id": "absorb",
+      "requires": [
+        "absorption"
+      ],
+      "title": "Time the stored-damage release",
+      "text": "{absorption} needs enemies nearby when its burst fires. Healing helps it survive, but a death burst and a periodic burst are different outcomes."
+    }
+  ]
+}

@@ -90,6 +90,33 @@ func open_pause() -> void:
     _button("How to play", open_help)
     _button("Return to title", confirm_leave)
 
+func _paragraph(text: String, size: int = 17) -> Label:
+    var label := ScreenStyle.label(text, size)
+    label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    _body.add_child(label)
+    return label
+
+func open_warband_guide() -> void:
+    _page("Your warband's plan", "Relationships to explore. These notes describe possibilities, not a predicted winner.")
+    var cards := ContentDatabase.get_cards_by_ids(GameState.army.get_cards())
+    var guide := WarbandGuide.analyze(cards, GameState.get_selected_signature_set())
+    _paragraph(guide["theme"])
+    _paragraph("Frontline: " + str(guide["frontline"]))
+    for note in guide["notes"]:
+        _paragraph(str(note["title"]), 20)
+        _paragraph(str(note["text"]), 16)
+    if guide["notes"].is_empty():
+        _paragraph("Select companions to see how their abilities can work together.")
+    _button("Ability glossary", open_ability_glossary)
+    _button("Back to warband", close, true).grab_focus()
+
+func open_ability_glossary() -> void:
+    _page("Ability glossary", "A quick reference for the current collection. Card tooltips and battle inspection show each unit's exact values.")
+    for entry in WarbandGuide.glossary():
+        _paragraph(str(entry["name"]), 20)
+        _paragraph(str(entry["explanation"]), 16)
+    _button("Back to warband guide", open_warband_guide, true).grab_focus()
+
 func open_settings() -> void:
     _page("Make yourself comfortable", "Music, sound and accessibility settings are saved on this device.")
     _volume("Music", GameAudio.music_volume, GameAudio.set_music_volume)
@@ -150,6 +177,17 @@ func open_settings() -> void:
         GameState.match_preferences.redraw_experiment = value
         GameState.match_preferences.save())
     _body.add_child(redraw)
+    var specialization := CheckButton.new()
+    specialization.name = "SpecializationExperiment"
+    _skin_toggle(specialization)
+    specialization.text = "Commander paths · prototype, next adventure"
+    specialization.button_pressed = GameState.match_preferences.specialization_experiment
+    specialization.disabled = GameState.has_pending_adventure() or OnlineSession.active
+    specialization.tooltip_text = "Optional local PvAI prototype. From Round 3, both sides may spend one normal pick once per match on a commander path. Off by default; match-only ability changes."
+    specialization.toggled.connect(func(value: bool):
+        GameState.match_preferences.specialization_experiment = value
+        GameState.match_preferences.save())
+    _body.add_child(specialization)
     _button("Adventure insights", open_insights)
     _button("Developer access" + (" · Active" if GameState.developer_access.is_enabled() else ""), open_developer_access)
     _button("Done", _back_from_page, true)
@@ -158,7 +196,7 @@ func open_settings() -> void:
         first_control.grab_focus()
 
 func open_insights() -> void:
-    _page("Your adventure pace", "Recent adventures on this device. These observations help us understand time limits and compare the optional redraw; they do not change battle rules.")
+    _page("Your adventure pace", "Recent adventures on this device. Samples are self-selected; differences do not establish that an experiment caused an outcome.")
     var summary := GameState.match_insights.summary()
     if int(summary["rounds"]) == 0:
         _body.add_child(ScreenStyle.label("Play an adventure to start collecting pacing observations.", 18))
@@ -167,6 +205,10 @@ func open_insights() -> void:
         var totals := ScreenStyle.label(text, 18)
         totals.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
         _body.add_child(totals)
+        _paragraph("Recorded builds: %d themed · %d mixed\nBattles with every army card capped: %d" % [summary["themed_matches"], summary["mixed_matches"], summary["army_capped_rounds"]], 16)
+    for mode in [0, 1]:
+        var sample := GameState.match_insights.summary(-1, mode)
+        _paragraph("Commander paths %s: %d adventures · %.1fs average battle · %d time-limit draws" % ["on" if mode == 1 else "off", sample["matches"], sample["average_battle"], sample["timeouts"]], 16)
     for experiment in [0, 1]:
         var sample := GameState.match_insights.summary(experiment)
         var label := ScreenStyle.label("%s: %d adventures, %d battles, %.1fs average battle" % ["Standard draft" if experiment == 0 else "Redraw experiment", sample["matches"], sample["rounds"], sample["average_battle"]], 15)
@@ -176,6 +218,24 @@ func open_insights() -> void:
     note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     _body.add_child(note)
     _button("Back to settings", open_settings, true).grab_focus()
+
+func open_specializations(on_selected: Callable) -> void:
+    _page("Choose your commander's path", "Prototype · one normal pick, once per adventure, from Round 3. Changes last for this adventure and affect qualifying companions of any theme.")
+    for id in GameState.draft.specialization_options:
+        var branch: Dictionary = GameState.draft.specialization_options[id]
+        _paragraph(str(branch["display_name"]), 22)
+        _paragraph(str(branch["description"]), 17)
+        var affected := CommanderSpecializations.affected(ContentDatabase.get_cards_by_ids(GameState.army.get_cards()), GameState.draft.unit_counts, branch)
+        _paragraph("%d recruited companions benefit now. %s" % [affected["units"], "Applies to %s, including future recruits." % ", ".join(affected["types"]) if not affected["types"].is_empty() else "No matching abilities in this warband."], 15)
+        var button := _button("Choose %s · 1 pick" % branch["display_name"], func():
+            if GameState.draft.choose_specialization(str(branch["id"])):
+                close()
+                GameAudio.play_effect("pick")
+                on_selected.call())
+        button.name = str(id)
+        button.tooltip_text = "\n\n".join(affected["details"])
+        button.disabled = not GameState.draft.can_specialize(str(id))
+    _button("Keep drafting", close, true).grab_focus()
 
 func open_developer_access() -> void:
     _page("Developer access", "Use your private developer key to try the complete collection on this device. Mastery and achievements still follow your actual match record.")

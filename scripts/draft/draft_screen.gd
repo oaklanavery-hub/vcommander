@@ -22,6 +22,7 @@ var _hearts_meter := MatchStatus.new()
 var round_label: Label = _hearts_meter.round_label
 var timer_label: Label = _hearts_meter.timer_label
 var redraw_button := Button.new()
+var specialization_button := Button.new()
 var _offer_scroll := ScrollContainer.new()
 var _draft_actions := HBoxContainer.new()
 
@@ -67,6 +68,12 @@ func _ready() -> void:
     _draft_actions.move_child(redraw_button, 0)
     redraw_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     redraw_button.add_theme_font_size_override("font_size", 14)
+    specialization_button.name = "CommanderPath"
+    specialization_button.custom_minimum_size.y = 36
+    specialization_button.text = "Commander path · 1 pick (C)"
+    specialization_button.tooltip_text = "Prototype: once per adventure from Round 3. Opens two ability paths; reading and cancelling cost no pick. C"
+    specialization_button.pressed.connect(_open_specializations)
+    offer_content.add_child(specialization_button)
 
     if not GameState.match_started:
         footer.text = "No active draft. Return to the Army Builder."
@@ -112,6 +119,8 @@ func _refresh_all() -> void:
     redraw_button.visible = GameState.draft.redraw_enabled and not complete
     redraw_button.disabled = not GameState.draft.can_redraw()
     redraw_button.text = "Redraw · %d left (R)" % (0 if GameState.draft.redraw_used else 1)
+    specialization_button.visible = GameState.draft.specialization_enabled and GameState.draft.specialization_id.is_empty() and GameState.draft.round_number >= GameState.draft.specialization_first_round and not complete
+    specialization_button.disabled = not GameState.draft.can_specialize()
     offer_row.visible = not complete
     _timer_bar.visible = not complete
     offer_content.get_node("Prompt").text = "Your warband is ready" if complete else "Choose one card"
@@ -238,6 +247,13 @@ func _redraw() -> void:
         GameAudio.play_effect("pick")
         _refresh_all()
 
+func _open_specializations() -> void:
+    if not GameState.draft.can_specialize():
+        return
+    GameMenu.open_specializations(func():
+        _time_left = GameState.draft_time_left
+        _refresh_all())
+
 func _start_battle() -> void:
     battle_button.disabled = true
     footer.text = "Preparing battle…"
@@ -259,6 +275,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
         _use_commander_skill()
     elif event.keycode == KEY_R and redraw_button.visible:
         _redraw()
+    elif event.keycode == KEY_C and specialization_button.visible:
+        _open_specializations()
     elif event.keycode == KEY_ENTER and battle_button.visible:
         _start_battle()
     else:

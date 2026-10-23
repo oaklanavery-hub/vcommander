@@ -58,6 +58,9 @@ func simulate(
 ) -> Dictionary:
     _reset(battle_seed, balance)
 
+    player_side = CommanderSpecializations.apply_side(player_side)
+    opponent_side = CommanderSpecializations.apply_side(opponent_side)
+
     _spawn_side(player_side, false, opponent_side)
     _spawn_side(opponent_side, true, player_side)
     var before_skills := _snapshot()
@@ -1537,7 +1540,7 @@ func _snapshot() -> Dictionary:
 
 func _unit_snapshot(unit: Dictionary) -> Dictionary:
     var effective_attack_speed := _effective_attack_speed(unit)
-    return {
+    var result := {
             "id": str(unit.get("id", "")),
             "name": str(unit.get("display_name", "Unit")),
             "element": str(unit.get("element", "earth")),
@@ -1571,6 +1574,11 @@ func _unit_snapshot(unit: Dictionary) -> Dictionary:
             "ability_type": str(unit.get("ability", {}).get("type", "")),
             "aura_radius": _radius_from_value(str(unit.get("ability", {}).get("radius", "small"))) if str(unit.get("ability", {}).get("type", "")).begins_with("aura_") else 0.0
     }
+    var change := str(unit.get("ability", {}).get("specialization_description", ""))
+    if not change.is_empty():
+        result["specialization_description"] = change
+        result["ability_cooldown_seconds"] = float(unit.get("ability", {}).get("cooldown_seconds", 5))
+    return result
 
 
 func _finish_result(winner: String, reason: String) -> Dictionary:

@@ -32,6 +32,12 @@ func _ready() -> void:
     rewards.custom_minimum_size = Vector2(110, 42)
     rewards.pressed.connect(func(): ProgressJournal.open(get_tree(), scene_file_path, GameState.selected_commander_id))
     $Margin/Main/Header.add_child(rewards)
+    var guide := Button.new()
+    guide.name = "WarbandGuide"
+    guide.text = "Warband guide"
+    guide.custom_minimum_size = Vector2(150, 42)
+    guide.pressed.connect(GameMenu.open_warband_guide)
+    $Margin/Main/Header.add_child(guide)
     back_button.pressed.connect(_go_back)
     begin_draft_button.pressed.connect(_begin_draft)
     friend_button = Button.new()
@@ -132,6 +138,10 @@ func _refresh() -> void:
         army_status_label.text += " • " + ScreenStyle.bonus_description(bonus, true) if GameState.is_full_set_active() else " • Mixed warband"
     else:
         army_status_label.text = "Choose %d more companion%s" % [GameState.army.max_slots - cards.size(), "" if cards.size() == 3 else "s"]
+    var guidance := WarbandGuide.analyze(ContentDatabase.get_cards_by_ids(cards), GameState.get_selected_signature_set())
+    army_status_label.tooltip_text = guidance["theme"] + "\nFrontline: " + guidance["frontline"] + "\nOpen Warband guide for interactions and ability explanations."
+    if GameState.army.is_full() and not GameState.is_full_set_active():
+        army_status_label.text += " · Theme bonus inactive (guide)"
     _refresh_available_cards()
     _refresh_presets()
 

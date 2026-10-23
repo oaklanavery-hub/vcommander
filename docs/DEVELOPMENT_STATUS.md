@@ -10,15 +10,19 @@ Verify the actual branch, tree and GitHub checks before resuming. [Older checkpo
 - [Deploy 39936242342](https://github.com/oaklanavery-hub/vcommander/actions/runs/39936242342) passed the same full gate on merged source, release export, publication and served-resource/source/checksum tests. Every regression suite also passed against the actual downloaded public PCK. Explicit final log: `Deployment verified: 0.17.0 at 14c530a701bde2dbe66d79900bc3ab66da2a810d`.
 - Independently fetched public manifest: version 0.17.0, source above, PCK SHA-256 `a3d6db628d59c5351e51a16e322b1d456ae0a9d6a0df999abc8ffee7fa031e24`.
 
-## Completed scope and next action
+## Active scope — approved P0/P1 strategy and learning
 
-- P0: bounded atomic local match recovery preserves both drafts/RNG, pick time, hearts, skill budgets and watched-result boundaries. Exact-once settlement handles both profile/checkpoint write-order interruptions; public display metadata is rebuilt from current content. Explicitly abandoning a played match still forfeits.
-- P0: power previews use the exact shared combat formula and show per-type before/after values, partial/full caps and future-recruit context. Power cards remain unlimited/legal.
-- P1: seeded Swarm/Sustain/Burst/Backline pressure opponents, public-only adaptation and Casual/Standard/Veteran decision-based difficulty with equal stats/collection/pick budgets.
-- P1: default-off one-free-redraw experiment for both sides, no extra pick/time, persisted allowance; bounded local pacing/timeout observations with overtime unchanged. Settings selects next-adventure rules and opens Adventure insights.
-- P1: factual two-sided post-replay observations and separate optional suggestions, reversible larger text, decorative effects intensity, clearer focus, direct optional first-adventure guidance and bounded compact draft/settings/report scrolling. Whole combat field and outside roster rails remain available; essential impacts, hazards, frost and skill timing are retained.
-- Code checkpoint branch `feat/pvai-experience`; closure branch `docs/release-v0.17.0` records verified release/README/history only with `[skip ci]`. No implementation, export or deployment check remains pending. The published pack intentionally identifies the released code commit, not a later documentation-only commit.
-- Next: human playtesting and review local pacing samples before proposing any overtime adjustment. P2/P3 is not approved. No campaign (KIV), public PvP (Coming Soon), broad balance audit, training grounds, save transfer or paid infrastructure was added. Existing mastery, rewards, device-only developer access, pre-battle skills, 1× starts, no skip and pixel fantasy art are retained.
+- User approved the second research round's P0/P1 on 2026-10-23. Base main: `5f767808e52d8af1ba5a5e7086c868f60512149c`; branch `feat/warband-strategy`.
+- Checkpoint 1: data-driven army-builder synergy explanations, exact theme/mixed tradeoff and a compact ability glossary. Acceptance: actual equipped relationships, no invented bonuses/counters, locked previews, responsive native views.
+- Checkpoint 2: default-off local commander-specialization prototype, two content-defined branches per Commander, available from Round 3, once per match at one normal pick. Equal AI access; hidden picks, replay/recovery and next-adventure preference retained. Acceptance: headless legality/behaviour, fresh/default equivalence, resumed/public boundaries, browser and native views.
+- Checkpoint 3: bounded reproducible pacing/themed-versus-hybrid playtest cases with clearly labelled synthetic findings, plus a human playtest procedure using existing Adventure insights. No overtime or blanket balance changes without evidence. Automated results are not human telemetry.
+- Checkpoint 1 implemented: generic read-only relationship catalog, builder entry/tradeoff and scrollable glossary. Focused `test_warband_guide.gd` passed; editor import logged no script errors. Native/browser review remains pending.
+- Checkpoint 2 implemented: eight generic commander paths, pick legality/AI, effective simulation/inspection, default-off preference, stable recovery/public visibility and extra local pacing context. `test_commander_specializations.gd` and content validation passed; no script errors in the editor import.
+- Focused AI/controller/adaptation, redraw/insights, match recovery, battle inspection, warband guide and new strategy-insights suites passed. Eleven native strategy views passed bounds checks at 1280×720 and 1024×600 with larger text; reviewed guide, builder, compact paths and selected draft.
+- Bounded synthetic sample completed: seven of eight fixtures finished; Water hybrid seed `204757` hit the 16-round diagnostic bound with ten timeouts/nine Sudden Death draws. See `docs/STRATEGY_PLAYTEST.md`. No human samples, broad balance conclusion or overtime change is claimed. This is a product decision after the approved release.
+- Final specialization regression passed, including buff-only capped armies, v0.17-shaped checkpoint compatibility, malformed counts, exact resumed specialized battles and current-time cooldowns. Native eleven-view check passed again after wording refinements.
+- Pending: full Actions source/export/browser/container/native gate and deployment.
+- P2/P3 remains outside scope: weekly challenges, cosmetics, sharing, campaign, public PvP, training grounds, save transfer and paid infrastructure.
 
 ## Working conventions
 

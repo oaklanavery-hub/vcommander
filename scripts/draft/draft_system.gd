@@ -28,6 +28,11 @@ var _rng := RandomNumberGenerator.new()
 var redraw_enabled := false
 var redraw_used := false
 var redraws_taken := 0
+var specialization_enabled := false
+var specialization_id := ""
+var specialization_options: Dictionary = {}
+var specialization_first_round := 3
+var specialization_cost := 1
 
 func configure(card_ids: Array, cards: Array, buffs: Array, match_seed: int, options: Dictionary = {}) -> void:
     loadout_card_ids.clear()
@@ -41,6 +46,14 @@ func configure(card_ids: Array, cards: Array, buffs: Array, match_seed: int, opt
     redraw_enabled = bool(options.get("redraw_experiment", false))
     redraw_used = false
     redraws_taken = 0
+    specialization_enabled = bool(options.get("specialization_experiment", false))
+    specialization_id = ""
+    specialization_options.clear()
+    var catalog: Dictionary = options.get("specialization_catalog", {})
+    specialization_first_round = int(catalog.get("first_round", 3))
+    specialization_cost = int(catalog.get("selection_cost", 1))
+    for branch in CommanderSpecializations.options(catalog, str(options.get("commander_id", ""))):
+        specialization_options[str(branch["id"])] = branch
 
     for raw_id in card_ids:
         var card_id := str(raw_id)
@@ -170,6 +183,28 @@ func redraw() -> bool:
     changed.emit(false) # No extra pick and no extra decision time.
     return true
 
+func can_specialize(id: String = "") -> bool:
+    if not specialization_enabled or not specialization_id.is_empty() or round_number < specialization_first_round or opening_phase or selection_points < specialization_cost:
+        return false
+    if id.is_empty():
+        for option_id in specialization_options:
+            if can_specialize(str(option_id)):
+                return true
+        return false
+    return specialization_options.has(id) and not CommanderSpecializations.affected(card_definitions.values(), unit_counts, specialization_options[id])["types"].is_empty()
+
+func choose_specialization(id: String) -> bool:
+    if not can_specialize(id):
+        return false
+    specialization_id = id
+    selection_points -= specialization_cost
+    refresh_offer()
+    changed.emit(true)
+    return true
+
+func specialization() -> Dictionary:
+    return specialization_options.get(specialization_id, {}).duplicate(true)
+
 func snapshot() -> Dictionary:
     return {
         "seed": str(seed), "rng_state": str(_rng.state),
@@ -177,7 +212,8 @@ func snapshot() -> Dictionary:
         "offer": current_offer.duplicate(true), "points": selection_points,
         "round": round_number, "opening": opening_phase, "sudden": sudden_death,
         "skill_uses": commander_skill_uses, "skill_prepared": commander_skill_used_this_round,
-        "redraw_enabled": redraw_enabled, "redraw_used": redraw_used, "redraws_taken": redraws_taken
+        "redraw_enabled": redraw_enabled, "redraw_used": redraw_used, "redraws_taken": redraws_taken,
+        "specialization_enabled": specialization_enabled, "specialization_id": specialization_id
     }
 
 # Configure current content first; validate everything before mutating this draft.
@@ -199,6 +235,12 @@ func restore(value: Dictionary) -> bool:
         return false
     if bool(value.get("redraw_used", false)) and (not bool(value.get("redraw_enabled", false)) or int(value.get("redraws_taken", 0)) == 0):
         return false
+    if not value.get("specialization_enabled", false) is bool or not value.get("specialization_id", "") is String:
+        return false
+    var saved_specialization: String = value.get("specialization_id", "")
+    if not saved_specialization.is_empty():
+        if not bool(value.get("specialization_enabled", false)) or not specialization_options.has(saved_specialization) or int(value["round"]) < specialization_first_round:
+            return false
     for field in ["unit_counts", "buff_stacks"]:
         if not value.get(field) is Dictionary:
             return false
@@ -210,6 +252,8 @@ func restore(value: Dictionary) -> bool:
                 return false
             if field == "unit_counts" and int(value[field][id]) > int(definitions[id].get("unit_cap", 0)):
                 return false
+    if not saved_specialization.is_empty() and CommanderSpecializations.affected(card_definitions.values(), value["unit_counts"], specialization_options[saved_specialization])["types"].is_empty():
+        return false
     if not value.get("offer") is Array or value["offer"].size() > OFFER_SIZE:
         return false
     var seen := {}
@@ -249,6 +293,8 @@ func restore(value: Dictionary) -> bool:
     redraw_enabled = bool(value.get("redraw_enabled", false))
     redraw_used = bool(value.get("redraw_used", false))
     redraws_taken = int(value.get("redraws_taken", 0))
+    specialization_enabled = bool(value.get("specialization_enabled", false))
+    specialization_id = saved_specialization
     return true
 
 func get_unit_count(card_id: String) -> int:

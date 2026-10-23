@@ -411,3 +411,29 @@ Adventure insights keeps bounded, device-local observations for the latest 30 pl
 
 **R115 — Presentation accessibility**
 Settings offers standard or 20% larger body/control text, independent reduced motion and health-number controls, and battle effect intensity from 35–100%. Larger text preserves the world/arena coordinates and readable pixel art; compact draft/settings/report content scrolls within its own bounds. Effect intensity reduces decorative particles and flashes while retaining projectile cores, impact contact, links, barriers, hazard coverage, frost coverage/duration and normal skill timing. Presentation preferences never affect damage, targeting, outcomes or rewards.
+
+
+## Warband strategy and optional commander paths
+
+**R116 — Read-only warband guidance**
+The army builder explains the selected cards' ability relationships, conventional frontline candidates and exact full-theme tradeoff. Mixed armies remain legal and have no partial-theme bonus. A glossary describes current ability behaviours; neither guidance nor a suggestion predicts an outcome, alters formation or adds a combat modifier. Backline travellers are not described as conventional opening frontline. Card tooltips and current-time inspection remain the source of individual ability values; battlefield word labels stay off.
+
+**R117 — Optional commander-path prototype**
+Off by default, Settings may enable commander paths for the next local PvAI adventure. Both sides have two content-defined paths belonging to their selected Commander. From Round 3 onward, once per adventure, a side may choose one path instead of a normal pick, spending exactly one selection and rerolling the normal offer. This resets the next selection's 30-second timer like an ordinary pick. Reading/cancelling the path menu costs nothing and pauses local play. A path must affect at least one equipped card type; currently unrecruited matching cards may benefit later. It is never chosen automatically on timeout. An adventure can finish without choosing a path.
+
+A chosen path modifies only matching unit ability parameters for that adventure, including fresh recruits and normal round resets. It applies to compatible equipped units of any theme, does not activate a missing theme, cannot be replaced and never changes card ownership, mastery, buffs, unit caps or Commander skill budgets. Ability changes are applied once to copied combat input; content definitions remain intact. The same choice/cost/availability rules apply to the AI. Its path choice uses its own recruited composition. Rival current picks, including a new path, stay hidden until battle; public snapshots and recovery preserve that boundary. Sudden Death retains a purchased path without granting another. Friend PvP has no commander paths.
+
+| Commander | Path | Prototype ability change |
+| --- | --- | --- |
+| Fire | Wildfire | Burns and flame trails last 50% longer; damage per tick is unchanged. |
+| Fire | Cinder Circle | Small damaging auras and attack splash radii become medium; other sizes stay unchanged. |
+| Water | Deep Wells | Healing pools last 50% longer; healing aura tick intervals shrink 25%. |
+| Water | Undertow | Small slowing auras become medium; small ranged pushes become moderate; gush contact radius grows 25%. |
+| Earth | Grasping Grove | Healing aura tick intervals and pull cooldowns shrink 25%. |
+| Earth | Rending Strikes | Abilities with a third empowered strike use every second strike; splash attack percentages grow 25%. Ordinary direct hits are unchanged. |
+| Slime | Royal Nursery | Death-split child HP inheritance changes from 50% to 75%. Attack inheritance, child count and one-generation limits are unchanged. |
+| Slime | Stored Surges | Stored burst intervals shrink 20%; slowing splash duration grows 50%. Absorption remains 30% and the death multiplier remains double. |
+
+These values are prototype tuning, not permanent mastery power. The active experiment and stable selected path IDs are saved with both drafts. Default-rule checkpoints from v0.17 remain compatible when other gameplay content is unchanged; opted-in checkpoints additionally fingerprint the path catalog. Current-time inspection and roster tooltips identify applied path changes.
+
+Adventure insights also records themed/mixed composition, whether paths were enabled and rounds with every army card capped. Older observations retain unknown composition. Path-enabled and path-disabled samples can be reviewed separately; these self-selected local samples establish neither causal balance nor difficulty rankings. Existing overtime, unlimited power cards, four-card armies, automatic formation, pre-battle skills, 1× starts and no-skip playback are retained.

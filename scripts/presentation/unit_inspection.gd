@@ -9,14 +9,14 @@ static func describe(unit: Dictionary, card: Dictionary, clock: float, frozen: b
     var remaining := maxf(0, float(unit.get("ability_cooldown", 0)) - maxf(0, clock - float(unit.get("sample_time", clock))))
     var last: Dictionary = unit.get("last_ability", {})
     if not last.is_empty() and float(last.get("time", 0)) > float(unit.get("sample_time", 0)):
-        remaining = maxf(0, float(last["time"]) + float(ability.get("cooldown_seconds", 5)) - clock)
+        remaining = maxf(0, float(last["time"]) + float(unit.get("ability_cooldown_seconds", ability.get("cooldown_seconds", 5))) - clock)
     var cooldown := "Passive ability"
     if type in ["backline_transit", "damage_link", "pull_then_melee"]:
         cooldown = "Ready" if remaining <= 0.001 else "Ready in %.1fs" % remaining
     elif type == "absorb_burst":
         var burst_at := float(unit.get("next_burst_at", clock))
         if last.get("kind") == "absorb_burst" and float(last.get("time", 0)) >= float(unit.get("sample_time", 0)):
-            burst_at = float(last["time"]) + float(ability.get("burst_seconds", 10))
+            burst_at = float(last["time"]) + float(unit.get("burst_seconds", ability.get("burst_seconds", 10)))
         cooldown = "Burst in %.1fs" % maxf(0, burst_at - clock)
     elif type in ["explosion", "death_split", "death_damage_area"]:
         cooldown = "Triggers on death"
@@ -46,7 +46,7 @@ static func describe(unit: Dictionary, card: Dictionary, clock: float, frozen: b
         "role": unit.get("role", card.get("role", "")), "hp": maxf(0, float(unit.get("hp", 0))), "max_hp": unit.get("max_hp", 1),
         "attack": unit.get("attack", 0), "defense": unit.get("defense", 0), "attack_speed": unit.get("attack_speed", 0),
         "movement_speed": unit.get("movement_speed", 0), "range": unit.get("range", 1),
-        "ability": unit.get("ability_name", ability.get("display_name", "Attack")), "description": ability_text(ability),
+        "ability": unit.get("ability_name", ability.get("display_name", "Attack")), "description": ("Base ability: " + ability_text(ability) + "\nPath changes: " + str(unit["specialization_description"])) if unit.has("specialization_description") else ability_text(ability),
         "cooldown": cooldown, "effects": effects, "element": unit.get("element", ""), "side": unit.get("side", "")}
 
 static func ability_text(ability: Dictionary) -> String:

@@ -98,6 +98,12 @@ func refresh() -> void:
     summary.text = "[b]Theme[/b]\n%s\nSkill uses: %d/2" % [theme, int(config.get("skill_uses_remaining", 2))]
     if bool(config.get("commander_skill_active", false)):
         summary.text += " · Prepared"
+    var specialization: Dictionary = config.get("specialization", {})
+    if not specialization.is_empty():
+        summary.text += "\nPath: " + str(specialization.get("display_name", ""))
+        summary.tooltip_text = str(specialization.get("description", ""))
+    else:
+        summary.tooltip_text = ""
     if hidden_picks:
         summary.text += "\nNew picks hidden"
     if rival and config.has("ai_plan"):
