@@ -6,6 +6,7 @@ var sets: Dictionary = {}
 var buffs: Dictionary = {}
 var balances: Dictionary = {}
 var progression: Dictionary = {}
+var tactics: Dictionary = {}
 var load_errors: Array[String] = []
 
 func _ready() -> void:
@@ -18,6 +19,7 @@ func reload() -> void:
     buffs.clear()
     balances.clear()
     progression.clear()
+    tactics.clear()
     load_errors.clear()
 
     _load_json_directory("res://data/commanders", commanders)
@@ -26,6 +28,10 @@ func reload() -> void:
     _load_json_directory("res://data/buffs", buffs)
     _load_json_directory("res://data/balance", balances)
     _load_json_directory("res://data/progression", progression)
+    _load_json_directory("res://data/tactics", tactics)
+
+func get_specializations() -> Dictionary:
+    return tactics.get("commander_specializations", {})
 
 func get_summary() -> Dictionary:
     return {

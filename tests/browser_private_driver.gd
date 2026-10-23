@@ -72,11 +72,24 @@ func _local_recovery_probe() -> void:
         state.select_commander("commander_fire_01")
         state.equip_starter_army()
         state.match_preferences.redraw_experiment = true
+        state.match_preferences.specialization_experiment = true
         state.begin_match(9007199254740999)
-        while not state.draft.is_phase_complete():
-            state.draft.auto_select()
-        state.run_battle()
-        state.begin_next_round()
+        for index in range(2):
+            while not state.draft.is_phase_complete():
+                state.draft.auto_select()
+            state.run_battle()
+            state.begin_next_round()
+        var draft_ui = load("res://scenes/draft/draft.tscn").instantiate()
+        tree.root.add_child(draft_ui)
+        tree.current_scene = draft_ui
+        await tree.process_frame
+        draft_ui.set_process(false)
+        draft_ui.specialization_button.pressed.emit()
+        await tree.process_frame
+        var menu := tree.root.get_node("GameMenu")
+        var path_button: Button = menu._body.find_child("fire_cinder_circle", true, false)
+        path_button.pressed.emit()
+        draft_ui.queue_free()
         state.draft.select_offer(0)
         state.update_draft_clock(11.5)
         state.draft.redraw()
@@ -92,6 +105,7 @@ func _local_recovery_probe() -> void:
         data["clock"] = state.draft_time_left
         data["hearts"] = state.match_state.losses.duplicate()
         data["opponent_snapshot"] = state.opponent.draft.snapshot()
+        data["public_specialization"] = state.opponent_public_side.get("specialization", {}).duplicate(true)
         data["pending"] = state.commander_progress.active_match().get("id", "")
         data["ok"] = continuation != null and state.local_store.last_error == OK and not str(data["pending"]).is_empty()
     elif continuation != null:
@@ -104,9 +118,10 @@ func _local_recovery_probe() -> void:
         data["clock"] = state.draft_time_left
         data["hearts"] = state.match_state.losses.duplicate()
         data["opponent_snapshot"] = state.opponent.draft.snapshot()
+        data["public_specialization"] = state.opponent_public_side.get("specialization", {}).duplicate(true)
         data["pending"] = state.commander_progress.active_match().get("id", "")
         data["scene"] = tree.current_scene.name
-        data["ok"] = tree.current_scene.name == "Draft" and state.draft.redraw_used and not state.draft.can_redraw() and state.match_seed == 9007199254740999 and state.commander_progress.record("commander_fire_01")["played"] == 0
+        data["ok"] = tree.current_scene.name == "Draft" and state.draft.redraw_used and not state.draft.can_redraw() and state.draft.specialization_id == "fire_cinder_circle" and state.draft.specialization_enabled and not state.draft.can_specialize() and state.match_seed == 9007199254740999 and state.commander_progress.record("commander_fire_01")["played"] == 0
     JavaScriptBridge.eval("window.vcommanderLocalQa = " + JSON.stringify(data) + ";", true)
 
 func _process(_delta: float) -> void:

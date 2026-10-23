@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 import sys
 
@@ -38,6 +39,9 @@ def main() -> int:
     sets = read_group(ROOT / "data" / "sets")
     buffs = read_group(ROOT / "data" / "buffs")
     balances = read_group(ROOT / "data" / "balance")
+    tactics = read_group(ROOT / "data" / "tactics")
+    validate_tactics(tactics.get("commander_specializations", {}), commanders, cards)
+    validate_warband_guide(cards)
 
     if not all((commanders, cards, sets, buffs)) or len(balances) != 1:
         raise ValueError("Content groups must be nonempty with exactly one global balance file")
@@ -231,6 +235,65 @@ def main() -> int:
         f"{len(sets)} sets, {len(buffs)} buffs, {len(balances)} balance file"
     )
     return 0
+
+
+def validate_tactics(catalog, commanders, cards):
+    if catalog.get("first_round") != 3 or catalog.get("selection_cost") != 1:
+        raise ValueError("Commander paths require Round 3 and one normal pick")
+    numeric = {"burn_seconds", "trail_seconds", "duration_seconds", "tick_seconds", "contact_radius", "cooldown_seconds", "every_n_attacks", "splash_attack_pct", "child_health_pct", "burst_seconds", "slow_seconds"}
+    enums = {"radius": {"small", "medium", "large"}, "splash_radius": {"small", "medium", "large"}, "pushback": {"small", "moderate", "large"}}
+    seen = set()
+    counts = dict.fromkeys(commanders, 0)
+    for branch in catalog.get("branches", []):
+        ident = branch.get("id")
+        owner = branch.get("commander_id")
+        if not isinstance(ident, str) or not ident or ident in seen or owner not in commanders:
+            raise ValueError("Commander paths need unique IDs and a current Commander")
+        seen.add(ident)
+        counts[owner] += 1
+        if not branch.get("display_name") or not branch.get("description") or not branch.get("changes"):
+            raise ValueError(f"{ident} needs a name, explanation and ability changes")
+        for change in branch["changes"]:
+            field = change.get("field")
+            if field not in numeric | enums.keys() or ("factor" in change) == ("value" in change):
+                raise ValueError(f"Unsupported path change in {ident}")
+            if not isinstance(change.get("ability_types"), list) or not change["ability_types"]:
+                raise ValueError(f"{ident} needs ability selectors")
+            if "factor" in change:
+                value = change["factor"]
+                if field not in numeric or isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not .5 <= value <= 2:
+                    raise ValueError(f"{ident} has an unsafe ability multiplier")
+            elif field in enums:
+                if change["value"] not in enums[field]:
+                    raise ValueError(f"{ident} has an unknown area/push size")
+            else:
+                value = change["value"]
+                require_positive_number(value, f"{ident} {field}")
+                if not math.isfinite(value) or isinstance(value, bool) or (field == "every_n_attacks" and not isinstance(value, int)):
+                    raise ValueError(f"{ident} has an invalid numeric ability value")
+                if field == "child_health_pct" and value > 100:
+                    raise ValueError("Death-split inheritance cannot exceed parent HP")
+            matches = [card["ability"] for card in cards.values() if card["ability"]["type"] in change["ability_types"] and ("mode" not in change or card["ability"].get("mode") == change["mode"]) and field in card["ability"] and ("previous" not in change or card["ability"][field] == change["previous"])]
+            if not matches:
+                raise ValueError(f"{ident} has a change with no matching current ability")
+    if any(count != 2 for count in counts.values()):
+        raise ValueError("Prototype needs two paths per Commander")
+
+
+def validate_warband_guide(cards):
+    guide = json.loads((ROOT / "data/presentation/warband_guide.json").read_text())
+    if guide.get("schema_version") != 1:
+        raise ValueError("Unsupported warband guide schema")
+    abilities = guide.get("abilities", {})
+    for card in cards.values():
+        entry = abilities.get(card["ability"]["type"], {})
+        if not entry.get("name") or not entry.get("explanation") or not isinstance(entry.get("tags"), list):
+            raise ValueError(f"Warband glossary does not explain {card['id']}")
+    tags = {tag for entry in abilities.values() for tag in entry["tags"]}
+    tags.update(tag for values in guide.get("roles", {}).values() for tag in values)
+    for relationship in guide.get("relationships", []):
+        if not relationship.get("id") or not relationship.get("title") or not relationship.get("text") or not relationship.get("requires") or not set(relationship["requires"]) <= tags:
+            raise ValueError("Invalid warband relationship")
 
 
 if __name__ == "__main__":

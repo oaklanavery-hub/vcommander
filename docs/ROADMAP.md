@@ -182,3 +182,11 @@ Unlimited power picks and clear playable ground; four 2/4 units with backline tr
 - Factual battle recaps, optional suggestions, larger text, effects intensity, compact scrolling and a direct optional guide entry.
 - Actual browser restart/persistence acceptance, recovery/agency/accessibility regressions and twelve dedicated native views.
 - Campaign KIV, PvP Coming Soon, no P2/P3 expansion or paid infrastructure.
+
+
+## v0.18 — Approved strategy and learning P0/P1
+
+- Explain equipped warband interactions, ability keywords and the existing full-theme tradeoff.
+- Default-off commander-path prototype with eight content-defined ability branches, normal-pick legality, equal AI rules and exact recovery/public visibility.
+- Extend local pacing context and run a bounded starter-only themed/hybrid diagnostic; publish synthetic findings and human acceptance procedure. A repeated Water-hybrid Sudden Death timeout case needs an overtime product decision.
+- Verify compact/larger-text guidance and actual browser path purchase/reload through the ordinary Continue action. P2/P3 stays deferred.

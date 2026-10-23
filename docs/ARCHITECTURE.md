@@ -239,3 +239,10 @@ LocalMatchStore owns bounded atomic checkpoint IO. GameState validates/assembles
 WarbandStats is the existing exact stat formula shared by combat, actual-benefit previews and public-information opponent priorities. MatchPreferences owns next-match choices. The optional redraw belongs to DraftSystem and emits whether a legal action resets the pick clock; a redraw never resets it. MatchInsights owns bounded local pacing observations and idempotent round/viewing receipts; it never grants progression or changes overtime. BattleReport derives factual recaps from completed recorded events and groups simultaneous deaths/births before considering frontline loss.
 
 InterfaceAccessibility preserves original body/control font sizes so scaling is reversible and does not compound on reparenting. GameAudio owns saved presentation preferences and defers font application by safe instance ID; scripted QA uses isolated/in-memory preferences. Effects intensity changes deterministic decorative drawing only. Draft, report and settings use bounded local scrolling at compact sizes while the existing full-field combat view and outside roster rails remain intact.
+
+
+## Warband strategy
+
+`WarbandGuide` is read-only presentation analysis over the equipped cards and current signature definition. Its catalog is separate from gameplay. Existing GameMenu renders bounded guidance and glossary pages; the Army Builder continues to invoke ordinary equip validation.
+
+`CommanderSpecializations` is a pure generic transformation over content-defined ability changes. ContentDatabase loads the technique catalog. DraftSystem owns match-fixed opt-in state, compatible owner-specific options and the once-per-match normal-pick purchase. CombatSimulator applies the chosen transformation to copied side input before formation/spawns. Both sides use the same path. GameState keeps normal content identity for default checkpoints and additionally fingerprints the catalog only for prototype adventures; reconstruction restores the saved public path rather than the rival's current hidden one. Private-room configuration supplies no path options and stays on existing rules.

@@ -53,7 +53,9 @@ func configure(commanders: Array, all_cards: Array, sets: Dictionary, buffs: Arr
     var ids: Array[String] = []
     for card in cards:
         ids.append(str(card["id"]))
-    draft.configure(ids, cards, buffs, seed_value + 7919, preferences)
+    var draft_options := preferences.duplicate(true)
+    draft_options["commander_id"] = str(commander.get("id", ""))
+    draft.configure(ids, cards, buffs, seed_value + 7919, draft_options)
     return true
 
 func _has_card(card_id: String) -> bool:
@@ -73,6 +75,9 @@ func begin_round(opening: bool, lost_previous: bool, sudden: bool, public_enemy:
     var guard := 0
     while not draft.is_phase_complete() and guard < 8:
         guard += 1
+        var branch := _preferred_specialization()
+        if not branch.is_empty() and draft.choose_specialization(branch):
+            continue
         if _should_use_skill(public_enemy, losses):
             if not draft.use_commander_skill():
                 return false
@@ -93,6 +98,21 @@ func begin_round(opening: bool, lost_previous: bool, sudden: bool, public_enemy:
             if not draft.select_offer(best_index):
                 return false
     return draft.is_phase_complete()
+
+func _preferred_specialization() -> String:
+    if not draft.can_specialize():
+        return ""
+    var best := ""
+    var value := 0
+    # Only the AI's own recruited bodies and legal techniques inform this choice.
+    for id in draft.specialization_options:
+        if not draft.can_specialize(str(id)):
+            continue
+        var affected := CommanderSpecializations.affected(cards, draft.unit_counts, draft.specialization_options[id])
+        if int(affected["units"]) > value:
+            value = int(affected["units"])
+            best = str(id)
+    return best
 
 func _missing_frontline_offer() -> bool:
     if draft.round_number < 2:
@@ -246,5 +266,6 @@ func get_side(skill_active: bool = false) -> Dictionary:
         "buffs": buffs, "set_bonus": bonus,
         "commander_skill_active": skill_active,
         "skill_uses_remaining": draft.commander_skill_uses_remaining(),
+        "specialization": draft.specialization(),
         "ai_plan": {"style": style, "name": str(STYLE_NAMES.get(style, "Balanced")), "difficulty": difficulty}
     }

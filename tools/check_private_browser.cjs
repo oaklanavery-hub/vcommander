@@ -57,9 +57,10 @@ const path = require('node:path');
     if (!restored.ok || !restored.continue_visible || restored.scene !== 'Draft') throw Error('Actual Continue adventure failed after browser restart');
     if (JSON.stringify(prepared.snapshot) !== JSON.stringify(restored.snapshot) || restored.clock > prepared.clock || restored.clock < prepared.clock - 0.5) throw Error('Browser recovery changed the offer, seed, allowance or clock');
     if (JSON.stringify(prepared.opponent_snapshot) !== JSON.stringify(restored.opponent_snapshot) || JSON.stringify(prepared.hearts) !== JSON.stringify(restored.hearts) || prepared.pending !== restored.pending) throw Error('Browser recovery changed the rival, hearts or pending profile identity');
+    if (JSON.stringify(prepared.public_specialization) !== JSON.stringify(restored.public_specialization)) throw Error('Browser recovery revealed or replaced the rival current path');
     await local.screenshot({ path: path.join(output, 'browser_local_resumed.png') });
     await local.context().close();
-    console.log('Browser local recovery passed: IndexedDB restart, actual Continue button, exact draft/RNG, preserved redraw and clock, no profile loss.');
+    console.log('Browser local recovery passed: actual commander-path purchase, IndexedDB restart, actual Continue button, exact draft/RNG, preserved path/redraw/clock, hidden rival path and no profile loss.');
     const host = await page();
     await host.goto(base + '&qa_role=host');
     await host.waitForFunction(() => window.vcommanderPvpQa?.room?.length === 6, null,

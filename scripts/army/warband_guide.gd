@@ -31,7 +31,7 @@ static func analyze(cards: Array, signature: Dictionary) -> Dictionary:
     var bonus: Dictionary = signature.get("bonus", {})
     var description := str(bonus.get("description", ""))
     if description.is_empty():
-        description = "+%s%% %s" % [str(bonus.get("percentage", 0)), str(bonus.get("stat", "")).replace("_", " ").to_upper()]
+        description = "+%s%% %s" % [str(bonus.get("percentage", 0)).trim_suffix(".0"), str(bonus.get("stat", "")).replace("_", " ").to_upper()]
     var theme := "Theme active: " + description if active else "Theme inactive (%d / 4): %s. Mixed armies are legal; this bonus needs four matching cards." % [matched, description]
     var notes: Array[Dictionary] = []
     for relationship in data.get("relationships", []):

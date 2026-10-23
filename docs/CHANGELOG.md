@@ -3,6 +3,10 @@
 ## v0.18.0 — Warband strategy (in development)
 
 - Add read-only warband relationships, a collection-wide ability glossary and explicit themed-versus-mixed tradeoffs in the army builder.
+- Add a default-off commander-path prototype: two match-only ability branches per Commander from Round 3, once per adventure for one normal pick, with equal AI access.
+- Preserve path purchases, clocks, RNG and prior-public rival information across recovery; keep existing default checkpoints compatible.
+- Record themed/mixed builds, path participation and full-recruitment rounds in local Adventure insights; inspection reads actual changed cooldowns and identifies path modifiers.
+- Publish a bounded eight-adventure synthetic pacing/hybrid diagnostic and a human playtest procedure. One Water hybrid repeats Sudden Death timeouts; overtime remains a documented product decision.
 
 ## v0.17.0 — Player decisions and recoverable adventures
 

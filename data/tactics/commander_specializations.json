@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "id": "commander_specializations",
+  "first_round": 3,
+  "selection_cost": 1,
+  "branches": [
+    {
+      "id": "fire_wildfire",
+      "commander_id": "commander_fire_01",
+      "display_name": "Wildfire",
+      "description": "Burns and flame trails last 50% longer. Damage per tick is unchanged.",
+      "changes": [
+        {
+          "ability_types": [
+            "explosion",
+            "ranged_aoe_dot"
+          ],
+          "field": "burn_seconds",
+          "factor": 1.5
+        },
+        {
+          "ability_types": [
+            "backline_transit"
+          ],
+          "field": "trail_seconds",
+          "mode": "flame",
+          "factor": 1.5
+        }
+      ]
+    },
+    {
+      "id": "fire_cinder_circle",
+      "commander_id": "commander_fire_01",
+      "display_name": "Cinder Circle",
+      "description": "Small damaging auras and small attack splashes become medium. Other area sizes stay unchanged.",
+      "changes": [
+        {
+          "ability_types": [
+            "aura_damage"
+          ],
+          "field": "radius",
+          "value": "medium",
+          "previous": "small"
+        },
+        {
+          "ability_types": [
+            "ranged_aoe"
+          ],
+          "field": "splash_radius",
+          "value": "medium",
+          "previous": "small"
+        }
+      ]
+    },
+    {
+      "id": "water_deep_wells",
+      "commander_id": "commander_water_01",
+      "display_name": "Deep Wells",
+      "description": "Healing pools last 50% longer. Healing auras tick at 25% shorter intervals.",
+      "changes": [
+        {
+          "ability_types": [
+            "area_heal"
+          ],
+          "field": "duration_seconds",
+          "factor": 1.5
+        },
+        {
+          "ability_types": [
+            "aura_heal"
+          ],
+          "field": "tick_seconds",
+          "factor": 0.75
+        }
+      ]
+    },
+    {
+      "id": "water_undertow",
+      "commander_id": "commander_water_01",
+      "display_name": "Undertow",
+      "description": "Small slowing auras become medium, small ranged pushes become moderate, and gush contact radius grows 25%.",
+      "changes": [
+        {
+          "ability_types": [
+            "aura_debuff"
+          ],
+          "field": "radius",
+          "value": "medium",
+          "previous": "small"
+        },
+        {
+          "ability_types": [
+            "ranged_pushback"
+          ],
+          "field": "pushback",
+          "value": "moderate",
+          "previous": "small"
+        },
+        {
+          "ability_types": [
+            "backline_transit"
+          ],
+          "field": "contact_radius",
+          "mode": "gush",
+          "factor": 1.25
+        }
+      ]
+    },
+    {
+      "id": "earth_grasping_grove",
+      "commander_id": "commander_earth_01",
+      "display_name": "Grasping Grove",
+      "description": "Healing auras and vine pulls have 25% shorter tick or cooldown intervals.",
+      "changes": [
+        {
+          "ability_types": [
+            "aura_heal"
+          ],
+          "field": "tick_seconds",
+          "factor": 0.75
+        },
+        {
+          "ability_types": [
+            "pull_then_melee"
+          ],
+          "field": "cooldown_seconds",
+          "factor": 0.75
+        }
+      ]
+    },
+    {
+      "id": "earth_rending_strikes",
+      "commander_id": "commander_earth_01",
+      "display_name": "Rending Strikes",
+      "description": "Third-strike abilities trigger every second strike. Splash attack percentages grow 25%; ordinary direct hits are unchanged.",
+      "changes": [
+        {
+          "ability_types": [
+            "empowered_attack",
+            "backline_transit"
+          ],
+          "field": "every_n_attacks",
+          "value": 2,
+          "previous": 3
+        },
+        {
+          "ability_types": [
+            "ranged_aoe"
+          ],
+          "field": "splash_attack_pct",
+          "factor": 1.25
+        }
+      ]
+    },
+    {
+      "id": "slime_royal_nursery",
+      "commander_id": "commander_slime_01",
+      "display_name": "Royal Nursery",
+      "description": "Death-split children inherit 75% of the parent's Max HP instead of 50%. Their attack fraction and one-generation limit stay unchanged.",
+      "changes": [
+        {
+          "ability_types": [
+            "death_split"
+          ],
+          "field": "child_health_pct",
+          "value": 75,
+          "previous": 50
+        }
+      ]
+    },
+    {
+      "id": "slime_stored_surges",
+      "commander_id": "commander_slime_01",
+      "display_name": "Stored Surges",
+      "description": "Stored-damage bursts have 20% shorter intervals. Slowing splashes last 50% longer. Absorption and the doubled death burst stay unchanged.",
+      "changes": [
+        {
+          "ability_types": [
+            "absorb_burst"
+          ],
+          "field": "burst_seconds",
+          "factor": 0.8
+        },
+        {
+          "ability_types": [
+            "ranged_aoe_slow"
+          ],
+          "field": "slow_seconds",
+          "factor": 1.5
+        }
+      ]
+    }
+  ]
+}

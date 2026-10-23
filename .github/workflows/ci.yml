@@ -187,6 +187,19 @@ jobs:
         if: always()
         run: /usr/bin/python3 tools/emit_visual_review.py --views experience_continue experience_power_large experience_recap_compact experience_settings_compact
 
+      - name: Render warband guidance and commander-path prototype
+        run: |
+          set -o pipefail
+          timeout 75s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_warband_strategy.gd -- --output-dir=build/qa 2>&1 | tee /tmp/warband-strategy-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/warband-strategy-qa.log; then exit 1; fi
+          for view in builder guide glossary mixed mixed_guide draft paths paths_compact selected settings insights; do
+            test -s "build/qa/strategy_${view}.png"
+          done
+
+      - name: Emit strategy native review previews
+        if: always()
+        run: /usr/bin/python3 tools/emit_visual_review.py --views strategy_guide strategy_paths_compact strategy_mixed
+
       - name: Upload visual QA screenshots
         if: always()
         uses: actions/upload-artifact@v4

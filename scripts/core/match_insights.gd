@@ -24,6 +24,8 @@ func _valid(value: Dictionary) -> bool:
         for key in ["last_round", "round_count", "draws", "timeouts", "sudden_draws"]:
             if not CommanderProgress._counter(entry.get(key)):
                 return false
+        if not entry.get("specializations", false) is bool or entry.get("composition", "unknown") not in ["unknown", "themed", "mixed"] or not CommanderProgress._counter(entry.get("army_capped_rounds", 0)):
+            return false
         for key in ["battle_seconds", "draft_seconds", "watch_seconds"]:
             if not _seconds(entry.get(key)):
                 return false
@@ -43,6 +45,9 @@ func record_round(id: String, metadata: Dictionary, round_info: Dictionary) -> v
     var entry := _find(id)
     if entry.is_empty():
         entry = {"id": id, "commander": str(metadata.get("commander", "")), "difficulty": str(metadata.get("difficulty", "standard")), "redraw": bool(metadata.get("redraw", false)), "outcome": "ongoing", "last_round": 0, "round_count": 0, "draws": 0, "timeouts": 0, "sudden_draws": 0, "battle_seconds": 0.0, "draft_seconds": 0.0, "watch_seconds": 0.0, "rounds": []}
+        entry["specializations"] = bool(metadata.get("specializations", false))
+        entry["composition"] = str(metadata.get("composition", "unknown"))
+        entry["army_capped_rounds"] = 0
         entries.append(entry)
         while entries.size() > MAX_MATCHES:
             entries.pop_front()
@@ -50,6 +55,7 @@ func record_round(id: String, metadata: Dictionary, round_info: Dictionary) -> v
     if number > int(entry["last_round"]):
         entry["last_round"] = number
         entry["round_count"] = int(entry["round_count"]) + 1
+        entry["army_capped_rounds"] = int(entry.get("army_capped_rounds", 0)) + (1 if bool(round_info.get("army_capped", false)) else 0)
         var draw: bool = round_info.get("winner") == "draw"
         entry["draws"] = int(entry["draws"]) + (1 if draw else 0)
         entry["timeouts"] = int(entry["timeouts"]) + (1 if round_info.get("reason") == "timer" else 0)
@@ -81,14 +87,19 @@ func finish(id: String, outcome: String) -> void:
         entry["outcome"] = outcome
         _save()
 
-func summary(experiment: int = -1) -> Dictionary:
-    var result := {"matches": 0, "completed": 0, "rounds": 0, "draws": 0, "timeouts": 0, "sudden_draws": 0, "battle_seconds": 0.0, "draft_seconds": 0.0, "watch_seconds": 0.0}
+func summary(experiment: int = -1, specializations: int = -1) -> Dictionary:
+    var result := {"matches": 0, "completed": 0, "rounds": 0, "draws": 0, "timeouts": 0, "sudden_draws": 0, "battle_seconds": 0.0, "draft_seconds": 0.0, "watch_seconds": 0.0, "themed_matches": 0, "mixed_matches": 0, "army_capped_rounds": 0}
     for entry in entries:
         if experiment >= 0 and bool(entry["redraw"]) != bool(experiment):
+            continue
+        if specializations >= 0 and bool(entry.get("specializations", false)) != bool(specializations):
             continue
         result["matches"] += 1
         result["completed"] += 1 if entry["outcome"] in ["win", "loss"] else 0
         result["rounds"] += int(entry["round_count"])
+        result["themed_matches"] += 1 if entry.get("composition") == "themed" else 0
+        result["mixed_matches"] += 1 if entry.get("composition") == "mixed" else 0
+        result["army_capped_rounds"] += int(entry.get("army_capped_rounds", 0))
         for key in ["draws", "timeouts", "sudden_draws", "battle_seconds", "draft_seconds", "watch_seconds"]:
             result[key] += entry[key]
     var count := maxi(1, int(result["rounds"]))
