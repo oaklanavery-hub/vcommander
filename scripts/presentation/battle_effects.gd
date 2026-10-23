@@ -1,6 +1,11 @@
 class_name BattleEffects
 extends RefCounted
 
+static var intensity := 1.0
+
+static func particle_count(normal: int) -> int:
+    return maxi(1, ceili(float(normal) * clampf(intensity, 0.35, 1.0)))
+
 static func absorbed_burst(canvas: CanvasItem, center: Vector2, radius: float, age: float, on_death: bool, reduced: bool) -> void:
     if age < 0 or age >= 0.65:
         return
@@ -11,8 +16,9 @@ static func absorbed_burst(canvas: CanvasItem, center: Vector2, radius: float, a
     canvas.draw_arc(center, extent, 0, TAU, 24, color, 3 if on_death else 2)
     if age < 0.30:
         canvas.draw_arc(center + Vector2(0, -10), maxf(6, extent * 0.72), 0, TAU, 16, Color(0.70, 0.88, 0.95, fade * 0.65), 2)
-    for index in range(12 if on_death else 8):
-        var angle := float(index) * TAU / (12 if on_death else 8)
+    var count := particle_count(12 if on_death else 8)
+    for index in range(count):
+        var angle := float(index) * TAU / count
         var point := center + Vector2.from_angle(angle) * extent
         if not reduced:
             point.y -= sin(progress * PI) * 12
@@ -90,14 +96,14 @@ static func projectile(canvas: CanvasItem, p: Vector2, direction: Vector2, style
             canvas.draw_rect(Rect2((p - Vector2(2, 2)).round(), Vector2(5, 4)), Color("e9c879"))
             canvas.draw_line((p - direction * 6).round(), (p - direction * 10 + side * 3).round(), Color("a5c76b"), 2)
         "dragonfire":
-            for index in range(5):
+            for index in range(particle_count(5)):
                 var wave := 0.0 if reduced else sin(clock * 22 + index) * 2
                 var center := (p - direction * float(index * 5) + side * wave).round()
                 var radius := float(7 - index)
                 canvas.draw_rect(Rect2(center - Vector2.ONE * radius, Vector2.ONE * radius * 2), Color("b44a32") if index > 2 else Color("ed8e42"))
             canvas.draw_rect(Rect2((p - Vector2(3, 3)).round(), Vector2(6, 6)), Color("ffe7a0"))
         "water_orb":
-            for index in range(3):
+            for index in range(particle_count(3)):
                 canvas.draw_circle((p - direction * (7 + index * 5)).round(), 2, Color(0.4, 0.8, 0.88, 0.6 - index * 0.15))
             canvas.draw_circle(p, 6, Color("397c9b"))
             canvas.draw_circle(p, 4, Color("81d3d7"))
@@ -106,7 +112,7 @@ static func projectile(canvas: CanvasItem, p: Vector2, direction: Vector2, style
             var color := slime_color(style)
             var outline := color.darkened(0.55)
             var wobble := 0.0 if reduced else roundf(sin(clock * 16) * 1.5)
-            for index in range(3):
+            for index in range(particle_count(3)):
                 var tail := (p - direction * (10 + index * 5) + side * wobble * (index + 1)).round()
                 canvas.draw_circle(tail, 3 - index * 0.5, Color(color, 0.6 - index * 0.15))
             canvas.draw_circle(p, 8, outline)
@@ -115,7 +121,7 @@ static func projectile(canvas: CanvasItem, p: Vector2, direction: Vector2, style
             canvas.draw_rect(Rect2(p + Vector2(0, 0), Vector2(2, 3)), outline)
             canvas.draw_rect(Rect2(p + Vector2(4, 0), Vector2(2, 3)), outline)
         _:
-            for index in range(3):
+            for index in range(particle_count(3)):
                 var drift := 0.0 if reduced else sin(clock * 18 + index) * 2
                 canvas.draw_rect(Rect2((p - direction * float(6 + index * 5) + side * drift - Vector2(2, 2)).round(), Vector2(4, 4)), Color("d76532") if index < 2 else Color("935039"))
             canvas.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -7), p + Vector2(6, 0), p + Vector2(0, 7), p + Vector2(-6, 0)]), Color("ef9d42"))
@@ -127,13 +133,14 @@ static func impact(canvas: CanvasItem, p: Vector2, style: String, age: float, re
         return
     var colors := {"arrow": Color("e5c991"), "seed": Color("b8ce6f"), "water_orb": Color("9ae0e1"), "ice_shard": Color("d0f6f4"), "slam": Color("c9ad80"), "slash": Color("efdcb5"), "bite": Color("b8cb78")}
     var color: Color = slime_color(style) if style.begins_with("slime_") else colors.get(style, Color("ffb85e"))
-    color.a = 1.0 - progress
+    color.a = (1.0 - progress) * (0.4 + 0.6 * clampf(intensity, 0.35, 1.0))
     if age < 0.1:
-        canvas.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -8), p + Vector2(8, 0), p + Vector2(0, 8), p + Vector2(-8, 0)]), Color("fff3d5"))
+        canvas.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -8), p + Vector2(8, 0), p + Vector2(0, 8), p + Vector2(-8, 0)]), Color(Color("fff3d5"), clampf(intensity, 0.35, 1.0)))
     if style.begins_with("slime_"):
         canvas.draw_arc(p, 5 + progress * 14, 0, TAU, 10, color, 3)
-        for index in range(6):
-            var ray := Vector2.from_angle(float(index) * TAU / 6)
+        var count := particle_count(6)
+        for index in range(count):
+            var ray := Vector2.from_angle(float(index) * TAU / count)
             var point: Vector2 = (p + ray * (6 + (0 if reduced else progress * 22))).round()
             canvas.draw_circle(point, maxf(1, 4 - progress * 3), color)
     elif style == "water_orb":
@@ -142,8 +149,9 @@ static func impact(canvas: CanvasItem, p: Vector2, style: String, age: float, re
         for offset in [-6, 0, 6]:
             canvas.draw_line((p + Vector2(-8 + offset, -8)).round(), (p + Vector2(5 + offset, 7)).round(), color, 2)
     else:
-        for index in range(6):
-            var ray := Vector2.from_angle(float(index) * TAU / 6.0)
+        var count := particle_count(6)
+        for index in range(count):
+            var ray := Vector2.from_angle(float(index) * TAU / count)
             var distance := 7.0 if reduced else 3 + progress * 19
             var point := (p + ray * distance).round()
             if style in ["arrow", "ice_shard"]:
@@ -165,7 +173,7 @@ static func slime_pool(canvas: CanvasItem, center: Vector2, radius: float, remai
     canvas.draw_colored_polygon(polygon, Color(0.73, 0.23, 0.48, fade * 0.08))
     canvas.draw_polyline(polygon, Color(rim, fade * 0.22), 1)
     var age_fraction := 1 - clampf(remaining / maxf(0.01, duration), 0, 1)
-    for index in range(5):
+    for index in range(particle_count(5)):
         var angle := float(index) * 2.4
         var position := center + Vector2.from_angle(angle) * radius * (0.25 + float(index % 3) * 0.23)
         var bubble := 2.0 if reduced else 2 + sin(clock * 3 + index) * 1.3

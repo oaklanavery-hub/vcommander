@@ -21,6 +21,9 @@ var _timer_bar := ProgressBar.new()
 var _hearts_meter := MatchStatus.new()
 var round_label: Label = _hearts_meter.round_label
 var timer_label: Label = _hearts_meter.timer_label
+var redraw_button := Button.new()
+var _offer_scroll := ScrollContainer.new()
+var _draft_actions := HBoxContainer.new()
 
 func _ready() -> void:
     ScreenStyle.apply(self)
@@ -35,9 +38,35 @@ func _ready() -> void:
     _timer_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
     offer_content.add_child(_timer_bar)
     offer_content.move_child(_timer_bar, 2)
+    var padding := offer_content.get_parent()
+    _offer_scroll.name = "DraftScroll"
+    _offer_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+    _offer_scroll.follow_focus = true
+    padding.add_child(_offer_scroll)
+    offer_content.reparent(_offer_scroll)
+    offer_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    _draft_actions.name = "DraftActions"
+    _draft_actions.add_theme_constant_override("separation", 8)
+    offer_content.add_child(_draft_actions)
+    skill_button.reparent(_draft_actions)
+    skill_button.custom_minimum_size.y = 40
+    skill_button.add_theme_font_size_override("font_size", 14)
+    skill_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    var arena: Control = get_node("Margin/Main/Board/Padding/Arena")
+    arena.resized.connect(_fit_draft)
+    offer_content.minimum_size_changed.connect(_fit_draft)
+    _fit_draft.call_deferred()
     back_button.pressed.connect(_go_back)
     skill_button.pressed.connect(_use_commander_skill)
     battle_button.pressed.connect(_start_battle)
+    redraw_button.name = "RedrawChoices"
+    redraw_button.custom_minimum_size.y = 32
+    redraw_button.tooltip_text = "Experiment: redraw all three choices once this round. Costs no pick, adds no time; cards may repeat. R"
+    redraw_button.pressed.connect(_redraw)
+    _draft_actions.add_child(redraw_button)
+    _draft_actions.move_child(redraw_button, 0)
+    redraw_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    redraw_button.add_theme_font_size_override("font_size", 14)
 
     if not GameState.match_started:
         footer.text = "No active draft. Return to the Army Builder."
@@ -46,6 +75,7 @@ func _ready() -> void:
         set_process(false)
         return
 
+    _time_left = GameState.draft_time_left
     _refresh_all()
 
 func _process(delta: float) -> void:
@@ -53,6 +83,7 @@ func _process(delta: float) -> void:
         return
 
     _time_left = maxf(0.0, _time_left - delta)
+    GameState.update_draft_clock(_time_left)
     timer_label.text = "%02ds to choose" % int(ceil(_time_left))
     _timer_bar.value = _time_left
     timer_label.modulate = Color("f1a27b") if _time_left < 6 else Color.WHITE
@@ -78,9 +109,12 @@ func _refresh_all() -> void:
     _refresh_summaries()
 
     var complete: bool = bool(GameState.draft.is_phase_complete())
+    redraw_button.visible = GameState.draft.redraw_enabled and not complete
+    redraw_button.disabled = not GameState.draft.can_redraw()
+    redraw_button.text = "Redraw · %d left (R)" % (0 if GameState.draft.redraw_used else 1)
     offer_row.visible = not complete
     _timer_bar.visible = not complete
-    offer_content.get_node("Prompt").text = "Your warband is ready" if complete else "Choose one card to grow your warband"
+    offer_content.get_node("Prompt").text = "Your warband is ready" if complete else "Choose one card"
     battle_button.visible = complete
     battle_button.disabled = not complete
     if complete:
@@ -94,6 +128,19 @@ func _refresh_all() -> void:
         else:
             footer.text = "Armies and buffs persist. All units respawn at full HP each battle."
     FirstMatchGuide.draft_updated()
+    if not GameState.recovery_notice.is_empty():
+        footer.text = GameState.recovery_notice
+    _fit_draft.call_deferred()
+
+func _fit_draft() -> void:
+    if not is_instance_valid(offer_content) or not _offer_scroll.is_inside_tree():
+        return
+    var arena: Control = get_node("Margin/Main/Board/Padding/Arena")
+    var panel: Control = arena.get_node("DraftCenter/OfferPanel")
+    panel.custom_minimum_size.x = minf(660, maxf(0, arena.size.x - 12))
+    for button in offer_row.get_children():
+        button.custom_minimum_size.x = 132 if arena.size.x < 660 else 156
+    _offer_scroll.custom_minimum_size.y = minf(offer_content.get_combined_minimum_size().y, maxf(80, arena.size.y - 64))
 
 func _refresh_offer() -> void:
     for child in offer_row.get_children():
@@ -115,6 +162,7 @@ func _refresh_offer() -> void:
             var blessing := BuffTile.new()
             blessing.definition = ContentDatabase.get_buff(str(option["id"]))
             blessing.stacks = GameState.draft.get_buff_stacks(str(option["id"]))
+            blessing.side_config = GameState.get_player_combat_side()
             button = blessing
         button.custom_minimum_size = Vector2(156, 204)
         button.disabled = GameState.draft.is_phase_complete()
@@ -154,12 +202,13 @@ func _option_text(option: Dictionary) -> String:
 func _refresh_skill(commander: Dictionary) -> void:
     var skill: Dictionary = commander.get("active_skill", {})
     skill_button.tooltip_text = ScreenStyle.skill_description(commander)
-    skill_button.text = "%s\nCost: 1 selection • Uses left: %d/2" % [
+    skill_button.text = "%s · 1 pick · %d/2" % [
         str(skill.get("display_name", "Commander Skill")),
         GameState.draft.commander_skill_uses_remaining()
     ]
     if GameState.draft.commander_skill_used_this_round:
-        skill_button.text += " • Prepared for battle"
+        skill_button.text += " · Prepared"
+    skill_button.tooltip_text += "\nCosts 1 selection · At most once this round · S"
     skill_button.disabled = (
         GameState.draft.is_phase_complete()
         or GameState.draft.commander_skill_used_this_round
@@ -184,6 +233,11 @@ func _use_commander_skill() -> void:
         _time_left = SELECTION_SECONDS
         _refresh_all()
 
+func _redraw() -> void:
+    if GameState.draft.redraw():
+        GameAudio.play_effect("pick")
+        _refresh_all()
+
 func _start_battle() -> void:
     battle_button.disabled = true
     footer.text = "Preparing battle…"
@@ -203,6 +257,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
         _select_offer(int(event.keycode - KEY_1))
     elif event.keycode == KEY_S:
         _use_commander_skill()
+    elif event.keycode == KEY_R and redraw_button.visible:
+        _redraw()
     elif event.keycode == KEY_ENTER and battle_button.visible:
         _start_battle()
     else:

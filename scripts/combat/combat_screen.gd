@@ -153,6 +153,17 @@ func _ready() -> void:
         _advance_prelude(0.0)
     if playback_driver != null:
         playback_driver.attach(self)
+    elif _source == GameState and GameState.battle_watched:
+        # A previously watched result can reopen directly. Unwatched recovery
+        # always replays the same battle from its opening at the normal 1×.
+        _playback_time = _duration
+        _end_elapsed = _tail_length
+        _prelude.elapsed = _prelude.duration
+        battlefield.replay_enabled = true
+        battlefield.prelude_skills = []
+        _advance_frames()
+        _advance_events()
+        _finish_replay()
 
 func _process(delta: float) -> void:
     if playback_driver != null:
@@ -160,6 +171,9 @@ func _process(delta: float) -> void:
         return
     if _finished or _paused:
         return
+
+    if _source == GameState:
+        GameState.record_watch_time(delta)
 
     if _prelude.active():
         _advance_prelude(delta)
@@ -303,6 +317,8 @@ func _finish_replay() -> void:
     if _finished:
         return
     _finished = true
+    if _source == GameState:
+        GameState.mark_battle_watched()
     battlefield.replay_complete = true
     _hearts_meter.refresh(_source.match_state)
     battlefield.finish_replay()
@@ -423,6 +439,7 @@ func _update_option_labels() -> void:
     sound_button.text = "Effects: On" if GameAudio.effects_volume > 0 else "Effects: Off"
     BattlefieldView.reduced_motion = GameAudio.reduced_motion
     BattlefieldView.show_hp_numbers = GameAudio.show_hp_numbers
+    BattleEffects.intensity = GameAudio.effects_intensity
     motion_button.text = "Motion: Reduced" if BattlefieldView.reduced_motion else "Motion: Full"
     hp_button.text = "HP numbers: On" if BattlefieldView.show_hp_numbers else "HP numbers: Off"
 

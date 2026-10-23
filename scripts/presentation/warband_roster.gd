@@ -100,6 +100,9 @@ func refresh() -> void:
         summary.text += " · Prepared"
     if hidden_picks:
         summary.text += "\nNew picks hidden"
+    if rival and config.has("ai_plan"):
+        var plan: Dictionary = config["ai_plan"]
+        summary.text += "\n%s · %s" % [str(plan.get("difficulty", "standard")).capitalize(), str(plan.get("name", "Balanced"))]
     var entries: Array[String] = []
     for buff in config.get("buffs", []):
         var definition: Dictionary = buff.get("definition", {})

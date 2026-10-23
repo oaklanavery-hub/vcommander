@@ -61,7 +61,7 @@ All three selections before Battle 1 are guaranteed Army-card choices. Buff Card
 A normal pre-battle phase gives three selections. The side that lost the previous battle gets four selections in its next pre-battle phase.
 
 **R019 — Reroll cadence**  
-After every selection, all three displayed choices are randomized again. There is no manual reroll.
+After every selection, all three displayed choices are randomized again. There is no manual reroll in the default rules; R113 defines a separately opted-in local experiment.
 
 **R020 — Buff stacking**  
 The same Buff Card may be selected any number of times per match. Identical and different buffs stack multiplicatively. Existing Attack Speed and Movement Speed caps still apply.
@@ -88,7 +88,7 @@ If time expires, one of the three displayed cards is selected at random. Command
 Selection points must be spent unless no legal card choices remain.
 
 **R028 — Draft information**  
-Buff Cards display effect and stack count. Army cards display summon gain and current/capped unit count.
+Buff Cards display effect and stack count. Local PvAI offers also show how many currently recruited units gain a stat increase; tooltips show per-type before/after values using the exact combat calculation, including theme bonuses, rounding and speed caps. No-gain cards remain legal and permanent buffs also affect future recruits. Army cards display summon gain and current/capped unit count.
 
 **R029 — Current army summary**  
 The player's full current army composition, active Buff stacks, Commander skill uses remaining and round-loss count are visible during drafting.
@@ -319,7 +319,9 @@ Each Commander has a separate local PvAI record keyed by stable Commander ID: fu
 A completed match win grants 100 mastery XP; a completed match loss grants 25 XP. A forfeit grants 0 XP. Commanders start at Level 1 with 0 XP and gain one level per 250 XP. Levels and XP never decrease. A better win ratio earns more XP at equal match count. The initial level interval is content-defined playtest tuning. Mastery levels grant no combat stat or unit-cap multipliers. R099–R101 define achievements, four starter cards per Commander and permanent collection rewards.
 
 **R094 — Forfeit and persistence**
-Leaving or replacing an unfinished match after its first battle begins records one forfeit loss for the Commander who began it. A persisted unfinished match recovered after restarting the game also settles once as a forfeit. An already completed match retains its resolved win/loss and reward, including when leaving its final battle replay. Rewards are settled by authoritative match state, with presentation revealing them only after the final replay finishes. Reopening/replaying a result never grants XP again.
+Explicitly leaving or replacing an unfinished match after its first battle begins records one forfeit loss for the Commander who began it. Restarting or refreshing a recoverable local match does not forfeit: **Continue adventure** restores both drafts, random state, current selection time, hearts and skill budgets. An unwatched battle restarts the identical replay at 1×; a previously watched result may reopen its report. New adventure asks before abandoning a saved unfinished match. Legacy pending matches without a checkpoint retain the old one-forfeit recovery policy. Invalid/incompatible checkpoints show a notice rather than silently discarding records.
+
+An already completed match retains its resolved win/loss and reward, including when leaving its final battle replay. Rewards are settled by authoritative match state, with presentation revealing them only after the final replay finishes. Reopening/replaying a result never grants XP again. Persisted last-settlement identity makes recovery idempotent across profile/checkpoint write interruptions.
 
 Records persist on the current device/browser through a versioned local profile and backup. Save/load failures are visible and preserve session play; unreadable profile files are not overwritten with empty defaults. Automated test/capture scripts use isolated or in-memory profiles. Account sync, online competitive ratings and shared leaderboards are outside this personal PvAI system.
 
@@ -388,10 +390,24 @@ The developer may activate a privately supplied access key in Settings → Devel
 **R109 — Battle report**
 After complete battle playback, players may inspect a two-sided report grouped by unit type. Damage counts actual HP removed, excluding overkill; healing counts positive HP restored, excluding overheal. Absorption counts recorded damage prevented/stored by an absorption ability, independently of DEF. Kills credit the last damaging source only when that body actually dies. Death-spawned and revived bodies group with their card, while Commander skill damage and summoned units remain identifiable. Survival counts living bodies and their actual lifetimes. Damage, healing and protection have separate highlights; there is no score that treats raw damage as every role's value. Reports never change outcomes or grant rewards, and cannot expose a result before replay completion.
 
+The report's short recap separates recorded observations from optional next-draft suggestions. Frontline loss is assessed after all births/deaths at the same simulation time, so a simultaneous split or revival is not a false collapse. Backline-transit assassins and temporary Commander plants are not treated as an opening frontline. Damage-share facts use effective HP loss, and absence of evidence creates no invented explanation. Suggestions are choices to test, not a causal verdict or guaranteed counter.
+
 **R110 — Unit inspection**
 Selecting a visible unit during local battle playback opens its current HP, modified stats, ability/cooldown and active effects beside the arena. The whole field remains visible. Inspection reads the displayed replay time only and never controls movement, targeting or combat. Unit ownership/effect word labels remain off battlefield actors.
 
 Drafting and combat share a centered round/time and Commander/hearts strip, with four-card recruited/cap rosters outside playable ground. Draft choices occupy the center while both public rosters, theme effects, skill budgets and power stacks remain readable. Combat's army-health balance bar totals current visible living HP, including summoned/death-created bodies; it predicts no result and reveals no future damage. During drafting the bar is neutral and labelled as unrevealed until battle. The rival's current selections remain hidden under R030.
 
 **R111 — Optional guided first match**
-Players may start guidance from How to Play. It teaches actual Commander selection, four-card army setup, legal drafting and optional skill selection, normal pre-battle/battle playback, inspection and the report. Short reading panels pause local clocks and restore the prior pause state. Guidance may be ended at any time. The match uses normal rules, records, XP and forfeit behavior; completing guidance creates no extra reward. Only tutorial completion is saved as a separate local preference. Guidance is not available in friend PvP.
+Players may start guidance directly from the title before their first completed guide, or from How to Play. It teaches actual Commander selection, four-card army setup, legal drafting and optional skill selection, normal pre-battle/battle playback, inspection and the report. Short reading panels pause local clocks and restore the prior pause state. Guidance may be ended at any time. The match uses normal rules, records, XP and forfeit behavior; completing guidance creates no extra reward. Only tutorial completion is saved as a separate local preference. Guidance is not available in friend PvP.
+
+**R112 — PvAI styles and difficulty**
+Local opponents use seeded Swarm, Sustain, Burst or Backline pressure plans when assembling and growing a legal four-card army. Settings selects Casual, Standard or Veteran before the next adventure; the active choice is retained on recovery. All difficulties use the same collection, card stats, pick budgets and skill limits. Casual makes less consistent draft decisions; Standard and Veteran weight counters to the player's previous public army, with Veteran using more consistent priorities. Neither sees current hidden picks or future combat results. The rival roster identifies its plan and difficulty. These are heuristic policies, not guarantees that one difficulty always wins a particular seed.
+
+**R113 — Optional redraw experiment**
+Off by default, Settings may enable the local PvAI redraw experiment for the next adventure. Both sides may redraw the full offer once per round, including opening and Sudden Death rounds. A redraw costs no selection, grants no selection, does not reset the current pick timer and may repeat cards. Normal opening/unit-cap/buff-offer rules still apply. The allowance refreshes only at the next round, not after a pick or restart. Both drafts and the experiment choice are retained on recovery. It never changes friend-room rules.
+
+**R114 — Local pacing evidence**
+Adventure insights keeps bounded, device-local observations for the latest 30 played PvAI adventures: round counts, draft time while actively choosing, simulated battle duration at 1×, actual viewing time, drawn/time-limit/Sudden Death rounds, difficulty and redraw participation. Reading while paused is excluded. Reopening a scored round does not add another observation. Default and experiment samples remain distinguishable; these observations never grant rewards, change difficulty automatically or alter the existing overtime rules.
+
+**R115 — Presentation accessibility**
+Settings offers standard or 20% larger body/control text, independent reduced motion and health-number controls, and battle effect intensity from 35–100%. Larger text preserves the world/arena coordinates and readable pixel art; compact draft/settings/report content scrolls within its own bounds. Effect intensity reduces decorative particles and flashes while retaining projectile cores, impact contact, links, barriers, hazard coverage, frost coverage/duration and normal skill timing. Presentation preferences never affect damage, targeting, outcomes or rewards.

@@ -243,29 +243,7 @@ func _spawn_unit(spec: Dictionary, position: Vector2) -> void:
 
 
 func _modified_stat(base_value: int, stat_name: String, side_config: Dictionary) -> float:
-    if base_value == 0:
-        return 0.0
-    var value := float(base_value)
-
-    var set_bonus: Dictionary = side_config.get("set_bonus", {})
-    if str(set_bonus.get("stat", "")) == stat_name and str(set_bonus.get("trigger", "")).is_empty():
-        value *= 1.0 + float(set_bonus.get("percentage", 0)) / 100.0
-
-    var buffs: Array = side_config.get("buffs", [])
-    for raw_buff_state in buffs:
-        if typeof(raw_buff_state) != TYPE_DICTIONARY:
-            continue
-        var buff_state: Dictionary = raw_buff_state
-        var definition: Dictionary = buff_state.get("definition", {})
-        if str(definition.get("stat", "")) != stat_name:
-            continue
-        var stacks := maxi(0, int(buff_state.get("stacks", 0)))
-        var multiplier := 1.0 + float(definition.get("percentage", 0)) / 100.0
-        # Numerical safety only: finite floating-point output even after thousands
-        # of picks. This ceiling is far beyond any playable match.
-        value = exp(minf(log(1.0e100), log(maxf(1.0e-20, value)) + float(stacks) * log(multiplier)))
-
-    return round(value)
+    return WarbandStats.modified(base_value, stat_name, side_config)
 
 
 func _resolve_pre_battle_skills(player_side: Dictionary, opponent_side: Dictionary) -> void:

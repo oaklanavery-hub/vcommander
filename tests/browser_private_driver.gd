@@ -11,6 +11,7 @@ var prepared_skill := false
 var initial_records: Dictionary = {}
 var _published_at := -1000
 var font_symbols_ready := false
+var probe_stage := "prepare"
 
 func _ready() -> void:
     call_deferred("run")
@@ -24,6 +25,11 @@ func run() -> void:
             role = argument.trim_prefix("--role=")
         elif argument.begins_with("--room="):
             code = argument.trim_prefix("--room=")
+        elif argument.begins_with("--probe-stage="):
+            probe_stage = argument.trim_prefix("--probe-stage=")
+    if role == "local":
+        await _local_recovery_probe()
+        return
     session = root.get_node("OnlineSession")
     session.available = true # Explicit isolated QA seam; ordinary entry remains Coming Soon.
     print("Browser PvP endpoint: ", session.endpoint)
@@ -54,6 +60,54 @@ func run() -> void:
         ui.join_button.pressed.emit()
     started = true
     print("Browser PvP UI ready: ", role)
+
+func _local_recovery_probe() -> void:
+    var tree := get_tree()
+    var state := tree.root.get_node("GameState")
+    var db := tree.root.get_node("ContentDatabase")
+    # This browser context is isolated by Playwright. Use the normal persistent
+    # paths so a reload also exercises ordinary autoload pending-match recovery.
+    state.match_preferences = MatchPreferences.new("")
+    if probe_stage == "prepare":
+        state.select_commander("commander_fire_01")
+        state.equip_starter_army()
+        state.match_preferences.redraw_experiment = true
+        state.begin_match(9007199254740999)
+        while not state.draft.is_phase_complete():
+            state.draft.auto_select()
+        state.run_battle()
+        state.begin_next_round()
+        state.draft.select_offer(0)
+        state.update_draft_clock(11.5)
+        state.draft.redraw()
+    ui = load("res://scenes/main_menu/main_menu.tscn").instantiate()
+    tree.root.add_child(ui)
+    tree.current_scene = ui
+    await tree.process_frame
+    await tree.process_frame
+    var continuation := ui.find_child("ContinueAdventure", true, false) as Button
+    var data := {"stage": probe_stage, "persistent": OS.is_userfs_persistent(), "continue_visible": continuation != null, "ok": false}
+    if probe_stage == "prepare":
+        data["snapshot"] = state.draft.snapshot()
+        data["clock"] = state.draft_time_left
+        data["hearts"] = state.match_state.losses.duplicate()
+        data["opponent_snapshot"] = state.opponent.draft.snapshot()
+        data["pending"] = state.commander_progress.active_match().get("id", "")
+        data["ok"] = continuation != null and state.local_store.last_error == OK and not str(data["pending"]).is_empty()
+    elif continuation != null:
+        continuation.pressed.emit()
+        await tree.scene_changed
+        tree.current_scene.set_process(false)
+        await tree.process_frame
+        await tree.process_frame
+        data["snapshot"] = state.draft.snapshot()
+        data["clock"] = state.draft_time_left
+        data["hearts"] = state.match_state.losses.duplicate()
+        data["opponent_snapshot"] = state.opponent.draft.snapshot()
+        data["pending"] = state.commander_progress.active_match().get("id", "")
+        data["scene"] = tree.current_scene.name
+        data["ok"] = tree.current_scene.name == "Draft" and state.draft.redraw_used and not state.draft.can_redraw() and state.match_seed == 9007199254740999 and state.commander_progress.record("commander_fire_01")["played"] == 0
+    JavaScriptBridge.eval("window.vcommanderLocalQa = " + JSON.stringify(data) + ";", true)
 
 func _process(_delta: float) -> void:
     if not started:

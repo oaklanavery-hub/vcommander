@@ -174,6 +174,19 @@ jobs:
         if: always()
         run: /usr/bin/python3 tools/emit_visual_review.py
 
+      - name: Render P0/P1 experience and accessibility
+        run: |
+          set -o pipefail
+          timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_player_experience.gd -- --output-dir=build/qa 2>&1 | tee /tmp/player-experience-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/player-experience-qa.log; then exit 1; fi
+          for view in menu settings settings_large continue redraw low_effects recap recap_compact power_large power_compact settings_compact insights; do
+            test -s "build/qa/experience_${view}.png"
+          done
+
+      - name: Emit P0/P1 native review previews
+        if: always()
+        run: /usr/bin/python3 tools/emit_visual_review.py --views experience_continue experience_power_large experience_recap_compact experience_settings_compact
+
       - name: Upload visual QA screenshots
         if: always()
         uses: actions/upload-artifact@v4

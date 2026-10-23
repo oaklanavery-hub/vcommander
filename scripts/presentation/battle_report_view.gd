@@ -61,10 +61,18 @@ func open(value: Dictionary, round_number: int) -> void:
     _body = VBoxContainer.new()
     _body.size_flags_vertical = Control.SIZE_EXPAND_FILL
     _body.add_theme_constant_override("separation", 8)
-    body.add_child(_body)
+    var page_scroll := ScrollContainer.new()
+    page_scroll.name = "ReportScroll"
+    page_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    page_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+    body.add_child(page_scroll)
+    _body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    page_scroll.add_child(_body)
     var note := ScreenStyle.label("Damage excludes overkill · Healing excludes overheal · Protection = HP lost + absorbed damage\nBodies alive includes splits and revivals. Select a row for its survival and ability details.", 14)
     note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-    body.add_child(note)
+    note.tooltip_text = note.text
+    _body.set_meta("report_note", note.text)
+    note.queue_free()
     overlay.show()
     _select_side("player")
     close_button.grab_focus()
@@ -94,16 +102,24 @@ func _select_side(side: String) -> void:
         var label := ScreenStyle.label(text, 17)
         label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
         panel.add_child(label)
+    var recap: Dictionary = data.get("recap", {})
+    if not recap.get("facts", []).is_empty():
+        var evidence := ScreenStyle.label("Observed: " + "  ·  ".join(recap["facts"]), 16)
+        evidence.name = "BattleObservations"
+        evidence.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+        _body.add_child(evidence)
+        var advice := ScreenStyle.label("Optional idea: " + str(recap.get("suggestion", "")), 14)
+        advice.name = "BattleSuggestion"
+        advice.modulate = Color("c7d0b5")
+        advice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+        _body.add_child(advice)
     var columns := _columns(["Companion", "Damage", "Healing", "HP lost / absorbed", "KOs", "Bodies alive"], true)
     _body.add_child(columns)
-    var scroll := ScrollContainer.new()
-    scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-    scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-    _body.add_child(scroll)
     var rows := VBoxContainer.new()
+    rows.name = "CompanionRows"
     rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     rows.add_theme_constant_override("separation", 6)
-    scroll.add_child(rows)
+    _body.add_child(rows)
     for row in data.get("rows", []):
         var button := Button.new()
         button.custom_minimum_size.y = 48
@@ -124,6 +140,9 @@ func _select_side(side: String) -> void:
     _detail.custom_minimum_size.y = 48
     _detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     _body.add_child(_detail)
+    var note := ScreenStyle.label(str(_body.get_meta("report_note", "")), 14)
+    note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    _body.add_child(note)
 
 func _columns(values: Array, heading: bool = false) -> HBoxContainer:
     var row := HBoxContainer.new()

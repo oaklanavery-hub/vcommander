@@ -69,8 +69,86 @@ static func build(result: Dictionary) -> Dictionary:
                 if float(row[metric]) > float(best.get("value", 0)):
                     best = {"card_id": row["card_id"], "name": row["name"], "value": row[metric]}
             highlights[metric] = best
-        report["sides"][side] = {"rows": entries, "totals": totals, "highlights": highlights}
+        report["sides"][side] = {"rows": entries, "totals": totals, "highlights": highlights, "recap": recap(result, side)}
     return report
+
+static func recap(result: Dictionary, side: String) -> Dictionary:
+    var facts: Array[String] = []
+    var suggestion := "Compare your recruit and power choices with the rival's report before the next draft."
+    var events: Array = result.get("events", [])
+    var living := {}
+    var identities := {}
+    var had_frontline := false
+    var opening_bodies := 0
+    var created := 0
+    var lost_frontline := -1.0
+    var remaining_backline := 0
+    var incoming := 0.0
+    var linked := 0.0
+    var commander := 0.0
+    var index := 0
+    while index < events.size():
+        var time := float(events[index].get("time", 0))
+        # Deaths, revivals and splits at the same simulation time are one fact.
+        while index < events.size() and absf(float(events[index].get("time", 0)) - time) < 0.00001:
+            var event: Dictionary = events[index]
+            if event.get("type") == "spawn" and event.get("unit") is Dictionary:
+                var unit: Dictionary = event["unit"]
+                var id := str(unit.get("id", ""))
+                identities[id] = unit
+                if unit.get("side") == side:
+                    living[id] = unit
+                    if time <= 0.00001 and str(event.get("source", "")).is_empty() and not bool(unit.get("summoned", false)):
+                        opening_bodies += 1
+                        had_frontline = had_frontline or _frontline(unit)
+                    if event.get("source") in ["death_split", "revival"]:
+                        created += 1
+            elif event.get("type") == "defeat":
+                living.erase(str(event.get("unit_id", "")))
+            elif event.get("type") == "damage":
+                var target: Dictionary = identities.get(str(event.get("target_id", "")), {})
+                if target.get("side") == side and event.get("source_side") != side:
+                    var amount := maxf(0, float(event.get("hp_loss", 0)))
+                    incoming += amount
+                    if event.get("source") == "sticky_share":
+                        linked += amount
+                    if str(event.get("source", "")).begins_with("commander_skill"):
+                        commander += amount
+            index += 1
+        var front := 0
+        var back := 0
+        for unit in living.values():
+            if _frontline(unit):
+                front += 1
+            elif str(unit.get("role", "")) in ["range", "healer"] and not bool(unit.get("summoned", false)):
+                back += 1
+        if had_frontline and front == 0 and back > 0 and lost_frontline < 0:
+            lost_frontline = time
+            remaining_backline = back
+    if lost_frontline >= 0:
+        facts.append("Frontline gone at %.1fs; %d ranged/support bodies remained." % [lost_frontline, remaining_backline])
+        suggestion = "Reinforce the frontline or add sustain before another army-wide power."
+    elif opening_bodies > 0 and not had_frontline:
+        facts.append("No frontline bodies were present at the opening.")
+        suggestion = "Consider an early frontline recruit to give ranged and healing units time to act."
+    if incoming > 0 and linked / incoming >= 0.2:
+        facts.append("Linked hits caused %.0f%% of incoming HP loss." % (linked * 100.0 / incoming))
+        if lost_frontline < 0:
+            suggestion = "Try removing the enemy link support sooner, or compare a tougher opening frontline."
+    elif incoming > 0 and commander / incoming >= 0.5:
+        facts.append("Commander opening damage caused %.0f%% of incoming HP loss." % (commander * 100.0 / incoming))
+    if result.get("reason") == "timer":
+        facts.append("Both armies still had living units at the %.0fs limit." % float(result.get("duration", 0)))
+        if lost_frontline < 0:
+            suggestion = "Compare attack growth against healing and defence; stronger damage may help break a repeated draw."
+    elif created > 0 and facts.size() < 2:
+        facts.append("Splits and revivals created %d extra allied bodies." % created)
+    if facts.is_empty() and opening_bodies > 0:
+        facts.append("The fight resolved in %.1fs." % float(result.get("duration", 0)))
+    return {"facts": facts.slice(0, 2), "suggestion": suggestion if not facts.is_empty() else ""}
+
+static func _frontline(unit: Dictionary) -> bool:
+    return str(unit.get("role", "")) in ["tank", "melee"] and str(unit.get("ability_type", "")) != "backline_transit" and not bool(unit.get("summoned", false))
 
 static func _register(bodies: Dictionary, rows: Dictionary, unit: Dictionary, born_at: float, initial: bool) -> void:
     var id := str(unit.get("id", ""))

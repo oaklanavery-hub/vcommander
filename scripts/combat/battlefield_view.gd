@@ -583,8 +583,9 @@ func _draw_effects() -> void:
             var contact := _body_point(target) if not target.is_empty() else p + Vector2(0, -22)
             BattleEffects.impact(self, contact, str(effect.get("style", "magic")), age, reduced_motion)
         elif type == "summon" and age < 0.8:
-            for index in range(5):
-                var offset := Vector2.from_angle(float(index) * TAU / 5.0) * 13
+            var count := BattleEffects.particle_count(5)
+            for index in range(count):
+                var offset := Vector2.from_angle(float(index) * TAU / count) * 13
                 var height := 7.0 if reduced_motion else 5 + sin(clampf(age / 0.8, 0, 1) * PI) * 18
                 draw_line((p + offset).round(), (p + offset - Vector2(0, height)).round(), Color("a4c974"), 3)
             draw_arc(p, 16, 0, TAU, 12, Color(0.8, 0.86, 0.47, 1.0 - age), 2)
@@ -592,8 +593,9 @@ func _draw_effects() -> void:
             var color := BattleEffects.slime_color("slime_pink" if type == "rebirth" else "slime_green")
             color.a = 1 - age / 0.7
             draw_arc(p, 12 + (0 if reduced_motion else age * 34), 0, TAU, 12, color, 2)
-            for index in range(5):
-                var offset := Vector2.from_angle(float(index) * TAU / 5) * 15
+            var count := BattleEffects.particle_count(5)
+            for index in range(count):
+                var offset := Vector2.from_angle(float(index) * TAU / count) * 15
                 var rise := 8.0 if reduced_motion else sin(age / 0.7 * PI) * 26
                 draw_circle((p + offset - Vector2(0, rise)).round(), 3, color)
         elif type in ["damage", "heal"]:
@@ -646,4 +648,4 @@ func _draw_effects() -> void:
             color.a = (1.0 - age * 2.0) * 0.6
             draw_arc(p, 16.0 if reduced_motion else 12.0 + age * 40, 0, TAU, 12, color, 2)
         elif type == "commander_skill" and age < 1.0 and prelude_skills.is_empty() and effect.get("skill_type") == "round_debuff":
-            draw_rect(_arena, Color(0.45, 0.8, 0.95, (1.0 - age) * 0.12))
+            draw_rect(_arena, Color(0.45, 0.8, 0.95, (1.0 - age) * 0.12 * BattleEffects.intensity))

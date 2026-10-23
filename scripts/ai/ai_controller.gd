@@ -10,10 +10,19 @@ var signature_set: Dictionary = {}
 var draft = DraftScript.new()
 var _rng := RandomNumberGenerator.new()
 var _stat_caps: Dictionary = {"attack_speed": 200, "movement_speed": 200}
+const STYLE_NAMES := {"swarm": "Swarm", "sustain": "Sustain", "burst": "Burst", "flank": "Backline pressure"}
+var difficulty := "standard"
+var style := "swarm"
+var _public_enemy: Dictionary = {}
 
 # Only previous-round public enemy information crosses this boundary.
-func configure(commanders: Array, all_cards: Array, sets: Dictionary, buffs: Array, seed_value: int, stat_rules: Dictionary = {}) -> bool:
+func configure(commanders: Array, all_cards: Array, sets: Dictionary, buffs: Array, seed_value: int, stat_rules: Dictionary = {}, preferences: Dictionary = {}) -> bool:
     _rng.seed = seed_value
+    difficulty = str(preferences.get("difficulty", "standard"))
+    if difficulty not in ["casual", "standard", "veteran"]:
+        difficulty = "standard"
+    style = str(STYLE_NAMES.keys()[_rng.randi_range(0, STYLE_NAMES.size() - 1)])
+    _public_enemy.clear()
     for stat in ["attack_speed", "movement_speed"]:
         _stat_caps[stat] = float(stat_rules.get(stat + "_cap", 200))
     commander.clear()
@@ -37,11 +46,14 @@ func configure(commanders: Array, all_cards: Array, sets: Dictionary, buffs: Arr
             available = matching
         if available.is_empty():
             return false
+        var preferred: Array = available.filter(func(card): return _style_weight(card) > 1.0)
+        if not preferred.is_empty() and _rng.randf() < 0.75:
+            available = preferred
         cards.append(available[_rng.randi_range(0, available.size() - 1)].duplicate(true))
     var ids: Array[String] = []
     for card in cards:
         ids.append(str(card["id"]))
-    draft.configure(ids, cards, buffs, seed_value + 7919)
+    draft.configure(ids, cards, buffs, seed_value + 7919, preferences)
     return true
 
 func _has_card(card_id: String) -> bool:
@@ -51,6 +63,12 @@ func _has_card(card_id: String) -> bool:
     return false
 
 func begin_round(opening: bool, lost_previous: bool, sudden: bool, public_enemy: Dictionary, losses: int = 0) -> bool:
+    _public_enemy.clear()
+    # Whitelist prior-round public evidence. Hidden/current selections and battle
+    # results cannot cross this boundary, even if a caller supplies extra fields.
+    for key in ["cards", "unit_counts", "buffs", "set_bonus"]:
+        if public_enemy.has(key):
+            _public_enemy[key] = public_enemy[key].duplicate(true)
     draft.begin_round(opening, lost_previous, sudden)
     var guard := 0
     while not draft.is_phase_complete() and guard < 8:
@@ -62,13 +80,33 @@ func begin_round(opening: bool, lost_previous: bool, sudden: bool, public_enemy:
             var best_index := -1
             var best_score := -INF
             for index in range(draft.current_offer.size()):
-                var score := score_option(draft.current_offer[index]) + _rng.randf_range(0.0, 0.05)
+                var base := score_option(draft.current_offer[index])
+                var uncertainty := 0.45 if difficulty == "casual" else (0.01 if difficulty == "veteran" else 0.08)
+                var score := base * _rng.randf_range(1.0 - uncertainty, 1.0 + uncertainty)
                 if score > best_score:
                     best_score = score
                     best_index = index
+            if draft.can_redraw() and (best_score <= 0 or _missing_frontline_offer()):
+                draft.redraw()
+                guard -= 1
+                continue
             if not draft.select_offer(best_index):
                 return false
     return draft.is_phase_complete()
+
+func _missing_frontline_offer() -> bool:
+    if draft.round_number < 2:
+        return false
+    var can_recruit_tank := false
+    for card in cards:
+        if card.get("role") == "tank":
+            if draft.get_unit_count(str(card["id"])) > 0:
+                return false
+            can_recruit_tank = true
+    for option in draft.current_offer:
+        if option.get("type") == "unit" and draft.card_definitions.get(str(option.get("id", "")), {}).get("role") == "tank":
+            return false
+    return can_recruit_tank
 
 func _should_use_skill(public_enemy: Dictionary, losses: int) -> bool:
     if draft.commander_skill_uses_remaining() <= 0 or draft.commander_skill_used_this_round:
@@ -100,11 +138,26 @@ func score_option(option: Dictionary) -> float:
             # First support unit gains value as more allies can benefit.
             var heal_pct := float(ability.get("heal_target_max_hp_pct", ability.get("heal_ally_max_hp_pct", 0)))
             score += float(_unit_total()) * heal_pct * 3.0
-        return score
+        return score * _style_weight(card) * _counter_weight(card)
     var buff: Dictionary = draft.buff_definitions.get(option_id, {})
     var value := float(buff.get("percentage", 0)) * float(_unit_total()) * 0.65
     if str(buff.get("stat", "")) in ["health", "attack"]:
         value *= 1.2
+    var growth: String = str(buff.get("stat", ""))
+    if style == "sustain" and growth in ["health", "defense"]:
+        value *= 1.35
+    elif style == "burst" and growth == "attack":
+        value *= 1.4
+    elif style == "flank" and growth in ["attack", "movement_speed"]:
+        value *= 1.2
+    elif style == "swarm":
+        value *= 0.85
+    if difficulty != "casual":
+        var threat := _enemy_profile()
+        if growth == "attack" and float(threat["defense"]) > 0:
+            value *= 1.0 + minf(0.6, float(threat["defense"]) / 25.0) * (1.0 if difficulty == "veteran" else 0.6)
+        if growth == "attack_speed" and float(threat["healers"]) > 0:
+            value *= 1.2
     var stat := str(buff.get("stat", ""))
     if _stat_caps.has(stat):
         # Unlimited speed cards remain legal, but an already-capped army gets
@@ -129,6 +182,49 @@ func score_option(option: Dictionary) -> float:
         value *= weighted_gain / float(maxi(1, total))
     return value
 
+func _style_weight(card: Dictionary) -> float:
+    var ability := str(card.get("ability", {}).get("type", ""))
+    match style:
+        "swarm":
+            return 1.25 if int(card.get("summon_amount", 1)) >= 2 or ability == "death_split" else 1.0
+        "sustain":
+            return 1.35 if ability in ["area_heal", "aura_heal", "absorb_burst"] else 1.0
+        "burst":
+            return 1.3 if ability in ["ranged_aoe", "empowered_attack", "explosion", "absorb_burst"] else 1.0
+        "flank":
+            return 1.4 if ability in ["backline_transit", "pull_then_melee", "damage_link"] else 1.0
+    return 1.0
+
+func _enemy_profile() -> Dictionary:
+    var threat := {"total": 0.0, "backline": 0.0, "healers": 0.0, "defense": 0.0}
+    for card in _public_enemy.get("cards", []):
+        var count := float(_public_enemy.get("unit_counts", {}).get(str(card.get("id", "")), 0))
+        threat["total"] += count
+        if str(card.get("role", "")) in ["range", "healer"]:
+            threat["backline"] += count
+        if str(card.get("ability", {}).get("type", "")) in ["area_heal", "aura_heal"]:
+            threat["healers"] += count
+        threat["defense"] += count * WarbandStats.effective(int(card.get("stats", {}).get("defense", 0)), "defense", _public_enemy, _stat_caps)
+    if float(threat["total"]) > 0:
+        threat["backline"] /= float(threat["total"])
+        threat["healers"] /= float(threat["total"])
+        threat["defense"] /= float(threat["total"])
+    return threat
+
+func _counter_weight(card: Dictionary) -> float:
+    if difficulty == "casual":
+        return 1.0
+    var threat := _enemy_profile()
+    var amount := 0.0
+    var ability := str(card.get("ability", {}).get("type", ""))
+    if ability in ["ranged_aoe", "ranged_aoe_dot", "aura_damage", "explosion", "death_damage_area", "absorb_burst", "damage_link"]:
+        amount += minf(0.65, float(threat["total"]) / 24.0)
+    if ability == "backline_transit":
+        amount += float(threat["backline"]) * 0.8 + float(threat["healers"]) * 0.6
+    if ability == "empowered_attack":
+        amount += minf(0.5, float(threat["defense"]) / 30.0)
+    return 1.0 + amount * (1.0 if difficulty == "veteran" else 0.6)
+
 func _unit_total() -> int:
     var result := 0
     for count in draft.unit_counts.values():
@@ -149,5 +245,6 @@ func get_side(skill_active: bool = false) -> Dictionary:
         "cards": cards.duplicate(true), "unit_counts": draft.unit_counts.duplicate(true),
         "buffs": buffs, "set_bonus": bonus,
         "commander_skill_active": skill_active,
-        "skill_uses_remaining": draft.commander_skill_uses_remaining()
+        "skill_uses_remaining": draft.commander_skill_uses_remaining(),
+        "ai_plan": {"style": style, "name": str(STYLE_NAMES.get(style, "Balanced")), "difficulty": difficulty}
     }

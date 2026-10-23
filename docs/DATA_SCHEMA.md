@@ -173,6 +173,8 @@ Pull events provide `source_x/y`, `from_x/y`, `to_x/y` and original target HP fo
 
 ## Validation expectations
 
+`user://local_match.json` is a bounded schema-1 local PvAI checkpoint, atomically replaced with a current backup. It stores the gameplay-content SHA-256 fingerprint, stable Commander/card IDs, string-encoded 64-bit seeds/RNG states, both draft states, match history/hearts, public rival snapshot, pending profile identity, remaining pick time and whether the result was already watched. Replay events/frames and developer credentials are never stored here. Current content and profile identity are validated before a temporary decoded state replaces the running game. A resolved battle is deterministically reconstructed without scoring it again. Commander profiles accept an optional validated `last_settlement` receipt for exact-once recovery; old profiles without it remain valid.
+
 - IDs are unique within each content type.
 - Content groups are nonempty and there is one global balance file. The roster currently contains 4 Commanders, 24 Army cards, 4 themes and 5 Buff Cards, including the Slime Court expansion.
 - Every Commander `signature_set_id` resolves.
@@ -193,6 +195,12 @@ Combat replay units include stable `card_id`, `element`, HP, position, ability t
 The separate `assets/pixel/roster.json` catalog uses its own schema version 1: common colors, elemental palettes and a `sprites` dictionary keyed by presentation/content ID. Each sprite defines a name, element, role and sixteen rows of sixteen palette characters. `.` is transparent. `tools/validate_art.py` verifies palette validity, dimensions and coverage of all starter cards independently of gameplay content validation.
 
 `assets/pixel/commanders.json` uses the same palette-character approach for original 32×48 full-body portraits keyed by element. Commander cards and the full portrait share this catalog. A card's recruit/cap fraction and class badge always read its content definition, independently of the artwork.
+
+## Local match preferences and insights
+
+`user://match_preferences.cfg` stores the next local adventure difficulty (`casual`, `standard`, `veteran`) and the default-off redraw experiment. The active rule and each round allowance are retained in both draft snapshots, alongside AI plan/public evidence and elapsed draft/viewing time. Seeds and RNG states remain decimal strings.
+
+`user://match_insights.json` uses bounded schema 1 with a current atomic backup: at most 30 match identities, aggregate timing/draw counters, outcome/difficulty/experiment, and at most 64 round viewing receipts per match. Idempotent round numbers prevent duplicate observations when recovering a scored round. It contains no credentials, replay frames or progression grants. Automated scripts use in-memory stores.
 
 ## Local warband preset data
 
@@ -253,3 +261,5 @@ Replay unit snapshots additionally expose defense, effective attack/movement spe
 `user://first_match_guide.cfg` contains `[guide] schema=1, completed=true` after the optional guide reaches its first completed battle report. A temporary ConfigFile is completed before replacement. Missing/unknown schemas mean no remembered completion. This preference never stores a replay, Commander record or entitlement; script/headless runs use memory unless a test supplies an isolated path. Ending guidance early does not mark it completed or end the match.
 
 Combat cue profiles add `death_motion` (`collapse`, `wilt`, `dissolve`, `pop`) and `death_sound` (an exported original cue). These are presentation parameters only. Recorded defeat time owns the animation start; the existing half-second contact tail contains the full fade. Reduced motion preserves the original shape with a fade. Combat audio has bounded per-window budgets (five ordinary, three important ability and two Commander cues), per-cue cooldowns and three reserved voices; ordinary/UI effects cannot replace a higher-priority voice.
+
+Presentation preferences now include `interface_text_scale` (1.0/1.2) and `effects_intensity` (0.35–1.0), independently of audio, motion and health numbers. Missing keys preserve standard defaults. Scripted QA uses memory or an explicit isolated settings path. The browser recovery acceptance uses ordinary persistent paths only inside an isolated test browser context.
