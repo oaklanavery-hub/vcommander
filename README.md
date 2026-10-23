@@ -6,7 +6,7 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 **v0.18.0 — Warband strategy and optional commander paths**
 
-Continue the same local adventure after closing or refreshing the game, with identical drafts/RNG, remaining pick time, hearts and skill budgets. Power cards preview their actual current-army benefit. Seeded opponents use distinct plans and public-information counters at Casual, Standard or Veteran difficulty. Optional redraw testing, local pacing insights, factual battle recaps, larger interface text and adjustable effects extend the existing fantasy battlefield, mastery and guided-first-match flow.
+Build a warband with clearer ability relationships and an explicit themed-versus-mixed tradeoff. An optional commander-path prototype gives each Commander two match-only ability branches from Round 3 for one normal pick, with equal AI access and exact recovery. Local pacing insights distinguish experiments and build composition; a reproducible timeout case is documented for the next overtime decision. Existing recovery, power previews, AI difficulty, reports, mastery, pixel presentation and accessibility remain available.
 
 The current playable prototype supports:
 

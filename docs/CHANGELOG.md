@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.18.0 — Warband strategy (in development)
+## v0.18.0 — Warband strategy and optional commander paths
 
 - Add read-only warband relationships, a collection-wide ability glossary and explicit themed-versus-mixed tradeoffs in the army builder.
 - Add a default-off commander-path prototype: two match-only ability branches per Commander from Round 3, once per adventure for one normal pick, with equal AI access.
