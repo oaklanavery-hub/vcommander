@@ -190,3 +190,12 @@ Unlimited power picks and clear playable ground; four 2/4 units with backline tr
 - Default-off commander-path prototype with eight content-defined ability branches, normal-pick legality, equal AI rules and exact recovery/public visibility.
 - Extend local pacing context and run a bounded starter-only themed/hybrid diagnostic; publish synthetic findings and human acceptance procedure. A repeated Water-hybrid Sudden Death timeout case needs an overtime product decision.
 - Verify compact/larger-text guidance and actual browser path purchase/reload through the ordinary Continue action. P2/P3 stays deferred.
+
+
+## v0.19 — Approved Sudden Death growth
+
+- Each Sudden Death battle has a 180-second ceiling; normal battles remain 120 seconds.
+- Double the percentage only for newly picked Sudden Death powers. Preserve earlier strengths and enhanced subsets across repeated rounds, with shared combat/preview/AI math and the existing speed caps.
+- Recover mixed cohorts, exact RNG and hidden rival powers; keep old v0.18 scored replays at their original limit and apply the new rule to subsequent rounds.
+- Add enhanced-card browser purchase/reload/Continue acceptance, two focused suites and seven native views including compact/larger-text bounds and full-field frost after 2:00.
+- The bounded known Water hybrid comparison finishes Round 15 after seven Sudden Death draws. Long repeated draws remain possible; human pacing evidence is still needed before any further stall-resolution mechanic. Campaign/PvP deferrals and free hosting remain.

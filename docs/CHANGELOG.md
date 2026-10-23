@@ -2,6 +2,8 @@
 
 ## v0.19.0 — Sudden Death growth
 
+Released as `f29996f71359a092121f6c49729a811c34c8245c`; [deployment and actual served-pack verification passed](https://github.com/oaklanavery-hub/vcommander/actions/runs/39990629132).
+
 - Each Sudden Death battle has its own three-minute ceiling; normal battles keep two minutes.
 - New Sudden Death power picks double their percentage. Earlier bonuses retain their original strength, including across repeated rounds.
 - Combat, previews, rosters and AI share mixed-strength power math with the existing speed caps.

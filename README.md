@@ -6,7 +6,7 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 **v0.19.0 — Sudden Death growth**
 
-Every Sudden Death battle has its own three-minute ceiling. Only new power cards picked during Sudden Death get double their percentage; earlier bonuses retain their strength. Normal battles keep their two-minute limit. Previews, mixed-strength rosters, AI and recovery use the same rules, including preservation of old completed replays.
+Every Sudden Death battle has its own three-minute ceiling. Only new power cards picked during Sudden Death get double their percentage; earlier bonuses retain their strength. Normal battles keep their two-minute limit. Previews, mixed-strength rosters, AI and recovery use the same rules, including preservation of old completed replays. [Release verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39990629132) passed against the actual public game pack.
 
 The current playable prototype supports:
 
@@ -78,7 +78,7 @@ The current playable prototype supports:
 - eight-direction movement poses, four-direction attacks, neutral idle/death and combat VFX
 - optional sound, reduced motion, HP numbers, pause and keyboard shortcuts
 - seeded match input, Commander-theme quick equip and visible opponent progress
-- 120-second draw resolution
+- 120-second normal battle limit and 180-second limit for each Sudden Death battle
 
 The opponent now selects its own Commander and unique four-card loadout, drafts legally using a seeded policy, and conceals current picks until combat. The battlefield uses original elemental pixel artwork, a meadow arena, projectile/skill effects and readable side markers. Matches now continue until one side reaches four losses. Draws cost both sides a loss; simultaneous fourth losses trigger repeated Sudden Death rounds. Losing sides receive a fourth selection in normal rounds. Armies, Buffs and skill budgets persist while battle units respawn at full HP.
 
@@ -146,7 +146,7 @@ Choose Preset 1, 2 or 3, then **Save** a complete four-card warband. Clicking a 
 
 Run `python3 tools/run_checks.py --godot /path/to/godot` for all content/art validation and headless suites. Run `godot --headless --path . --script tools/run_balance.gd -- --seeds=8 --seed-start=1000 --output=/tmp/balance.json` for a reproducible AI sample. See `docs/PLAYTEST_REPORT.md` for methods, tuning and limitations.
 
-CI renders the full desktop capture gallery, including twelve dedicated recovery/redraw/recap/accessibility views as well as title animation phases/reduced motion, help/settings/pause, projectile contact, attack phases, frost, summon ownership, the Slime Court and tactical formations, all four elemental galleries, compact battle details and long blessing labels, and tests the exported game pack. Bounded native review previews supplement the full-resolution PNG artifact. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.
+CI renders the full desktop capture gallery, including seven dedicated Sudden Death views, eleven warband strategy views, twelve recovery/redraw/recap/accessibility views as well as title animation phases/reduced motion, help/settings/pause, projectile contact, attack phases, frost, summon ownership, the Slime Court and tactical formations, all four elemental galleries, compact battle details and long blessing labels, and tests the exported game pack. Bounded native review previews supplement the full-resolution PNG artifact. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.
 
 ## Commander mastery
 
