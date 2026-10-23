@@ -293,11 +293,12 @@ func _side_summary(title: String, side_config: Dictionary) -> String:
         var skill: Dictionary = commander.get("active_skill", {})
         lines.append("Commander Skill: %s" % str(skill.get("display_name", "Active")))
     for buff in side_config.get("buffs", []):
-        lines.append("%s ×%d" % [str(buff.get("definition", {}).get("display_name", "Buff")), int(buff.get("stacks", 0))])
+        lines.append("%s %s" % [str(buff.get("definition", {}).get("display_name", "Buff")), BuffTile.applied_text(buff)])
     return "\n".join(lines)
 
 func _update_timer_label() -> void:
-    battle_timer.text = "Battle · %d:%02d" % [int(_playback_time) / 60, int(_playback_time) % 60]
+    var limit := int(_source.battle_result.get("round_time_limit", 120))
+    battle_timer.text = "Battle · %d:%02d / %d:%02d" % [int(_playback_time) / 60, int(_playback_time) % 60, limit / 60, limit % 60]
 
 func _update_speed_label() -> void:
     speed_button.text = "%dx speed" % int(_speed_options[_speed_index])

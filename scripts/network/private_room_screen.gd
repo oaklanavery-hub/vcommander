@@ -229,6 +229,7 @@ func _render_offers(view: Dictionary) -> void:
             var buff := ContentDatabase.get_buff(str(option["id"]))
             var blessing := BuffTile.new()
             blessing.definition = buff
+            blessing.side_config = view["self"]
             for applied in view["self"].get("buffs", []):
                 if str(applied.get("definition", {}).get("id", "")) == str(option["id"]):
                     blessing.stacks = int(applied.get("stacks", 0))
@@ -279,7 +280,7 @@ func _army_text(title: String, side: Dictionary) -> String:
     var bonus: Dictionary = side.get("set_bonus", {})
     entries.append("Theme inactive" if bonus.is_empty() else "Theme: " + ScreenStyle.bonus_description(bonus, true))
     for buff in side.get("buffs", []):
-        entries.append("%s ×%d" % [buff.get("definition", {}).get("display_name", "Buff"), int(buff.get("stacks", 0))])
+        entries.append("%s %s" % [buff.get("definition", {}).get("display_name", "Buff"), BuffTile.applied_text(buff)])
     return "\n".join(entries)
 
 func _panel(parent: Node, minimum: Vector2 = Vector2.ZERO) -> VBoxContainer:

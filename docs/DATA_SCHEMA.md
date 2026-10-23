@@ -122,7 +122,7 @@ Buffs live in `data/buffs/`. They are not part of the four-card pre-match Army l
 
 ## Balance
 
-Global numeric playtest values that are not tied to a specific content item live in `data/balance/game_balance.json`.
+Global numeric playtest values that are not tied to a specific content item live in `data/balance/game_balance.json`. `match.round_time_seconds` is 120; `sudden_death_round_time_seconds` is 180 and `sudden_death_power_multiplier` is 2.
 
 The v0.4 simulator reads:
 
@@ -274,3 +274,10 @@ Presentation preferences now include `interface_text_scale` (1.0/1.2) and `effec
 Match preferences add default-false `specialization_experiment`. Draft snapshots add optional `specialization_enabled` and `specialization_id`, defaulting false/empty for old saves. Content supplies valid owner-specific options during restore; a disabled, foreign, premature or incompatible chosen path is rejected. Runtime combat-side input adds a trusted `specialization` definition; simulator copies and transforms abilities once. Only affected replay actors add their factual `specialization_description` and effective cooldown interval for current-time inspection. No future event is exposed. Rival public path definitions are rebuilt from their saved public IDs, independently of their hidden current choice.
 
 Insights schema 1 adds optional `specializations` boolean, `composition` (`unknown`, `themed`, `mixed`) and nonnegative `army_capped_rounds`. Older entries remain valid with unknown composition, no path experiment and zero known capped rounds. Bounds, storage locations, idempotence and progression isolation remain unchanged.
+
+
+## Sudden Death power cohorts (v0.19)
+
+Draft snapshots retain total `buff_stacks` plus `sudden_death_buff_stacks`, the enhanced subset for each stable buff ID. Counts must be nonnegative whole numbers with enhanced ≤ total, and enhanced counts require Sudden Death. Missing cohorts in old checkpoints mean zero enhanced picks. Runtime buff entries carry unchanged base `definition`, total `stacks` and optional `sudden_death_stacks` / trusted `sudden_death_multiplier`. A percentage p with n picks and e enhanced picks multiplies a stat by `(1+p/100)^(n-e) × (1+2p/100)^e` before the existing final rounding and speed caps. The shared formula serves combat, actual power previews and AI cap decisions.
+
+Runtime sides carry public round context: `sudden_death`, `round_time_limit` and `sudden_death_power_multiplier`. Draft snapshots record the current budget. Result metadata includes `round_time_limit`; it describes the allowed battle time, not the eventual outcome. History accepts up to 120 seconds for normal rounds and 180 for Sudden Death rounds. Existing v0.18 fingerprints are recognized only by removing these two new balance keys: old completed battles reconstruct with their original 120-second clock and ordinary bonuses; new pending Sudden Death battles use 180 seconds. Once migrated, the explicit old replay budget survives another restart. Prior-public rival cohorts are validated independently from hidden current picks and rebuilt from trusted definitions. No replay or new progression reward is stored.

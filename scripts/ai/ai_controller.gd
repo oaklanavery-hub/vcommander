@@ -160,7 +160,9 @@ func score_option(option: Dictionary) -> float:
             score += float(_unit_total()) * heal_pct * 3.0
         return score * _style_weight(card) * _counter_weight(card)
     var buff: Dictionary = draft.buff_definitions.get(option_id, {})
-    var value := float(buff.get("percentage", 0)) * float(_unit_total()) * 0.65
+    var side := get_side()
+    var percentage := WarbandStats.power_percentage(side, buff)
+    var value := percentage * float(_unit_total()) * 0.65
     if str(buff.get("stat", "")) in ["health", "attack"]:
         value *= 1.2
     var growth: String = str(buff.get("stat", ""))
@@ -184,17 +186,11 @@ func score_option(option: Dictionary) -> float:
         # no benefit from them. Prefer useful growth when the offer permits it.
         var weighted_gain := 0.0
         var total := 0
-        var multiplier := 1 + float(buff.get("percentage", 0)) / 100.0
+        var multiplier := 1 + percentage / 100.0
         for card in cards:
             var count := draft.get_unit_count(str(card["id"]))
-            var base := maxf(1, float(card.get("stats", {}).get(stat, 100)))
-            var log_value := log(base)
-            for id in draft.buff_definitions:
-                var active: Dictionary = draft.buff_definitions[id]
-                if str(active.get("stat", "")) == stat:
-                    log_value += float(draft.get_buff_stacks(str(id))) * log(1 + float(active.get("percentage", 0)) / 100.0)
             var cap := float(_stat_caps[stat])
-            var current := minf(cap, exp(minf(log(cap), log_value)))
+            var current := WarbandStats.effective(int(card.get("stats", {}).get(stat, 100)), stat, side, _stat_caps)
             if current >= cap - 0.0001:
                 current = cap
             weighted_gain += float(count) * (minf(cap, current * multiplier) - current) / maxf(0.001, current * (multiplier - 1))
@@ -255,11 +251,7 @@ func get_side(skill_active: bool = false) -> Dictionary:
     var bonus: Dictionary = {}
     if SetChecker.is_complete(cards, str(signature_set.get("id", "")), int(signature_set.get("required_count", 4))):
         bonus = signature_set.get("bonus", {}).duplicate(true)
-    var buffs: Array[Dictionary] = []
-    for buff_id in draft.buff_definitions:
-        var stacks: int = draft.get_buff_stacks(str(buff_id))
-        if stacks > 0:
-            buffs.append({"definition": draft.buff_definitions[buff_id].duplicate(true), "stacks": stacks})
+    var buffs: Array[Dictionary] = draft.get_buff_states()
     return {
         "id": "opponent", "commander": commander.duplicate(true),
         "cards": cards.duplicate(true), "unit_counts": draft.unit_counts.duplicate(true),
@@ -268,4 +260,4 @@ func get_side(skill_active: bool = false) -> Dictionary:
         "skill_uses_remaining": draft.commander_skill_uses_remaining(),
         "specialization": draft.specialization(),
         "ai_plan": {"style": style, "name": str(STYLE_NAMES.get(style, "Balanced")), "difficulty": difficulty}
-    }
+    }.merged(draft.round_context())

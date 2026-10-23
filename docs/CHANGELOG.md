@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.19.0 — Sudden Death growth
+
+- Each Sudden Death battle has its own three-minute ceiling; normal battles keep two minutes.
+- New Sudden Death power picks double their percentage. Earlier bonuses retain their original strength, including across repeated rounds.
+- Combat, previews, rosters and AI share mixed-strength power math with the existing speed caps.
+- Recover enhanced picks and round budgets without revealing hidden rival picks; preserve v0.18 scored replays at their original limit.
+
 ## v0.18.0 — Warband strategy and optional commander paths
 
 - Add read-only warband relationships, a collection-wide ability glossary and explicit themed-versus-mixed tradeoffs in the army builder.

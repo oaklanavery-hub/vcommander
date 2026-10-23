@@ -14,6 +14,11 @@ var card_definitions: Dictionary = {}
 var buff_definitions: Dictionary = {}
 var unit_counts: Dictionary = {}
 var buff_stacks: Dictionary = {}
+var sudden_death_buff_stacks: Dictionary = {}
+var round_time_limit := 120.0
+var sudden_death_power_multiplier := 2.0
+var _normal_round_seconds := 120.0
+var _sudden_round_seconds := 180.0
 var current_offer: Array[Dictionary] = []
 
 var selection_points := 0
@@ -40,6 +45,13 @@ func configure(card_ids: Array, cards: Array, buffs: Array, match_seed: int, opt
     buff_definitions.clear()
     unit_counts.clear()
     buff_stacks.clear()
+    sudden_death_buff_stacks.clear()
+    var match_rules: Dictionary = options.get("match_rules", {})
+    _normal_round_seconds = float(match_rules.get("round_time_seconds", 120))
+    _sudden_round_seconds = float(match_rules.get("sudden_death_round_time_seconds", 180))
+    sudden_death_power_multiplier = float(match_rules.get("sudden_death_power_multiplier", 2))
+    round_time_limit = _normal_round_seconds
+    sudden_death = false
     current_offer.clear()
     commander_skill_uses = 0
     round_number = 0
@@ -75,6 +87,7 @@ func configure(card_ids: Array, cards: Array, buffs: Array, match_seed: int, opt
         if not buff_id.is_empty():
             buff_definitions[buff_id] = buff
             buff_stacks[buff_id] = 0
+            sudden_death_buff_stacks[buff_id] = 0
 
     seed = match_seed
     _rng.seed = match_seed
@@ -83,6 +96,7 @@ func begin_round(is_opening: bool, lost_previous_round: bool, is_sudden_death: b
     round_number += 1
     opening_phase = is_opening
     sudden_death = is_sudden_death
+    round_time_limit = _sudden_round_seconds if sudden_death else _normal_round_seconds
     commander_skill_used_this_round = false
     redraw_used = false
     selection_points = DEFAULT_SELECTIONS
@@ -209,6 +223,7 @@ func snapshot() -> Dictionary:
     return {
         "seed": str(seed), "rng_state": str(_rng.state),
         "unit_counts": unit_counts.duplicate(), "buff_stacks": buff_stacks.duplicate(),
+        "sudden_death_buff_stacks": sudden_death_buff_stacks.duplicate(), "round_time_limit": round_time_limit,
         "offer": current_offer.duplicate(true), "points": selection_points,
         "round": round_number, "opening": opening_phase, "sudden": sudden_death,
         "skill_uses": commander_skill_uses, "skill_prepared": commander_skill_used_this_round,
@@ -254,6 +269,20 @@ func restore(value: Dictionary) -> bool:
                 return false
     if not saved_specialization.is_empty() and CommanderSpecializations.affected(card_definitions.values(), value["unit_counts"], specialization_options[saved_specialization])["types"].is_empty():
         return false
+    var enhanced: Dictionary = {}
+    if value.has("sudden_death_buff_stacks"):
+        if not value["sudden_death_buff_stacks"] is Dictionary or value["sudden_death_buff_stacks"].size() != buff_definitions.size():
+            return false
+        enhanced = value["sudden_death_buff_stacks"]
+        for id in enhanced:
+            if not buff_definitions.has(id) or not CommanderProgress._counter(enhanced[id]) or int(enhanced[id]) > int(value["buff_stacks"][id]) or (not bool(value["sudden"]) and int(enhanced[id]) > 0):
+                return false
+    var seconds = value.get("round_time_limit", _sudden_round_seconds if bool(value["sudden"]) else _normal_round_seconds)
+    if not (seconds is int or seconds is float) or not is_finite(float(seconds)):
+        return false
+    # A migrated, already-scored v0.18 replay keeps its original normal limit.
+    if float(seconds) != _normal_round_seconds and (not bool(value["sudden"]) or float(seconds) != _sudden_round_seconds):
+        return false
     if not value.get("offer") is Array or value["offer"].size() > OFFER_SIZE:
         return false
     var seen := {}
@@ -283,6 +312,8 @@ func restore(value: Dictionary) -> bool:
         unit_counts[id] = int(value["unit_counts"][id])
     for id in value["buff_stacks"]:
         buff_stacks[id] = int(value["buff_stacks"][id])
+        sudden_death_buff_stacks[id] = int(enhanced.get(id, 0))
+    round_time_limit = float(seconds)
     current_offer.assign(value["offer"])
     selection_points = int(value["points"])
     round_number = int(value["round"])
@@ -302,6 +333,23 @@ func get_unit_count(card_id: String) -> int:
 
 func get_buff_stacks(buff_id: String) -> int:
     return int(buff_stacks.get(buff_id, 0))
+
+func get_buff_states() -> Array[Dictionary]:
+    var result: Array[Dictionary] = []
+    for id in buff_definitions:
+        var stacks := get_buff_stacks(str(id))
+        if stacks <= 0:
+            continue
+        var entry := {"definition": buff_definitions[id].duplicate(true), "stacks": stacks}
+        var enhanced := int(sudden_death_buff_stacks.get(id, 0))
+        if enhanced > 0:
+            entry["sudden_death_stacks"] = enhanced
+            entry["sudden_death_multiplier"] = sudden_death_power_multiplier
+        result.append(entry)
+    return result
+
+func round_context() -> Dictionary:
+    return {"sudden_death": sudden_death, "round_time_limit": round_time_limit, "sudden_death_power_multiplier": sudden_death_power_multiplier}
 
 func commander_skill_uses_remaining() -> int:
     return maxi(0, COMMANDER_SKILL_USES_PER_MATCH - commander_skill_uses)
@@ -330,6 +378,8 @@ func _apply_buff(buff_id: String) -> bool:
     if max_stacks > 0 and current >= max_stacks:
         return false
     buff_stacks[buff_id] = current + 1
+    if sudden_death:
+        sudden_death_buff_stacks[buff_id] = int(sudden_death_buff_stacks.get(buff_id, 0)) + 1
     return true
 
 func _eligible_unit_ids() -> Array[String]:

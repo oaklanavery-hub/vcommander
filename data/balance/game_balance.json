@@ -11,7 +11,9 @@
   },
   "match": {
     "round_time_seconds": 120,
-    "losses_to_lose_match": 4
+    "losses_to_lose_match": 4,
+    "sudden_death_round_time_seconds": 180,
+    "sudden_death_power_multiplier": 2
   },
   "stats": {
     "minimum_damage": 1,

@@ -243,7 +243,7 @@ The exact starter numeric stats and ability tuning in `data/` are approved as th
 ## Battle and match resolution
 
 **R074 — Round timer**  
-A battle round lasts at most 120 seconds.
+A normal battle round lasts at most 120 seconds. Each Sudden Death battle lasts at most 180 seconds, measured after Commander skill presentation finishes. The ceiling applies separately to every battle, not to the entire Sudden Death phase.
 
 **R075 — Immediate victory**  
 The round ends immediately when one side has no surviving units, after resolving death abilities, death-created units and revival from that simulation step. Lingering areas do not count as surviving units.
@@ -261,7 +261,7 @@ A player loses the match upon reaching four round losses unless both players rea
 If both sides reach four losses together, the match enters Sudden Death rather than ending as a draw.
 
 **R080 — Sudden death draft**  
-Before every Sudden Death battle, both sides receive three selections. The loser-comeback fourth selection does not apply.
+Before every Sudden Death battle, both sides receive three selections. The loser-comeback fourth selection does not apply. Every power card picked during Sudden Death grants twice its normal percentage: +30% ATK, +50% HP, +40% Attack Speed, +50% DEF or +60% Movement Speed. Power cards picked earlier retain their original percentages. Both cohorts persist and stack multiplicatively; entering another Sudden Death round never upgrades an existing pick again. Existing speed caps and unlimited power picks remain.
 
 **R081 — Sudden death repeat**  
 If a Sudden Death battle is also a draw, another three-selection Sudden Death round begins. Repeat until one side wins outright.

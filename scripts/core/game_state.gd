@@ -243,16 +243,7 @@ func _build_combat_side(side_id: String, draft_state, skill_active: bool) -> Dic
     for card_id in army.get_cards():
         counts[card_id] = draft_state.get_unit_count(card_id)
 
-    var buff_states: Array[Dictionary] = []
-    for buff in ContentDatabase.get_all_buffs():
-        var buff_id := str(buff.get("id", ""))
-        var stacks: int = int(draft_state.get_buff_stacks(buff_id))
-        if stacks <= 0:
-            continue
-        buff_states.append({
-            "definition": buff.duplicate(true),
-            "stacks": stacks
-        })
+    var buff_states: Array[Dictionary] = draft_state.get_buff_states()
 
     var set_bonus: Dictionary = {}
     if is_full_set_active():
@@ -269,7 +260,7 @@ func _build_combat_side(side_id: String, draft_state, skill_active: bool) -> Dic
         "set_bonus": set_bonus,
         "skill_uses_remaining": draft_state.commander_skill_uses_remaining(),
         "specialization": draft_state.specialization()
-    }
+    }.merged(draft_state.round_context())
 
 func _reset_match_runtime() -> void:
     if match_insights != null and not _progress_match_id.is_empty():
@@ -335,10 +326,16 @@ func has_saved_match() -> bool:
     return false
 
 func _draft_options(commander_id: String, enabled: bool) -> Dictionary:
-    return {"redraw_experiment": match_preferences.redraw_experiment, "specialization_experiment": enabled, "commander_id": commander_id, "specialization_catalog": ContentDatabase.get_specializations()}
+    return {"redraw_experiment": match_preferences.redraw_experiment, "specialization_experiment": enabled, "commander_id": commander_id, "specialization_catalog": ContentDatabase.get_specializations(), "match_rules": ContentDatabase.get_game_balance().get("match", {})}
 
-func _content_fingerprint(include_specializations: bool = false) -> String:
-    var definitions: Array = [ContentDatabase.commanders, ContentDatabase.cards, ContentDatabase.sets, ContentDatabase.buffs, ContentDatabase.balances]
+func _content_fingerprint(include_specializations: bool = false, legacy_overtime: bool = false) -> String:
+    var balances: Dictionary = ContentDatabase.balances
+    if legacy_overtime:
+        balances = balances.duplicate(true)
+        for balance in balances.values():
+            balance.get("match", {}).erase("sudden_death_round_time_seconds")
+            balance.get("match", {}).erase("sudden_death_power_multiplier")
+    var definitions: Array = [ContentDatabase.commanders, ContentDatabase.cards, ContentDatabase.sets, ContentDatabase.buffs, balances]
     if include_specializations:
         definitions.append(ContentDatabase.get_specializations())
     return JSON.stringify(definitions).sha256_text()
@@ -415,7 +412,8 @@ func resume_match() -> bool:
 
 func _decode_checkpoint(value: Dictionary) -> Dictionary:
     var uses_specializations := bool(value.get("draft", {}).get("specialization_enabled", false)) if value.get("draft") is Dictionary else false
-    if value.get("schema") != 1 or value.get("content") != _content_fingerprint(uses_specializations):
+    var legacy_overtime: bool = value.get("content") == _content_fingerprint(uses_specializations, true)
+    if value.get("schema") != 1 or (value.get("content") != _content_fingerprint(uses_specializations) and not legacy_overtime):
         return {}
     if str(value.get("difficulty", "standard")) not in MatchPreferences.DIFFICULTIES or str(value.get("style", "swarm")) not in AiScript.STYLE_NAMES or not value.get("enemy_evidence", {}) is Dictionary:
         return {}
@@ -443,9 +441,17 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
     for key in ["draft", "opponent_draft", "match", "public_side"]:
         if not value.get(key) is Dictionary:
             return {}
+    # Completed old rounds must reconstruct with their original clock, even
+    # after the upgraded checkpoint is written with the new fingerprint.
+    var player_snapshot: Dictionary = value["draft"].duplicate(true)
+    var rival_snapshot: Dictionary = value["opponent_draft"].duplicate(true)
+    if legacy_overtime and value["match"].get("phase") in ["result", "complete"]:
+        var legacy_seconds := float(ContentDatabase.get_game_balance().get("match", {}).get("round_time_seconds", 120))
+        player_snapshot["round_time_limit"] = legacy_seconds
+        rival_snapshot["round_time_limit"] = legacy_seconds
     var player_draft = DraftSystemScript.new()
     player_draft.configure(value["army"], ContentDatabase.get_cards_by_ids(value["army"]), ContentDatabase.get_all_buffs(), int(value["seed"]), _draft_options(str(value["commander"]), uses_specializations))
-    if not player_draft.restore(value["draft"]):
+    if not player_draft.restore(player_snapshot):
         return {}
     var rival = AiScript.new()
     if not rival.configure(ContentDatabase.get_all_commanders(), commander_progress.available_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), int(value["seed"]) + 3571, ContentDatabase.get_game_balance().get("stats", {})):
@@ -454,7 +460,11 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
     rival.signature_set = ContentDatabase.get_signature_set(str(rival.commander["signature_set_id"])).duplicate(true)
     rival.cards.assign(ContentDatabase.get_cards_by_ids(value["opponent_cards"]))
     rival.draft.configure(value["opponent_cards"], rival.cards, ContentDatabase.get_all_buffs(), int(value["seed"]) + 11490, _draft_options(str(value["opponent_commander"]), uses_specializations))
-    if not rival.draft.restore(value["opponent_draft"]):
+    if not rival.draft.restore(rival_snapshot):
+        return {}
+    if rival.draft.round_time_limit != player_draft.round_time_limit or rival.draft.sudden_death != player_draft.sudden_death:
+        return {}
+    if value["match"].get("phase") == "draft" and player_draft.round_time_limit != (player_draft._sudden_round_seconds if player_draft.sudden_death else player_draft._normal_round_seconds):
         return {}
     if rival.draft.specialization_enabled != player_draft.specialization_enabled:
         return {}
@@ -477,7 +487,7 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
         var entry = info["history"][index]
         if not entry is Dictionary or entry.get("round") != index + 1 or entry.get("winner") not in ["player", "opponent", "draw"] or not entry.get("sudden_death") is bool:
             return {}
-        if not (entry.get("duration") is float or entry.get("duration") is int) or not is_finite(float(entry["duration"])) or float(entry["duration"]) < 0 or float(entry["duration"]) > 120.1:
+        if not (entry.get("duration") is float or entry.get("duration") is int) or not is_finite(float(entry["duration"])) or float(entry["duration"]) < 0 or float(entry["duration"]) > float(ContentDatabase.get_game_balance()["match"]["sudden_death_round_time_seconds" if entry["sudden_death"] else "round_time_seconds"]) + 0.1:
             return {}
     if info["phase"] != "draft" and (not player_draft.is_phase_complete() or not rival.draft.is_phase_complete()):
         return {}
@@ -485,6 +495,11 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
         return {}
     var public: Dictionary = value["public_side"]
     if not public.get("specialization", {}) is Dictionary:
+        return {}
+    if not public.get("sudden_death", false) is bool:
+        return {}
+    var public_limit = public.get("round_time_limit", player_draft._normal_round_seconds)
+    if not (public_limit is int or public_limit is float) or float(public_limit) not in [player_draft._normal_round_seconds, player_draft._sudden_round_seconds]:
         return {}
     var public_specialization := str(public.get("specialization", {}).get("id", ""))
     if not public_specialization.is_empty() and (not uses_specializations or public_specialization != rival.draft.specialization_id):
@@ -515,10 +530,24 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
         if definition.is_empty() or seen_buffs.has(id):
             return {}
         seen_buffs[id] = true
-        public_buffs.append({"definition": definition.duplicate(true), "stacks": int(entry["stacks"])})
+        if not CommanderProgress._counter(entry.get("sudden_death_stacks", 0)):
+            return {}
+        var enhanced := int(entry.get("sudden_death_stacks", 0))
+        var total := int(entry["stacks"])
+        var private_enhanced := int(rival.draft.sudden_death_buff_stacks.get(id, 0))
+        if enhanced > total or enhanced > private_enhanced or total - enhanced > rival.draft.get_buff_stacks(id) - private_enhanced:
+            return {}
+        var restored_buff := {"definition": definition.duplicate(true), "stacks": total}
+        if enhanced > 0:
+            restored_buff["sudden_death_stacks"] = enhanced
+            restored_buff["sudden_death_multiplier"] = rival.draft.sudden_death_power_multiplier
+        public_buffs.append(restored_buff)
     # Rebuild definitions from current content. Corrupted saved display metadata
     # can neither inject stats into advice nor crash roster rendering.
     var restored_public: Dictionary = rival.get_side()
+    # Round context is public, but must not be copied from hidden current picks.
+    restored_public["sudden_death"] = bool(public.get("sudden_death", false))
+    restored_public["round_time_limit"] = float(public.get("round_time_limit", player_draft._normal_round_seconds))
     restored_public["unit_counts"] = public_counts
     restored_public["buffs"] = public_buffs
     restored_public["skill_uses_remaining"] = int(public["skill_uses_remaining"])

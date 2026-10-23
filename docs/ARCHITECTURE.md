@@ -246,3 +246,8 @@ InterfaceAccessibility preserves original body/control font sizes so scaling is 
 `WarbandGuide` is read-only presentation analysis over the equipped cards and current signature definition. Its catalog is separate from gameplay. Existing GameMenu renders bounded guidance and glossary pages; the Army Builder continues to invoke ordinary equip validation.
 
 `CommanderSpecializations` is a pure generic transformation over content-defined ability changes. ContentDatabase loads the technique catalog. DraftSystem owns match-fixed opt-in state, compatible owner-specific options and the once-per-match normal-pick purchase. CombatSimulator applies the chosen transformation to copied side input before formation/spawns. Both sides use the same path. GameState keeps normal content identity for default checkpoints and additionally fingerprints the catalog only for prototype adventures; reconstruction restores the saved public path rather than the rival's current hidden one. Private-room configuration supplies no path options and stays on existing rules.
+
+
+## Sudden Death round context (v0.19)
+
+DraftSystem records total and enhanced power cohorts and the current battle budget. Its shared buff-state builder supplies GameState, AiController and private-room authority; WarbandStats applies mixed strengths consistently to combat, preview and cap-aware AI. The simulator selects 180 seconds only when both battle sides are in Sudden Death; a recorded matching legacy budget preserves already-scored v0.18 replays. Presentation displays the budget and each cohort without owning the rules. Recovery migrates the known prior content fingerprint, keeps earlier strengths and reconstructs scored rounds without charging another heart.

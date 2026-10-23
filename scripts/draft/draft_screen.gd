@@ -127,11 +127,11 @@ func _refresh_all() -> void:
     battle_button.visible = complete
     battle_button.disabled = not complete
     if complete:
-        footer.text = "Ready for battle • Enter to begin. The rival reveals new picks at combat."
+        footer.text = "Ready · 3-minute battle limit. New powers ×2; earlier bonuses unchanged." if GameState.draft.sudden_death else "Ready for battle • Enter to begin. The rival reveals new picks at combat."
         timer_label.text = "Draft complete"
     else:
         if GameState.match_state.sudden_death:
-            footer.text = "Sudden Death: three selections each. Win a battle outright to win the match."
+            footer.text = "Sudden Death · New powers ×2; earlier bonuses unchanged. Battle limit: 3 minutes."
         elif GameState.match_state.round_number == 1:
             footer.text = "Round 1 is Army-only. Every pick rerolls all three choices."
         else:
@@ -203,7 +203,7 @@ func _option_text(option: Dictionary) -> String:
     var stack: int = GameState.draft.get_buff_stacks(option_id)
     return "%s\n+%s%% %s\nStacks %s" % [
         str(buff.get("display_name", option_id)),
-        str(int(buff.get("percentage", 0))),
+        str(int(WarbandStats.power_percentage(GameState.get_player_combat_side(), buff))),
         str(buff.get("stat", "stat")).replace("_", " ").to_upper(),
         BuffTile.stack_text(buff, stack)
     ]
