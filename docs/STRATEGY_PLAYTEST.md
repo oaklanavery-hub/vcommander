@@ -45,3 +45,17 @@ Use ordinary profiles and Settings → Adventure insights; do not reset ownershi
 Record whether a new player can explain the lost theme bonus in a mixed build, name a useful interaction without external help, find the glossary, understand both path effects and the one-pick cost, and cancel reading without spending a pick or losing time. Check that a restarted chosen path, hidden rival choice and following offer stay consistent. Complete ordinary match/XP settlement and compact/larger-text reading.
 
 Review actual match lengths and repeated-draw cases before selecting an overtime rule. A small convenience sample is directional evidence only. No human observations were available during this implementation, and none are fabricated here.
+
+
+## Approved Sudden Death comparison — v0.19
+
+The user subsequently approved a 180-second ceiling **per Sudden Death battle**, doubling only power cards newly picked in Sudden Death. Earlier bonuses remain unchanged. Normal rounds remain 120 seconds, with no new healing penalty, damage ramp or tiebreaker. This supersedes the earlier decision to defer overtime; other findings above remain historical v0.18 observations.
+
+Reproduce with `godot --headless --path . --script tools/compare_sudden_death.gd`. It runs only the known Water mixed fixture at seed `204757`, starter collection, Standard policies, paths/redraw off and a 16-round diagnostic bound. The two runs share setup/seed/loadout and use the current shared AI/stat code. The control sets Sudden Death to 120 seconds and new-power multiplier 1; the approved run uses 180 and 2. Ignored output is `build/qa/sudden_death_comparison.json`.
+
+| Rule | Rounds observed | Time-limit draws | Sudden Death draws | Combat at 1× | Result |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Control: 120 seconds, ordinary powers | 16 | 10 | 9 | 1,372.8s | Unfinished at diagnostic bound |
+| Approved: 180 seconds, new powers ×2 | 15 | 8 | 7 | 1,584.3s | Earth defeats Water in Round 15 |
+
+The control exactly reproduced the recorded v0.18 case. Both runs had identical first seven rounds; Round 7 was the normal 120-second draw that triggered Sudden Death. The approved run then drew Rounds 8–14 at 180 seconds each and ended Round 15 by elimination at 31.5 seconds. This single paired fixture demonstrates a changed outcome and an eventual finish in this case, with fewer observed drawn rounds but more total simulated combat than the bounded control. It does **not** prove that all stalemates finish or that human matches are shorter or balanced. Repeated three-minute draws remain possible under the approved rules. No human results were available or invented.

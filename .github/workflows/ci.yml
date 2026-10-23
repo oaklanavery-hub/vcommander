@@ -196,6 +196,19 @@ jobs:
             test -s "build/qa/strategy_${view}.png"
           done
 
+      - name: Render enhanced Sudden Death
+        run: |
+          set -o pipefail
+          timeout 60s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_sudden_death.gd -- --output-dir=build/qa 2>&1 | tee /tmp/sudden-death-qa.log
+          if grep -E "SCRIPT ERROR:|ERROR:" /tmp/sudden-death-qa.log; then exit 1; fi
+          for view in draft powers compact battle frost_late result help; do
+            test -s "build/qa/sudden_${view}.png"
+          done
+
+      - name: Emit Sudden Death review previews
+        if: always()
+        run: /usr/bin/python3 tools/emit_visual_review.py --views sudden_draft sudden_compact sudden_frost_late
+
       - name: Emit strategy native review previews
         if: always()
         run: /usr/bin/python3 tools/emit_visual_review.py --views strategy_guide strategy_paths_compact strategy_mixed

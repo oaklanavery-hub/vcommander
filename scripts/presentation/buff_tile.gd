@@ -47,8 +47,9 @@ func _ready() -> void:
     value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     value.add_theme_color_override("font_color", Color("eed299"))
     body.add_child(value)
-    var detail := ScreenStyle.label(("Sudden Death ×2 · %d picks" if bool(side_config.get("sudden_death", false)) else "%d stacks · ∞") % stacks, 12)
-    detail.custom_minimum_size.y = 18
+    var detail := ScreenStyle.label(("Sudden Death ×2\n%d picks · ∞" if bool(side_config.get("sudden_death", false)) else "%d stacks · ∞") % stacks, 12)
+    detail.custom_minimum_size.y = 34 if bool(side_config.get("sudden_death", false)) else 18
+    detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     body.add_child(detail)
     tooltip_text = "%s\n+%d%% %s for the whole warband\nCurrent stacks: %s" % [str(definition.get("display_name", "Blessing")), percentage, str(definition.get("stat", "")).replace("_", " "), stack_text(definition, stacks)]
@@ -97,5 +98,5 @@ static func applied_text(entry: Dictionary) -> String:
     if total > enhanced:
         parts.append("+%d%% ×%d" % [percentage, total - enhanced])
     if enhanced > 0:
-        parts.append("+%d%% ×%d SD" % [int(percentage * float(entry.get("sudden_death_multiplier", 2))), enhanced])
-    return " · ".join(parts)
+        parts.append("SD +%d%% ×%d" % [int(percentage * float(entry.get("sudden_death_multiplier", 2))), enhanced])
+    return "\n".join(parts)
