@@ -39,18 +39,23 @@ func _ready() -> void:
     heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     body.add_child(heading)
-    var value := ScreenStyle.label("+%d%%" % int(definition.get("percentage", 0)) if not side_config.is_empty() else "+%d%% %s" % [int(definition.get("percentage", 0)), str(definition.get("stat", "")).replace("_", " ")], 14)
+    var percentage := int(WarbandStats.power_percentage(side_config, definition))
+    var value := ScreenStyle.label("+%d%%" % percentage if not side_config.is_empty() else "+%d%% %s" % [percentage, str(definition.get("stat", "")).replace("_", " ")], 14)
     value.custom_minimum_size.y = 24 if not side_config.is_empty() else 44
     value.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     value.add_theme_color_override("font_color", Color("eed299"))
     body.add_child(value)
-    var detail := ScreenStyle.label("%d stacks · ∞" % stacks, 12)
-    detail.custom_minimum_size.y = 18
+    var detail := ScreenStyle.label(("Sudden Death ×2\n%d picks · ∞" if bool(side_config.get("sudden_death", false)) else "%d stacks · ∞") % stacks, 12)
+    detail.custom_minimum_size.y = 34 if bool(side_config.get("sudden_death", false)) else 18
+    detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     body.add_child(detail)
-    tooltip_text = "%s\n+%d%% %s for the whole warband\nCurrent stacks: %s" % [str(definition.get("display_name", "Blessing")), int(definition.get("percentage", 0)), str(definition.get("stat", "")).replace("_", " "), stack_text(definition, stacks)]
+    tooltip_text = "%s\n+%d%% %s for the whole warband\nCurrent stacks: %s" % [str(definition.get("display_name", "Blessing")), percentage, str(definition.get("stat", "")).replace("_", " "), stack_text(definition, stacks)]
+
+    if bool(side_config.get("sudden_death", false)):
+        tooltip_text += "\nThis new pick has double strength. Earlier bonuses keep their original strength."
 
     var rating_cap := int(ContentDatabase.get_game_balance().get("stats", {}).get(str(definition.get("stat", "")) + "_cap", 0))
     if rating_cap > 0:
@@ -84,3 +89,14 @@ func _fit_contents() -> void:
 static func stack_text(buff: Dictionary, count: int) -> String:
     var limit := int(buff.get("max_stacks", 0))
     return "%d / %d" % [count, limit] if limit > 0 else "%d · No limit" % count
+
+static func applied_text(entry: Dictionary) -> String:
+    var percentage := int(entry.get("definition", {}).get("percentage", 0))
+    var total := int(entry.get("stacks", 0))
+    var enhanced := int(entry.get("sudden_death_stacks", 0))
+    var parts: Array[String] = []
+    if total > enhanced:
+        parts.append("+%d%% ×%d" % [percentage, total - enhanced])
+    if enhanced > 0:
+        parts.append("SD +%d%% ×%d" % [int(percentage * float(entry.get("sudden_death_multiplier", 2))), enhanced])
+    return "\n".join(parts)

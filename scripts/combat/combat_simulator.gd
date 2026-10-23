@@ -57,6 +57,12 @@ func simulate(
     balance: Dictionary = {}
 ) -> Dictionary:
     _reset(battle_seed, balance)
+    if bool(player_side.get("sudden_death", false)) and bool(opponent_side.get("sudden_death", false)):
+        var sudden_limit := float(balance.get("match", {}).get("sudden_death_round_time_seconds", 180))
+        var left := float(player_side.get("round_time_limit", sudden_limit))
+        var right := float(opponent_side.get("round_time_limit", sudden_limit))
+        # Only an explicitly matching old replay may retain the normal ceiling.
+        _round_limit = left if left == right and left == _round_limit else maxf(_step, sudden_limit)
 
     player_side = CommanderSpecializations.apply_side(player_side)
     opponent_side = CommanderSpecializations.apply_side(opponent_side)
@@ -1591,6 +1597,7 @@ func _finish_result(winner: String, reason: String) -> Dictionary:
         "winner": winner,
         "reason": reason,
         "duration": snappedf(_time, 0.001),
+        "round_time_limit": _round_limit,
         "events": _events.duplicate(true),
         "frames": _frames.duplicate(true),
         "pre_battle": _pre_battle.duplicate(true),

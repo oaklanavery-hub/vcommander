@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.19.0 — Sudden Death growth
+
+- Each Sudden Death battle has its own three-minute ceiling; normal battles keep two minutes.
+- New Sudden Death power picks double their percentage. Earlier bonuses retain their original strength, including across repeated rounds.
+- Combat, previews, rosters and AI share mixed-strength power math with the existing speed caps.
+- Recover enhanced picks and round budgets without revealing hidden rival picks; preserve v0.18 scored replays at their original limit.
+- Add actual browser-pick/reload/Continue acceptance and seven native review views, including compact/larger-text cards and full-field frost after 2:00.
+- Reproduce the known Water hybrid control and compare the approved rule: it ends in Round 15 after seven Sudden Death draws; long repeated draws remain possible.
+
 ## v0.18.0 — Warband strategy and optional commander paths
 
 - Add read-only warband relationships, a collection-wide ability glossary and explicit themed-versus-mixed tradeoffs in the army builder.

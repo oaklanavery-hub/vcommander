@@ -39,7 +39,7 @@ func add_side(side: String, commander_id: String, card_ids: Array, now: float) -
         if not card_id is String or _content.get_card(card_id).is_empty() or not loadout.equip(card_id):
             return false
     var draft := DraftSystem.new()
-    draft.configure(loadout.get_cards(), _content.get_cards_by_ids(loadout.get_cards()), _content.get_all_buffs(), _rng.randi())
+    draft.configure(loadout.get_cards(), _content.get_cards_by_ids(loadout.get_cards()), _content.get_all_buffs(), _rng.randi(), {"match_rules": _content.get_game_balance().get("match", {})})
     setups[side] = {"commander_id": commander_id, "card_ids": loadout.get_cards()}
     drafts[side] = draft
     public_sides[side] = _combat_side(side, false)
@@ -181,11 +181,7 @@ func _combat_side(side: String, skill_active: bool) -> Dictionary:
     var bonus := {}
     if SetBonusChecker.is_complete(cards, str(signature.get("id", "")), int(signature.get("required_count", 4))):
         bonus = signature.get("bonus", {}).duplicate(true)
-    var buffs: Array[Dictionary] = []
-    for buff in _content.get_all_buffs():
-        var stacks := draft.get_buff_stacks(str(buff["id"]))
-        if stacks > 0:
-            buffs.append({"definition": buff.duplicate(true), "stacks": stacks})
+    var buffs: Array[Dictionary] = draft.get_buff_states()
     return {"id": side, "commander": commander.duplicate(true), "cards": cards.duplicate(true),
         "unit_counts": draft.unit_counts.duplicate(), "buffs": buffs, "set_bonus": bonus,
-        "commander_skill_active": skill_active, "skill_uses_remaining": draft.commander_skill_uses_remaining()}
+        "commander_skill_active": skill_active, "skill_uses_remaining": draft.commander_skill_uses_remaining()}.merged(draft.round_context())

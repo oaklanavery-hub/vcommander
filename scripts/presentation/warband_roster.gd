@@ -112,5 +112,5 @@ func refresh() -> void:
     var entries: Array[String] = []
     for buff in config.get("buffs", []):
         var definition: Dictionary = buff.get("definition", {})
-        entries.append("%s +%d%% ×%d" % [str(STAT_NAMES.get(str(definition.get("stat", "")), "Power")), int(definition.get("percentage", 0)), int(buff.get("stacks", 0))])
+        entries.append("%s %s" % [str(STAT_NAMES.get(str(definition.get("stat", "")), "Power")), BuffTile.applied_text(buff)])
     buffs.text = "[b]Power cards[/b]\n" + ("None yet" if entries.is_empty() else "\n".join(entries))

@@ -153,6 +153,8 @@ def main() -> int:
         balance.get("match", {}).get("round_time_seconds"),
         "game_balance match.round_time_seconds",
     )
+    for key in ("sudden_death_round_time_seconds", "sudden_death_power_multiplier"):
+        require_positive_number(balance.get("match", {}).get(key), f"game_balance match.{key}")
     battlefield = balance.get("battlefield", {})
     require_positive_number(battlefield.get("width"), "game_balance battlefield.width")
     require_positive_number(battlefield.get("height"), "game_balance battlefield.height")

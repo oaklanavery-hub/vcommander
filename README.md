@@ -4,21 +4,21 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.18.0 — Warband strategy and optional commander paths**
+**v0.19.0 — Sudden Death growth**
 
-Build a warband with clearer ability relationships and an explicit themed-versus-mixed tradeoff. An optional commander-path prototype gives each Commander two match-only ability branches from Round 3 for one normal pick, with equal AI access and exact recovery. Local pacing insights distinguish experiments and build composition; a reproducible timeout case is documented for the next overtime decision. Existing recovery, power previews, AI difficulty, reports, mastery, pixel presentation and accessibility remain available.
+Every Sudden Death battle has its own three-minute ceiling. Only new power cards picked during Sudden Death get double their percentage; earlier bonuses retain their strength. Normal battles keep their two-minute limit. Previews, mixed-strength rosters, AI and recovery use the same rules, including preservation of old completed replays.
 
 The current playable prototype supports:
 
 - **Army builder → Warband guide** explains equipped interactions, ability keywords and the exact mixed-theme tradeoff
 - **Settings → Commander paths** enables a default-off local prototype: two paths per Commander, one normal pick from Round 3, once per adventure, with equal AI access and recoverable state
-- local pacing insights distinguish path participation and themed/mixed builds; [focused synthetic playtest findings](docs/STRATEGY_PLAYTEST.md) document a repeated Sudden Death timeout case without changing overtime
+- local pacing insights distinguish path participation and themed/mixed builds; [focused synthetic playtest findings](docs/STRATEGY_PLAYTEST.md) document a repeated timeout case and the bounded approved-rule comparison
 
 - **Continue adventure** after restart; explicit abandonment stays separate and final mastery settlement remains exact-once
 - effective power previews with before/after values and visible partial/full speed-cap warnings
 - Swarm, Sustain, Burst and Backline pressure opponents; difficulty changes their decisions rather than unit stats or collection access
 - a default-off redraw experiment: both sides get one free redraw per round, with no extra pick or timer reset
-- **Settings → Adventure insights** for bounded local pacing/time-limit observations; overtime rules are unchanged
+- **Settings → Adventure insights** for bounded local pacing/time-limit observations; normal and Sudden Death samples remain distinguishable
 - optional post-replay ideas separated from recorded facts, reversible larger body/control text, configurable decorative effects and a direct first-adventure guide entry
 
 - replay-current companion HP, modified stats, ability cooldowns and active effects in a separate inspector beside the field

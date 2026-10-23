@@ -135,3 +135,10 @@ Use a separate presentation catalog and pure WarbandGuide for relationships/glos
 The commander-path prototype is a default-off, match-fixed local rule. Content declares two branches per Commander and narrowly validated generic ability transformations. DraftSystem owns one-pick purchase legality and the stable selected ID; CommanderSpecializations transforms copied ability input once at the simulation boundary. AiController gets the same catalog and uses its own composition. GameState checkpoints both rules and IDs and rebuilds prior public path metadata from trusted content, never from the rival's already-spent hidden draft. Default checkpoints keep their original fingerprint; prototype checkpoints include the technique catalog. No additional scene, account, currency, permanent stat progression or server is introduced. R117 records approved first-version mechanics and provisional values.
 
 Extend bounded local insights with optional composition/path/full-recruitment metadata. Run a small explicit seeded matchup/pacing sample, label it synthetic, and retain the current overtime and bonuses pending human evidence. Existing campaign/PvP and P2/P3 deferrals remain.
+
+
+## ADR-021 — Enhanced new Sudden Death powers and per-battle ceiling
+
+**Status:** accepted by user (2026-10-24)
+
+Extend each Sudden Death battle to 180 seconds while normal rounds retain 120. Double the percentage of new power picks only; preserve earlier normal and enhanced cohorts across repeated rounds. Retain the existing three-pick repeated-draw loop, multiplicative stacking and speed caps. Do not add a tiebreaker, healing penalty or damage ramp. Keep cohorts in DraftSystem and the shared WarbandStats formula, with explicit round budgets for exact old replay migration rather than silently recomputing a scored adventure under the new limit. Synthetic pacing diagnostics can identify remaining stalls but do not authorize further balance changes.

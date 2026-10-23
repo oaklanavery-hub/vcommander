@@ -16,9 +16,15 @@ static func modified(base_value: int, stat_name: String, side_config: Dictionary
         if str(definition.get("stat", "")) != stat_name:
             continue
         var stacks := maxi(0, int(raw_buff_state.get("stacks", 0)))
-        var multiplier := 1.0 + float(definition.get("percentage", 0)) / 100.0
-        value = exp(minf(log(1.0e100), log(maxf(1.0e-20, value)) + float(stacks) * log(multiplier)))
+        var enhanced := clampi(int(raw_buff_state.get("sudden_death_stacks", 0)), 0, stacks)
+        var percentage := float(definition.get("percentage", 0)) / 100.0
+        var multiplier := 1.0 + percentage
+        var enhanced_multiplier := 1.0 + percentage * float(raw_buff_state.get("sudden_death_multiplier", 2))
+        value = exp(minf(log(1.0e100), log(maxf(1.0e-20, value)) + float(stacks - enhanced) * log(multiplier) + float(enhanced) * log(enhanced_multiplier)))
     return round(value)
+
+static func power_percentage(side: Dictionary, buff: Dictionary) -> float:
+    return float(buff.get("percentage", 0)) * (float(side.get("sudden_death_power_multiplier", 2)) if bool(side.get("sudden_death", false)) else 1.0)
 
 static func effective(base_value: int, stat_name: String, side_config: Dictionary, rules: Dictionary) -> float:
     var value := modified(base_value, stat_name, side_config)
@@ -34,9 +40,16 @@ static func power_preview(side: Dictionary, buff: Dictionary, rules: Dictionary)
     for entry in next["buffs"]:
         if entry.get("definition", {}).get("id") == buff.get("id"):
             entry["stacks"] = int(entry.get("stacks", 0)) + 1
+            if bool(side.get("sudden_death", false)):
+                entry["sudden_death_stacks"] = int(entry.get("sudden_death_stacks", 0)) + 1
+                entry["sudden_death_multiplier"] = float(side.get("sudden_death_power_multiplier", 2))
             found = true
     if not found:
-        next["buffs"].append({"definition": buff.duplicate(true), "stacks": 1})
+        var entry := {"definition": buff.duplicate(true), "stacks": 1}
+        if bool(side.get("sudden_death", false)):
+            entry["sudden_death_stacks"] = 1
+            entry["sudden_death_multiplier"] = float(side.get("sudden_death_power_multiplier", 2))
+        next["buffs"].append(entry)
     var stat := str(buff.get("stat", ""))
     var result := {"total": 0, "improved": 0, "capped": 0, "rows": [], "before": 0.0, "after": 0.0, "stat": stat}
     for card in side.get("cards", []):

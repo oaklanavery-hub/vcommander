@@ -68,7 +68,7 @@ func _local_recovery_probe() -> void:
     # This browser context is isolated by Playwright. Use the normal persistent
     # paths so a reload also exercises ordinary autoload pending-match recovery.
     state.match_preferences = MatchPreferences.new("")
-    if probe_stage == "prepare":
+    if probe_stage in ["prepare", "sudden_prepare"]:
         state.select_commander("commander_fire_01")
         state.equip_starter_army()
         state.match_preferences.redraw_experiment = true
@@ -93,6 +93,27 @@ func _local_recovery_probe() -> void:
         state.draft.select_offer(0)
         state.update_draft_clock(11.5)
         state.draft.redraw()
+        if probe_stage == "sudden_prepare":
+            # Controlled late-round fixture in an isolated browser profile.
+            # The enhanced pick below goes through the actual draft button.
+            while not state.draft.is_phase_complete():
+                state.draft.auto_select()
+            for draft in [state.draft, state.opponent.draft]:
+                for id in draft.unit_counts:
+                    draft.unit_counts[id] = int(draft.card_definitions[id]["unit_cap"])
+            state.match_state.losses = {"player": 3, "opponent": 3}
+            state.match_state.begin_battle()
+            state.match_state.resolve_round("draw", 120)
+            state.begin_next_round()
+            var sudden_ui = load("res://scenes/draft/draft.tscn").instantiate()
+            tree.root.add_child(sudden_ui)
+            tree.current_scene = sudden_ui
+            await tree.process_frame
+            sudden_ui.set_process(false)
+            sudden_ui.offer_row.get_child(0).pressed.emit()
+            state.draft.redraw()
+            state.update_draft_clock(11.5)
+            sudden_ui.queue_free()
     ui = load("res://scenes/main_menu/main_menu.tscn").instantiate()
     tree.root.add_child(ui)
     tree.current_scene = ui
@@ -100,12 +121,13 @@ func _local_recovery_probe() -> void:
     await tree.process_frame
     var continuation := ui.find_child("ContinueAdventure", true, false) as Button
     var data := {"stage": probe_stage, "persistent": OS.is_userfs_persistent(), "continue_visible": continuation != null, "ok": false}
-    if probe_stage == "prepare":
+    if probe_stage in ["prepare", "sudden_prepare"]:
         data["snapshot"] = state.draft.snapshot()
         data["clock"] = state.draft_time_left
         data["hearts"] = state.match_state.losses.duplicate()
         data["opponent_snapshot"] = state.opponent.draft.snapshot()
         data["public_specialization"] = state.opponent_public_side.get("specialization", {}).duplicate(true)
+        data["public_buffs"] = state.opponent_public_side.get("buffs", []).duplicate(true)
         data["pending"] = state.commander_progress.active_match().get("id", "")
         data["ok"] = continuation != null and state.local_store.last_error == OK and not str(data["pending"]).is_empty()
     elif continuation != null:
@@ -119,9 +141,12 @@ func _local_recovery_probe() -> void:
         data["hearts"] = state.match_state.losses.duplicate()
         data["opponent_snapshot"] = state.opponent.draft.snapshot()
         data["public_specialization"] = state.opponent_public_side.get("specialization", {}).duplicate(true)
+        data["public_buffs"] = state.opponent_public_side.get("buffs", []).duplicate(true)
         data["pending"] = state.commander_progress.active_match().get("id", "")
         data["scene"] = tree.current_scene.name
         data["ok"] = tree.current_scene.name == "Draft" and state.draft.redraw_used and not state.draft.can_redraw() and state.draft.specialization_id == "fire_cinder_circle" and state.draft.specialization_enabled and not state.draft.can_specialize() and state.match_seed == 9007199254740999 and state.commander_progress.record("commander_fire_01")["played"] == 0
+    if probe_stage in ["sudden_prepare", "sudden_restore"]:
+        data["ok"] = bool(data["ok"]) and state.draft.sudden_death and state.draft.round_time_limit == 180 and state.draft.sudden_death_buff_stacks.values().any(func(n): return int(n) > 0)
     JavaScriptBridge.eval("window.vcommanderLocalQa = " + JSON.stringify(data) + ";", true)
 
 func _process(_delta: float) -> void:

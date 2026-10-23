@@ -61,6 +61,24 @@ const path = require('node:path');
     await local.screenshot({ path: path.join(output, 'browser_local_resumed.png') });
     await local.context().close();
     console.log('Browser local recovery passed: actual commander-path purchase, IndexedDB restart, actual Continue button, exact draft/RNG, preserved path/redraw/clock, hidden rival path and no profile loss.');
+    const sudden = await page();
+    await sudden.goto(base + '&qa_role=local&qa_stage=sudden_prepare');
+    await sudden.waitForFunction(() => window.vcommanderLocalQa?.stage === 'sudden_prepare');
+    const suddenPrepared = await sudden.evaluate(() => window.vcommanderLocalQa);
+    if (!suddenPrepared.ok || !suddenPrepared.persistent) throw Error('Enhanced power was not saved through the actual draft button');
+    await sudden.screenshot({ path: path.join(output, 'browser_sudden_saved.png') });
+    await sudden.waitForTimeout(2500);
+    await sudden.goto(base + '&qa_role=local&qa_stage=sudden_restore');
+    await sudden.waitForFunction(() => window.vcommanderLocalQa?.stage === 'sudden_restore');
+    const suddenRestored = await sudden.evaluate(() => window.vcommanderLocalQa);
+    if (!suddenRestored.ok || suddenRestored.scene !== 'Draft') throw Error('Sudden Death Continue adventure failed');
+    for (const key of ['snapshot', 'opponent_snapshot', 'hearts', 'public_buffs', 'public_specialization', 'pending']) {
+      if (JSON.stringify(suddenPrepared[key]) !== JSON.stringify(suddenRestored[key])) throw Error('Sudden Death restart changed ' + key);
+    }
+    if (suddenRestored.clock > suddenPrepared.clock || suddenRestored.clock < suddenPrepared.clock - 0.5) throw Error('Sudden Death restart changed pick time');
+    await sudden.screenshot({ path: path.join(output, 'browser_sudden_resumed.png') });
+    await sudden.context().close();
+    console.log('Browser Sudden Death recovery passed: actual enhanced draft pick, IndexedDB reload, actual Continue, exact mixed cohorts/RNG, 180-second budget, hidden rival powers, path, redraw and profile identity.');
     const host = await page();
     await host.goto(base + '&qa_role=host');
     await host.waitForFunction(() => window.vcommanderPvpQa?.room?.length === 6, null,
