@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.18.0 — Warband strategy (in development)
+
+- Add read-only warband relationships, a collection-wide ability glossary and explicit themed-versus-mixed tradeoffs in the army builder.
+
 ## v0.17.0 — Player decisions and recoverable adventures
 
 - Recover local PvAI drafts and battles after refresh with the same offers, seed, hearts and skill budgets. Explicit abandonment still forfeits; unwatched battles replay at 1×.

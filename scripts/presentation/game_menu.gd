@@ -90,6 +90,33 @@ func open_pause() -> void:
     _button("How to play", open_help)
     _button("Return to title", confirm_leave)
 
+func _paragraph(text: String, size: int = 17) -> Label:
+    var label := ScreenStyle.label(text, size)
+    label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    _body.add_child(label)
+    return label
+
+func open_warband_guide() -> void:
+    _page("Your warband's plan", "Relationships to explore. These notes describe possibilities, not a predicted winner.")
+    var cards := ContentDatabase.get_cards_by_ids(GameState.army.get_cards())
+    var guide := WarbandGuide.analyze(cards, GameState.get_selected_signature_set())
+    _paragraph(guide["theme"])
+    _paragraph("Frontline: " + str(guide["frontline"]))
+    for note in guide["notes"]:
+        _paragraph(str(note["title"]), 20)
+        _paragraph(str(note["text"]), 16)
+    if guide["notes"].is_empty():
+        _paragraph("Select companions to see how their abilities can work together.")
+    _button("Ability glossary", open_ability_glossary)
+    _button("Back to warband", close, true).grab_focus()
+
+func open_ability_glossary() -> void:
+    _page("Ability glossary", "A quick reference for the current collection. Card tooltips and battle inspection show each unit's exact values.")
+    for entry in WarbandGuide.glossary():
+        _paragraph(str(entry["name"]), 20)
+        _paragraph(str(entry["explanation"]), 16)
+    _button("Back to warband guide", open_warband_guide, true).grab_focus()
+
 func open_settings() -> void:
     _page("Make yourself comfortable", "Music, sound and accessibility settings are saved on this device.")
     _volume("Music", GameAudio.music_volume, GameAudio.set_music_volume)
