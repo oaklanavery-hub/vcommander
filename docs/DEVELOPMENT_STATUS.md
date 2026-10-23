@@ -1,40 +1,29 @@
 # Development handoff
 
-Verify branch, tree and GitHub checks before resuming. This file is the short active handoff; [older checkpoint history](history/development-through-v0.15.md) is reference only.
+Verify the actual branch, tree and GitHub checks before resuming. [Older checkpoints](history/development-through-v0.15.md) and [v0.17 implementation history](history/development-v0.17.md) are reference only.
 
 ## Verified release
 
-- **v0.16.1**, released source `fd0c1ee431df91c5101327f5a03ba418c4c93626`, [merged PR #36](https://github.com/oaklanavery-hub/vcommander/pull/36).
+- **v0.17.0**, released source `14c530a701bde2dbe66d79900bc3ab66da2a810d`, [merged PR #37](https://github.com/oaklanavery-hub/vcommander/pull/37). Reviewed game/source tree: `2a8afca3da5c882562e1681f18498ed598897911`.
 - Live: https://oaklanavery-hub.github.io/vcommander/
-- [CI 39854783801](https://github.com/oaklanavery-hub/vcommander/actions/runs/39854783801): 42 source suites, 42 pack suites, four JS clock cases, two WebGL2 sessions with both actual browser font chains checked, production container and 150 native views passed.
-- [Deploy 39855363694](https://github.com/oaklanavery-hub/vcommander/actions/runs/39855363694): merged-source release gate, Web export, publication and actual served-build verification passed. Resources, PCK checksum and every downloaded-pack suite matched. An independent public manifest fetch reports 0.16.1 at the released source above.
-- Fixed: browser boxes in Next/Battle/recruit arrows. Six original bundled pixel symbols fill display/body font gaps; existing letters/metrics and other configured fallbacks are preserved. The tiny native FontFile resource loads before asset import without installed fonts or a new runtime dependency.
-- Retained: shared draft/battle layout, Commander portraits/hearts/round/time, mirrored recruited/cap rosters, centered draft, live HP bar, five-power stacks, pre-battle skills, 1× start, reports, inspection, guidance, mastery and private developer access.
+- [PR CI 39934480534](https://github.com/oaklanavery-hub/vcommander/actions/runs/39934480534) passed on `3b39037e7b8cb2ec3baacced2b33dcedbef5d941`: 48 source suites, 48 exported-pack suites, four JS clock cases, actual browser/IndexedDB played-match restart through Continue, two isolated WebGL2 friend sessions with bundled font coverage, the production container and the complete native gallery including twelve new views. One browser-only dependency retry resolved an Ubuntu mirror timeout; passing jobs/checks were retained.
+- [Deploy 39936242342](https://github.com/oaklanavery-hub/vcommander/actions/runs/39936242342) passed the same full gate on merged source, release export, publication and served-resource/source/checksum tests. Every regression suite also passed against the actual downloaded public PCK. Explicit final log: `Deployment verified: 0.17.0 at 14c530a701bde2dbe66d79900bc3ab66da2a810d`.
+- Independently fetched public manifest: version 0.17.0, source above, PCK SHA-256 `a3d6db628d59c5351e51a16e322b1d456ae0a9d6a0df999abc8ffee7fa031e24`.
 
-## Active scope — P0/P1 player experience
+## Completed scope and next action
 
-- Approved 2026-10-23: resumable local PvAI, effective power previews, adaptive AI styles/difficulty, an optional one-redraw experiment, local pacing evidence, factual battle recaps, larger text/effects controls and discoverable guidance.
-- Branch `feat/pvai-experience`, base `6eaffa7366049821a3e8ffad9eb00441d3d560ad`. Checkpoint 1 complete: bounded atomic snapshots, same-match recovery, remaining pick clock, watched-result boundary and persisted exact-once settlement receipts.
-- Redraw stays opt-in; overtime rules remain unchanged pending pacing evidence. No P2/P3 expansion, balance audit, training grounds, save transfer, campaign, PvP reopening or paid services.
-- Focused checks passed: project import, `test_match_recovery`, draft system, Commander progress, mastery lifecycle, scene flow and first-match guidance. Recovery checks cover >53-bit seeds/RNG continuation, identical event/frame output, no extra hearts/XP, a final-settlement write interruption, backup and invalid content/caps. Full source/pack/browser/container/native gate remains pending until the remaining checkpoints are ready.
-- Checkpoint 2 complete: shared exact combat/power-preview formula, visible no-gain/partial-cap benefits, four seeded AI plans and Casual/Standard/Veteran decision settings. Focused power-preview, 700-phase existing AI, new public-boundary/counter adaptation, recovery, combat simulation, mastery lifecycle and player-experience suites passed.
-- Checkpoint 3 complete: opt-in symmetric redraw with no extra pick/time, bounded local pacing observations, factual two-sided post-replay recaps and scrolling report content. Focused redraw/insights, recovery, draft, AI, mastery lifecycle, recap, report and inspection suites passed.
-- Checkpoint 4 implemented: reversible larger body/control text, configurable particle/flash intensity with essential cues retained, direct optional guide entry, bounded compact draft/settings/report scrolling and card-caption fitting. Twelve dedicated native views rendered and inspected; compact/card overflow defects were corrected and covered by bounds tests.
-- Focused accessibility, player experience, first-match guide, readability/report/layout/font, recovery/progress, power, redraw/insights and recap checks passed. Python delivery checks (6), JS clock checks (4), content validation and diff/syntax checks passed. Final recovery/profile-write reconciliation checks passed.
-- [PR #37](https://github.com/oaklanavery-hub/vcommander/pull/37), prepared source `5cbb65ac4279a4bc2a76c0957e5eb16801b766aa`, version 0.17.0. [First gate 39933609109](https://github.com/oaklanavery-hub/vcommander/actions/runs/39933609109): container passed; source and pack stopped at an obsolete fixed Achievements menu path in the existing progression presentation test. The test now finds the actual named button within the scrollable menu, retaining its complete navigation/reward assertions and avoiding a null-access timeout.
-- Focused progression presentation, PvAI preview, roster stress and scene-flow checks passed after that correction. Actual browser acceptance reloads a real played match from ordinary IndexedDB/profile paths and uses the real Continue button; full source/pack/browser/container/native retry remains pending. Main remains verified 0.16.1; do not claim 0.17.0 is live until deployment verification.
-
-## Previous completed checkpoint
-
-- Implementation branch `fix/ui-symbol-font`, base `713bb9c5efa1ad6d474b2ee7f65d16347759187f`; reviewed source tree `30cb7092397af123dc2eac9673a68c65a8ff0d29` exactly matches the released code commit.
-- Font regression shapes actual navigation/recruit/heart/achievement strings at four sizes with OS fallback disabled and checks bundled glyph IDs on real buttons/cards. Browser QA independently checks both actual WebAssembly font chains. Gallery/army/draft arrows were reviewed; font generation is byte-for-byte reproducible.
-- Closure branch `docs/release-v0.16.1`, based on the released source, records this verified handoff only. No implementation, export or deployment check remains. Next: human playtesting or the next explicitly scoped request.
-- No gameplay, layout, progression or hosting changes. PvP stays Coming Soon; campaign stays KIV; hosting stays free.
+- P0: bounded atomic local match recovery preserves both drafts/RNG, pick time, hearts, skill budgets and watched-result boundaries. Exact-once settlement handles both profile/checkpoint write-order interruptions; public display metadata is rebuilt from current content. Explicitly abandoning a played match still forfeits.
+- P0: power previews use the exact shared combat formula and show per-type before/after values, partial/full caps and future-recruit context. Power cards remain unlimited/legal.
+- P1: seeded Swarm/Sustain/Burst/Backline pressure opponents, public-only adaptation and Casual/Standard/Veteran decision-based difficulty with equal stats/collection/pick budgets.
+- P1: default-off one-free-redraw experiment for both sides, no extra pick/time, persisted allowance; bounded local pacing/timeout observations with overtime unchanged. Settings selects next-adventure rules and opens Adventure insights.
+- P1: factual two-sided post-replay observations and separate optional suggestions, reversible larger text, decorative effects intensity, clearer focus, direct optional first-adventure guidance and bounded compact draft/settings/report scrolling. Whole combat field and outside roster rails remain available; essential impacts, hazards, frost and skill timing are retained.
+- Code checkpoint branch `feat/pvai-experience`; closure branch `docs/release-v0.17.0` records verified release/README/history only with `[skip ci]`. No implementation, export or deployment check remains pending. The published pack intentionally identifies the released code commit, not a later documentation-only commit.
+- Next: human playtesting and review local pacing samples before proposing any overtime adjustment. P2/P3 is not approved. No campaign (KIV), public PvP (Coming Soon), broad balance audit, training grounds, save transfer or paid infrastructure was added. Existing mastery, rewards, device-only developer access, pre-battle skills, 1× starts, no skip and pixel fantasy art are retained.
 
 ## Working conventions
 
-- Read AGENTS.md and relevant project rules, then use current source/checks instead of historical pending notes.
-- Use Godot 4.7 stable. Run focused `godot --headless --path . --script tests/test_NAME.gd` checks while editing; Actions owns the complete release gate.
-- Browser setup: `python3 tools/setup_browser_qa.py`; CI also enforces an outer 190-second process-group limit. Cache hits still verify the exact package and install required system libraries.
-- Native previews: default eight selected views / 1.5 MB image payload. `--views NAME ...` selects task-relevant views; `--all` restores the broader set. All native PNGs remain in the artifact.
-- Do not read, print or move the developer's private key. Tests use in-memory/isolated profiles and synthetic credentials.
+- Read AGENTS.md and relevant rules; use current repository/checks rather than historical pending notes. Save focused checkpoints before lengthy gates; do not rerun passing full checks for routine cosmetic changes.
+- Pinned Godot 4.7 runtime; focused `godot --headless --path . --script tests/test_NAME.gd` while editing. Actions owns full source/pack/browser/container/native release verification.
+- Browser setup reuses the pinned verified cache with a three-minute budget. A dependency failure is not evidence of a game defect; retry only the failed job when appropriate.
+- Native previews use the bounded selection by default; full PNGs remain in the Actions artifact. Dedicated P0/P1 captures: `tools/capture_player_experience.gd`.
+- Automated runs use in-memory/isolated profile, checkpoint, preferences and pacing stores. The browser restart acceptance uses ordinary paths only in an isolated browser context. Never read, print or move the developer private key.

@@ -4,11 +4,18 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.16.1 — Shared battlefield layout and portable symbols**
+**v0.17.0 — Recoverable adventures and clearer decisions**
 
-Drafting and fighting now share a battlefield layout: Commander portraits and hearts, centered round/time, mirrored roster panels, a live army-health bar and a centered draft window. Unit counts, theme bonuses, skill budgets and power stacks stay beside the action. Bundled pixel symbols keep arrows, hearts and achievement badges readable in the browser. Completed-battle reports, live unit inspection and the optional Guided first match remain available.
+Continue the same local adventure after closing or refreshing the game, with identical drafts/RNG, remaining pick time, hearts and skill budgets. Power cards preview their actual current-army benefit. Seeded opponents use distinct plans and public-information counters at Casual, Standard or Veteran difficulty. Optional redraw testing, local pacing insights, factual battle recaps, larger interface text and adjustable effects extend the existing fantasy battlefield, mastery and guided-first-match flow.
 
 The current playable prototype supports:
+
+- **Continue adventure** after restart; explicit abandonment stays separate and final mastery settlement remains exact-once
+- effective power previews with before/after values and visible partial/full speed-cap warnings
+- Swarm, Sustain, Burst and Backline pressure opponents; difficulty changes their decisions rather than unit stats or collection access
+- a default-off redraw experiment: both sides get one free redraw per round, with no extra pick or timer reset
+- **Settings → Adventure insights** for bounded local pacing/time-limit observations; overtime rules are unchanged
+- optional post-replay ideas separated from recorded facts, reversible larger body/control text, configurable decorative effects and a direct first-adventure guide entry
 
 - replay-current companion HP, modified stats, ability cooldowns and active effects in a separate inspector beside the field
 - post-playback reports with effective damage/healing, absorption, kills, bodies alive and survival, including death-created/revived bodies and Commander effects
@@ -112,13 +119,14 @@ Open `project.godot` using Godot 4.7 stable and run the project. Choose **Play**
 | Any game screen | Esc | Pause menu, help and settings |
 | Draft | 1 / 2 / 3 | Choose the corresponding offered card |
 | Draft | S | Prepare Commander skill |
+| Draft experiment | R | Use the once-per-round redraw without resetting the timer |
 | Draft | Enter | Start battle after selections are spent |
 | Battle | Space | Pause/resume playback |
 | Battle | 1 / 2 / 4 | Set battle speed |
 | Battle | M | Toggle sound |
 | Result | Enter | Continue to the next round |
 
-Music and sound begin after the first player interaction. **Settings** has separate music/effects volume and accessibility controls, saved on the current device. Set a volume to zero to mute it. **Advanced match options** in the warband screen reveals the optional match seed; reuse it with the same setup and picks to reproduce a match. Current rival draft choices are concealed until combat. Audio credits and composition source are in `assets/audio/CREDITS.md` and `tools/compose_audio.py`.
+Music and sound begin after the first player interaction. **Settings** has separate music/effects volume, larger text, reduced motion, health numbers and decorative battle-effects intensity, saved on the current device. Choose the next opponent difficulty and optional redraw experiment before starting an adventure; these rules stay fixed for the active/recovered match. Set a volume to zero to mute it. **Advanced match options** in the warband screen reveals the optional match seed; reuse it with the same setup and picks to reproduce a match. Current rival draft choices are concealed until combat. Audio credits and composition source are in `assets/audio/CREDITS.md` and `tools/compose_audio.py`.
 
 ## Cards and warband presets
 
@@ -134,13 +142,13 @@ Choose Preset 1, 2 or 3, then **Save** a complete four-card warband. Clicking a 
 
 Run `python3 tools/run_checks.py --godot /path/to/godot` for all content/art validation and headless suites. Run `godot --headless --path . --script tools/run_balance.gd -- --seeds=8 --seed-start=1000 --output=/tmp/balance.json` for a reproducible AI sample. See `docs/PLAYTEST_REPORT.md` for methods, tuning and limitations.
 
-CI renders 115 desktop captures, including title animation phases/reduced motion, help/settings/pause, projectile contact, attack phases, frost, summon ownership, the Slime Court and tactical formations, all four elemental galleries, compact battle details and long blessing labels, and tests the exported game pack. Bounded native review previews supplement the full-resolution PNG artifact. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.
+CI renders the full desktop capture gallery, including twelve dedicated recovery/redraw/recap/accessibility views as well as title animation phases/reduced motion, help/settings/pause, projectile contact, attack phases, frost, summon ownership, the Slime Court and tactical formations, all four elemental galleries, compact battle details and long blessing labels, and tests the exported game pack. Bounded native review previews supplement the full-resolution PNG artifact. A deployed build can be verified with `python3 tools/verify_deployment.py --expected-commit <full-main-sha> --godot /path/to/godot`.
 
 ## Commander mastery
 
 Each Commander starts at Level 1 and keeps a separate personal PvAI match record on this device/browser. Win a complete match for 100 XP, finish a lost match for 25 XP, and earn one permanent level every 250 XP. A better win ratio earns mastery faster at the same match count. Individual battle rounds never grant separate XP; mastery levels provide no combat stat multipliers. New collection rewards are described below.
 
-Leaving before the first battle has no record. Leaving or closing an unfinished game after battle begins counts as one loss/forfeit with zero XP; interrupted stored matches settle when the game next opens. An already resolved final match keeps its actual outcome. Replaying a result never awards XP again. The gallery shows each Commander's level, record, win rate and next-level progress; the final match result animates the XP gain after battle playback.
+Leaving before the first battle has no record. Explicitly leaving or replacing a played unfinished match counts as one loss/forfeit with zero XP. Closing or refreshing a recoverable adventure preserves it: use **Continue adventure** to restore the same draft/clock or replay the same unwatched battle at 1×. A previously watched result may reopen directly. Legacy pending records without a checkpoint retain their old forfeit policy, while incompatible/corrupt checkpoints show guidance and preserve records. An already resolved final match keeps its actual outcome, including recovery across profile/checkpoint write interruptions. Replaying a result never awards XP again. The gallery shows each Commander's level, record, win rate and next-level progress; the final match result animates the XP gain after battle playback.
 
 Records use local browser/device storage and a backup. Clearing site data or using a different browser/device does not retain the same record; private browsing or blocked storage may prevent saving. Visible notices explain save/load failures, and an unreadable profile is preserved instead of silently overwritten. This release does not provide account sync, online competitive ratings or a shared leaderboard. Automated test/capture scripts use isolated profiles.
 
