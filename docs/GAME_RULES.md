@@ -61,7 +61,7 @@ All three selections before Battle 1 are guaranteed Army-card choices. Buff Card
 A normal pre-battle phase gives three selections. The side that lost the previous battle gets four selections in its next pre-battle phase.
 
 **R019 — Reroll cadence**  
-After every selection, all three displayed choices are randomized again. There is no manual reroll.
+After every selection, all three displayed choices are randomized again. There is no manual reroll in the default rules; R113 defines a separately opted-in local experiment.
 
 **R020 — Buff stacking**  
 The same Buff Card may be selected any number of times per match. Identical and different buffs stack multiplicatively. Existing Attack Speed and Movement Speed caps still apply.
@@ -390,6 +390,8 @@ The developer may activate a privately supplied access key in Settings → Devel
 **R109 — Battle report**
 After complete battle playback, players may inspect a two-sided report grouped by unit type. Damage counts actual HP removed, excluding overkill; healing counts positive HP restored, excluding overheal. Absorption counts recorded damage prevented/stored by an absorption ability, independently of DEF. Kills credit the last damaging source only when that body actually dies. Death-spawned and revived bodies group with their card, while Commander skill damage and summoned units remain identifiable. Survival counts living bodies and their actual lifetimes. Damage, healing and protection have separate highlights; there is no score that treats raw damage as every role's value. Reports never change outcomes or grant rewards, and cannot expose a result before replay completion.
 
+The report's short recap separates recorded observations from optional next-draft suggestions. Frontline loss is assessed after all births/deaths at the same simulation time, so a simultaneous split or revival is not a false collapse. Backline-transit assassins and temporary Commander plants are not treated as an opening frontline. Damage-share facts use effective HP loss, and absence of evidence creates no invented explanation. Suggestions are choices to test, not a causal verdict or guaranteed counter.
+
 **R110 — Unit inspection**
 Selecting a visible unit during local battle playback opens its current HP, modified stats, ability/cooldown and active effects beside the arena. The whole field remains visible. Inspection reads the displayed replay time only and never controls movement, targeting or combat. Unit ownership/effect word labels remain off battlefield actors.
 
@@ -400,3 +402,9 @@ Players may start guidance from How to Play. It teaches actual Commander selecti
 
 **R112 — PvAI styles and difficulty**
 Local opponents use seeded Swarm, Sustain, Burst or Backline pressure plans when assembling and growing a legal four-card army. Settings selects Casual, Standard or Veteran before the next adventure; the active choice is retained on recovery. All difficulties use the same collection, card stats, pick budgets and skill limits. Casual makes less consistent draft decisions; Standard and Veteran weight counters to the player's previous public army, with Veteran using more consistent priorities. Neither sees current hidden picks or future combat results. The rival roster identifies its plan and difficulty. These are heuristic policies, not guarantees that one difficulty always wins a particular seed.
+
+**R113 — Optional redraw experiment**
+Off by default, Settings may enable the local PvAI redraw experiment for the next adventure. Both sides may redraw the full offer once per round, including opening and Sudden Death rounds. A redraw costs no selection, grants no selection, does not reset the current pick timer and may repeat cards. Normal opening/unit-cap/buff-offer rules still apply. The allowance refreshes only at the next round, not after a pick or restart. Both drafts and the experiment choice are retained on recovery. It never changes friend-room rules.
+
+**R114 — Local pacing evidence**
+Adventure insights keeps bounded, device-local observations for the latest 30 played PvAI adventures: round counts, draft time while actively choosing, simulated battle duration at 1×, actual viewing time, drawn/time-limit/Sudden Death rounds, difficulty and redraw participation. Reading while paused is excluded. Reopening a scored round does not add another observation. Default and experiment samples remain distinguishable; these observations never grant rewards, change difficulty automatically or alter the existing overtime rules.

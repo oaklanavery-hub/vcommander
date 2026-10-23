@@ -1,7 +1,7 @@
 class_name DraftSystem
 extends RefCounted
 
-signal changed
+signal changed(reset_clock: bool)
 
 const DEFAULT_SELECTIONS := 3
 const LOSER_SELECTIONS := 4
@@ -25,8 +25,11 @@ var commander_skill_used_this_round := false
 var seed := 1
 
 var _rng := RandomNumberGenerator.new()
+var redraw_enabled := false
+var redraw_used := false
+var redraws_taken := 0
 
-func configure(card_ids: Array, cards: Array, buffs: Array, match_seed: int) -> void:
+func configure(card_ids: Array, cards: Array, buffs: Array, match_seed: int, options: Dictionary = {}) -> void:
     loadout_card_ids.clear()
     card_definitions.clear()
     buff_definitions.clear()
@@ -35,6 +38,9 @@ func configure(card_ids: Array, cards: Array, buffs: Array, match_seed: int) -> 
     current_offer.clear()
     commander_skill_uses = 0
     round_number = 0
+    redraw_enabled = bool(options.get("redraw_experiment", false))
+    redraw_used = false
+    redraws_taken = 0
 
     for raw_id in card_ids:
         var card_id := str(raw_id)
@@ -65,6 +71,7 @@ func begin_round(is_opening: bool, lost_previous_round: bool, is_sudden_death: b
     opening_phase = is_opening
     sudden_death = is_sudden_death
     commander_skill_used_this_round = false
+    redraw_used = false
     selection_points = DEFAULT_SELECTIONS
     if not is_opening and lost_previous_round and not is_sudden_death:
         selection_points = LOSER_SELECTIONS
@@ -125,7 +132,7 @@ func select_offer(index: int) -> bool:
         refresh_offer()
     else:
         current_offer.clear()
-    changed.emit()
+    changed.emit(true)
     return true
 
 func auto_select() -> bool:
@@ -148,7 +155,19 @@ func use_commander_skill() -> bool:
         refresh_offer()
     else:
         current_offer.clear()
-    changed.emit()
+    changed.emit(true)
+    return true
+
+func can_redraw() -> bool:
+    return redraw_enabled and not redraw_used and selection_points > 0 and not current_offer.is_empty()
+
+func redraw() -> bool:
+    if not can_redraw():
+        return false
+    redraw_used = true
+    redraws_taken += 1
+    refresh_offer()
+    changed.emit(false) # No extra pick and no extra decision time.
     return true
 
 func snapshot() -> Dictionary:
@@ -157,7 +176,8 @@ func snapshot() -> Dictionary:
         "unit_counts": unit_counts.duplicate(), "buff_stacks": buff_stacks.duplicate(),
         "offer": current_offer.duplicate(true), "points": selection_points,
         "round": round_number, "opening": opening_phase, "sudden": sudden_death,
-        "skill_uses": commander_skill_uses, "skill_prepared": commander_skill_used_this_round
+        "skill_uses": commander_skill_uses, "skill_prepared": commander_skill_used_this_round,
+        "redraw_enabled": redraw_enabled, "redraw_used": redraw_used, "redraws_taken": redraws_taken
     }
 
 # Configure current content first; validate everything before mutating this draft.
@@ -174,6 +194,10 @@ func restore(value: Dictionary) -> bool:
     if int(value["points"]) > LOSER_SELECTIONS or int(value["round"]) < 1 or int(value["skill_uses"]) > COMMANDER_SKILL_USES_PER_MATCH:
         return false
     if bool(value["skill_prepared"]) and int(value["skill_uses"]) == 0:
+        return false
+    if not value.get("redraw_enabled", false) is bool or not value.get("redraw_used", false) is bool or not CommanderProgress._counter(value.get("redraws_taken", 0)):
+        return false
+    if bool(value.get("redraw_used", false)) and (not bool(value.get("redraw_enabled", false)) or int(value.get("redraws_taken", 0)) == 0):
         return false
     for field in ["unit_counts", "buff_stacks"]:
         if not value.get(field) is Dictionary:
@@ -222,6 +246,9 @@ func restore(value: Dictionary) -> bool:
     sudden_death = bool(value["sudden"])
     commander_skill_uses = int(value["skill_uses"])
     commander_skill_used_this_round = bool(value["skill_prepared"])
+    redraw_enabled = bool(value.get("redraw_enabled", false))
+    redraw_used = bool(value.get("redraw_used", false))
+    redraws_taken = int(value.get("redraws_taken", 0))
     return true
 
 func get_unit_count(card_id: String) -> int:

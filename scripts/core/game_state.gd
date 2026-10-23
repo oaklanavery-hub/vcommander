@@ -34,6 +34,9 @@ var recovery_notice := ""
 var _restoring := false
 var match_preferences: MatchPreferences
 var active_difficulty := "standard"
+var match_insights: MatchInsights
+var _draft_elapsed := 0.0
+var _watch_elapsed := 0.0
 
 func _ready() -> void:
     # Tool scripts receive an in-memory profile and cannot touch a player's records.
@@ -44,6 +47,7 @@ func _ready() -> void:
     commander_progress = CommanderProgressScript.new(ContentDatabase, "" if scripted else CommanderProgressScript.DEFAULT_PATH, developer_access)
     local_store = StoreScript.new("" if scripted else StoreScript.DEFAULT_PATH)
     match_preferences = MatchPreferences.new("" if scripted else MatchPreferences.DEFAULT_PATH)
+    match_insights = MatchInsights.new("" if scripted else MatchInsights.DEFAULT_PATH)
     _bind_draft()
     # A refresh preserves the pending identity. A legacy interrupted match still
     # follows the old recovery policy when there is no resumable checkpoint.
@@ -146,20 +150,23 @@ func begin_match(seed_value: int) -> bool:
         army.get_cards(),
         ContentDatabase.get_cards_by_ids(army.get_cards()),
         ContentDatabase.get_all_buffs(),
-        match_seed
+        match_seed,
+        {"redraw_experiment": match_preferences.redraw_experiment}
     )
     draft.begin_round(true, false, false)
     match_started = true
     battle_result.clear()
     opponent = AiScript.new()
     active_difficulty = match_preferences.difficulty
-    if not opponent.configure(ContentDatabase.get_all_commanders(), commander_progress.available_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571, ContentDatabase.get_game_balance().get("stats", {}), {"difficulty": active_difficulty}):
+    if not opponent.configure(ContentDatabase.get_all_commanders(), commander_progress.available_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571, ContentDatabase.get_game_balance().get("stats", {}), {"difficulty": active_difficulty, "redraw_experiment": match_preferences.redraw_experiment}):
         match_started = false
         return false
     opponent_public_side = opponent.get_side()
     var ready: bool = opponent.begin_round(true, false, false, get_player_combat_side())
     draft_time_left = 30.0
     battle_watched = false
+    _draft_elapsed = 0.0
+    _watch_elapsed = 0.0
     checkpoint()
     return ready
 
@@ -190,9 +197,14 @@ func run_battle() -> bool:
         ContentDatabase.get_game_balance()
     )
     var resolved: bool = match_state.resolve_round(str(battle_result.get("winner", "draw")), float(battle_result.get("duration", 0.0)))
+    if resolved:
+        var metadata := {"commander": selected_commander_id, "difficulty": active_difficulty, "redraw": draft.redraw_enabled, "outcome": ("win" if match_state.winner == "player" else "loss") if match_state.is_complete() else "ongoing"}
+        var history: Dictionary = match_state.history.back()
+        match_insights.record_round(_progress_match_id, metadata, {"round": match_state.round_number, "winner": battle_result.get("winner"), "reason": battle_result.get("reason"), "duration": battle_result.get("duration"), "draft_seconds": _draft_elapsed, "sudden": history.get("sudden_death", false)})
     if resolved and match_state.is_complete():
         mastery_reward = commander_progress.finish_match(_progress_match_id, "win" if match_state.winner == "player" else "loss")
     battle_watched = false
+    _watch_elapsed = 0.0
     checkpoint()
     return resolved
 
@@ -207,6 +219,8 @@ func begin_next_round() -> bool:
     var ready: bool = opponent.begin_round(false, bool(match_state.lost_previous["opponent"]), match_state.sudden_death, public_player, int(match_state.losses["opponent"]))
     draft_time_left = 30.0
     battle_watched = false
+    _draft_elapsed = 0.0
+    _watch_elapsed = 0.0
     checkpoint()
     return ready
 
@@ -255,6 +269,9 @@ func _build_combat_side(side_id: String, draft_state, skill_active: bool) -> Dic
     }
 
 func _reset_match_runtime() -> void:
+    if match_insights != null and not _progress_match_id.is_empty():
+        match_insights.record_watch(_progress_match_id, match_state.round_number, _watch_elapsed)
+        match_insights.finish(_progress_match_id, "forfeit")
     if commander_progress != null and not _progress_match_id.is_empty():
         # A completed match is already settled; repeat calls cannot change its result.
         commander_progress.finish_match(_progress_match_id, "forfeit")
@@ -276,12 +293,14 @@ func _bind_draft() -> void:
     if not draft.changed.is_connected(_draft_changed):
         draft.changed.connect(_draft_changed)
 
-func _draft_changed() -> void:
-    draft_time_left = 30.0
+func _draft_changed(reset_clock: bool) -> void:
+    if reset_clock:
+        draft_time_left = 30.0
     checkpoint()
 
 func update_draft_clock(seconds: float) -> void:
     var previous := int(ceil(draft_time_left))
+    _draft_elapsed += maxf(0, draft_time_left - clampf(seconds, 0.0, 30.0))
     draft_time_left = clampf(seconds, 0.0, 30.0)
     if int(ceil(draft_time_left)) != previous:
         checkpoint()
@@ -289,6 +308,13 @@ func update_draft_clock(seconds: float) -> void:
 func mark_battle_watched() -> void:
     if not battle_watched:
         battle_watched = true
+        match_insights.record_watch(_progress_match_id, match_state.round_number, _watch_elapsed)
+        checkpoint()
+
+func record_watch_time(seconds: float) -> void:
+    var previous := int(_watch_elapsed)
+    _watch_elapsed += maxf(0, seconds)
+    if int(_watch_elapsed) != previous:
         checkpoint()
 
 func has_pending_adventure() -> bool:
@@ -330,7 +356,8 @@ func checkpoint() -> void:
         "difficulty": active_difficulty, "style": opponent.style, "enemy_evidence": opponent._public_enemy.duplicate(true),
         "public_side": opponent_public_side.duplicate(true), "match": info,
         "progress_id": _progress_match_id, "clock": draft_time_left, "watched": battle_watched,
-        "reward": mastery_reward.duplicate(true)
+        "reward": mastery_reward.duplicate(true),
+        "draft_elapsed": _draft_elapsed, "watch_elapsed": _watch_elapsed
     })
     recovery_notice = "Adventure could not be saved. Keep this tab open and try again." if error != OK else ""
 
@@ -353,6 +380,8 @@ func resume_match() -> bool:
         _progress_match_id = str(decoded["progress_id"])
         draft_time_left = float(value["clock"])
         battle_watched = bool(value["watched"])
+        _draft_elapsed = float(value.get("draft_elapsed", 0))
+        _watch_elapsed = float(value.get("watch_elapsed", 0))
         mastery_reward = value.get("reward", {}).duplicate(true)
         if mastery_reward.is_empty() and commander_progress.last_receipt.get("match_id") == _progress_match_id:
             mastery_reward = commander_progress.last_receipt.duplicate(true)
@@ -379,6 +408,9 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
             return {}
     if not value.get("progress_id") is String or not value.get("watched") is bool or not value.get("reward", {}) is Dictionary:
         return {}
+    for field in ["draft_elapsed", "watch_elapsed"]:
+        if not MatchInsights._seconds(value.get(field, 0)):
+            return {}
     if not (value.get("clock") is float or value.get("clock") is int) or not is_finite(float(value["clock"])) or float(value["clock"]) < 0 or float(value["clock"]) > 30:
         return {}
     if ContentDatabase.get_commander(str(value.get("commander", ""))).is_empty() or ContentDatabase.get_commander(str(value.get("opponent_commander", ""))).is_empty():

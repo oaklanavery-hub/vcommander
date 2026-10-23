@@ -18,7 +18,8 @@ Verify branch, tree and GitHub checks before resuming. This file is the short ac
 - Redraw stays opt-in; overtime rules remain unchanged pending pacing evidence. No P2/P3 expansion, balance audit, training grounds, save transfer, campaign, PvP reopening or paid services.
 - Focused checks passed: project import, `test_match_recovery`, draft system, Commander progress, mastery lifecycle, scene flow and first-match guidance. Recovery checks cover >53-bit seeds/RNG continuation, identical event/frame output, no extra hearts/XP, a final-settlement write interruption, backup and invalid content/caps. Full source/pack/browser/container/native gate remains pending until the remaining checkpoints are ready.
 - Checkpoint 2 complete: shared exact combat/power-preview formula, visible no-gain/partial-cap benefits, four seeded AI plans and Casual/Standard/Veteran decision settings. Focused power-preview, 700-phase existing AI, new public-boundary/counter adaptation, recovery, combat simulation, mastery lifecycle and player-experience suites passed.
-- Next: optional redraw, local pacing records/recaps and accessibility/native review. Remote branch uses `feat/pvai-experience` because an older unrelated branch already occupies the original name. Main/base match; the closure-only main commit intentionally skipped CI.
+- Checkpoint 3 complete: opt-in symmetric redraw with no extra pick/time, bounded local pacing observations, factual two-sided post-replay recaps and scrolling report content. Focused redraw/insights, recovery, draft, AI, mastery lifecycle, recap, report and inspection suites passed.
+- Next: larger text, effects intensity, guidance entry and focused native/actual-browser review, then the unchanged full release gate. Remote checkpoints are saved on `feat/pvai-experience`; main remains v0.16.1.
 
 ## Previous completed checkpoint
 

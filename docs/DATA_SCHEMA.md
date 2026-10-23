@@ -196,6 +196,12 @@ The separate `assets/pixel/roster.json` catalog uses its own schema version 1: c
 
 `assets/pixel/commanders.json` uses the same palette-character approach for original 32×48 full-body portraits keyed by element. Commander cards and the full portrait share this catalog. A card's recruit/cap fraction and class badge always read its content definition, independently of the artwork.
 
+## Local match preferences and insights
+
+`user://match_preferences.cfg` stores the next local adventure difficulty (`casual`, `standard`, `veteran`) and the default-off redraw experiment. The active rule and each round allowance are retained in both draft snapshots, alongside AI plan/public evidence and elapsed draft/viewing time. Seeds and RNG states remain decimal strings.
+
+`user://match_insights.json` uses bounded schema 1 with a current atomic backup: at most 30 match identities, aggregate timing/draw counters, outcome/difficulty/experiment, and at most 64 round viewing receipts per match. Idempotent round numbers prevent duplicate observations when recovering a scored round. It contains no credentials, replay frames or progression grants. Automated scripts use in-memory stores.
+
 ## Local warband preset data
 
 `user://warband_presets.cfg` contains Commander-ID sections with `preset_0`, `preset_1` and `preset_2` arrays of four stable Army card IDs. Saved order is preserved. Loading validates the Commander, all card IDs, uniqueness and completeness against current content; invalid data yields an empty result and does not alter the active loadout. This local data is never exported as content or used to grant units.

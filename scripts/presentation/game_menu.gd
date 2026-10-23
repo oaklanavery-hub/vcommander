@@ -110,8 +110,40 @@ func open_settings() -> void:
         GameState.match_preferences.save())
     difficulty_row.add_child(difficulty)
     _body.add_child(difficulty_row)
+    var redraw := CheckButton.new()
+    redraw.name = "RedrawExperiment"
+    _skin_toggle(redraw)
+    redraw.text = "Experimental redraw · next adventure"
+    redraw.button_pressed = GameState.match_preferences.redraw_experiment
+    redraw.disabled = GameState.has_pending_adventure()
+    redraw.tooltip_text = "Optional PvAI test: both sides may redraw once each round without spending a pick or resetting the timer. Off by default."
+    redraw.toggled.connect(func(value: bool):
+        GameState.match_preferences.redraw_experiment = value
+        GameState.match_preferences.save())
+    _body.add_child(redraw)
+    _button("Adventure insights", open_insights)
     _button("Developer access" + (" · Active" if GameState.developer_access.is_enabled() else ""), open_developer_access)
     _button("Done", _back_from_page, true).grab_focus()
+
+func open_insights() -> void:
+    _page("Your adventure pace", "Recent adventures on this device. These observations help us understand time limits and compare the optional redraw; they do not change battle rules.")
+    var summary := GameState.match_insights.summary()
+    if int(summary["rounds"]) == 0:
+        _body.add_child(ScreenStyle.label("Play an adventure to start collecting pacing observations.", 18))
+    else:
+        var text := "%d recent adventures · %d completed · %d battles\n\nAverage battle at 1×: %.1fs\nAverage active draft: %.1fs\nDrawn rounds: %d\nTime-limit draws: %d (%.1f%%)\nRepeated Sudden Death draws: %d\nActual battle viewing: %.1f minutes" % [summary["matches"], summary["completed"], summary["rounds"], summary["average_battle"], summary["average_draft"], summary["draws"], summary["timeouts"], summary["timeout_rate"], summary["sudden_draws"], float(summary["watch_seconds"]) / 60.0]
+        var totals := ScreenStyle.label(text, 18)
+        totals.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+        _body.add_child(totals)
+    for experiment in [0, 1]:
+        var sample := GameState.match_insights.summary(experiment)
+        var label := ScreenStyle.label("%s: %d adventures, %d battles, %.1fs average battle" % ["Standard draft" if experiment == 0 else "Redraw experiment", sample["matches"], sample["rounds"], sample["average_battle"]], 15)
+        label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+        _body.add_child(label)
+    var note := ScreenStyle.label("Keeps the latest 30 adventures. Paused reading time is excluded; battle time at 1× and actual viewing time are separate. Small, self-selected samples do not establish which mode is better.", 14)
+    note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    _body.add_child(note)
+    _button("Back to settings", open_settings, true).grab_focus()
 
 func open_developer_access() -> void:
     _page("Developer access", "Use your private developer key to try the complete collection on this device. Mastery and achievements still follow your actual match record.")

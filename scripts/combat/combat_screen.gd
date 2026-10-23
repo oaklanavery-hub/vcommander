@@ -172,6 +172,9 @@ func _process(delta: float) -> void:
     if _finished or _paused:
         return
 
+    if _source == GameState:
+        GameState.record_watch_time(delta)
+
     if _prelude.active():
         _advance_prelude(delta)
         return

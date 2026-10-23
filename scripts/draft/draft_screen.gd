@@ -21,6 +21,7 @@ var _timer_bar := ProgressBar.new()
 var _hearts_meter := MatchStatus.new()
 var round_label: Label = _hearts_meter.round_label
 var timer_label: Label = _hearts_meter.timer_label
+var redraw_button := Button.new()
 
 func _ready() -> void:
     ScreenStyle.apply(self)
@@ -38,6 +39,12 @@ func _ready() -> void:
     back_button.pressed.connect(_go_back)
     skill_button.pressed.connect(_use_commander_skill)
     battle_button.pressed.connect(_start_battle)
+    redraw_button.name = "RedrawChoices"
+    redraw_button.custom_minimum_size.y = 32
+    redraw_button.tooltip_text = "Experiment: redraw all three choices once this round. Costs no pick, adds no time; cards may repeat. R"
+    redraw_button.pressed.connect(_redraw)
+    offer_content.add_child(redraw_button)
+    offer_content.move_child(redraw_button, offer_row.get_index() + 1)
 
     if not GameState.match_started:
         footer.text = "No active draft. Return to the Army Builder."
@@ -80,6 +87,9 @@ func _refresh_all() -> void:
     _refresh_summaries()
 
     var complete: bool = bool(GameState.draft.is_phase_complete())
+    redraw_button.visible = GameState.draft.redraw_enabled and not complete
+    redraw_button.disabled = not GameState.draft.can_redraw()
+    redraw_button.text = "Redraw choices · %d left (R)" % (0 if GameState.draft.redraw_used else 1)
     offer_row.visible = not complete
     _timer_bar.visible = not complete
     offer_content.get_node("Prompt").text = "Your warband is ready" if complete else "Choose one card to grow your warband"
@@ -189,6 +199,11 @@ func _use_commander_skill() -> void:
         _time_left = SELECTION_SECONDS
         _refresh_all()
 
+func _redraw() -> void:
+    if GameState.draft.redraw():
+        GameAudio.play_effect("pick")
+        _refresh_all()
+
 func _start_battle() -> void:
     battle_button.disabled = true
     footer.text = "Preparing battle…"
@@ -208,6 +223,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
         _select_offer(int(event.keycode - KEY_1))
     elif event.keycode == KEY_S:
         _use_commander_skill()
+    elif event.keycode == KEY_R and redraw_button.visible:
+        _redraw()
     elif event.keycode == KEY_ENTER and battle_button.visible:
         _start_battle()
     else:

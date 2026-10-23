@@ -53,7 +53,7 @@ func configure(commanders: Array, all_cards: Array, sets: Dictionary, buffs: Arr
     var ids: Array[String] = []
     for card in cards:
         ids.append(str(card["id"]))
-    draft.configure(ids, cards, buffs, seed_value + 7919)
+    draft.configure(ids, cards, buffs, seed_value + 7919, preferences)
     return true
 
 func _has_card(card_id: String) -> bool:
@@ -86,9 +86,27 @@ func begin_round(opening: bool, lost_previous: bool, sudden: bool, public_enemy:
                 if score > best_score:
                     best_score = score
                     best_index = index
+            if draft.can_redraw() and (best_score <= 0 or _missing_frontline_offer()):
+                draft.redraw()
+                guard -= 1
+                continue
             if not draft.select_offer(best_index):
                 return false
     return draft.is_phase_complete()
+
+func _missing_frontline_offer() -> bool:
+    if draft.round_number < 2:
+        return false
+    var can_recruit_tank := false
+    for card in cards:
+        if card.get("role") == "tank":
+            if draft.get_unit_count(str(card["id"])) > 0:
+                return false
+            can_recruit_tank = true
+    for option in draft.current_offer:
+        if option.get("type") == "unit" and draft.card_definitions.get(str(option.get("id", "")), {}).get("role") == "tank":
+            return false
+    return can_recruit_tank
 
 func _should_use_skill(public_enemy: Dictionary, losses: int) -> bool:
     if draft.commander_skill_uses_remaining() <= 0 or draft.commander_skill_used_this_round:
