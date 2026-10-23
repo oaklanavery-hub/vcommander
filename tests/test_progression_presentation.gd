@@ -23,8 +23,12 @@ func run() -> void:
     var session := root.get_node("OnlineSession")
     check(not session.available and not session.start("create") and not session.active and session.client._socket == null, "Coming Soon blocks connection before any socket is opened")
     var title = await scene("res://scenes/main_menu/main_menu.tscn")
-    check(title.has_node("Margin/Main/Achievements"), "title exposes achievements and rewards")
-    title.get_node("Margin/Main/Achievements").pressed.emit()
+    var achievements := title.find_child("Achievements", true, false) as Button
+    check(achievements != null and achievements.is_visible_in_tree(), "title exposes achievements and rewards in its scrollable menu")
+    if achievements == null:
+        quit(1)
+        return
+    achievements.pressed.emit()
     await scene_changed
     for i in range(3):
         await process_frame
