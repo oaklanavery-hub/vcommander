@@ -11,7 +11,6 @@ var summary_label: Label
 var filter_select: OptionButton
 var tab_buttons: Array[Button] = []
 var displayed_ids: Array[String] = []
-var forge_button: Button
 
 static func open(tree: SceneTree, source: String, commander: String = "") -> void:
     return_scene = source
@@ -45,13 +44,6 @@ func _ready() -> void:
     var title := ScreenStyle.label("ACHIEVEMENTS & REWARDS", 30)
     title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     header.add_child(title)
-    var forge := Button.new()
-    forge_button = forge
-    forge.name = "UnitForge"
-    forge.text = "Unit forge · %d XP" % GameState.commander_progress.upgrade_balance()
-    forge.custom_minimum_size = Vector2(190, 44)
-    forge.pressed.connect(GameMenu.open_unit_upgrades)
-    header.add_child(forge)
     var hero := PanelContainer.new()
     hero.add_theme_stylebox_override("panel", ScreenStyle.frame(Color("332d24"), Color("9a7c50"), 12))
     main.add_child(hero)
@@ -120,7 +112,6 @@ func _select_filter(index: int) -> void:
     _render()
 
 func _render() -> void:
-    forge_button.text = "Unit forge · %d XP" % GameState.commander_progress.upgrade_balance()
     for child in grid.get_children():
         grid.remove_child(child)
         child.queue_free()

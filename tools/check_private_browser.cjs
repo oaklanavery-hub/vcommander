@@ -96,7 +96,7 @@ const path = require('node:path');
     if (upgradeRestored.clock > upgradePrepared.clock || upgradeRestored.clock < upgradePrepared.clock - 0.5) throw Error('Unit forge restart changed draft time');
     await upgrades.screenshot({ path: path.join(output, 'browser_upgrades_resumed.png') });
     await upgrades.context().close();
-    console.log('Browser unit upgrades passed: actual Rewards/forge/200-XP button, separate Lv. 2 art, IndexedDB restart, actual Continue, exact 200-XP balance/400-XP next price, unchanged mastery, frozen upgrades, AI/public collection, draft/RNG and hearts.');
+    console.log('Browser unit upgrades passed: actual main-menu/standalone Forge/200-XP button, separate Lv. 2 art, IndexedDB restart, actual Continue, exact 200-XP balance/400-XP next price, unchanged mastery, frozen upgrades, AI/public collection, draft/RNG and hearts.');
     const host = await page();
     await host.goto(base + '&qa_role=host');
     await host.waitForFunction(() => window.vcommanderPvpQa?.room?.length === 6, null,

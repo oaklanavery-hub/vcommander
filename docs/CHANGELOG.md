@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.21.0 — Dedicated Unit Forge
+
+- Give Unit Forge its own main-menu button and presentation scene, separate from Achievements & rewards.
+- Follow the supplied layout: Lv. 1 + quoted XP = Lv. 2, ability details and purchase beside it, then a Commander filter, available XP and scrolling eight-column desktop collection.
+- Retain pixel fantasy materials, rounded cards, compact/larger-text layouts, safe Back routing, exact purchase feedback and the existing 200/400-XP rules. Browsing preserves warbands and saved adventures.
+- Move the warband-builder shortcut to the same screen; remove the old modal and pause-menu entry.
+
 ## v0.20.0 — Permanent unit upgrades
 
 Released as `197952f4203ac6fccf09c19caaa53e3ed5438af0`; [deployment and all 57 suites against the actual served pack passed](https://github.com/oaklanavery-hub/vcommander/actions/runs/40067428512).

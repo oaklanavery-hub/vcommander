@@ -58,24 +58,41 @@ func run() -> void:
         await gallery(element)
     state.select_commander("commander_fire_01")
     state.equip_starter_army()
-    change_scene_to_file("res://scenes/army_builder/army_builder.tscn")
-    await scene_changed
     for index in range(2):
         state.commander_progress.finish_match(state.commander_progress.begin_match("commander_fire_01"), "win")
-    menu.open_unit_upgrades("card_fire_01")
+    change_scene_to_file("res://scenes/main_menu/main_menu.tscn")
+    await scene_changed
+    await save_image("upgrades_main_menu")
+    current_scene.find_child("UnitForge", true, false).pressed.emit()
+    await scene_changed
+    current_scene.select_unit("card_fire_01")
     await save_image("upgrades_forge_first")
-    menu._body.find_child("Upgrade_card_fire_01", true, false).pressed.emit()
+    current_scene.purchase_button.pressed.emit()
     await save_image("upgrades_forge_owned")
-    menu.open_unit_upgrades("card_fire_02")
+    current_scene.unit_buttons["card_fire_02"].pressed.emit()
     await save_image("upgrades_forge_shortfall")
+    current_scene.filter_select.select(1)
+    current_scene.filter_select.item_selected.emit(1)
+    await save_image("upgrades_forge_filtered")
+    current_scene.filter_select.select(0)
+    current_scene.filter_select.item_selected.emit(0)
+    current_scene.unit_buttons["card_water_06"].grab_focus()
+    for index in range(5):
+        await process_frame
+    current_scene.collection_scroll.scroll_vertical = int(current_scene.collection_scroll.get_v_scroll_bar().max_value)
+    await save_image("upgrades_forge_scrolled")
     root.size = Vector2i(960, 540)
     root.content_scale_size = root.size
     audio.set_interface_text_scale(1.2)
-    menu.open_unit_upgrades("card_slime_06")
+    current_scene.select_unit("card_slime_06")
     await save_image("upgrades_forge_compact")
-    menu._body.find_child("CloseForge", true, false).grab_focus()
+    current_scene.unit_buttons["card_water_06"].grab_focus()
+    for index in range(5):
+        await process_frame
+    current_scene.collection_scroll.scroll_vertical = int(current_scene.collection_scroll.get_v_scroll_bar().max_value)
     await save_image("upgrades_forge_compact_action")
-    menu.close()
+    current_scene.back_button.pressed.emit()
+    await scene_changed
     root.size = Vector2i(1280, 720)
     root.content_scale_size = root.size
     audio.set_interface_text_scale(1.0)

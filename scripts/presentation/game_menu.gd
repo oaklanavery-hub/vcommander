@@ -22,6 +22,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
         return
     if overlay.visible:
         close()
+    elif get_tree().current_scene != null and get_tree().current_scene.name == "UnitForge":
+        get_tree().current_scene.call("go_back")
     elif get_tree().current_scene != null and get_tree().current_scene.name != "MainMenu":
         open_pause()
     get_viewport().set_input_as_handled()
@@ -87,7 +89,6 @@ func open_pause() -> void:
     _page("A moment by the campfire", "The online match continues while this menu is open. Shared battles stay at 1×." if OnlineSession.active else "Your adventure can wait a moment. Take your time.")
     _button("Resume game", close, true).grab_focus()
     _button("Settings", open_settings)
-    _button("Unit forge · %d XP" % GameState.commander_progress.upgrade_balance(), open_unit_upgrades)
     _button("How to play", open_help)
     _button("Return to title", confirm_leave)
 
@@ -96,9 +97,6 @@ func _paragraph(text: String, size: int = 17) -> Label:
     label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     _body.add_child(label)
     return label
-
-func open_unit_upgrades(selected_id := "", notice := "", element_filter := "") -> void:
-    load("res://scripts/presentation/unit_upgrade_forge.gd").open(self, selected_id, notice, element_filter)
 
 func open_warband_guide() -> void:
     _page("Your warband's plan", "Relationships to explore. These notes describe possibilities, not a predicted winner.")

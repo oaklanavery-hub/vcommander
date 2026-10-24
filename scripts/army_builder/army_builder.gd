@@ -32,7 +32,7 @@ func _ready() -> void:
     rewards.text = "Unit forge"
     rewards.custom_minimum_size = Vector2(120, 42)
     rewards.tooltip_text = "Spend shared XP on permanent unit abilities and new artwork."
-    rewards.pressed.connect(GameMenu.open_unit_upgrades)
+    rewards.pressed.connect(func(): load("res://scripts/presentation/unit_upgrade_forge.gd").open(get_tree(), scene_file_path))
     $Margin/Main/Header.add_child(rewards)
     var guide := Button.new()
     guide.name = "WarbandGuide"
