@@ -44,6 +44,12 @@ func _ready() -> void:
     var title := ScreenStyle.label("ACHIEVEMENTS & REWARDS", 30)
     title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     header.add_child(title)
+    var forge := Button.new()
+    forge.name = "UnitForge"
+    forge.text = "Unit forge · %d XP" % GameState.commander_progress.upgrade_balance()
+    forge.custom_minimum_size = Vector2(190, 44)
+    forge.pressed.connect(GameMenu.open_unit_upgrades)
+    header.add_child(forge)
     var hero := PanelContainer.new()
     hero.add_theme_stylebox_override("panel", ScreenStyle.frame(Color("332d24"), Color("9a7c50"), 12))
     main.add_child(hero)
@@ -98,6 +104,7 @@ func _ready() -> void:
     main.add_child(notice)
     ScreenStyle.apply(self)
     GameState.collection_changed.connect(_render)
+    GameState.collection_changed.connect(func(): forge.text = "Unit forge · %d XP" % GameState.commander_progress.upgrade_balance())
     _render()
     back.grab_focus()
 
