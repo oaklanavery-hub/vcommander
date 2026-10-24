@@ -77,7 +77,7 @@ func test_migration() -> void:
         var migrated := CommanderProgress.new(db, path)
         check(migrated.available_cards().size() == 24 and migrated.record("commander_fire_01")["played"] == 0, "old ordinary ownership survives without fabricating records")
         var saved: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
-        check(saved["schema_version"] == 3 and saved["active_match"] == old["active_match"], "migration saves schema 3 and preserves pending identity")
+        check(saved["schema_version"] == 4 and saved["active_match"] == old["active_match"], "migration saves schema 4 and preserves pending identity")
         for id in db.get_mastery_rules()["legacy_available_cards"]:
             check(migrated.unlocked_card_ids().has(id), "legacy ordinary card is a permanent entitlement")
         if version == 2:
@@ -96,7 +96,7 @@ func test_migration() -> void:
     write_profile(current)
     check(CommanderProgress.new(db, path).available_cards().size() == 16, "current schema never replays legacy grants")
     for invalid in [{"schema_version": 1, "match_serial": 0, "commanders": {"bad": {}}, "active_match": {}},
-            {"schema_version": 4, "match_serial": 0, "commanders": {}, "active_match": {}, "achievements": [], "unlocked_cards": []}]:
+            {"schema_version": 5, "match_serial": 0, "commanders": {}, "active_match": {}, "achievements": [], "unlocked_cards": []}]:
         cleanup()
         write_profile(invalid)
         var bytes := FileAccess.get_file_as_string(path)
