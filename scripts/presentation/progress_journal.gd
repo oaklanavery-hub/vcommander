@@ -11,6 +11,7 @@ var summary_label: Label
 var filter_select: OptionButton
 var tab_buttons: Array[Button] = []
 var displayed_ids: Array[String] = []
+var forge_button: Button
 
 static func open(tree: SceneTree, source: String, commander: String = "") -> void:
     return_scene = source
@@ -45,6 +46,7 @@ func _ready() -> void:
     title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     header.add_child(title)
     var forge := Button.new()
+    forge_button = forge
     forge.name = "UnitForge"
     forge.text = "Unit forge · %d XP" % GameState.commander_progress.upgrade_balance()
     forge.custom_minimum_size = Vector2(190, 44)
@@ -104,7 +106,6 @@ func _ready() -> void:
     main.add_child(notice)
     ScreenStyle.apply(self)
     GameState.collection_changed.connect(_render)
-    GameState.collection_changed.connect(func(): forge.text = "Unit forge · %d XP" % GameState.commander_progress.upgrade_balance())
     _render()
     back.grab_focus()
 
@@ -119,6 +120,7 @@ func _select_filter(index: int) -> void:
     _render()
 
 func _render() -> void:
+    forge_button.text = "Unit forge · %d XP" % GameState.commander_progress.upgrade_balance()
     for child in grid.get_children():
         grid.remove_child(child)
         child.queue_free()
