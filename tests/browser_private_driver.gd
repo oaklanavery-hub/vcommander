@@ -120,7 +120,10 @@ func _upgrade_recovery_probe() -> void:
     data["pending"] = state.commander_progress.active_match().get("id", "")
     data["scene"] = tree.current_scene.name
     data["preview_level"] = state.preview_unit(db.get_card("card_fire_01")).get("unit_level", 1)
-    data["ok"] = continuation != null and state.local_store.last_error == OK and data["wallet"] == 200 and data["price"] == 400 and data["owned"] == ["card_fire_01"] and data["active_upgrades"] == data["owned"] and int(data["mastery"]["xp"]) == 400 and int(data["mastery"]["level"]) == 2 and data["preview_level"] == 2
+    data["storage_error"] = int(state.local_store.last_error)
+    # The title and its Continue button are freed after navigating to Draft.
+    # Assert the visibility captured before navigation, not that freed object.
+    data["ok"] = bool(data["continue_visible"]) and state.local_store.last_error == OK and data["wallet"] == 200 and data["price"] == 400 and data["owned"] == ["card_fire_01"] and data["active_upgrades"] == data["owned"] and int(data["mastery"]["xp"]) == 400 and int(data["mastery"]["level"]) == 2 and data["preview_level"] == 2
     data["ok"] = bool(data["ok"]) and (purchased if probe_stage == "upgrade_prepare" else tree.current_scene.name == "Draft")
     JavaScriptBridge.eval("window.vcommanderLocalQa = " + JSON.stringify(data) + ";", true)
 
