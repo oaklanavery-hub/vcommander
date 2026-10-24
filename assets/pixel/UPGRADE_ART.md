@@ -2,9 +2,9 @@
 
 Original project artwork generated with the built-in image-generation tool on 2026-10-24, using the existing project-owned `roster-v5.png` as the identity/style reference. No paid external service or third-party character artwork was added.
 
-The final game asset is `roster-upgrades-v1.png`: twenty-four 64×64 cells in six columns/four rows, ordered by Fire, Water, Earth and Slime, then stable unit number. `tools/pack_upgrade_art.gd` extracts the generated six-by-four source cells and scales them with nearest-neighbor sampling. Existing base-unit atlas pixels are unchanged. The upgraded atlas is consumed by card portraits, public rosters and current replay actors, including death and revival.
+The final game asset is `roster-upgrades-v1.png`: twenty-four 64×64 cells in six columns/four rows, ordered by Fire, Water, Earth and Slime, then stable unit number. `tools/pack_upgrade_art.gd` extracts the generated complete sprite silhouettes and scales them with nearest-neighbor sampling. Existing base-unit atlas pixels are unchanged. The upgraded atlas is consumed by card portraits, public rosters and current replay actors, including death and revival.
 
-Both prompts are preserved below. The second pass improves transparent isolation. Source character designs remain separate from simulation rules and tuning.
+All generation/edit prompts are preserved below. Later passes improve transparent isolation and spacing. Source character designs remain separate from simulation rules and tuning.
 
 ## Initial prompt
 
@@ -56,3 +56,11 @@ Edit target is the supplied 6-column by 4-row pixel fantasy unit atlas. Keep the
 REMOVE EVERY COLORED BACKGROUND RECTANGLE AND EVERY COLORED BACKGROUND HALO. Set all empty space around each character to actual alpha 0, including between limbs, wings, staffs and vines. No ambient glow or cast shadow outside a character silhouette. Only the character pixels should be visible against a neutral checkerboard. Fully opaque solid sprite interiors, crisp transparent edges. Do not preserve the colored red/blue/green/lavender backdrop or its gradients as translucent fog.
 Preserve exactly six columns and four rows at 1536x1024. Fit each complete character inside the middle 200x200 pixels of its own 256x256 cell, with at least 24px truly transparent padding on every side. No sprite clipping, no cross-cell overlap, no text, no labels, no decorations or ground. The actual transparent channel must contain clean zero-alpha empty margins; never draw a checkerboard into the image. Preserve all original character design details.
 ```
+
+## Final spacing pass and atlas extraction
+
+```text
+Use case: game-sprite-sheet, precise-object-edit. Re-layout the supplied 24-character transparent pixel fantasy upgrade atlas into a STRICT 6-column by 4-row grid at 1536 by 1024. Every cell is 256 by 256. Preserve these exact 24 designs, order and pixel fantasy style, including two heads on the teal serpent, white Slime Ball, green Slime Giant and Cannon, pink Barrel. CRITICAL PRODUCTION FIX: every complete character must fit within the central 192 by 192 square of its own cell (32-pixel zero-alpha margin on ALL FOUR SIDES). Shrink characters uniformly to accomplish this. Do not let wings, serpent heads, tails, leaves, weapons or slimes cross any cell boundary. The prior image has neighboring fragments crossing into the Penguin, Nymph, Slime Ball and Sorcerer cells; remove those fragments from the wrong cells and keep each complete character in its own cell. No detached decoration, no tiny fragments, no glow haze, no ground, no background panels, no letters, no text, no grid lines. Crisp opaque sprite interiors and transparent alpha-zero empty space. Keep all 24 figures visually distinct and recognizable: first row Fire (golem, imp, sorcerer, dragon, phoenix, spriggan), second Water (ice giant, two-headed serpent, penguin, wizard, shell guard, nymph), third Earth (tree, pitcher plant, armored bear, double-arrow archer, mushroom sage, mining mole), fourth Slime (green crowned giant, green brass cannon, white crystal ball, pink barrel, lavender medic, sticky pink-violet slime).
+```
+
+Native review found that source silhouettes still crossed nominal cell borders. `tools/pack_upgrade_art.gd` now extracts the 24 complete connected sprite silhouettes, preserving their pixels, then scales and centers each in its own 64×64 transparent game cell. This prevents a neighboring tail, wing or weapon fragment from appearing in another portrait. The normal roster atlas remains unchanged. Native comparisons cover all 24 original/Lv. 2 pairs, the forge, compact larger-text actions, four upgraded battles and inspection.

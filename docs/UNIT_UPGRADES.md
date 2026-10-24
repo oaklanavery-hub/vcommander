@@ -44,3 +44,16 @@ All original abilities remain unless the description explicitly replaces a param
 The purchased collection freezes at adventure start and is supplied equally to both PvAI sides. Runtime transformations copy base content and apply once before optional Commander paths. Old saved adventures remain base-unit adventures, and recorded upgrades/powers/paths reconstruct without rescoring hearts or currency. Private PvP retains base units while its public entry remains Coming Soon.
 
 All 24 units have separate Lv. 2 sprite artwork in cards, rosters, living/dead/revived replay actors and inspection. The normal atlas stays unchanged. Root vines, elemental pulses, persistent fire/corrosion/slowing/healing fields and ability sounds read recorded combat evidence. Ground fields honor exact event creation, replacement and expiry; they never appear early or extend the battle after army elimination. No effect or team text is added over units. Art provenance and prompts are in [UPGRADE_ART.md](../assets/pixel/UPGRADE_ART.md).
+
+## Bounded synthetic comparison
+
+`tools/compare_unit_upgrades.gd` ran four paired AI-vs-AI adventures with fixed seeds and the same fully unlocked collection on both sides. The paired variant grants all 24 Lv. 2 options equally. Fire, Earth and Slime use their four starters; Water uses a documented mixed roster. Each adventure stops at 16 rounds. Redraw and Commander paths are off. These are eight synthetic adventures and zero human playtests, so they do not establish unit rankings, player retention or final balance.
+
+| Commander | Base rounds / combat | Lv. 2 rounds / combat | Outcome, both variants |
+| --- | --- | --- | --- |
+| Earth | 5 / 286.2s | 4 / 172.4s | Win |
+| Fire | 6 / 69.3s | 6 / 45.4s | Win |
+| Slime | 6 / 196.7s | 7 / 104.3s | Loss |
+| Water mixed | 6 / 217.2s | 6 / 149.3s | Loss |
+
+All eight completed without a time-limit draw; this small sample does not prove late-game stalls are eliminated. Maximum recorded bodies were 30. The slowest native battle simulation in this container was 531.01 ms (base Earth), and the slowest upgraded case 482.74 ms (Earth); these are diagnostic timings, not browser performance guarantees. Separate regression cases cover all 24 effects, full-recruitment Lv. 2 mirrors, split generations, revival and overlap bounds. Keep the approved Sudden Death rules; human play will inform later tuning.

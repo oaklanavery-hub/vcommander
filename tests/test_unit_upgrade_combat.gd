@@ -36,6 +36,7 @@ func run() -> void:
     stacking_and_splits()
     death_fields()
     old_and_seeded()
+    capped_mirrors()
     if not failed:
         print("Unit upgrade combat tests passed: all 24 upgrades, real delayed hits/impacts, pulses/procs/fields, relative healing, roots/expiry, capped focus/shred/slows, two split generations/revival, nonrecursive death links, enemy ownership and seeded baseline parity.")
     quit(1 if failed else 0)
@@ -304,3 +305,27 @@ func check(condition: bool, message: String) -> void:
     if not condition:
         failed = true
         push_error("TEST FAILED: " + message)
+
+func capped_mirrors() -> void:
+    var rosters := {"fire": [1, 2, 4, 6], "water": [1, 2, 3, 6], "earth": [1, 2, 4, 6], "slime": [1, 3, 5, 6]}
+    for element in rosters:
+        var cards: Array = []
+        var counts := {}
+        var buffs: Array = []
+        for number in rosters[element]:
+            var card: Dictionary = db.get_card("card_%s_%02d" % [element, number])
+            cards.append(card)
+            counts[card["id"]] = int(card["unit_cap"])
+        for buff in db.get_all_buffs():
+            buffs.append({"definition": buff, "stacks": 3})
+        var left := {"id": "player", "commander": db.get_commander("commander_" + element + "_01"), "commander_skill_active": true, "cards": cards, "unit_counts": counts, "buffs": buffs, "set_bonus": db.get_signature_set("set_" + element + "_01")["bonus"], "unit_upgrades": UnitUpgrades.definitions(db.get_upgrade_rules(), counts.keys())}
+        var right := left.duplicate(true)
+        right["id"] = "opponent"
+        var sim := CombatSimulator.new()
+        var result := sim.simulate(left, right, 7001, db.get_game_balance())
+        check(float(result["duration"]) <= 120.001 and result["winner"] in ["player", "opponent", "draw"], "capped Lv. 2 mirror obeys battle bounds: " + element)
+        check(sim._units.size() <= 256, "all death families and revivals remain bounded at full recruitment: " + element)
+        for unit in sim._units:
+            check(is_finite(float(unit["hp"])) and float(unit["hp"]) >= 0 and float(unit["hp"]) <= float(unit["max_hp"]), "capped upgraded HP remains valid")
+            check(int(unit["attack_speed"]) <= 200 and int(unit["movement_speed"]) <= 200, "upgraded mirrors preserve speed rating caps")
+            check(float(unit["x"]) >= 0 and float(unit["x"]) <= 24 and float(unit["y"]) >= 0 and float(unit["y"]) <= 14, "upgraded knockback/transits stay on the field")

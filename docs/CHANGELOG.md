@@ -6,6 +6,7 @@
 - Add a shared spendable XP ledger: first permanent upgrade 200 XP, later upgrades 400; spending preserves lifetime mastery and ownership. Existing XP is available.
 - Increase completed-loss rewards to 50 XP; wins remain 100 and forfeits zero. Purchases validate quotes, locks, funds and persistence before charging.
 - Implement the reference abilities with bounded proc/stack/split/link behavior, expiring roots/fields and after-DEF twin-hit tuning. Freeze purchased upgrades per adventure and preserve equal AI options and recoverable replays.
+- Add a shared, scrollable pixel fantasy forge with before/after artwork, exact ability/cost previews and purchase/save feedback; refresh owned cards immediately. Test actual browser purchases and IndexedDB reload through Continue.
 - Give all 24 units distinct original Lv. 2 pixel sprites, including a two-headed Sea Serpent, retained in battle, death/revival and inspection; keep base artwork unchanged.
 
 ## v0.19.0 — Sudden Death growth

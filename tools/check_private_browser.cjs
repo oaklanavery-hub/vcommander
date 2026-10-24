@@ -79,6 +79,24 @@ const path = require('node:path');
     await sudden.screenshot({ path: path.join(output, 'browser_sudden_resumed.png') });
     await sudden.context().close();
     console.log('Browser Sudden Death recovery passed: actual enhanced draft pick, IndexedDB reload, actual Continue, exact mixed cohorts/RNG, 180-second budget, hidden rival powers, path, redraw and profile identity.');
+    const upgrades = await page();
+    await upgrades.goto(base + '&qa_role=local&qa_stage=upgrade_prepare');
+    await upgrades.waitForFunction(() => window.vcommanderLocalQa?.stage === 'upgrade_prepare');
+    const upgradePrepared = await upgrades.evaluate(() => window.vcommanderLocalQa);
+    if (!upgradePrepared.ok || !upgradePrepared.persistent) throw Error('Actual unit forge purchase failed: ' + JSON.stringify(upgradePrepared));
+    await upgrades.screenshot({ path: path.join(output, 'browser_upgrades_saved.png') });
+    await upgrades.waitForTimeout(2500);
+    await upgrades.goto(base + '&qa_role=local&qa_stage=upgrade_restore');
+    await upgrades.waitForFunction(() => window.vcommanderLocalQa?.stage === 'upgrade_restore');
+    const upgradeRestored = await upgrades.evaluate(() => window.vcommanderLocalQa);
+    if (!upgradeRestored.ok || upgradeRestored.scene !== 'Draft') throw Error('Unit forge Continue failed after restart: ' + JSON.stringify(upgradeRestored));
+    for (const key of ['wallet', 'owned', 'mastery', 'price', 'active_upgrades', 'preview_level', 'snapshot', 'opponent_snapshot', 'public_upgrades', 'hearts', 'pending']) {
+      if (JSON.stringify(upgradePrepared[key]) !== JSON.stringify(upgradeRestored[key])) throw Error('Unit forge restart changed ' + key);
+    }
+    if (upgradeRestored.clock > upgradePrepared.clock || upgradeRestored.clock < upgradePrepared.clock - 0.5) throw Error('Unit forge restart changed draft time');
+    await upgrades.screenshot({ path: path.join(output, 'browser_upgrades_resumed.png') });
+    await upgrades.context().close();
+    console.log('Browser unit upgrades passed: actual Rewards/forge/200-XP button, separate Lv. 2 art, IndexedDB restart, actual Continue, exact 200-XP balance/400-XP next price, unchanged mastery, frozen upgrades, AI/public collection, draft/RNG and hearts.');
     const host = await page();
     await host.goto(base + '&qa_role=host');
     await host.waitForFunction(() => window.vcommanderPvpQa?.room?.length === 6, null,

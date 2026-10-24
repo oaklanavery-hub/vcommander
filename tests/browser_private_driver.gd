@@ -28,6 +28,9 @@ func run() -> void:
         elif argument.begins_with("--probe-stage="):
             probe_stage = argument.trim_prefix("--probe-stage=")
     if role == "local":
+        if probe_stage.begins_with("upgrade_"):
+            await _upgrade_recovery_probe()
+            return
         await _local_recovery_probe()
         return
     session = root.get_node("OnlineSession")
@@ -60,6 +63,66 @@ func run() -> void:
         ui.join_button.pressed.emit()
     started = true
     print("Browser PvP UI ready: ", role)
+
+func _upgrade_recovery_probe() -> void:
+    var tree := get_tree()
+    var state := tree.root.get_node("GameState")
+    var menu := tree.root.get_node("GameMenu")
+    var db := tree.root.get_node("ContentDatabase")
+    state.match_preferences = MatchPreferences.new("")
+    var purchased := false
+    ui = load("res://scenes/main_menu/main_menu.tscn").instantiate()
+    tree.root.add_child(ui)
+    tree.current_scene = ui
+    await tree.process_frame
+    if probe_stage == "upgrade_prepare":
+        state.select_commander("commander_fire_01")
+        for index in range(4):
+            state.commander_progress.finish_match(state.commander_progress.begin_match("commander_fire_01"), "win")
+        ui.find_child("Achievements", true, false).pressed.emit()
+        await tree.scene_changed
+        tree.current_scene.find_child("UnitForge", true, false).pressed.emit()
+        await tree.process_frame
+        var purchase: Button = menu._body.find_child("Upgrade_card_fire_01", true, false)
+        if purchase == null or purchase.disabled:
+            JavaScriptBridge.eval("window.vcommanderLocalQa = " + JSON.stringify({"stage": probe_stage, "ok": false, "reason": "actual forge purchase unavailable"}) + ";", true)
+            return
+        purchase.pressed.emit()
+        await tree.process_frame
+        var preview = menu._body.find_child("ForgeLevel2", true, false)
+        purchased = preview != null and preview.portrait.definition.get("unit_level") == 2 and menu._body.find_child("Upgrade_card_fire_01", true, false).disabled
+        menu.close()
+        state.equip_starter_army()
+        state.begin_match(9007199254740111)
+        state.draft.select_offer(0)
+        state.update_draft_clock(11.5)
+        tree.change_scene_to_file("res://scenes/main_menu/main_menu.tscn")
+        await tree.scene_changed
+        ui = tree.current_scene
+    await tree.process_frame
+    var continuation := ui.find_child("ContinueAdventure", true, false) as Button
+    var data := {"stage": probe_stage, "persistent": OS.is_userfs_persistent(), "continue_visible": continuation != null, "ok": false}
+    if probe_stage == "upgrade_restore" and continuation != null:
+        continuation.pressed.emit()
+        await tree.scene_changed
+        tree.current_scene.set_process(false)
+        await tree.process_frame
+    data["wallet"] = state.commander_progress.upgrade_balance()
+    data["owned"] = state.commander_progress.upgraded_unit_ids()
+    data["mastery"] = state.commander_progress.record("commander_fire_01")
+    data["price"] = state.commander_progress.upgrade_cost()
+    data["active_upgrades"] = state.active_unit_upgrades.duplicate()
+    data["snapshot"] = state.draft.snapshot()
+    data["opponent_snapshot"] = state.opponent.draft.snapshot()
+    data["public_upgrades"] = state.opponent_public_side.get("unit_upgrades", []).duplicate(true)
+    data["hearts"] = state.match_state.losses.duplicate()
+    data["clock"] = state.draft_time_left
+    data["pending"] = state.commander_progress.active_match().get("id", "")
+    data["scene"] = tree.current_scene.name
+    data["preview_level"] = state.preview_unit(db.get_card("card_fire_01")).get("unit_level", 1)
+    data["ok"] = continuation != null and state.local_store.last_error == OK and data["wallet"] == 200 and data["price"] == 400 and data["owned"] == ["card_fire_01"] and data["active_upgrades"] == data["owned"] and int(data["mastery"]["xp"]) == 400 and int(data["mastery"]["level"]) == 2 and data["preview_level"] == 2
+    data["ok"] = bool(data["ok"]) and (purchased if probe_stage == "upgrade_prepare" else tree.current_scene.name == "Draft")
+    JavaScriptBridge.eval("window.vcommanderLocalQa = " + JSON.stringify(data) + ";", true)
 
 func _local_recovery_probe() -> void:
     var tree := get_tree()

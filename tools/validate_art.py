@@ -56,7 +56,7 @@ for group, expected in [('menu_fire', {str(index) for index in range(6)}),
         assert (x, y) not in seen, name
         seen.add((x, y))
         assert x >= 0 and y >= 0 and (x + 1) * atlas['cell_size'][0] <= width and (y + 1) * atlas['cell_size'][1] <= height, name
-print(f"Detailed art OK: {len(atlas_manifest['commanders']['frames'])} Commander frames, {len(atlas_manifest['units']['frames'])} roster frames, RGBA textures and unique regions")
+print(f"Detailed art OK: {len(atlas_manifest['commanders']['frames'])} Commander frames, {len(atlas_manifest['units']['frames'])} roster frames, {len(atlas_manifest['upgraded_units']['frames'])} Lv. 2 frames, RGBA textures and unique regions")
 
 scene = atlas_manifest['menu_scene']
 with (root / scene['texture'].removeprefix('res://')).open('rb') as stream:
