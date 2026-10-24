@@ -42,6 +42,7 @@ def main() -> int:
     tactics = read_group(ROOT / "data" / "tactics")
     validate_tactics(tactics.get("commander_specializations", {}), commanders, cards)
     validate_warband_guide(cards)
+    validate_upgrades(read_group(ROOT / "data" / "progression").get("unit_upgrades", {}), cards)
 
     if not all((commanders, cards, sets, buffs)) or len(balances) != 1:
         raise ValueError("Content groups must be nonempty with exactly one global balance file")
@@ -180,7 +181,7 @@ def main() -> int:
     mastery = progression.get("commander_mastery", {})
     if not isinstance(mastery.get("xp_per_level"), int) or isinstance(mastery.get("xp_per_level"), bool) or mastery["xp_per_level"] <= 0:
         raise ValueError("Mastery xp_per_level must be a positive whole number")
-    for outcome, expected in {"win": 100, "loss": 25, "forfeit": 0}.items():
+    for outcome, expected in {"win": 100, "loss": 50, "forfeit": 0}.items():
         if mastery.get("match_xp", {}).get(outcome) != expected:
             raise ValueError(f"Approved mastery {outcome} reward must be {expected}")
     legacy_cards = mastery.get("legacy_available_cards")
@@ -280,6 +281,75 @@ def validate_tactics(catalog, commanders, cards):
                 raise ValueError(f"{ident} has a change with no matching current ability")
     if any(count != 2 for count in counts.values()):
         raise ValueError("Prototype needs two paths per Commander")
+
+
+def validate_upgrades(catalog, cards):
+    if catalog.get("max_level") != 2 or catalog.get("first_upgrade_xp") != 200 or catalog.get("upgrade_xp") != 400:
+        raise ValueError("Unit upgrades require the approved Lv. 2 and 200/400 XP prices")
+    if set(catalog.get("units", {})) != set(cards):
+        raise ValueError("Unit upgrades must cover every current unit exactly once")
+    fields = {"splash_radius", "splash_attack_pct", "trail_transits", "dead_trail_seconds", "heal_target_max_hp_pct", "pushback", "slow_seconds", "enemy_movement_speed_pct", "attack_pct", "radius_multiplier", "root_seconds", "split_generations"}
+    required = {
+        "pulse_damage": ["interval", "radius", "attack_pct"],
+        "attack_hits": ["hits", "damage_pct"],
+        "impact_area": ["radius", "duration_seconds", "tick_seconds", "attack_pct"],
+        "death_heal": ["radius", "heal_pct"],
+        "attack_proc": ["chance_pct", "action"],
+        "attack_rate": ["multiplier", "damage_pct"],
+        "focus_damage": ["stack_pct", "max_stacks"],
+        "hit_debuff": ["key", "stat", "percentage", "max_stacks", "duration_seconds"],
+        "death_field": ["radius", "duration_seconds", "stat", "percentage"],
+        "death_heal_area": ["radius", "duration_seconds", "tick_seconds", "heal_pct", "stacking_key"],
+        "death_link": ["radius", "duration_seconds", "shared_damage_pct"],
+    }
+    for ident, entry in catalog["units"].items():
+        if not entry.get("name") or not entry.get("description") or not isinstance(entry.get("traits"), list):
+            raise ValueError(f"{ident} upgrade needs name, description and traits")
+        overrides = entry.get("ability_overrides", {})
+        if not isinstance(overrides, dict) or not set(overrides) <= fields:
+            raise ValueError(f"{ident} has unsupported upgrade ability fields")
+        for key, value in overrides.items():
+            if key in ("splash_radius", "pushback"):
+                if value not in ("small", "medium", "moderate", "large"):
+                    raise ValueError(f"{ident} has invalid upgrade radius/pushback")
+            elif key == "enemy_movement_speed_pct":
+                if not isinstance(value, (int, float)) or not -80 <= value < 0:
+                    raise ValueError("Upgrade slows must stay below 80 percent")
+            else:
+                require_positive_number(value, f"{ident} upgrade {key}")
+        if overrides.get("split_generations", 1) > 2 or overrides.get("root_seconds", 0) > 2 or overrides.get("trail_transits", 1) > 2:
+            raise ValueError("Upgrade descendants, roots and trails exceed approved bounds")
+        seen = set()
+        for trait in entry["traits"]:
+            kind = trait.get("type")
+            if kind not in required or kind in seen or any(key not in trait for key in required[kind]):
+                raise ValueError(f"{ident} has an invalid/duplicate upgrade trait")
+            seen.add(kind)
+            for key, value in trait.items():
+                if key in ("type", "key", "stacking_key", "stat", "action", "radius", "pushback"):
+                    continue
+                require_positive_number(value, f"{ident} {kind}.{key}")
+            if "radius" in trait and trait["radius"] not in ("small", "medium", "large"):
+                raise ValueError("Unsupported upgrade trait radius")
+            if kind in ("hit_debuff", "death_field") and trait["stat"] not in ("defense", "attack_speed", "movement_speed"):
+                raise ValueError("Unsupported upgrade debuff stat")
+            if kind == "attack_proc" and (trait["action"] not in ("area_damage", "push") or not 0 < trait["chance_pct"] <= 100 or (trait["action"] == "area_damage" and not trait.get("attack_pct"))):
+                raise ValueError("Invalid seeded upgrade proc")
+            if "max_stacks" in trait and (type(trait["max_stacks"]) is not int or not 1 <= trait["max_stacks"] <= 10):
+                raise ValueError("Upgrade stacks must be bounded whole numbers")
+            if kind == "hit_debuff" and trait["percentage"] * trait["max_stacks"] > 60:
+                raise ValueError("Upgrade stacking debuffs are too strong")
+            if kind == "attack_hits" and (type(trait["hits"]) is not int or not 1 <= trait["hits"] <= 2):
+                raise ValueError("Upgrade hits are bounded at two")
+            if kind == "attack_rate" and trait["multiplier"] > 2:
+                raise ValueError("Upgrade attack rate is bounded at two")
+            if trait.get("duration_seconds", 0) > 10 or trait.get("shared_damage_pct", 0) > 50:
+                raise ValueError("Upgrade duration/share exceeds its bounds")
+        visual = entry.get("visual", {})
+        if not isinstance(visual, dict) or not set(visual) <= {"scale", "heads", "projectile_scale"}:
+            raise ValueError("Invalid upgrade visual metadata")
+        if not 0.5 <= visual.get("scale", 1) <= 1.4 or visual.get("heads", 1) not in (1, 2) or not 1 <= visual.get("projectile_scale", 1) <= 1.5:
+            raise ValueError("Upgrade visuals exceed their bounds")
 
 
 def validate_warband_guide(cards):

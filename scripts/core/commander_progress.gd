@@ -2,7 +2,7 @@ class_name CommanderProgress
 extends RefCounted
 
 const DEFAULT_PATH := "user://commander_profile.json"
-const SCHEMA_VERSION := 3
+const SCHEMA_VERSION := 4
 const MAX_COUNTER := 9007199254740991
 
 var path: String
@@ -14,8 +14,9 @@ var last_receipt: Dictionary = {}
 var _content: Object
 var _rules: Dictionary
 var _primary_valid := false
+var _last_write_committed := false
 var _developer_access: DeveloperAccess
-var _data := {"schema_version": SCHEMA_VERSION, "match_serial": 0, "commanders": {}, "active_match": {}, "achievements": [], "unlocked_cards": []}
+var _data := {"schema_version": SCHEMA_VERSION, "match_serial": 0, "commanders": {}, "active_match": {}, "achievements": [], "unlocked_cards": [], "unit_upgrades": []}
 
 func _init(content: Object, storage_path: String = DEFAULT_PATH, developer_access: DeveloperAccess = null) -> void:
     _content = content
@@ -26,7 +27,7 @@ func _init(content: Object, storage_path: String = DEFAULT_PATH, developer_acces
         _load_profile()
     last_receipt = _data.get("last_settlement", {}).duplicate(true)
     var migrated := not read_only and int(_data["schema_version"]) < SCHEMA_VERSION
-    if migrated:
+    if migrated and int(_data["schema_version"]) < 3:
         # This frozen content list preserves formerly available cards, including
         # historical presets. Fresh profiles never receive legacy entitlements.
         for id in _rules.get("legacy_available_cards", []):
@@ -52,6 +53,52 @@ func progress_at(total_xp: int) -> Dictionary:
 func active_match() -> Dictionary:
     return _data["active_match"].duplicate(true)
 
+func upgrade_balance() -> int:
+    var earned := 0
+    for entry in _data["commanders"].values():
+        earned += int(entry.get("xp", 0))
+    for purchase in _data.get("unit_upgrades", []):
+        earned -= int(purchase["xp_cost"])
+    return maxi(0, earned)
+
+func upgraded_unit_ids() -> Array[String]:
+    var result: Array[String] = []
+    for purchase in _data.get("unit_upgrades", []):
+        result.append(str(purchase["unit_id"]))
+    result.sort()
+    return result
+
+func unit_level(card_id: String) -> int:
+    return 2 if upgraded_unit_ids().has(card_id) else 1
+
+func upgrade_cost() -> int:
+    return int(_content.get_upgrade_rules().get("first_upgrade_xp", 200) if _data.get("unit_upgrades", []).is_empty() else _content.get_upgrade_rules().get("upgrade_xp", 400))
+
+func purchase_unit_upgrade(card_id: String, quoted_cost: int = -1) -> Dictionary:
+    var cost := upgrade_cost()
+    var reason := ""
+    if read_only:
+        reason = "Saved progress is unavailable. Purchases are disabled."
+    elif not active_match().is_empty():
+        reason = "Finish your adventure before upgrading."
+    elif not _content.get_upgrade_rules().get("units", {}).has(card_id) or not is_card_unlocked(card_id):
+        reason = "Unlock this unit before upgrading it."
+    elif unit_level(card_id) >= 2:
+        reason = "This unit is already Lv. 2."
+    elif quoted_cost >= 0 and quoted_cost != cost:
+        reason = "The price changed. Review the refreshed upgrade."
+    elif upgrade_balance() < cost:
+        reason = "Earn %d more XP to upgrade." % (cost - upgrade_balance())
+    if not reason.is_empty():
+        return {"ok": false, "reason": reason}
+    var previous := _data.duplicate(true)
+    _data["unit_upgrades"].append({"unit_id": card_id, "xp_cost": cost})
+    last_save_error = _save_profile()
+    if last_save_error != OK and not _last_write_committed:
+        _data = previous
+        return {"ok": false, "reason": "Upgrade could not be saved. No XP was spent."}
+    return {"ok": true, "unit_id": card_id, "xp_cost": cost, "balance": upgrade_balance()}
+
 func begin_match(commander_id: String) -> String:
     if _content.get_commander(commander_id).is_empty() or not _data["active_match"].is_empty():
         return ""
@@ -71,6 +118,7 @@ func finish_match(match_id: String, outcome: String) -> Dictionary:
         return last_receipt.duplicate(true) if str(last_receipt.get("match_id", "")) == match_id else {}
     var commander_id := str(pending["commander_id"])
     var before := record(commander_id)
+    var wallet_before := upgrade_balance()
     var stats := {"wins": int(before["wins"]), "losses": int(before["losses"]), "forfeits": int(before["forfeits"]), "xp": int(before["xp"])}
     stats["wins" if outcome == "win" else "losses"] += 1
     if outcome == "forfeit":
@@ -81,7 +129,7 @@ func finish_match(match_id: String, outcome: String) -> Dictionary:
     _data["active_match"] = {}
     var grants := _refresh_rewards()
     last_receipt = {"achievements": grants["achievements"], "unlocked_cards": grants["unlocked_cards"], "match_id": match_id, "commander_id": commander_id, "outcome": outcome,
-        "xp_awarded": gained, "before": before, "after": record(commander_id)}
+        "xp_awarded": gained, "before": before, "after": record(commander_id), "upgrade_xp_before": wallet_before, "upgrade_xp_after": upgrade_balance()}
     _data["last_settlement"] = last_receipt.duplicate(true)
     last_save_error = _save_profile()
     return last_receipt.duplicate(true)
@@ -222,7 +270,7 @@ func _read_profile(file_path: String) -> Dictionary:
     if parser.parse(file.get_as_text()) != OK:
         return {}
     var parsed = parser.data
-    if not parsed is Dictionary or not _counter(parsed.get("schema_version")) or int(parsed["schema_version"]) not in [1, 2, SCHEMA_VERSION]:
+    if not parsed is Dictionary or not _counter(parsed.get("schema_version")) or int(parsed["schema_version"]) not in [1, 2, 3, SCHEMA_VERSION]:
         return {}
     if not _counter(parsed.get("match_serial")) or not parsed.get("commanders") is Dictionary or not parsed.get("active_match") is Dictionary:
         return {}
@@ -246,6 +294,28 @@ func _read_profile(file_path: String) -> Dictionary:
                 return {}
             entry[key] = int(entry[key])
         if int(entry["forfeits"]) > int(entry["losses"]):
+            return {}
+    if int(parsed["schema_version"]) < 4:
+        parsed["unit_upgrades"] = []
+    if not parsed.get("unit_upgrades") is Array or parsed["unit_upgrades"].size() > _content.get_upgrade_rules().get("units", {}).size():
+        return {}
+    var earned := 0
+    for entry in parsed["commanders"].values():
+        earned += int(entry["xp"])
+        if earned > MAX_COUNTER:
+            return {}
+    var spent := 0
+    var seen_upgrades := {}
+    for purchase in parsed["unit_upgrades"]:
+        if not purchase is Dictionary or not purchase.get("unit_id") is String or not _counter(purchase.get("xp_cost")) or int(purchase["xp_cost"]) <= 0:
+            return {}
+        var id: String = purchase["unit_id"]
+        if seen_upgrades.has(id) or not _content.get_upgrade_rules().get("units", {}).has(id):
+            return {}
+        seen_upgrades[id] = true
+        purchase["xp_cost"] = int(purchase["xp_cost"])
+        spent += int(purchase["xp_cost"])
+        if spent > earned:
             return {}
     var pending: Dictionary = parsed["active_match"]
     if not pending.is_empty():
@@ -283,7 +353,9 @@ static func _counter(value: Variant) -> bool:
     return (value is int or value is float) and is_finite(float(value)) and float(value) >= 0 and float(value) <= MAX_COUNTER and float(value) == floor(float(value))
 
 func _save_profile() -> Error:
+    _last_write_committed = false
     if path.is_empty():
+        _last_write_committed = true
         return OK # Explicit in-memory profile for tests and visual fixtures.
     if read_only:
         return ERR_FILE_CORRUPT
@@ -304,6 +376,7 @@ func _save_profile() -> Error:
             return error
     error = DirAccess.rename_absolute(temporary, file_path)
     if error == OK:
+        _last_write_committed = true
         _primary_valid = true
         # Keep the backup current so recovery cannot turn an already settled win
         # into a forfeit by loading an older pending-match snapshot.

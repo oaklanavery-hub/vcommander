@@ -48,8 +48,8 @@ func test_rewards() -> void:
     var strong := profile.record(first)
     var mixed := profile.record(second)
     check(strong["played"] == 40 and strong["wins"] == 30 and strong["losses"] == 10 and strong["win_rate"] == 75, "per-Commander counts and win rate use whole matches")
-    check(strong["xp"] == 3250 and strong["level"] == 14 and strong["xp_in_level"] == 0, "250 XP earns each permanent level")
-    check(mixed["played"] == 40 and mixed["xp"] == 2500 and mixed["level"] == 11, "better win ratio earns more mastery at equal match count")
+    check(strong["xp"] == 3500 and strong["level"] == 15 and strong["xp_in_level"] == 0, "250 XP earns each permanent level")
+    check(mixed["played"] == 40 and mixed["xp"] == 3000 and mixed["level"] == 13, "better win ratio earns more mastery at equal match count")
     var forfeited := apply(profile, first, "forfeit")
     check(forfeited["xp_awarded"] == 0 and forfeited["after"]["losses"] == 11 and forfeited["after"]["forfeits"] == 1, "forfeit counts as a loss with zero XP")
     check(forfeited["after"]["level"] == strong["level"], "losses and forfeits cannot remove earned levels")
@@ -59,12 +59,12 @@ func test_rewards() -> void:
     var pending := profile.begin_match(second)
     var pending_copy := profile.active_match()
     pending_copy["commander_id"] = first
-    check(profile.record(first)["xp"] == 3250 and profile.active_match()["commander_id"] == second, "returned records, receipts and pending state do not expose writable profile data")
+    check(profile.record(first)["xp"] == 3500 and profile.active_match()["commander_id"] == second, "returned records, receipts and pending state do not expose writable profile data")
     profile.finish_match(pending, "loss")
     # Content IDs, including newly introduced Commanders, select records generically.
     db.commanders["commander_future"] = {"id": "commander_future"}
     apply(profile, "commander_future", "win")
-    check(profile.record("commander_future")["xp"] == 100 and profile.record(first)["xp"] == 3250, "new Commander content receives an independent record without service changes")
+    check(profile.record("commander_future")["xp"] == 100 and profile.record(first)["xp"] == 3500, "new Commander content receives an independent record without service changes")
     db.commanders.erase("commander_future")
 
 func test_storage() -> void:
@@ -90,7 +90,7 @@ func test_storage() -> void:
     check(reloaded.recovered_from_backup and reloaded.record(commander)["wins"] == 1 and reloaded.record(commander)["losses"] == 1, "current backup restores completed records without stale pending matches")
     apply(reloaded, commander, "loss")
     reloaded = CommanderProgress.new(db, test_path)
-    check(not reloaded.read_only and not reloaded.recovered_from_backup and reloaded.record(commander)["xp"] == 125, "recovery repairs the primary on the next save")
+    check(not reloaded.read_only and not reloaded.recovered_from_backup and reloaded.record(commander)["xp"] == 150, "recovery repairs the primary on the next save")
     var blocked := CommanderProgress.new(db, "user://missing_mastery_directory_%d/profile.json" % OS.get_process_id())
     apply(blocked, commander, "win")
     check(blocked.last_save_error != OK and blocked.record(commander)["xp"] == 100 and blocked.storage_notice().contains("could not be saved"), "save failure preserves session progress and surfaces a warning")

@@ -11,11 +11,14 @@ Verify the actual branch, tree and GitHub checks before resuming. [Earlier histo
 - [Deploy 39990629132](https://github.com/oaklanavery-hub/vcommander/actions/runs/39990629132) completed successfully: merged-source full gate, release export, publication, served-resource/checksum verification and all 53 suites against the actual downloaded public PCK. Explicit final log: `Deployment verified: 0.19.0 at f29996f71359a092121f6c49729a811c34c8245c`.
 - Independently fetched public manifest: version 0.19.0, source above, PCK SHA-256 `32e4ce13b7764d636b3e95f13d72657b0c500617c967ae08e30093316f573e5f`.
 
-## Current scope and next decision
+## Active — approved permanent unit upgrades
 
-- Approved Sudden Death work is complete; no implementation or release checks remain pending. Completed v0.18 replays keep their old clock; new rounds/picks use the approved rule. Resume preserves mixed cohorts, RNG, hearts, path/redraw budgets and prior-public rival information.
-- The bounded paired Water diagnostic reproduces the legacy control (16 rounds unfinished, nine SD draws, 1372.8s). Approved rules finish Round 15 after seven SD draws and 1584.3s. This is one synthetic fixture, not proof of universal resolution, balance or shorter human matches. See [findings and reproduction](STRATEGY_PLAYTEST.md).
-- Collect human pacing evidence before any further anti-stall mechanic. No healing penalty, damage ramp or tiebreaker was authorized. Campaign remains KIV; PvP remains Coming Soon and hosting stays free.
+- User approved all proposed upgrade work on 2026-10-24: attached reference has one Lv. 2 upgrade for each of 24 units; shared spendable XP, first purchase 200 XP then 400 each; completed losses 50 XP; lifetime mastery/ownership never decrease. Existing earned XP is available, with purchases recorded separately.
+- Base main `8c79e5948419f4f79782211922a9e0ee6d0c894e`, branch `feat/unit-upgrades`; verified prior deploy remains successful.
+- Checkpoint 1: data-defined 24-unit catalog, validated purchase ledger/profile migration, exact-once shared XP and unchanged mastery. Purchases require unlocked units and no pending adventure; no workbook edit.
+- Checkpoint 2: generic combat hooks for the reference abilities, bounded stacking/splitting/links, fair AI and frozen/recoverable adventure upgrades. Preserve baseline replays and optional paths.
+- Checkpoint 3: pixel fantasy upgrade forge, card/inspection previews, actual browser purchase/reload, focused mechanics/persistence checks and bounded native/paired samples; then full Actions release gate and served-pack verification.
+- Checkpoint 1 implemented: 24-unit catalog with validated generic effects, pure transformer and schema-4 paid ledger/derived shared balance; old schema-3 profiles retain XP without receiving legacy schema-1/2 card grants. Content validation and the new upgrade progression suite pass; initial reserved-word/type-inference parser issues were corrected before passing. The existing Commander progression suite also passes. Combat hooks, adventure guards/recovery, forge UI and the complete release gate remain pending. Keep PvP Coming Soon, campaign KIV, free hosting, existing developer collection access, Sudden Death rules, prelude, 1× and no skip.
 
 ## Working conventions
 
