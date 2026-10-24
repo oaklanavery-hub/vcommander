@@ -204,6 +204,8 @@ func _build_collection() -> void:
     balance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
     balance_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
     balance_label.add_theme_color_override("font_color", Color("f2d58e"))
+    balance_label.add_theme_color_override("font_outline_color", Color("16170f"))
+    balance_label.add_theme_constant_override("outline_size", 4)
     controls.add_child(balance_label)
     var divider := HSeparator.new()
     divider.name = "CollectionDivider"
