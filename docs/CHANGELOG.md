@@ -2,6 +2,8 @@
 
 ## v0.21.0 — Dedicated Unit Forge
 
+Released as `d73ee43acb096cf2788b20f67cbee55487f20200`; [deployment and all 57 suites against the actual served pack passed](https://github.com/oaklanavery-hub/vcommander/actions/runs/40118488020).
+
 - Give Unit Forge its own main-menu button and presentation scene, separate from Achievements & rewards.
 - Follow the supplied layout: Lv. 1 + quoted XP = Lv. 2, ability details and purchase beside it, then a Commander filter, available XP and scrolling eight-column desktop collection.
 - Retain pixel fantasy materials, rounded cards, compact/larger-text layouts, safe Back routing, exact purchase feedback and the existing 200/400-XP rules. Browsing preserves warbands and saved adventures.
