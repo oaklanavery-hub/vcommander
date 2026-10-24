@@ -34,6 +34,7 @@ var recovery_notice := ""
 var _restoring := false
 var match_preferences: MatchPreferences
 var active_difficulty := "standard"
+var active_unit_upgrades: Array[String] = []
 var match_insights: MatchInsights
 var _draft_elapsed := 0.0
 var _watch_elapsed := 0.0
@@ -145,6 +146,7 @@ func begin_match(seed_value: int) -> bool:
             return false
     _reset_match_runtime()
     match_seed = seed_value
+    active_unit_upgrades = commander_progress.upgraded_unit_ids()
     match_state.start(int(ContentDatabase.get_game_balance().get("match", {}).get("losses_to_lose_match", 4)))
     draft.configure(
         army.get_cards(),
@@ -160,6 +162,7 @@ func begin_match(seed_value: int) -> bool:
     active_difficulty = match_preferences.difficulty
     var preferences := _draft_options(selected_commander_id, match_preferences.specialization_experiment)
     preferences["difficulty"] = active_difficulty
+    preferences["unit_upgrades"] = UnitUpgrades.definitions(ContentDatabase.get_upgrade_rules(), active_unit_upgrades)
     if not opponent.configure(ContentDatabase.get_all_commanders(), commander_progress.available_cards(), ContentDatabase.sets, ContentDatabase.get_all_buffs(), match_seed + 3571, ContentDatabase.get_game_balance().get("stats", {}), preferences):
         match_started = false
         return false
@@ -260,7 +263,25 @@ func _build_combat_side(side_id: String, draft_state, skill_active: bool) -> Dic
         "set_bonus": set_bonus,
         "skill_uses_remaining": draft_state.commander_skill_uses_remaining(),
         "specialization": draft_state.specialization()
-    }.merged(draft_state.round_context())
+    }.merged(draft_state.round_context()).merged(_upgrade_side_context())
+
+func _upgrade_side_context() -> Dictionary:
+    return {} if active_unit_upgrades.is_empty() else {"unit_upgrades": UnitUpgrades.definitions(ContentDatabase.get_upgrade_rules(), active_unit_upgrades)}
+
+func preview_unit(card: Dictionary) -> Dictionary:
+    var id := str(card.get("id", ""))
+    var upgraded := active_unit_upgrades.has(id) if match_started else commander_progress.unit_level(id) >= 2
+    if not upgraded:
+        return card.duplicate(true)
+    return UnitUpgrades.changed_card(card, ContentDatabase.get_upgrade_rules().get("units", {}).get(str(card.get("id", "")), {}))
+
+func purchase_unit_upgrade(card_id: String, quoted_cost: int) -> Dictionary:
+    if has_pending_adventure() or OnlineSession.active:
+        return {"ok": false, "reason": "Finish or leave your adventure before upgrading."}
+    var result := commander_progress.purchase_unit_upgrade(card_id, quoted_cost)
+    if bool(result.get("ok", false)):
+        collection_changed.emit()
+    return result
 
 func _reset_match_runtime() -> void:
     if match_insights != null and not _progress_match_id.is_empty():
@@ -277,6 +298,7 @@ func _reset_match_runtime() -> void:
     _progress_match_id = ""
     mastery_reward.clear()
     match_started = false
+    active_unit_upgrades.clear()
     match_state.start()
     battle_result.clear()
     opponent_public_side.clear()
@@ -328,7 +350,7 @@ func has_saved_match() -> bool:
 func _draft_options(commander_id: String, enabled: bool) -> Dictionary:
     return {"redraw_experiment": match_preferences.redraw_experiment, "specialization_experiment": enabled, "commander_id": commander_id, "specialization_catalog": ContentDatabase.get_specializations(), "match_rules": ContentDatabase.get_game_balance().get("match", {})}
 
-func _content_fingerprint(include_specializations: bool = false, legacy_overtime: bool = false) -> String:
+func _content_fingerprint(include_specializations: bool = false, legacy_overtime: bool = false, include_upgrades: bool = false) -> String:
     var balances: Dictionary = ContentDatabase.balances
     if legacy_overtime:
         balances = balances.duplicate(true)
@@ -338,6 +360,8 @@ func _content_fingerprint(include_specializations: bool = false, legacy_overtime
     var definitions: Array = [ContentDatabase.commanders, ContentDatabase.cards, ContentDatabase.sets, ContentDatabase.buffs, balances]
     if include_specializations:
         definitions.append(ContentDatabase.get_specializations())
+    if include_upgrades:
+        definitions.append(ContentDatabase.get_upgrade_rules())
     return JSON.stringify(definitions).sha256_text()
 
 func checkpoint() -> void:
@@ -356,7 +380,7 @@ func checkpoint() -> void:
     for card in opponent.cards:
         opponent_ids.append(str(card["id"]))
     var error := local_store.save({
-        "schema": 1, "content": _content_fingerprint(draft.specialization_enabled), "commander": selected_commander_id,
+        "schema": 1, "content": _content_fingerprint(draft.specialization_enabled, false, not active_unit_upgrades.is_empty()), "unit_upgrades": active_unit_upgrades.duplicate(), "commander": selected_commander_id,
         "army": army.get_cards(), "seed": str(match_seed), "draft": draft.snapshot(),
         "opponent_commander": str(opponent.commander.get("id", "")), "opponent_cards": opponent_ids,
         "opponent_draft": opponent.draft.snapshot(), "opponent_rng": str(opponent._rng.state),
@@ -384,6 +408,7 @@ func resume_match() -> bool:
         match_state = decoded["match"]
         match_seed = int(value["seed"])
         active_difficulty = str(value.get("difficulty", "standard"))
+        active_unit_upgrades.assign(decoded["unit_upgrades"])
         _progress_match_id = str(decoded["progress_id"])
         draft_time_left = float(value["clock"])
         battle_watched = bool(value["watched"])
@@ -412,8 +437,17 @@ func resume_match() -> bool:
 
 func _decode_checkpoint(value: Dictionary) -> Dictionary:
     var uses_specializations := bool(value.get("draft", {}).get("specialization_enabled", false)) if value.get("draft") is Dictionary else false
-    var legacy_overtime: bool = value.get("content") == _content_fingerprint(uses_specializations, true)
-    if value.get("schema") != 1 or (value.get("content") != _content_fingerprint(uses_specializations) and not legacy_overtime):
+    var saved_upgrades = value.get("unit_upgrades", [])
+    if not saved_upgrades is Array:
+        return {}
+    var seen_upgrades := {}
+    for id in saved_upgrades:
+        if not id is String or seen_upgrades.has(id) or commander_progress.unit_level(id) < 2 or not ContentDatabase.get_upgrade_rules().get("units", {}).has(id):
+            return {}
+        seen_upgrades[id] = true
+    var uses_upgrades: bool = not saved_upgrades.is_empty()
+    var legacy_overtime: bool = value.get("content") == _content_fingerprint(uses_specializations, true, uses_upgrades)
+    if value.get("schema") != 1 or (value.get("content") != _content_fingerprint(uses_specializations, false, uses_upgrades) and not legacy_overtime):
         return {}
     if str(value.get("difficulty", "standard")) not in MatchPreferences.DIFFICULTIES or str(value.get("style", "swarm")) not in AiScript.STYLE_NAMES or not value.get("enemy_evidence", {}) is Dictionary:
         return {}
@@ -468,6 +502,7 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
         return {}
     if rival.draft.specialization_enabled != player_draft.specialization_enabled:
         return {}
+    rival._unit_upgrades = UnitUpgrades.definitions(ContentDatabase.get_upgrade_rules(), saved_upgrades)
     rival._rng.state = int(value["opponent_rng"])
     rival.difficulty = str(value.get("difficulty", "standard"))
     rival.style = str(value.get("style", "swarm"))
@@ -501,6 +536,13 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
     var public_limit = public.get("round_time_limit", player_draft._normal_round_seconds)
     if not (public_limit is int or public_limit is float) or float(public_limit) not in [player_draft._normal_round_seconds, player_draft._sudden_round_seconds]:
         return {}
+    if not public.get("unit_upgrades", []) is Array or public.get("unit_upgrades", []).size() != saved_upgrades.size():
+        return {}
+    var seen_public_upgrades := {}
+    for definition in public.get("unit_upgrades", []):
+        if not definition is Dictionary or not definition.get("unit_id") is String or not seen_upgrades.has(definition["unit_id"]) or seen_public_upgrades.has(definition["unit_id"]):
+            return {}
+        seen_public_upgrades[definition["unit_id"]] = true
     var public_specialization := str(public.get("specialization", {}).get("id", ""))
     if not public_specialization.is_empty() and (not uses_specializations or public_specialization != rival.draft.specialization_id):
         return {}
@@ -575,4 +617,4 @@ func _decode_checkpoint(value: Dictionary) -> Dictionary:
     restored_match.history.assign(info["history"])
     for entry in restored_match.history:
         entry["round"] = int(entry["round"])
-    return {"army": armies[0], "draft": player_draft, "opponent": rival, "match": restored_match, "progress_id": progress_id, "public_side": restored_public}
+    return {"unit_upgrades": saved_upgrades.duplicate(), "army": armies[0], "draft": player_draft, "opponent": rival, "match": restored_match, "progress_id": progress_id, "public_side": restored_public}

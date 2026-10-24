@@ -46,7 +46,7 @@ func frost_coverage() -> float:
     return 1.0 if replay_enabled else clampf((prelude_time - 0.3) / 1.3, 0, 1)
 
 func set_side_configs(player: Dictionary, opponent: Dictionary) -> void:
-    _sides.assign([player, opponent])
+    _sides.assign([UnitUpgrades.apply_side(player), UnitUpgrades.apply_side(opponent)])
 
 func set_battlefield_size(width: float, height: float) -> void:
     _field_width = maxf(1.0, width)
@@ -156,13 +156,15 @@ func _draw() -> void:
     var units := visible_units()
     for unit in units:
         _draw_aura(unit)
-    var areas: Array = _frame.get("areas", []).filter(func(area): return not replay_enabled or area.get("type") != "damage_area")
+    var areas: Array = _frame.get("areas", []).filter(func(area): return not replay_enabled or (area.get("type") != "damage_area" and not bool(area.get("upgrade_field", false))))
     if replay_enabled:
         areas.append_array(replay.death_areas_at(_visual_time))
     for area in areas:
         var center := _point(float(area.get("x", 0)), float(area.get("y", 0)))
         var radius := float(area.get("radius", 1)) / _field_width * _arena.size.x
-        if area.get("type") == "damage_area":
+        if bool(area.get("upgrade_field", false)):
+            UnitUpgradeVisuals.area(self, area, center, radius, _visual_time, reduced_motion)
+        elif area.get("type") == "damage_area":
             BattleEffects.slime_pool(self, center, radius, float(area.get("remaining", 0)), float(area.get("duration", 10)), _visual_time, reduced_motion)
         else:
             draw_circle(center, radius, Color(0.35, 0.8, 0.71, 0.16))
@@ -400,7 +402,7 @@ func _draw_rosters() -> void:
             var id_value := str(card.get("id", ""))
             var count := int(config.get("unit_counts", {}).get(id_value, 0))
             var icon_size := float(layout["icon_size"])
-            draw_texture_rect(UnitArt.icon(id_value, str(card.get("role", "range")), str(card.get("element", "earth"))), Rect2(Vector2(x, y - icon_size + 3), Vector2.ONE * icon_size), false)
+            draw_texture_rect(UnitArt.icon(id_value, str(card.get("role", "range")), str(card.get("element", "earth")), int(card.get("unit_level", 1))), Rect2(Vector2(x, y - icon_size + 3), Vector2.ONE * icon_size), false)
             if compact:
                 draw_string(ThemeDB.fallback_font, Vector2(x + 30, y - 4), "%s ×%d" % [str(card.get("display_name", "Unit")), count], HORIZONTAL_ALIGNMENT_LEFT, _arena.position.x - 60, 12, Color("eee2c3"))
             else:
@@ -435,6 +437,7 @@ func _draw_unit(unit: Dictionary) -> void:
         AssassinEffects.actor(self, unit, _visual_time, reduced_motion)
         return
     var p := _point(float(unit.get("x", 0)), float(unit.get("y", 0)))
+    UnitUpgradeVisuals.roots(self, p, bool(unit.get("rooted", false)) and _visual_time < float(unit.get("root_until", INF)))
     var id_value := str(unit.get("id", ""))
     var side := str(unit.get("side", "player"))
     var pose: Dictionary = _poses.get(id_value, {})
@@ -455,6 +458,7 @@ func _draw_unit(unit: Dictionary) -> void:
         pose["power"] = float(pose.get("power", 0)) * 0.2
         pose["articulation"] = float(pose.get("articulation", pose.get("power", 0))) * 0.2
         pose["settle"] = 0.0
+    pose["unit_level"] = int(unit.get("unit_level", 1))
     UnitArt.draw_unit(self, sprite_position, str(unit.get("role", "range")), str(unit.get("element", "earth")), pixel, side == "opponent", bob, str(unit.get("card_id", "")), pose)
     if pose.get("state") == "attack" and pose.has("rig"):
         UnitAttackMotion.draw_action(self, _body_point(unit), pose, str(unit.get("element", "earth")), reduced_motion)
@@ -563,7 +567,13 @@ func _draw_projectiles() -> void:
         if style == "seed":
             var team := Color("eda086") if projectile.get("source_side") == "opponent" else Color("8bd9ce")
             draw_line((p - direction * 12).round(), (p - direction * 18).round(), team, 2)
-        BattleEffects.projectile(self, p.round(), direction, style, _visual_time, reduced_motion)
+        var visual_scale := float(projectile.get("visual_scale", 1))
+        if visual_scale != 1:
+            draw_set_transform(p.round(), 0, Vector2.ONE * visual_scale)
+            BattleEffects.projectile(self, Vector2.ZERO, direction, style, _visual_time, reduced_motion)
+            draw_set_transform(Vector2.ZERO)
+        else:
+            BattleEffects.projectile(self, p.round(), direction, style, _visual_time, reduced_motion)
 
 func _draw_effects() -> void:
     for effect in _effects:
@@ -572,6 +582,7 @@ func _draw_effects() -> void:
             continue
         var type := str(effect.get("type", ""))
         var p := _point(float(effect.get("x", 0)), float(effect.get("y", 0)))
+        UnitUpgradeVisuals.event(self, str(effect.get("kind", "")), p, float(effect.get("radius", 1)) / _field_width * _arena.size.x, age, reduced_motion)
         if effect.get("kind") == "pull":
             var origin: Dictionary = _known.get(str(effect.get("unit_id", "")), {})
             var source := _point(float(origin.get("x", effect.get("source_x", 0))), float(origin.get("y", effect.get("source_y", 0)))) + Vector2(0, -20)
@@ -612,6 +623,7 @@ func _draw_effects() -> void:
         elif type == "defeat" and age < 0.5:
             var unit: Dictionary = effect.get("unit", {})
             var pose := UnitDeathMotion.pose(unit, age, reduced_motion)
+            pose["unit_level"] = int(unit.get("unit_level", 1))
             UnitArt.draw_unit(self, p, str(unit.get("role", "range")), str(unit.get("element", "earth")), 2.0 * float(unit.get("visual_scale", 1)), false, 0.0, str(unit.get("card_id", "")), pose)
             UnitDeathMotion.draw_particles(self, p, unit, age, reduced_motion)
         elif type == "attack" and effect.get("kind") == "melee" and age < 0.2:

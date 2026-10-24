@@ -75,7 +75,7 @@ func show_record(commander_id: String) -> void:
     var stats: Dictionary = _profile.record(commander_id)
     _show_stats(stats)
     _show_progress(int(stats["xp"]))
-    xp_label.text += "\nPermanent levels · Win +100 / Loss +25 XP"
+    xp_label.text += "\nPermanent levels · Win +100 / Loss +50 XP"
     for reward in _profile.mastery_rewards(commander_id):
         var card: Dictionary = _content.get_card(str(reward["card_id"]))
         var status := "Unlocked: " if reward["earned"] else ("Dev access: " if reward["unlocked"] else "Next: ")
@@ -130,6 +130,8 @@ func _show_progress(xp: int) -> void:
     if not _record_mode:
         level_label.text = "+%d XP · " % int(_reward["xp_awarded"]) + level_label.text
     xp_label.text = "%d / %d XP toward Level %d" % [int(progress["xp_in_level"]), int(progress["xp_per_level"]), int(progress["level"]) + 1]
+    if not _record_mode and _reward.has("upgrade_xp_after"):
+        xp_label.text += "\nUnit forge balance: %d XP" % int(_reward["upgrade_xp_after"])
     if not _record_mode and int(progress["level"]) > int(_reward["before"]["level"]):
         xp_label.text = "Level up!  " + xp_label.text
 

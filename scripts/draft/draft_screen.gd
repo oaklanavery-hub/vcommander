@@ -162,7 +162,7 @@ func _refresh_offer() -> void:
         if option.get("type") == "unit":
             var card: Dictionary = ContentDatabase.get_card(str(option["id"]))
             var tile := CardTile.new()
-            tile.set_content(card)
+            tile.set_content(GameState.preview_unit(card))
             var current: int = GameState.draft.get_unit_count(str(option["id"]))
             tile.detail_text = "%d → %d / %d" % [current, mini(int(card["unit_cap"]), current + int(card["summon_amount"])), int(card["unit_cap"])]
             tile.tooltip_text += "\nPick with " + str(index + 1)

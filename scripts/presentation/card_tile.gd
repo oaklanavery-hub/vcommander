@@ -71,6 +71,18 @@ func set_content(content: Dictionary, is_commander := false) -> void:
         if not description.is_empty():
             detail += "\n\n" + description
     tooltip_text = detail
+    if int(content.get("unit_level", 1)) == 2:
+        tooltip_text += "\n\nLv. 2 · " + str(content.get("upgrade_name", "Upgraded"))
+    if is_node_ready():
+        portrait.set_content(definition, commander)
+        portrait.visible = not definition.is_empty()
+        caption.text = str(definition.get("display_name", empty_caption))
+        if not detail_text.is_empty():
+            caption.text += "\n" + detail_text
+        queue_redraw()
+        for child in get_children():
+            if child is Control:
+                child.queue_redraw()
 
 func _draw() -> void:
     caption.modulate = Color("f5dfa7") if button_pressed else Color("f1e8d3")
@@ -102,6 +114,8 @@ func _draw_badges(canvas: Control) -> void:
     if commander:
         canvas.draw_string(ThemeDB.fallback_font, Vector2(38, 23), "MASTERY %d" % mastery_level, HORIZONTAL_ALIGNMENT_LEFT, size.x - 42, 10, Color("f0ddb0"))
     else:
+        if int(definition.get("unit_level", 1)) == 2:
+            canvas.draw_string(ThemeDB.fallback_font, Vector2(38, 22), "LV. 2", HORIZONTAL_ALIGNMENT_LEFT, size.x - 75, 11, Color("f4d68a"))
         var count := "%d/%d" % [int(definition.get("summon_amount", 0)), int(definition.get("unit_cap", 0))]
         var center := Vector2(size.x - 20, 17)
         canvas.draw_circle(center + Vector2(0, 1), 16, Color("352e25"))

@@ -142,3 +142,14 @@ Extend bounded local insights with optional composition/path/full-recruitment me
 **Status:** accepted by user (2026-10-24)
 
 Extend each Sudden Death battle to 180 seconds while normal rounds retain 120. Double the percentage of new power picks only; preserve earlier normal and enhanced cohorts across repeated rounds. Retain the existing three-pick repeated-draw loop, multiplicative stacking and speed caps. Do not add a tiebreaker, healing penalty or damage ramp. Keep cohorts in DraftSystem and the shared WarbandStats formula, with explicit round budgets for exact old replay migration rather than silently recomputing a scored adventure under the new limit. Synthetic pacing diagnostics can identify remaining stalls but do not authorize further balance changes.
+
+
+## ADR-022 — Permanent unit upgrades with a shared spendable XP ledger
+
+**Status:** accepted by user, 2026-10-24
+
+Implement the supplied 24-unit Lv. 2 reference as one permanent purchase per unit type. The first profile purchase costs 200 XP and later purchases 400. Completed PvAI losses award 50 XP; wins retain 100 and forfeits zero. Keep per-Commander lifetime mastery unchanged by spending. A shared wallet is total earned mastery XP across Commanders minus recorded purchase costs, so old XP becomes spendable without a second reward ledger or duplicate recovery credit. Record stable unit IDs and actual paid costs in a new profile schema; reject invalid or overdrawn ledgers and roll back failed purchases.
+
+Content declares upgrade ability patches and reusable traits, with explicit provisional tuning and bounded stacking, descendants and area/link overlap. A pure UnitUpgrades transformer copies battle input before optional Commander paths; the simulator remains independent from profile/UI. Both sides use the same purchased upgrade collection in PvAI. Freeze the collection at adventure start and retain it through recovery; old adventures have no upgrades. Purchases are disabled while any adventure is pending. Friend PvP remains Coming Soon and retains normalized base units without local upgrade inputs or rewards. Developer collection access continues to unlock cards only, without inventing XP or free purchases.
+
+Use the existing shared, scrollable pixel fantasy menu for a forge with costs, balance, complete effect previews and visible lock/save feedback. Persistent unit levels appear in card/roster/inspection metadata without effect labels over battlefield units. Test transactions/migration, all reference mechanics, baseline parity, seeded procs and actual browser purchase/reload/Continue. No account sync, paid service or spreadsheet mutation is required.

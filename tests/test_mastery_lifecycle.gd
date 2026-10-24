@@ -66,7 +66,7 @@ func test_completed_match(commander: String, player_strong: bool) -> void:
     check(state.match_state.winner == ("player" if player_strong else "opponent"), "fixture produces the intended final outcome")
     var reward: Dictionary = state.mastery_reward.duplicate(true)
     var after: Dictionary = state.commander_progress.record(commander)
-    var expected := 100 if player_strong else 25
+    var expected := 100 if player_strong else 50
     check(after["played"] == before["played"] + 1 and after["xp"] == before["xp"] + expected and reward["xp_awarded"] == expected, "only final match outcome grants its approved XP")
     check(state.commander_progress.active_match().is_empty(), "final settlement clears the persisted pending match")
     state.run_battle()

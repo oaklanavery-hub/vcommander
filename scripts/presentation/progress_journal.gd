@@ -11,6 +11,7 @@ var summary_label: Label
 var filter_select: OptionButton
 var tab_buttons: Array[Button] = []
 var displayed_ids: Array[String] = []
+var forge_button: Button
 
 static func open(tree: SceneTree, source: String, commander: String = "") -> void:
     return_scene = source
@@ -44,6 +45,13 @@ func _ready() -> void:
     var title := ScreenStyle.label("ACHIEVEMENTS & REWARDS", 30)
     title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     header.add_child(title)
+    var forge := Button.new()
+    forge_button = forge
+    forge.name = "UnitForge"
+    forge.text = "Unit forge · %d XP" % GameState.commander_progress.upgrade_balance()
+    forge.custom_minimum_size = Vector2(190, 44)
+    forge.pressed.connect(GameMenu.open_unit_upgrades)
+    header.add_child(forge)
     var hero := PanelContainer.new()
     hero.add_theme_stylebox_override("panel", ScreenStyle.frame(Color("332d24"), Color("9a7c50"), 12))
     main.add_child(hero)
@@ -112,6 +120,7 @@ func _select_filter(index: int) -> void:
     _render()
 
 func _render() -> void:
+    forge_button.text = "Unit forge · %d XP" % GameState.commander_progress.upgrade_balance()
     for child in grid.get_children():
         grid.remove_child(child)
         child.queue_free()
@@ -152,6 +161,7 @@ func _panel(earned: bool) -> VBoxContainer:
     return body
 
 func _reward_card(card: Dictionary, reward: Dictionary) -> void:
+    card = GameState.preview_unit(card)
     displayed_ids.append(str(card["id"]))
     var body := _panel(reward["earned"])
     body.custom_minimum_size.y = 172
@@ -172,7 +182,7 @@ func _reward_card(card: Dictionary, reward: Dictionary) -> void:
     details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     details.add_theme_constant_override("separation", 5)
     row.add_child(details)
-    details.add_child(_text(str(card["display_name"]), 24))
+    details.add_child(_text(str(card["display_name"]) + (" · Lv. 2" if int(card.get("unit_level", 1)) == 2 else ""), 24))
     details.add_child(_text("%s  ·  Recruit %d / Max %d" % [str(card["role"]).capitalize(), int(card["summon_amount"]), int(card["unit_cap"])], 13))
     details.add_child(_text(str(card.get("ability", {}).get("description", "")), 14))
     var progress := "Available in your collection. Choose it while building a warband." if reward["earned"] else "Level %d / %d   ·   Wins %d / %d" % [mini(int(reward["level"]), int(reward["required_level"])), int(reward["required_level"]), mini(int(reward["wins"]), int(reward["required_wins"])), int(reward["required_wins"])]

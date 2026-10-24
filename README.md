@@ -4,7 +4,9 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.19.0 — Sudden Death growth**
+**v0.20.0 — The unit forge**
+
+Spend shared adventure XP on permanent Lv. 2 abilities and new pixel artwork for all 24 units. The first upgrade costs 200 XP, later ones 400 XP; mastery, levels, records and earned units stay intact. The forge is available from the warband builder, Rewards and pause menu. Purchases apply from the next adventure, with the same upgraded collection available to the AI. [Upgrade effects and economy](docs/UNIT_UPGRADES.md).
 
 Every Sudden Death battle has its own three-minute ceiling. Only new power cards picked during Sudden Death get double their percentage; earlier bonuses retain their strength. Normal battles keep their two-minute limit. Previews, mixed-strength rosters, AI and recovery use the same rules, including preservation of old completed replays. [Release verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39990629132) passed against the actual public game pack.
 
@@ -40,7 +42,7 @@ The current playable prototype supports:
 - eighteen local achievements and eight mastery reward units, with progress in the Achievements & Rewards journal
 
 - separate personal PvAI records for every Commander: matches, wins/losses/forfeits, win rate, permanent mastery levels and XP progress
-- full-match win +100 XP, completed loss +25 XP, forfeit +0 XP; every 250 XP earns a level, with no combat stat advantages
+- full-match win +100 XP, completed loss +50 XP, forfeit +0 XP; every 250 XP earns a level, with no combat stat advantages
 - gallery mastery displays/card levels and an animated completed-match XP reward, with reduced motion and device-local profile/backup saving
 
 - a centered title and menu over an original moonlit pixel forest, with all four Commanders seated around an animated campfire; idle poses, cloth/hair, embers, stars and elemental motes respect reduced motion
@@ -150,7 +152,7 @@ CI renders the full desktop capture gallery, including seven dedicated Sudden De
 
 ## Commander mastery
 
-Each Commander starts at Level 1 and keeps a separate personal PvAI match record on this device/browser. Win a complete match for 100 XP, finish a lost match for 25 XP, and earn one permanent level every 250 XP. A better win ratio earns mastery faster at the same match count. Individual battle rounds never grant separate XP; mastery levels provide no combat stat multipliers. New collection rewards are described below.
+Each Commander starts at Level 1 and keeps a separate personal PvAI match record on this device/browser. Win a complete match for 100 XP, finish a lost match for 50 XP, and earn one permanent level every 250 XP. A better win ratio earns mastery faster at the same match count. Individual battle rounds never grant separate XP; mastery levels provide no combat stat multipliers. New collection rewards are described below.
 
 Leaving before the first battle has no record. Explicitly leaving or replacing a played unfinished match counts as one loss/forfeit with zero XP. Closing or refreshing a recoverable adventure preserves it: use **Continue adventure** to restore the same draft/clock or replay the same unwatched battle at 1×. A previously watched result may reopen directly. Legacy pending records without a checkpoint retain their old forfeit policy, while incompatible/corrupt checkpoints show guidance and preserve records. An already resolved final match keeps its actual outcome, including recovery across profile/checkpoint write interruptions. Replaying a result never awards XP again. The gallery shows each Commander's level, record, win rate and next-level progress; the final match result animates the XP gain after battle playback.
 

@@ -47,7 +47,7 @@ static func event_priority(event: Dictionary) -> int:
         return 3
     if event.get("type") == "spawn" and event.get("source") in ["death_split", "revival"]:
         return 2
-    if event.get("type") == "ability" and event.get("kind") in ["pull", "meteor", "on_death", "area_heal", "death_area", "absorb_burst", "backline_transit", "sticky_link"]:
+    if event.get("type") == "ability" and event.get("kind") in ["pull", "meteor", "on_death", "area_heal", "death_area", "absorb_burst", "backline_transit", "sticky_link", "upgrade_pulse", "ice_splinter", "upgrade_root", "upgrade_death_heal", "upgrade_death_field", "upgrade_ground_fire", "upgrade_knockback"]:
         return 2
     return 0
 

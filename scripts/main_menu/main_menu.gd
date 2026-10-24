@@ -72,7 +72,7 @@ func _ready() -> void:
         guide.tooltip_text = "Learn through a normal adventure with optional paused notes. Uses the usual mastery and match rules."
         guide.pressed.connect(func(): GameMenu.confirm_leave("res://scenes/commander_select/commander_select.tscn", FirstMatchGuide.start))
         main.add_child(guide)
-    var rewards := _menu_button("Achievements & rewards", 44)
+    var rewards := _menu_button("Rewards & unit forge", 44)
     rewards.name = "Achievements"
     rewards.pressed.connect(func(): ProgressJournal.open(get_tree(), scene_file_path))
     main.add_child(rewards)

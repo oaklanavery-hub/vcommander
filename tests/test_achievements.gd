@@ -39,7 +39,7 @@ func run() -> void:
     var losses := CommanderProgress.new(db, "")
     for i in range(20):
         award(losses, "commander_water_01", "loss")
-    check(losses.record("commander_water_01")["level"] == 3 and not losses.is_card_unlocked("card_water_04"), "loss XP alone cannot satisfy the win requirement")
+    check(losses.record("commander_water_01")["level"] == 5 and not losses.is_card_unlocked("card_water_04"), "50-XP losses alone cannot satisfy the win requirement")
     for i in range(3):
         award(losses, "commander_water_01", "win")
     check(losses.is_card_unlocked("card_water_04"), "the exact third win completes an already met level requirement")
@@ -71,7 +71,7 @@ func test_migration() -> void:
     check(not profile.read_only and profile.last_save_error == OK and profile.is_card_unlocked("card_fire_06"), "legacy records backfill eligible unit on load")
     check(earned(profile, "fire_adept") and profile.record("commander_fire_01")["xp"] == 525 and profile.record("historical_commander")["xp"] == 100, "migration preserves XP and historical records while backfilling achievements")
     var persisted: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
-    check(persisted["schema_version"] == 3 and persisted["active_match"] == legacy["active_match"], "schema migration preserves the pending match identity")
+    check(persisted["schema_version"] == 4 and persisted["active_match"] == legacy["active_match"], "schema migration preserves the pending match identity")
     profile.recover_interrupted_match()
     check(profile.record("commander_water_01")["forfeits"] == 1 and profile.is_card_unlocked("card_fire_06"), "interruption settles once without losing another Commander's reward")
     persisted = JSON.parse_string(FileAccess.get_file_as_string(path))

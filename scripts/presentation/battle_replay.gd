@@ -42,8 +42,13 @@ func configure(frames: Array, events: Array, event_start: int = 0) -> void:
             pushbacks[id].append(event.duplicate())
         if type == "spawn" and event.has("unit"):
             births[str(event["unit_id"])] = {"time": float(event["time"]), "unit": event["unit"].duplicate(true)}
-        if event.get("kind") == "death_area" and event.has("area"):
-            death_areas.append(event["area"].duplicate(true))
+        if event.get("kind") in ["death_area", "upgrade_ground_fire", "upgrade_death_field"] and event.has("area"):
+            var area: Dictionary = event["area"].duplicate(true)
+            if area.has("refresh_key"):
+                for previous in death_areas:
+                    if previous.get("refresh_key") == area["refresh_key"] and not previous.has("replaced_at"):
+                        previous["replaced_at"] = float(event["time"])
+            death_areas.append(area)
         if event.get("kind") == "pull":
             pulls[str(event.get("unit_id", ""))] = event
         if type == "projectile_launch":
@@ -101,7 +106,7 @@ func death_areas_at(clock: float) -> Array[Dictionary]:
     for original in death_areas:
         var age := clock - float(original.get("created_at", 0))
         var duration := float(original.get("duration", 10))
-        if age < 0 or age >= duration - 0.00001:
+        if age < 0 or age >= duration - 0.00001 or clock >= float(original.get("replaced_at", INF)):
             continue
         var area := original.duplicate()
         area["remaining"] = duration - age

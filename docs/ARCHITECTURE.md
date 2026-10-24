@@ -251,3 +251,8 @@ InterfaceAccessibility preserves original body/control font sizes so scaling is 
 ## Sudden Death round context (v0.19)
 
 DraftSystem records total and enhanced power cohorts and the current battle budget. Its shared buff-state builder supplies GameState, AiController and private-room authority; WarbandStats applies mixed strengths consistently to combat, preview and cap-aware AI. The simulator selects 180 seconds only when both battle sides are in Sudden Death; a recorded matching legacy budget preserves already-scored v0.18 replays. Presentation displays the budget and each cohort without owning the rules. Recovery migrates the known prior content fingerprint, keeps earlier strengths and reconstructs scored rounds without charging another heart.
+
+
+## Permanent unit upgrade boundary (v0.20)
+
+CommanderProgress owns a paid unit-upgrade ledger in profile schema 4. Spendable XP derives from lifetime earnings minus recorded costs; no second reward writer can duplicate currency after a crash. Purchase quotes, ownership, balance and save success are checked before UI acknowledgement. Existing GameState adventure guards will lock purchases until the pending adventure ends. UnitUpgrades is a pure content transformation; catalog patches and reusable combat traits supply Lv. 2 behavior without per-card branches in the simulator. Active upgrade IDs are frozen per adventure and shared fairly with the AI. See ADR-022.

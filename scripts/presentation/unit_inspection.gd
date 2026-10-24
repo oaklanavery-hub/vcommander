@@ -24,6 +24,8 @@ static func describe(unit: Dictionary, card: Dictionary, clock: float, frozen: b
         var attack_in := maxf(0, float(unit.get("attack_ready_at", clock)) - clock)
         cooldown = "Attack ready" if attack_in <= 0.001 else "Next attack in %.1fs" % attack_in
     var effects: Array[String] = []
+    if bool(unit.get("rooted", false)) and clock < float(unit.get("root_until", INF)):
+        effects.append("Rooted")
     if frozen:
         effects.append("Frozen Field · this round")
     if bool(unit.get("burning", false)):
@@ -42,11 +44,15 @@ static func describe(unit: Dictionary, card: Dictionary, clock: float, frozen: b
         effects.append("Travelling · invulnerable" if transit.get("invulnerable", false) else "Travelling underground")
     if type == "absorb_burst":
         effects.append("Stored damage: " + number(float(unit.get("absorbed_damage", 0))))
-    return {"id": unit.get("id", ""), "card_id": unit.get("card_id", ""), "name": unit.get("name", card.get("display_name", "Unit")),
+    var description := ("Base ability: " + ability_text(ability) + "\nPath changes: " + str(unit["specialization_description"])) if unit.has("specialization_description") else ability_text(ability)
+    var upgrade_text := str(unit.get("upgrade_description", ""))
+    if not upgrade_text.is_empty() and not description.contains(upgrade_text):
+        description += "\nLv. 2: " + upgrade_text
+    return {"id": unit.get("id", ""), "card_id": unit.get("card_id", ""), "name": str(unit.get("name", card.get("display_name", "Unit"))) + (" · Lv. 2" if int(unit.get("unit_level", 1)) >= 2 else ""),
         "role": unit.get("role", card.get("role", "")), "hp": maxf(0, float(unit.get("hp", 0))), "max_hp": unit.get("max_hp", 1),
         "attack": unit.get("attack", 0), "defense": unit.get("defense", 0), "attack_speed": unit.get("attack_speed", 0),
         "movement_speed": unit.get("movement_speed", 0), "range": unit.get("range", 1),
-        "ability": unit.get("ability_name", ability.get("display_name", "Attack")), "description": ("Base ability: " + ability_text(ability) + "\nPath changes: " + str(unit["specialization_description"])) if unit.has("specialization_description") else ability_text(ability),
+        "ability": unit.get("ability_name", ability.get("display_name", "Attack")), "description": description,
         "cooldown": cooldown, "effects": effects, "element": unit.get("element", ""), "side": unit.get("side", "")}
 
 static func ability_text(ability: Dictionary) -> String:

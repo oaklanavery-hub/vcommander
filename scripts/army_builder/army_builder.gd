@@ -28,9 +28,11 @@ func _ready() -> void:
         slots_row.draw_style_box(rack, Rect2(Vector2(-9, -10), slots_row.size + Vector2(18, 20))))
     slots_row.resized.connect(slots_row.queue_redraw)
     var rewards := Button.new()
-    rewards.text = "Rewards"
-    rewards.custom_minimum_size = Vector2(110, 42)
-    rewards.pressed.connect(func(): ProgressJournal.open(get_tree(), scene_file_path, GameState.selected_commander_id))
+    rewards.name = "UnitForge"
+    rewards.text = "Unit forge"
+    rewards.custom_minimum_size = Vector2(120, 42)
+    rewards.tooltip_text = "Spend shared XP on permanent unit abilities and new artwork."
+    rewards.pressed.connect(GameMenu.open_unit_upgrades)
     $Margin/Main/Header.add_child(rewards)
     var guide := Button.new()
     guide.name = "WarbandGuide"
@@ -85,7 +87,7 @@ func _populate_available_cards() -> void:
     for card in ContentDatabase.get_all_cards():
         var id := str(card.get("id", ""))
         var tile := CardTile.new()
-        tile.set_content(card)
+        tile.set_content(GameState.preview_unit(card))
         tile.toggle_mode = true
         tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         tile.pressed.connect(_card_pressed.bind(id))
@@ -123,7 +125,7 @@ func _refresh() -> void:
         var tile := CardTile.new()
         tile.custom_minimum_size = Vector2(132, 184)
         if index < cards.size():
-            tile.set_content(ContentDatabase.get_card(cards[index]))
+            tile.set_content(GameState.preview_unit(ContentDatabase.get_card(cards[index])))
             tile.tooltip_text += "\nClick to remove from your warband."
             tile.pressed.connect(_unequip_slot.bind(index))
         else:
@@ -151,7 +153,7 @@ func _refresh_available_cards() -> void:
         var tile: CardTile = available_card_buttons[id]
         var card := ContentDatabase.get_card(str(id))
         tile.locked = not GameState.commander_progress.is_card_unlocked(str(id))
-        tile.set_content(card)
+        tile.set_content(GameState.preview_unit(card))
         if card.has("mastery_unlock"):
             tile.tooltip_text += "\n\n" + GameState.commander_progress.unlock_description(str(id))
             if tile.locked:

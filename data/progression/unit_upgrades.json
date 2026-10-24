@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "id": "unit_upgrades",
+  "status": "playtest",
+  "max_level": 2,
+  "first_upgrade_xp": 200,
+  "upgrade_xp": 400,
+  "units": {
+    "card_fire_01": {
+      "name": "Inferno Ring",
+      "description": "Keeps Burning Aura and releases a large fire ring every 3 seconds for 150% ATK before DEF.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "pulse_damage",
+          "interval": 3,
+          "radius": "large",
+          "attack_pct": 150
+        }
+      ],
+      "visual": {}
+    },
+    "card_fire_02": {
+      "name": "Twin Strikes",
+      "description": "Each melee attack hits twice, each dealing 75% of a regular hit after DEF. Volatile Imp is unchanged.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "attack_hits",
+          "hits": 2,
+          "damage_pct": 75
+        }
+      ],
+      "visual": {}
+    },
+    "card_fire_03": {
+      "name": "Greater Fireball",
+      "description": "Larger fireballs splash a medium radius for 60% ATK around the enemy hit.",
+      "ability_overrides": {
+        "splash_radius": "medium",
+        "splash_attack_pct": 60
+      },
+      "traits": [],
+      "visual": {
+        "projectile_scale": 1.3
+      }
+    },
+    "card_fire_04": {
+      "name": "Scorched Ground",
+      "description": "Dragonfire keeps its burn and leaves a large fire field for 5 seconds, dealing 20% ATK each second. One ground field per Dragon; a new hit replaces it.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "impact_area",
+          "radius": "large",
+          "duration_seconds": 5,
+          "tick_seconds": 1,
+          "attack_pct": 20
+        }
+      ],
+      "visual": {}
+    },
+    "card_fire_05": {
+      "name": "Last Ember",
+      "description": "On death, restores 30% Max HP to living allies in a large radius.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "death_heal",
+          "radius": "large",
+          "heal_pct": 30
+        }
+      ],
+      "visual": {}
+    },
+    "card_fire_06": {
+      "name": "Lasting Embers",
+      "description": "A fire trail remains until two later fireball arrivals. If its owner dies, it fades within 10 seconds. Each trail damages an enemy once per tick.",
+      "ability_overrides": {
+        "trail_transits": 2,
+        "dead_trail_seconds": 10
+      },
+      "traits": [],
+      "visual": {}
+    },
+    "card_water_01": {
+      "name": "Ice Splinters",
+      "description": "Each normal attack has a seeded 20% chance to burst ice in a small radius around its target for 75% ATK before DEF.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "attack_proc",
+          "chance_pct": 20,
+          "action": "area_damage",
+          "radius": "small",
+          "attack_pct": 75
+        }
+      ],
+      "visual": {}
+    },
+    "card_water_02": {
+      "name": "Twin Heads",
+      "description": "Two heads attack at twice the normal rate, each shot dealing 70% of a regular hit after DEF. The Attack Speed rating cap still applies.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "attack_rate",
+          "multiplier": 2,
+          "damage_pct": 70
+        }
+      ],
+      "visual": {
+        "heads": 2
+      }
+    },
+    "card_water_03": {
+      "name": "Deeper Puddles",
+      "description": "Healing Puddle restores 5.5% Max HP per tick instead of 5%: a relative 10% healing increase.",
+      "ability_overrides": {
+        "heal_target_max_hp_pct": 5.5
+      },
+      "traits": [],
+      "visual": {}
+    },
+    "card_water_04": {
+      "name": "Crashing Tide",
+      "description": "Shots push enemies a moderate distance and slow movement by 20% for 1 second.",
+      "ability_overrides": {
+        "pushback": "moderate",
+        "slow_seconds": 1,
+        "enemy_movement_speed_pct": -20
+      },
+      "traits": [],
+      "visual": {}
+    },
+    "card_water_05": {
+      "name": "Shell Breaker",
+      "description": "Every third attack deals 200% ATK before DEF instead of 160%.",
+      "ability_overrides": {
+        "attack_pct": 200
+      },
+      "traits": [],
+      "visual": {}
+    },
+    "card_water_06": {
+      "name": "Riptide",
+      "description": "Water gush pushes enemies a large distance and slows their movement by 20% for 1 second. Each enemy is hit once per gush.",
+      "ability_overrides": {
+        "pushback": "large",
+        "slow_seconds": 1,
+        "enemy_movement_speed_pct": -20
+      },
+      "traits": [],
+      "visual": {}
+    },
+    "card_earth_01": {
+      "name": "Ancient Canopy",
+      "description": "Grows 20% larger visually and increases the healing aura radius by 25%.",
+      "ability_overrides": {
+        "radius_multiplier": 1.25
+      },
+      "traits": [],
+      "visual": {
+        "scale": 1.2
+      }
+    },
+    "card_earth_02": {
+      "name": "Binding Vines",
+      "description": "Vine Pull roots the pulled enemy for 2 seconds. Root blocks walking and starting a backline transit, but permits attacking and forced displacement.",
+      "ability_overrides": {
+        "root_seconds": 2
+      },
+      "traits": [],
+      "visual": {}
+    },
+    "card_earth_03": {
+      "name": "Relentless Maul",
+      "description": "Consecutive melee strikes on the same target gain 5% damage per strike, up to 50%. Switching targets resets the bonus. Maul still empowers every third hit.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "focus_damage",
+          "stack_pct": 5,
+          "max_stacks": 10
+        }
+      ],
+      "visual": {}
+    },
+    "card_earth_04": {
+      "name": "Double Loose",
+      "description": "Each attack fires two arrows, each dealing 75% of a regular hit after DEF.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "attack_hits",
+          "hits": 2,
+          "damage_pct": 75
+        }
+      ],
+      "visual": {}
+    },
+    "card_earth_05": {
+      "name": "Armor Spores",
+      "description": "Direct hits reduce the target’s DEF by 3% per stack, up to 30%. Stacks last 5 seconds after the latest hit and are shared across allied Spore Sages.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "hit_debuff",
+          "key": "armor_spores",
+          "stat": "defense",
+          "percentage": 3,
+          "max_stacks": 10,
+          "duration_seconds": 5
+        }
+      ],
+      "visual": {}
+    },
+    "card_earth_06": {
+      "name": "Upheaval",
+      "description": "Each normal attack has a seeded 15% chance to knock its enemy back a small distance. Cracks still block displacement.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "attack_proc",
+          "chance_pct": 15,
+          "action": "push",
+          "pushback": "small"
+        }
+      ],
+      "visual": {}
+    },
+    "card_slime_01": {
+      "name": "Jelly Family",
+      "description": "Small slimes split once more into two tiny slimes each, with 50% of their parent’s HP and ATK. Two split generations maximum; revived parents never split a second time.",
+      "ability_overrides": {
+        "split_generations": 2
+      },
+      "traits": [],
+      "visual": {}
+    },
+    "card_slime_02": {
+      "name": "Clinging Shots",
+      "description": "Direct hits also reduce Attack Speed by 5% per stack, up to 30%, for 5 seconds after the latest hit. The ordinary splash slow remains.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "hit_debuff",
+          "key": "clinging_shots",
+          "stat": "attack_speed",
+          "percentage": 5,
+          "max_stacks": 6,
+          "duration_seconds": 5
+        }
+      ],
+      "visual": {}
+    },
+    "card_slime_03": {
+      "name": "Corrosive Jelly",
+      "description": "On death, leaves a large field for 5 seconds that reduces enemy DEF by 20% while inside. Overlapping corrosive fields do not stack.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "death_field",
+          "radius": "large",
+          "duration_seconds": 5,
+          "stat": "defense",
+          "percentage": 20
+        }
+      ],
+      "visual": {}
+    },
+    "card_slime_04": {
+      "name": "Clogging Spill",
+      "description": "The death explosion and damaging pool remain. A large field also slows enemies inside by 15% for 10 seconds; overlapping fields do not stack.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "death_field",
+          "radius": "large",
+          "duration_seconds": 10,
+          "stat": "movement_speed",
+          "percentage": 15
+        }
+      ],
+      "visual": {}
+    },
+    "card_slime_05": {
+      "name": "Last Remedy",
+      "description": "On death, leaves a large healing pool for 5 seconds, restoring 10% Max HP each second to allies inside. Overlapping Last Remedy pools heal once per tick.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "death_heal_area",
+          "radius": "large",
+          "duration_seconds": 5,
+          "tick_seconds": 1,
+          "heal_pct": 10,
+          "stacking_key": "last_remedy"
+        }
+      ],
+      "visual": {}
+    },
+    "card_slime_06": {
+      "name": "Final Bond",
+      "description": "On death, links all enemies within a medium radius for 5 seconds. Hits to one share 25% of actual damage with each linked partner. Shared damage cannot share again; overlapping links use the strongest share per partner.",
+      "ability_overrides": {},
+      "traits": [
+        {
+          "type": "death_link",
+          "radius": "medium",
+          "duration_seconds": 5,
+          "shared_damage_pct": 25
+        }
+      ],
+      "visual": {}
+    }
+  }
+}
