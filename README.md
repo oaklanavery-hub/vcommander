@@ -4,9 +4,9 @@ A browser-first VTuber commander drafting auto-battler built with Godot.
 
 ## Current status
 
-**v0.20.0 — The unit forge**
+**v0.21.0 — A dedicated unit forge**
 
-Spend shared adventure XP on permanent Lv. 2 abilities and new pixel artwork for all 24 units. The first upgrade costs 200 XP, later ones 400 XP; mastery, levels, records and earned units stay intact. The forge is available from the warband builder, Rewards and pause menu. Purchases apply from the next adventure, with the same upgraded collection available to the AI. [Upgrade effects and economy](docs/UNIT_UPGRADES.md).
+Spend shared adventure XP on permanent Lv. 2 abilities and new pixel artwork for all 24 units. The first upgrade costs 200 XP, later ones 400 XP; mastery, levels, records and earned units stay intact. Open Unit Forge directly from its own title-menu button. The dedicated screen compares Lv. 1 + XP = Lv. 2, with the upgrade description and purchase on the right, and a filtered scrolling collection below. The warband-builder shortcut returns to the preserved setup; Achievements & rewards stays separate. Purchases apply from the next adventure, with the same upgraded collection available to the AI. [Upgrade effects and economy](docs/UNIT_UPGRADES.md).
 
 Every Sudden Death battle has its own three-minute ceiling. Only new power cards picked during Sudden Death get double their percentage; earlier bonuses retain their strength. Normal battles keep their two-minute limit. Previews, mixed-strength rosters, AI and recovery use the same rules, including preservation of old completed replays. [Release verification](https://github.com/oaklanavery-hub/vcommander/actions/runs/39990629132) passed against the actual public game pack.
 

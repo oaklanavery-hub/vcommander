@@ -6,11 +6,12 @@ func _init() -> void:
     call_deferred("run")
 
 func settle_layout() -> void:
-    for index in range(4):
+    for index in range(5):
         await process_frame
 
 func run() -> void:
     root.size = Vector2i(1280, 720)
+    root.content_scale_size = root.size
     var db := root.get_node("ContentDatabase")
     var state := root.get_node("GameState")
     var menu := root.get_node("GameMenu")
@@ -23,53 +24,76 @@ func run() -> void:
     var mastery: Dictionary = state.commander_progress.record("commander_fire_01")
     state.select_commander("commander_fire_01")
     state.equip_starter_army()
-    change_scene_to_file("res://scenes/army_builder/army_builder.tscn")
+    var army: Array = state.army.get_cards().duplicate()
+    change_scene_to_file("res://scenes/main_menu/main_menu.tscn")
+    await scene_changed
+    var entry: Button = current_scene.find_child("UnitForge", true, false)
+    check(entry != null and current_scene.find_child("Achievements", true, false) != null, "title has separate Forge and Rewards buttons")
+    entry.pressed.emit()
     await scene_changed
     await settle_layout()
-    var tile = current_scene.available_card_buttons["card_fire_01"]
-    check(int(tile.portrait.definition.get("unit_level", 1)) == 1, "original card starts with original artwork")
-    menu.open_unit_upgrades("card_fire_01")
-    await settle_layout()
-    var purchase: Button = menu._body.find_child("Upgrade_card_fire_01", true, false)
-    check(not purchase.disabled and purchase.text.contains("200 XP"), "first concrete purchase quotes 200 XP")
-    var preview = menu._body.find_child("ForgeLevel2", true, false)
-    check(preview.definition["unit_level"] == 2 and preview.portrait.definition["unit_level"] == 2, "unowned upgrade previews its actual Lv. 2 art")
+    var forge = current_scene
+    check(forge.name == "UnitForge" and not menu.overlay.visible and not paused, "main-menu Forge opens its own active screen")
+    check(forge.unit_buttons.size() == 24 and forge.cards_grid.columns == 8, "desktop collection has all 24 units in eight columns")
+    forge.unit_buttons["card_fire_01"].pressed.emit()
+    var purchase: Button = forge.purchase_button
+    check(not purchase.disabled and purchase.text.contains("200 XP") and forge.discount_label.visible, "first purchase shows its exact cost and bonus")
+    check(forge.original_tile.definition.get("unit_level", 1) == 1 and forge.upgraded_tile.portrait.definition["unit_level"] == 2, "recipe compares real original and upgraded artwork")
+    var gallery_clock: int = forge.collection_scroll.scroll_vertical
     purchase.pressed.emit()
     await settle_layout()
-    check(state.commander_progress.upgrade_balance() == 400 and state.commander_progress.unit_level("card_fire_01") == 2, "actual forge button spends once and grants the selected unit")
-    check(state.commander_progress.record("commander_fire_01") == mastery, "actual purchase preserves mastery, levels, records and earned rewards")
-    check(tile.definition["unit_level"] == 2 and tile.portrait.definition["unit_level"] == 2 and tile.tooltip_text.contains("Inferno Ring"), "existing army card and portrait update immediately after purchase")
-    check(menu._body.find_child("Upgrade_card_fire_01", true, false).disabled, "owned upgrade cannot be purchased twice")
-    menu.open_unit_upgrades("card_fire_02")
-    await settle_layout()
-    purchase = menu._body.find_child("Upgrade_card_fire_02", true, false)
-    check(not purchase.disabled and purchase.text.contains("400 XP"), "next unit quotes 400 XP")
+    check(state.commander_progress.upgrade_balance() == 400 and state.commander_progress.unit_level("card_fire_01") == 2, "actual Forge button spends once and grants the selected unit")
+    check(state.commander_progress.record("commander_fire_01") == mastery, "purchases preserve lifetime mastery, levels, records and rewards")
+    check(forge.unit_buttons["card_fire_01"].portrait.definition["unit_level"] == 2 and purchase.disabled, "owned gallery artwork refreshes immediately without duplicate purchases")
+    check(forge.collection_scroll.scroll_vertical == gallery_clock, "purchase retains the gallery position")
+    forge.unit_buttons["card_fire_02"].pressed.emit()
+    check(not purchase.disabled and purchase.text.contains("400 XP") and not forge.discount_label.visible, "later purchases quote 400 XP without the first-purchase bonus")
     purchase.pressed.emit()
     await settle_layout()
-    check(state.commander_progress.upgrade_balance() == 0 and state.commander_progress.upgraded_unit_ids().size() == 2, "second actual purchase charges its quoted price")
-    menu.open_unit_upgrades("card_fire_03")
+    check(state.commander_progress.upgrade_balance() == 0 and state.commander_progress.upgraded_unit_ids().size() == 2, "second purchase charges its quoted cost")
+    forge.select_unit("card_fire_03")
+    check(purchase.disabled and forge.notice_label.text.contains("400 more XP"), "shortfall feedback shows the exact missing XP")
+    var water_filter := 0
+    for index in range(forge.filter_select.item_count):
+        if forge.filter_select.get_item_metadata(index) == "water":
+            water_filter = index
+    forge.filter_select.select(water_filter)
+    forge.filter_select.item_selected.emit(water_filter)
+    check(forge.unit_buttons.values().filter(func(tile): return tile.visible).size() == 6, "Commander filter shows exactly its six unit cards")
+    forge.unit_buttons["card_water_06"].pressed.emit()
+    check(purchase.disabled and forge.notice_label.text.contains("Unlock"), "locked gallery cards preview their upgrade and mastery requirement")
+    forge.back_button.pressed.emit()
+    await scene_changed
+    check(current_scene.name == "MainMenu" and state.army.get_cards() == army and state.selected_commander_id == "commander_fire_01", "Back returns to the title without changing the chosen Commander or army")
+    change_scene_to_file("res://scenes/army_builder/army_builder.tscn")
+    await scene_changed
+    current_scene.find_child("UnitForge", true, false).pressed.emit()
+    await scene_changed
+    current_scene.back_button.pressed.emit()
+    await scene_changed
+    check(current_scene.name == "ArmyBuilder" and current_scene.available_card_buttons["card_fire_01"].portrait.definition["unit_level"] == 2 and state.army.get_cards() == army, "builder shortcut returns to the same owned warband")
+    check(state.begin_match(121), "upgraded adventure starts after browsing")
+    var snapshot: Dictionary = state.draft.snapshot().duplicate(true)
+    load("res://scripts/presentation/unit_upgrade_forge.gd").open(self, "res://scenes/main_menu/main_menu.tscn", "card_fire_03")
+    await scene_changed
+    forge = current_scene
     await settle_layout()
-    check(menu._body.find_child("Upgrade_card_fire_03", true, false).disabled and menu._body.find_child("UpgradeNotice", true, false).text.contains("400 more XP"), "insufficient funds shows the exact shortfall")
-    menu.open_unit_upgrades("card_water_06")
-    await settle_layout()
-    check(menu._body.find_child("Upgrade_card_water_06", true, false).disabled and menu._body.find_child("UpgradeNotice", true, false).text.contains("Unlock"), "locked companions remain previewable with clear mastery guidance")
-    menu.close()
-    check(state.begin_match(121), "upgraded adventure starts after the forge")
-    menu.open_unit_upgrades("card_fire_03")
-    await settle_layout()
-    check(menu._body.find_child("Upgrade_card_fire_03", true, false).disabled and menu._body.find_child("UpgradeNotice", true, false).text.contains("current adventure"), "pending opening adventure blocks forge purchases visibly")
+    check(forge.purchase_button.disabled and forge.notice_label.text.contains("current adventure"), "pending adventures remain visibly protected")
     root.size = Vector2i(960, 540)
     root.content_scale_size = root.size
     audio.set_interface_text_scale(1.2)
-    menu.open_unit_upgrades("card_slime_06")
+    forge.select_unit("card_slime_06")
     await settle_layout()
-    var bounds: Rect2 = menu._page_panel.get_global_rect()
-    check(Rect2(Vector2.ZERO, Vector2(root.size)).grow(1).encloses(bounds), "compact larger-text forge stays inside the viewport")
-    var close_button: Button = menu._body.find_child("CloseForge", true, false)
-    close_button.grab_focus()
+    var viewport := Rect2(Vector2.ZERO, Vector2(root.size)).grow(1)
+    for control in [forge.margin, forge.summary, forge.back_button, forge.purchase_button, forge.filter_select, forge.balance_label, forge.collection_scroll]:
+        check(viewport.encloses(control.get_global_rect()), "compact larger-text layout stays inside the viewport: " + str(control.name) + " " + str(control.get_global_rect()))
+    var last_tile = forge.unit_buttons["card_water_06"]
+    last_tile.grab_focus()
     await settle_layout()
-    check(close_button.has_focus() and menu._page_scroll.scroll_vertical > 0, "keyboard focus scrolls the final action into view")
-    menu.close()
+    check(last_tile.has_focus() and forge.collection_scroll.scroll_vertical > 0, "keyboard focus scrolls the complete gallery")
+    forge.back_button.pressed.emit()
+    await scene_changed
+    check(current_scene.find_child("ContinueAdventure", true, false) != null and state.draft.snapshot() == snapshot and state.commander_progress.record("commander_fire_01") == mastery, "browsing a saved adventure preserves Continue, draft/RNG and mastery")
     for card in db.get_all_cards():
         var id := str(card["id"])
         var original: AtlasTexture = load("res://scripts/presentation/pixel_unit_art.gd").icon(id)
@@ -87,7 +111,7 @@ func run() -> void:
         var sound := CombatCues.sound({"type": "ability", "kind": kind})
         check(not sound.is_empty() and audio.EFFECTS.has(sound), "upgrade cue uses a bundled sound: " + kind)
     if not failed:
-        print("Unit upgrade presentation tests passed: actual 200/400 XP buttons, mastery preservation, immediate portrait refresh, lock/shortfall/pending feedback, compact keyboard scrolling, all 24 art variants and exact field/SFX tracks.")
+        print("Unit upgrade presentation tests passed: separate title/Forge/Rewards navigation, reference recipe and eight-column gallery, actual 200/400 XP buttons, mastery preservation, filters, lock/shortfall/pending feedback, compact keyboard scrolling, safe builder/Continue return, all 24 art variants and exact field/SFX tracks.")
     quit(1 if failed else 0)
 
 func check(condition: bool, message: String) -> void:

@@ -256,3 +256,8 @@ DraftSystem records total and enhanced power cohorts and the current battle budg
 ## Permanent unit upgrade boundary (v0.20)
 
 CommanderProgress owns a paid unit-upgrade ledger in profile schema 4. Spendable XP derives from lifetime earnings minus recorded costs; no second reward writer can duplicate currency after a crash. Purchase quotes, ownership, balance and save success are checked before UI acknowledgement. Existing GameState adventure guards will lock purchases until the pending adventure ends. UnitUpgrades is a pure content transformation; catalog patches and reusable combat traits supply Lv. 2 behavior without per-card branches in the simulator. Active upgrade IDs are frozen per adventure and shared fairly with the AI. See ADR-022.
+
+
+## Dedicated forge presentation (v0.21)
+
+UnitUpgradeForge is its own Control scene, opened directly from the title and optionally from the warband builder. It renders a persistent workbench and independently scrollable filtered gallery over the existing profile/catalog APIs. It owns no XP, mastery, transaction or battle rules. Explicit Back routing returns to the originating title/setup without resetting GameState; the pause menu does not replace a running draft/battle with this scene. Achievements & rewards remains a separate destination. See ADR-023.

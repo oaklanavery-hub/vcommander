@@ -14,7 +14,9 @@ Verify the actual branch, tree and GitHub checks before resuming. [Earlier histo
 
 ## Current state
 
-- The approved unit-upgrade and visual-change milestone is complete. No requested implementation or release check remains pending.
+- Active request (2026-10-25): give Unit Forge its own main-menu button and dedicated screen following the supplied layout: Lv. 1 + XP cost = Lv. 2, description/purchase beside it, filter and available XP above a scrollable card gallery. Keep the fantasy pixel theme and existing upgrade rules.
+- Branch `feat/forge-screen`, base main `67fafa6317bc03c7f916068b96d07a3df9608ab7`; actual v0.20 deployment remains verified. Checkpoint 1: scene/navigation and focused transaction/layout tests. Checkpoint 2: native/browser acceptance, full release gate, merge/deploy/public verification. No new balance audit or artwork generation is needed for this UI-only request.
+- Dedicated scene/navigation and the reference workbench/gallery layout are implemented. Focused Forge transactions/layout, scene flow, player experience, developer-access UI lifecycle, guide and accessibility suites pass. A viewport-based column calculation corrected compact resizing before passing. Native capture passes 17 views, including separate title entry, actual purchase, filter/scroll, compact larger text and existing unit/battle art coverage. Browser acceptance now follows the main-menu Forge and Back route; the actual exported-browser flow and full release gate remain pending.
 - [UNIT_UPGRADES.md](UNIT_UPGRADES.md) records all effects, caps, economy assumptions and the eight-adventure paired synthetic diagnostic. These are initial playtest values, with no human balance/retention claim. Art prompts/provenance: [UPGRADE_ART.md](../assets/pixel/UPGRADE_ART.md).
 - Next: use player feedback on upgrade strength and grind before extending permanent progression. Keep PvP Coming Soon, campaign KIV, free hosting and existing private developer collection access.
 

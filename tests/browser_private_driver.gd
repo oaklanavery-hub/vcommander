@@ -79,19 +79,20 @@ func _upgrade_recovery_probe() -> void:
         state.select_commander("commander_fire_01")
         for index in range(4):
             state.commander_progress.finish_match(state.commander_progress.begin_match("commander_fire_01"), "win")
-        ui.find_child("Achievements", true, false).pressed.emit()
+        ui.find_child("UnitForge", true, false).pressed.emit()
         await tree.scene_changed
-        tree.current_scene.find_child("UnitForge", true, false).pressed.emit()
+        tree.current_scene.select_unit("card_fire_01")
         await tree.process_frame
-        var purchase: Button = menu._body.find_child("Upgrade_card_fire_01", true, false)
+        var purchase: Button = tree.current_scene.purchase_button
         if purchase == null or purchase.disabled:
             JavaScriptBridge.eval("window.vcommanderLocalQa = " + JSON.stringify({"stage": probe_stage, "ok": false, "reason": "actual forge purchase unavailable"}) + ";", true)
             return
         purchase.pressed.emit()
         await tree.process_frame
-        var preview = menu._body.find_child("ForgeLevel2", true, false)
-        purchased = preview != null and preview.portrait.definition.get("unit_level") == 2 and menu._body.find_child("Upgrade_card_fire_01", true, false).disabled
-        menu.close()
+        var preview = tree.current_scene.upgraded_tile
+        purchased = preview != null and preview.portrait.definition.get("unit_level") == 2 and tree.current_scene.purchase_button.disabled
+        tree.current_scene.back_button.pressed.emit()
+        await tree.scene_changed
         state.equip_starter_army()
         state.begin_match(9007199254740111)
         state.draft.select_offer(0)

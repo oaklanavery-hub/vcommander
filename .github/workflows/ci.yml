@@ -218,13 +218,13 @@ jobs:
           set -o pipefail
           timeout 75s xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_unit_upgrades.gd -- --output-dir=build/qa 2>&1 | tee /tmp/unit-upgrades-qa.log
           if grep -E "SCRIPT ERROR:|ERROR:" /tmp/unit-upgrades-qa.log; then exit 1; fi
-          for view in roster_fire roster_water roster_earth roster_slime forge_first forge_owned forge_shortfall forge_compact forge_compact_action battle_fire battle_water battle_earth battle_slime inspection; do
+          for view in roster_fire roster_water roster_earth roster_slime main_menu forge_filtered forge_scrolled forge_first forge_owned forge_shortfall forge_compact forge_compact_action battle_fire battle_water battle_earth battle_slime inspection; do
             test -s "build/qa/upgrades_${view}.png"
           done
 
       - name: Emit unit upgrade review previews
         if: always()
-        run: /usr/bin/python3 tools/emit_visual_review.py --views upgrades_roster_water upgrades_roster_slime upgrades_forge_first upgrades_forge_compact_action upgrades_inspection
+        run: /usr/bin/python3 tools/emit_visual_review.py --views upgrades_main_menu upgrades_forge_first upgrades_forge_filtered upgrades_forge_compact_action upgrades_forge_scrolled
 
       - name: Upload visual QA screenshots
         if: always()

@@ -39,6 +39,10 @@ All original abilities remain unless the description explicitly replaces a param
 | Jelly Medic | Last Remedy | On death, leaves a large healing pool for 5 seconds, restoring 10% Max HP each second to allies inside. Overlapping Last Remedy pools heal once per tick. |
 | Sticky Slime | Final Bond | On death, links all enemies within a medium radius for 5 seconds. Hits to one share 25% of actual damage with each linked partner. Shared damage cannot share again; overlapping links use the strongest share per partner. |
 
+## Forge interface
+
+Unit Forge has its own title-menu button and dedicated screen, separate from Achievements & rewards. Select a card from the Commander-filtered scrolling gallery. The workbench shows Lv. 1 + the actual quoted XP = Lv. 2, with the full upgrade description and purchase button beside it. Available shared XP stays above the gallery; the first-purchase bonus is shown only while eligible. Owned, locked, insufficient-XP, pending-adventure and storage states retain their existing guards. The warband-builder shortcut returns to the same setup. Compact/larger-text layouts retain visible navigation and independently scrollable description/collection areas.
+
 ## Adventure and presentation rules
 
 The purchased collection freezes at adventure start and is supplied equally to both PvAI sides. Runtime transformations copy base content and apply once before optional Commander paths. Old saved adventures remain base-unit adventures, and recorded upgrades/powers/paths reconstruct without rescoring hearts or currency. Private PvP retains base units while its public entry remains Coming Soon.
