@@ -91,3 +91,8 @@ Original environment assets made with the built-in image-generation tool for thi
 Art direction/reference only: the user's Hunter’s Lodge previews, also publicly visible at https://craftpix.net/product/fantasy-rpg-hunters-lodge-top-down-pixel-art-pack/ . No CraftPix asset was downloaded, traced or incorporated. The backgrounds were generated from original descriptions of a fine-pixel 16-bit fantasy woodland, warm walnut/honey/moss palette, irregular natural forms, detailed perimeter and quiet readable center. The carved material skin, brass pixel ornaments and control glyphs are original code-native interface work.
 
 Pixel display headings use Pixelify Sans by The Pixelify Sans Project Authors, obtained from the official Google Fonts repository (`ofl/pixelifysans`). The self-hosted original font is distributed under the SIL Open Font License 1.1; full license and copyright are retained in `assets/fonts/OFL-PixelifySans.txt`. Smaller body/badge text retains the existing readable fallback font.
+
+
+## Permanent Lv. 2 unit sprites
+
+Twenty-four original upgraded forms are in `roster-upgrades-v1.png`. The normal atlas is unchanged. Built-in generation/edit prompts and the deterministic nearest-neighbor packing command are documented in [UPGRADE_ART.md](UPGRADE_ART.md).

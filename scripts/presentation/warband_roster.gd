@@ -42,7 +42,7 @@ func _ready() -> void:
     refresh()
 
 func set_side(side: Dictionary, is_rival: bool = false, picks_hidden: bool = false) -> void:
-    config = side.duplicate(true)
+    config = UnitUpgrades.apply_side(side).duplicate(true)
     rival = is_rival
     hidden_picks = picks_hidden
     if is_node_ready():
@@ -70,7 +70,7 @@ func refresh() -> void:
         line.add_theme_constant_override("separation", 4)
         row.add_child(line)
         var portrait := TextureRect.new()
-        portrait.texture = UnitArt.icon(id, str(card.get("role", "range")), str(card.get("element", "earth")))
+        portrait.texture = UnitArt.icon(id, str(card.get("role", "range")), str(card.get("element", "earth")), int(card.get("unit_level", 1)))
         portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
         portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
         portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -82,7 +82,7 @@ func refresh() -> void:
         words.alignment = BoxContainer.ALIGNMENT_CENTER
         words.mouse_filter = Control.MOUSE_FILTER_IGNORE
         words.add_theme_constant_override("separation", 1)
-        var title := ScreenStyle.label(str(card.get("display_name", id)), 12)
+        var title := ScreenStyle.label(str(card.get("display_name", id)) + (" · Lv. 2" if int(card.get("unit_level", 1)) >= 2 else ""), 12)
         title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
         var amount := ScreenStyle.label("%d / %d" % [count, int(card.get("unit_cap", 0))], 14)
         amount.add_theme_color_override("font_color", Color("f1d89d") if id == highlighted_card else Color("b9c8ac"))

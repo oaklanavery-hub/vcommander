@@ -335,6 +335,11 @@ func _read_profile(file_path: String) -> Dictionary:
         if not receipt.get("after") is Dictionary or not receipt.get("before") is Dictionary or not _counter(receipt.get("xp_awarded")):
             return {}
         receipt["xp_awarded"] = int(receipt["xp_awarded"])
+        if receipt.has("upgrade_xp_before") or receipt.has("upgrade_xp_after"):
+            if not _counter(receipt.get("upgrade_xp_before")) or not _counter(receipt.get("upgrade_xp_after")) or int(receipt["upgrade_xp_after"]) - int(receipt["upgrade_xp_before"]) != int(receipt["xp_awarded"]):
+                return {}
+            receipt["upgrade_xp_before"] = int(receipt["upgrade_xp_before"])
+            receipt["upgrade_xp_after"] = int(receipt["upgrade_xp_after"])
         for field in ["before", "after"]:
             for key in ["wins", "losses", "forfeits", "xp", "played", "level", "xp_in_level", "xp_per_level"]:
                 if not _counter(receipt[field].get(key)):

@@ -46,7 +46,7 @@ func _draw() -> void:
     draw_arc(halo, halo_radius, 0, TAU, 32, Color(accent, 0.14), 1.0, false)
     if definition.is_empty():
         return
-    var picture: Texture2D = CommanderArt.icon(element) if commander else UnitArt.icon(str(definition.get("id", "")), str(definition.get("role", "range")), element)
+    var picture: Texture2D = CommanderArt.icon(element) if commander else UnitArt.icon(str(definition.get("id", "")), str(definition.get("role", "range")), element, int(definition.get("unit_level", 1)))
     var source_size := picture.get_size()
     var padding := 4.0 if size.y < 160 else 18.0
     var scale_factor := maxf(0.1, minf((size.x - padding) / source_size.x, (size.y - padding) / source_size.y))

@@ -22,7 +22,7 @@
     },
     "card_fire_02": {
       "name": "Twin Strikes",
-      "description": "Each melee attack hits twice for 75% ATK per hit. Volatile Imp is unchanged.",
+      "description": "Each melee attack hits twice, each dealing 75% of a regular hit after DEF. Volatile Imp is unchanged.",
       "ability_overrides": {},
       "traits": [
         {
@@ -100,7 +100,7 @@
     },
     "card_water_02": {
       "name": "Twin Heads",
-      "description": "Two heads attack at twice the normal rate, each shot dealing 70% ATK. The Attack Speed rating cap still applies.",
+      "description": "Two heads attack at twice the normal rate, each shot dealing 70% of a regular hit after DEF. The Attack Speed rating cap still applies.",
       "ability_overrides": {},
       "traits": [
         {
@@ -188,7 +188,7 @@
     },
     "card_earth_04": {
       "name": "Double Loose",
-      "description": "Each attack fires two arrows for 75% ATK each.",
+      "description": "Each attack fires two arrows, each dealing 75% of a regular hit after DEF.",
       "ability_overrides": {},
       "traits": [
         {

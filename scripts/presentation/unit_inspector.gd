@@ -52,6 +52,8 @@ func inspect(unit: Dictionary, card: Dictionary, clock: float, frozen: bool = fa
     cooldown_label.text = str(data["cooldown"])
     effects_label.text = "\n".join(data["effects"]) if not data["effects"].is_empty() else "No active effects"
     var display := card if not card.is_empty() else {"id": unit.get("card_id", ""), "element": unit.get("element", "earth"), "role": unit.get("role", "range")}
+    display = display.duplicate(true)
+    display["unit_level"] = int(unit.get("unit_level", 1))
     portrait.set_content(display, false)
     show()
 

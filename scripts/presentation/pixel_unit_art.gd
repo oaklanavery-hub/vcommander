@@ -25,8 +25,8 @@ static func palette(element: String) -> Dictionary:
     result.merge(catalog().get("palettes", {}).get(element, {}), true)
     return result
 
-static func icon(card_id: String, role: String = "range", element: String = "earth") -> Texture2D:
-    var detailed := PixelAtlasArt.icon("units", card_id)
+static func icon(card_id: String, role: String = "range", element: String = "earth", level: int = 1) -> Texture2D:
+    var detailed := detailed_icon(card_id, level)
     if detailed != null:
         return detailed
     var key := card_id + role + element
@@ -49,7 +49,7 @@ static func icon(card_id: String, role: String = "range", element: String = "ear
 
 # All animation is derived from replay motion/events, never from game-rule state.
 static func draw_unit(canvas: CanvasItem, position: Vector2, role: String, element: String, pixel: float, flip: bool = false, bob: float = 0.0, card_id: String = "", pose: Dictionary = {}) -> void:
-    var detailed := PixelAtlasArt.icon("units", card_id)
+    var detailed := detailed_icon(card_id, int(pose.get("unit_level", 1)))
     if detailed != null:
         _draw_detailed_unit(canvas, detailed, position, pixel, flip, bob, pose)
         return
@@ -133,3 +133,10 @@ static func _draw_detailed_unit(canvas: CanvasItem, texture: Texture2D, position
                 canvas.draw_texture_rect_region(texture, target, Rect2(float(leg) * source.x * 0.5, y, source.x * 0.5, 4), tint)
         else:
             canvas.draw_texture_rect_region(texture, Rect2(origin + Vector2(0, top) + offset, Vector2(side, bottom - top)), Rect2(0, y, source.x, minf(4, source.y - y)), tint)
+
+static func detailed_icon(card_id: String, level: int = 1) -> Texture2D:
+    if level >= 2:
+        var upgraded := PixelAtlasArt.icon("upgraded_units", card_id)
+        if upgraded != null:
+            return upgraded
+    return PixelAtlasArt.icon("units", card_id)

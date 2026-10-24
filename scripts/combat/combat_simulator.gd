@@ -26,6 +26,8 @@ var _formations: Dictionary = {}
 var _obstacles: Array[Dictionary] = []
 var _hazards: Array[Dictionary] = []
 var _links: Array[Dictionary] = []
+var _followup_attacks: Array[Dictionary] = []
+var _upgrade_effects_active := false
 var _terrain_revision := 0
 
 var _time := 0.0
@@ -64,9 +66,10 @@ func simulate(
         # Only an explicitly matching old replay may retain the normal ceiling.
         _round_limit = left if left == right and left == _round_limit else maxf(_step, sudden_limit)
 
-    player_side = CommanderSpecializations.apply_side(player_side)
-    opponent_side = CommanderSpecializations.apply_side(opponent_side)
+    player_side = CommanderSpecializations.apply_side(UnitUpgrades.apply_side(player_side))
+    opponent_side = CommanderSpecializations.apply_side(UnitUpgrades.apply_side(opponent_side))
 
+    _upgrade_effects_active = not player_side.get("unit_upgrades", []).is_empty() or not opponent_side.get("unit_upgrades", []).is_empty()
     _spawn_side(player_side, false, opponent_side)
     _spawn_side(opponent_side, true, player_side)
     var before_skills := _snapshot()
@@ -86,6 +89,7 @@ func simulate(
         _tick_status_effects()
         _tick_area_effects()
         _tick_auras()
+        UnitUpgradeEffects.tick(self)
         _tick_units()
         _tick_projectiles()
         _resolve_pending_effects()
@@ -120,6 +124,8 @@ func _reset(battle_seed: int, balance: Dictionary) -> void:
     _obstacles.clear()
     _hazards.clear()
     _links.clear()
+    _followup_attacks.clear()
+    _upgrade_effects_active = false
     _terrain_revision = 0
     _time = 0.0
     _next_frame_time = 0.0
@@ -239,6 +245,16 @@ func _spawn_unit(spec: Dictionary, position: Vector2) -> void:
         "speed_debuffs": [],
         "dots": []
     }
+    if int(card.get("unit_level", 1)) >= 2:
+        _upgrade_effects_active = true
+        unit["unit_level"] = 2
+        unit["upgrade_traits"] = card.get("upgrade_traits", []).duplicate(true)
+        unit["upgrade_name"] = str(card.get("upgrade_name", "Lv. 2"))
+        unit["upgrade_description"] = str(card.get("upgrade_description", ""))
+        unit["upgrade_visual"] = card.get("upgrade_visual", {}).duplicate(true)
+        unit["visual_scale"] = float(card.get("upgrade_visual", {}).get("scale", 1))
+    unit["original_name"] = unit["display_name"]
+    UnitUpgradeEffects.initialize(unit, _time)
     _units.append(unit)
     _events.append(BattleEventScript.make("spawn", _time, {
         "side": side_id,
@@ -508,11 +524,18 @@ func _tick_area_effects() -> void:
             if str(effect.get("type", "")) == "damage_area":
                 for enemy in _alive_units(_other_side(side_id)):
                     if center.distance_to(_unit_position(enemy)) <= radius + EPSILON:
-                        _queue_raw_damage(str(enemy["id"]), float(effect.get("damage", 0)), side_id, str(effect.get("source_unit_id", "")), "damage_area")
-            else:
+                        _queue_raw_damage(str(enemy["id"]), float(effect.get("damage", 0)), side_id, str(effect.get("source_unit_id", "")), str(effect.get("source", "damage_area")))
+            elif str(effect.get("type", "")) != "modifier_area":
                 var heal_pct := float(effect.get("heal_max_hp_pct", 0))
                 for ally in _alive_units(side_id):
                     if center.distance_to(_unit_position(ally)) <= radius + EPSILON:
+                        var stacking_key := str(effect.get("stacking_key", ""))
+                        if not stacking_key.is_empty():
+                            var ticks: Dictionary = ally.get("upgrade_heal_ticks", {})
+                            if _time < float(ticks.get(stacking_key, -100)) + float(effect.get("tick_seconds", 1)) - EPSILON:
+                                continue
+                            ticks[stacking_key] = _time
+                            ally["upgrade_heal_ticks"] = ticks
                         var amount := float(ally.get("max_hp", 1)) * heal_pct / 100.0
                         _pending_heal.append({
                             "target_id": str(ally.get("id", "")),
@@ -544,7 +567,7 @@ func _tick_auras() -> void:
 
         var tick_seconds := maxf(0.1, float(ability.get("tick_seconds", 1.0)))
         unit["ability_timer"] = timer + tick_seconds
-        var radius := _radius_from_value(str(ability.get("radius", "small")))
+        var radius := _radius_from_value(str(ability.get("radius", "small"))) * float(ability.get("radius_multiplier", 1))
         var center := _unit_position(unit)
         var side_id := str(unit.get("side", ""))
 
@@ -647,6 +670,9 @@ func _tick_pull_unit(unit: Dictionary, target: Dictionary, ability: Dictionary) 
             "from_x": pull_from.x, "from_y": pull_from.y,
             "to_x": float(target["x"]), "to_y": float(target["y"])
         }))
+        if float(ability.get("root_seconds", 0)) > 0 and not _is_invulnerable(target):
+            target["root_until"] = _time + float(ability["root_seconds"])
+            UnitUpgradeEffects.emit(self, unit, "upgrade_root", {"target_id": target["id"], "duration": ability["root_seconds"], "x": target["x"], "y": target["y"]})
         distance = _unit_position(unit).distance_to(_unit_position(target))
 
     if distance <= 1.0 + EPSILON:
@@ -706,7 +732,8 @@ func _perform_attack(attacker: Dictionary, target: Dictionary) -> void:
     attacker["attack_timer"] = interval
     attacker["attack_count"] = int(attacker.get("attack_count", 0)) + 1
 
-    var raw_damage := float(attacker.get("attack", 0))
+    var profile := UnitUpgradeEffects.attack_profile(attacker, target_id)
+    var raw_damage := float(attacker.get("attack", 0)) * float(profile["multiplier"])
     if ability.has("every_n_attacks"):
         var every_n := maxi(1, int(ability.get("every_n_attacks", 3)))
         if int(attacker.get("attack_count", 0)) % every_n == 0:
@@ -718,43 +745,44 @@ func _perform_attack(attacker: Dictionary, target: Dictionary) -> void:
                 "ability": str(ability.get("display_name", "Empowered Attack"))
             }))
 
+    _perform_strike(attacker, target, raw_damage, float(profile["post_defense_multiplier"]))
+    for index in range(1, int(profile["hits"])):
+        _followup_attacks.append({"at": _time + float(index) * _step, "source_id": attacker_id, "target_id": target_id, "damage": raw_damage, "damage_scale": profile["post_defense_multiplier"]})
+
+
+func _perform_strike(attacker: Dictionary, target: Dictionary, raw_damage: float, damage_scale: float = 1.0) -> void:
+    var side_id := str(attacker["side"])
+    var attacker_id := str(attacker["id"])
+    var target_id := str(target["id"])
+    var ability: Dictionary = attacker.get("ability", {})
     _events.append(BattleEventScript.make("attack", _time, {
-        "side": side_id,
-        "unit_id": attacker_id,
-        "target_id": target_id,
-        "kind": "ranged" if _is_ranged(attacker) else "melee",
-        "card_id": str(attacker.get("card_id", "")),
+        "side": side_id, "unit_id": attacker_id, "target_id": target_id,
+        "kind": "ranged" if _is_ranged(attacker) else "melee", "card_id": str(attacker.get("card_id", "")),
         "x": float(attacker.get("x", 0)), "y": float(attacker.get("y", 0)),
         "target_x": float(target.get("x", 0)), "target_y": float(target.get("y", 0))
     }))
-
     if _is_ranged(attacker):
         _projectile_sequence += 1
-        _projectiles.append({
-            "id": _projectile_sequence,
-            "launched_at": _time,
-            "start_x": float(attacker.get("x", 0.0)), "start_y": float(attacker.get("y", 0.0)),
-            "x": float(attacker.get("x", 0.0)),
-            "y": float(attacker.get("y", 0.0)),
-            "element": str(attacker.get("element", "earth")),
-            "card_id": str(attacker.get("card_id", "")),
-            "source_id": attacker_id,
-            "source_side": side_id,
-            "target_id": target_id,
-            "raw_damage": raw_damage,
-            "ability": ability.duplicate(true)
-        })
-        _events.append(BattleEventScript.make("projectile_launch", _time, {
-            "projectile": _projectiles.back().duplicate(true)
-        }))
+        var projectile := {
+            "id": _projectile_sequence, "launched_at": _time,
+            "start_x": float(attacker.get("x", 0)), "start_y": float(attacker.get("y", 0)),
+            "x": float(attacker.get("x", 0)), "y": float(attacker.get("y", 0)),
+            "element": str(attacker.get("element", "earth")), "card_id": str(attacker.get("card_id", "")),
+            "source_id": attacker_id, "source_side": side_id, "target_id": target_id,
+            "raw_damage": raw_damage, "ability": ability.duplicate(true)
+        }
+        if damage_scale != 1:
+            projectile["post_defense_multiplier"] = damage_scale
+        if int(attacker.get("upgrade_visual", {}).get("heads", 1)) > 1:
+            projectile["start_y"] = float(attacker["y"]) + (0.15 if int(attacker.get("attack_count", 0)) % 2 == 0 else -0.15)
+            projectile["y"] = projectile["start_y"]
+        if attacker.get("upgrade_visual", {}).has("projectile_scale"):
+            projectile["visual_scale"] = float(attacker["upgrade_visual"]["projectile_scale"])
+        _projectiles.append(projectile)
+        _events.append(BattleEventScript.make("projectile_launch", _time, {"projectile": projectile.duplicate(true)}))
     else:
-        _queue_raw_damage(
-            target_id,
-            raw_damage,
-            side_id,
-            attacker_id,
-            "normal_attack"
-        )
+        _queue_raw_damage(target_id, raw_damage, side_id, attacker_id, "normal_attack", damage_scale)
+        UnitUpgradeEffects.on_hit(self, attacker, target)
 
 
 func _tick_projectiles() -> void:
@@ -789,6 +817,7 @@ func _tick_projectiles() -> void:
         target_id = str(hit.get("id", ""))
 
         var source_id := str(projectile.get("source_id", ""))
+        var firing_unit := _unit_by_id(source_id)
         var raw_damage := float(projectile.get("raw_damage", 0))
         var ability: Dictionary = projectile.get("ability", {})
         var ability_type := str(ability.get("type", ""))
@@ -800,8 +829,10 @@ func _tick_projectiles() -> void:
                 / 100.0
             )
 
-        _queue_raw_damage(target_id, raw_damage, source_side, source_id, "projectile")
+        _queue_raw_damage(target_id, raw_damage, source_side, source_id, "projectile", float(projectile.get("post_defense_multiplier", 1)))
+        UnitUpgradeEffects.on_hit(self, firing_unit, target)
         var impact_position := _unit_position(target)
+        UnitUpgradeEffects.on_impact(self, firing_unit, impact_position)
         _events.append(BattleEventScript.make("projectile_impact", _time, {
             "projectile_id": int(projectile.get("id", 0)),
             "source_unit_id": source_id, "target_id": target_id,
@@ -849,6 +880,8 @@ func _tick_projectiles() -> void:
             var source := _unit_by_id(source_id)
             if not source.is_empty():
                 _push_from_source(target, source, _push_from_value(str(ability.get("pushback", "small"))))
+                if float(ability.get("slow_seconds", 0)) > 0:
+                    _apply_speed_debuff(target, ability)
 
     _projectiles = kept
 
@@ -971,6 +1004,7 @@ func _resolve_pending_effects() -> void:
     while not newly_dead.is_empty():
         var chained_damage: Array[Dictionary] = []
         for dead_unit in newly_dead:
+            UnitUpgradeEffects.on_death(self, dead_unit)
             var ability: Dictionary = dead_unit.get("ability", {})
             if str(ability.get("type", "")) == "absorb_burst":
                 _queue_absorbed_burst(dead_unit, chained_damage, true)
@@ -1095,12 +1129,17 @@ func _spawn_death_children(source: Dictionary, ability: Dictionary) -> void:
     source["split_spent"] = true
     for _index in range(maxi(0, int(ability.get("spawn_count", 2)))):
         var child := source.duplicate(true)
-        child["display_name"] = "Small " + str(source.get("display_name", "Unit"))
+        var depth := int(source.get("split_depth", 0)) + 1
+        child["split_depth"] = depth
+        child["display_name"] = ("Tiny " if depth > 1 else "Small ") + str(source.get("original_name", source.get("display_name", "Unit")))
         child["max_hp"] = maxf(1, round(float(source.get("max_hp", 1)) * float(ability.get("child_health_pct", 50)) / 100.0))
         child["hp"] = float(child["max_hp"])
         child["attack"] = maxf(1, round(float(source.get("attack", 1)) * float(ability.get("child_attack_pct", 50)) / 100.0))
-        child["ability"] = {"type": "basic_melee"}
-        child["visual_scale"] = float(ability.get("child_visual_scale", 0.68))
+        child["ability"] = ability.duplicate(true) if depth < int(ability.get("split_generations", 1)) else {"type": "basic_melee"}
+        if depth < int(ability.get("split_generations", 1)):
+            child["split_spent"] = false
+        child["visual_scale"] = float(source.get("visual_scale", 1)) * float(ability.get("child_visual_scale", 0.68))
+        child["upgrade_traits"] = []
         child["revives_remaining"] = 0
         _add_death_spawn(child, source, "death_split")
 
@@ -1134,6 +1173,7 @@ func _add_death_spawn(unit: Dictionary, source: Dictionary, cause: String) -> vo
     unit["attack_count"] = 0
     unit["blocked_steps"] = 0
     unit["spawned_at"] = _time
+    UnitUpgradeEffects.initialize(unit, _time)
     var position := _death_spawn_position(_unit_position(source))
     unit["x"] = position.x
     unit["y"] = position.y
@@ -1221,14 +1261,15 @@ func _queue_raw_damage(
     raw_damage: float,
     source_side: String,
     source_unit_id: String,
-    source: String
+    source: String,
+    post_defense_multiplier: float = 1.0
 ) -> void:
     var target := _unit_by_id(target_id)
     if target.is_empty() or not bool(target.get("alive", false)) or not _are_enemies(source_side, str(target.get("side", ""))):
         return
     _pending_damage.append({
         "target_id": target_id,
-        "amount": _damage_after_defense(raw_damage, target),
+        "amount": maxf(_minimum_damage, _damage_after_defense(raw_damage, target) * post_defense_multiplier),
         "source_side": source_side,
         "source_unit_id": source_unit_id,
         "source": source
@@ -1236,7 +1277,11 @@ func _queue_raw_damage(
 
 
 func _damage_after_defense(raw_damage: float, target: Dictionary) -> float:
-    return maxf(_minimum_damage, round(raw_damage) - float(target.get("defense", 0)))
+    return maxf(_minimum_damage, round(raw_damage) - _effective_defense(target))
+
+
+func _effective_defense(unit: Dictionary) -> float:
+    return float(unit.get("defense", 0)) * (1.0 - UnitUpgradeEffects.modifier_pct(self, unit, "defense") / 100.0)
 
 
 func _locked_or_new_target(unit: Dictionary) -> Dictionary:
@@ -1340,7 +1385,7 @@ func _move_away_from(unit: Dictionary, target: Dictionary) -> void:
 
 
 func _attempt_move(unit: Dictionary, direction: Vector2) -> void:
-    if direction.length_squared() <= EPSILON:
+    if UnitUpgradeEffects.rooted(self, unit) or direction.length_squared() <= EPSILON:
         return
 
     var rating := _speed_after_debuffs(unit, "movement_speed")
@@ -1408,7 +1453,7 @@ func _clamp_position(position: Vector2) -> Vector2:
 
 func _attack_interval(unit: Dictionary) -> float:
     var effective_speed := _effective_attack_speed(unit)
-    return 100.0 / float(maxi(1, effective_speed))
+    return 100.0 / float(maxi(1, effective_speed)) / float(UnitUpgrades.get_trait(unit, "attack_rate").get("multiplier", 1))
 
 
 func _effective_attack_speed(unit: Dictionary) -> int:
@@ -1445,7 +1490,7 @@ func _speed_after_debuffs(unit: Dictionary, stat: String) -> int:
     for slow in unit.get("speed_debuffs", []):
         if float(slow.get("remaining", 0)) > EPSILON:
             percentage = minf(percentage, float(slow.get(stat + "_pct", 0)))
-    return maxi(1, int(round(float(unit.get(stat, 1)) * (1.0 + percentage / 100.0))))
+    return maxi(1, int(round(float(unit.get(stat, 1)) * (1.0 + percentage / 100.0) * (1.0 - UnitUpgradeEffects.modifier_pct(self, unit, stat) / 100.0))))
 
 
 func _is_ranged(unit: Dictionary) -> bool:
@@ -1557,10 +1602,10 @@ func _unit_snapshot(unit: Dictionary) -> Dictionary:
             "visual_scale": float(unit.get("visual_scale", 1)),
             "spawned_at": float(unit.get("spawned_at", 0)),
             "attack": float(unit.get("attack", 0)),
-            "defense": float(unit.get("defense", 0)),
+            "defense": _effective_defense(unit),
             "attack_speed": effective_attack_speed,
             "aura_slowed": effective_attack_speed < _speed_after_debuffs(unit, "attack_speed"),
-            "movement_speed": 0 if bool(unit.get("stationary", false)) else _speed_after_debuffs(unit, "movement_speed"),
+            "movement_speed": 0 if bool(unit.get("stationary", false)) or UnitUpgradeEffects.rooted(self, unit) else _speed_after_debuffs(unit, "movement_speed"),
             "range": float(unit.get("range", 1)),
             "sample_time": _time,
             "ability_cooldown": maxf(0, float(unit.get("ability_cooldown", 0))),
@@ -1578,8 +1623,15 @@ func _unit_snapshot(unit: Dictionary) -> Dictionary:
             "burning": not unit.get("dots", []).is_empty(),
             "transit": unit.get("transit", {}).duplicate(true),
             "ability_type": str(unit.get("ability", {}).get("type", "")),
-            "aura_radius": _radius_from_value(str(unit.get("ability", {}).get("radius", "small"))) if str(unit.get("ability", {}).get("type", "")).begins_with("aura_") else 0.0
+            "aura_radius": _radius_from_value(str(unit.get("ability", {}).get("radius", "small"))) * float(unit.get("ability", {}).get("radius_multiplier", 1)) if str(unit.get("ability", {}).get("type", "")).begins_with("aura_") else 0.0
     }
+    if int(unit.get("unit_level", 1)) >= 2:
+        result["unit_level"] = 2
+        result["upgrade_name"] = str(unit.get("upgrade_name", "Lv. 2"))
+        result["upgrade_description"] = str(unit.get("upgrade_description", ""))
+    if UnitUpgradeEffects.rooted(self, unit):
+        result["rooted"] = true
+        result["root_until"] = float(unit["root_until"])
     var change := str(unit.get("ability", {}).get("specialization_description", ""))
     if not change.is_empty():
         result["specialization_description"] = change
@@ -1615,6 +1667,8 @@ func _is_invulnerable(unit: Dictionary) -> bool:
 
 
 func _begin_transit(unit: Dictionary, ability: Dictionary) -> bool:
+    if UnitUpgradeEffects.rooted(self, unit):
+        return false
     var enemies := _alive_units(_other_side(str(unit["side"])))
     if enemies.is_empty():
         return false
@@ -1676,6 +1730,8 @@ func _tick_special_effects() -> void:
                     transit["hit_ids"].append(str(enemy["id"]))
                     if not _is_invulnerable(enemy):
                         _queue_raw_damage(str(enemy["id"]), float(unit["attack"]) * float(ability.get("attack_pct", 80)) / 100.0, str(unit["side"]), str(unit["id"]), "gush")
+                        if float(ability.get("slow_seconds", 0)) > 0:
+                            _apply_speed_debuff(enemy, ability)
                         var closest := Geometry2D.get_closest_point_to_segment(_unit_position(enemy), origin, point)
                         var before := _unit_position(enemy)
                         _push_from_position(enemy, closest, _push_from_value(str(ability.get("pushback", "moderate"))))
@@ -1691,6 +1747,10 @@ func _tick_special_effects() -> void:
                     break
             if hazard.is_empty():
                 hazard = {"id": cast_id, "side": unit["side"], "source_id": unit["id"], "segments": [], "expires_at": _time + float(ability.get("trail_seconds", 4)), "next_tick": _time, "tick_seconds": float(ability.get("tick_seconds", 0.5)), "radius": float(ability.get("trail_radius", 0.7)), "damage": float(unit["attack"]) * float(ability.get("damage_attack_pct_per_tick", 35)) / 100.0}
+                if int(ability.get("trail_transits", 0)) > 0:
+                    hazard["expires_after_transits"] = int(unit.get("transits_completed", 0)) + 1 + int(ability["trail_transits"])
+                    hazard["expires_at"] = _round_limit + 1
+                    hazard["dead_trail_seconds"] = float(ability.get("dead_trail_seconds", 10))
                 _hazards.append(hazard)
             hazard["segments"].append({"from_x": origin.x, "from_y": origin.y, "to_x": point.x, "to_y": point.y})
         if progress >= 1 - EPSILON:
@@ -1705,10 +1765,20 @@ func _tick_special_effects() -> void:
             unit["x"] = landing.x
             unit["y"] = landing.y
             unit["transit"] = {}
+            unit["transits_completed"] = int(unit.get("transits_completed", 0)) + 1
             unit["route"] = []
             if str(transit["mode"]) == "burrow":
                 _create_crack(unit, transit, float(ability.get("obstacle_seconds", 5)))
             _events.append(BattleEventScript.make("ability", _time, {"kind": "transit_arrival", "side": unit["side"], "unit_id": unit["id"], "card_id": unit["card_id"], "x": unit["x"], "y": unit["y"], "mode": transit["mode"]}))
+    for hazard in _hazards:
+        if not hazard.has("expires_after_transits"):
+            continue
+        var owner := _unit_by_id(str(hazard["source_id"]))
+        if not owner.is_empty() and int(owner.get("transits_completed", 0)) >= int(hazard["expires_after_transits"]):
+            hazard["expires_at"] = _time
+        elif (owner.is_empty() or not bool(owner.get("alive", false))) and not bool(hazard.get("owner_dead", false)):
+            hazard["owner_dead"] = true
+            hazard["expires_at"] = minf(float(hazard["expires_at"]), _time + float(hazard["dead_trail_seconds"]))
     _hazards = _hazards.filter(func(hazard): return float(hazard["expires_at"]) > _time + EPSILON)
     for hazard in _hazards:
         if _time + EPSILON < float(hazard["next_tick"]):

@@ -14,10 +14,12 @@ const STYLE_NAMES := {"swarm": "Swarm", "sustain": "Sustain", "burst": "Burst", 
 var difficulty := "standard"
 var style := "swarm"
 var _public_enemy: Dictionary = {}
+var _unit_upgrades: Array[Dictionary] = []
 
 # Only previous-round public enemy information crosses this boundary.
 func configure(commanders: Array, all_cards: Array, sets: Dictionary, buffs: Array, seed_value: int, stat_rules: Dictionary = {}, preferences: Dictionary = {}) -> bool:
     _rng.seed = seed_value
+    _unit_upgrades.assign(preferences.get("unit_upgrades", []).duplicate(true))
     difficulty = str(preferences.get("difficulty", "standard"))
     if difficulty not in ["casual", "standard", "veteran"]:
         difficulty = "standard"
@@ -260,4 +262,4 @@ func get_side(skill_active: bool = false) -> Dictionary:
         "skill_uses_remaining": draft.commander_skill_uses_remaining(),
         "specialization": draft.specialization(),
         "ai_plan": {"style": style, "name": str(STYLE_NAMES.get(style, "Balanced")), "difficulty": difficulty}
-    }.merged(draft.round_context())
+    }.merged(draft.round_context()).merged({} if _unit_upgrades.is_empty() else {"unit_upgrades": _unit_upgrades.duplicate(true)})

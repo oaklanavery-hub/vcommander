@@ -37,7 +37,7 @@ static func sound(event: Dictionary) -> String:
     if type == "ability" and event.get("kind") == "sticky_link":
         return "sticky_link"
     if type == "ability":
-        return {"pull": "vine_pull", "meteor": "meteor", "on_death": "explosion", "area_heal": "healing_water", "death_area": "slime_burst", "slow_splash": "slime_splat", "absorb_burst": "slime_burst"}.get(str(event.get("kind", "")), "")
+        return {"pull": "vine_pull", "meteor": "meteor", "on_death": "explosion", "area_heal": "healing_water", "death_area": "slime_burst", "slow_splash": "slime_splat", "absorb_burst": "slime_burst", "upgrade_pulse": "fire_cast", "ice_splinter": "freeze", "upgrade_root": "vine_pull", "upgrade_death_heal": "heal", "upgrade_death_field": "slime_burst", "upgrade_ground_fire": "fire_cast", "upgrade_knockback": "earth_rumble"}.get(str(event.get("kind", "")), "")
     if type == "projectile_impact":
         return str(profile.get("impact_sound", "magic_hit"))
     if type == "attack":

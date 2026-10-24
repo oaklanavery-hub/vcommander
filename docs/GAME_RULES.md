@@ -449,3 +449,7 @@ Each of the 24 unit types has one permanent Lv. 2 upgrade, covering its recruits
 
 **R120 — Upgrade fairness and content**
 The user-supplied unit reference is implemented through content-defined ability patches and generic traits in `unit_upgrades.json`, with explicit playtest tuning. PvAI uses the same purchased upgrade collection for both sides, frozen when the adventure begins and retained through recovery. Old adventures have no upgrades. Four-card armies, recruitment caps, theme bonuses, normal/Sudden Death powers, skill budgets and Commander paths retain their rules. Upgrades apply once before optional path transformations; temporary effects reset each round. Friend rooms retain base units while public PvP remains Coming Soon.
+
+
+**R121 — Upgraded unit appearance and bounded effects**
+All 24 purchased unit types change to distinct Lv. 2 pixel sprites in card previews, rosters, battle, death/revival and inspection. Recorded levels govern replay art independently from current ownership. Effect graphics show real roots, pulses and timed fields; effect/team labels over units remain absent. The exact approved first-version numbers, overlap rules and descendant/proc limits are documented in [UNIT_UPGRADES.md](UNIT_UPGRADES.md) and content. Twin-hit and dual-head tuning scales a regular hit after DEF, with existing minimum damage preserved. No upgrade changes card recruitment caps, Commander ownership or local reward settlement.
