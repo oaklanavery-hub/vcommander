@@ -2,6 +2,8 @@
 
 ## v0.20.0 — Permanent unit upgrades
 
+Released as `197952f4203ac6fccf09c19caaa53e3ed5438af0`; [deployment and all 57 suites against the actual served pack passed](https://github.com/oaklanavery-hub/vcommander/actions/runs/40067428512).
+
 - Add a content-defined Lv. 2 upgrade for each of 24 units from the supplied reference, with explicit bounded playtest tuning.
 - Add a shared spendable XP ledger: first permanent upgrade 200 XP, later upgrades 400; spending preserves lifetime mastery and ownership. Existing XP is available.
 - Increase completed-loss rewards to 50 XP; wins remain 100 and forfeits zero. Purchases validate quotes, locks, funds and persistence before charging.
